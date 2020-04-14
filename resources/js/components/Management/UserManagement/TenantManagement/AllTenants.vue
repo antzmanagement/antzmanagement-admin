@@ -21,7 +21,7 @@
               class="elevation-1"
             >
               <template v-slot:item="props">
-                <tr @click="showTenant(props.item.uid)">
+                <tr @click="showTenant(props.item)">
                   <td>{{props.item.name}}</td>
                   <td>{{props.item.icno}}</td>
                   <td>{{props.item.tel1}}</td>
@@ -80,8 +80,8 @@ export default {
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction"
     }),
-    showTenant($uid){
-      this.$router.push('/tenant/'+$uid);
+    showTenant($data){
+      this.$router.push('/tenant/'+$data.uid);
     },
     getTenants() {
       this.loading = true;

@@ -10,6 +10,8 @@ use App\Traits\NotificationFunctions;
 use App\Traits\TenantServices;
 use App\Traits\UserServices;
 use App\Traits\UserTypeServices;
+use App\Traits\RoomServices;
+use App\Traits\RoomTypeServices;
 
 
 trait AllServices {
@@ -18,6 +20,8 @@ trait AllServices {
     GlobalFunctions,
     NotificationFunctions, 
 
+    RoomServices,
+    RoomTypeServices,
     TenantServices,
     UserServices,
     UserTypeServices;

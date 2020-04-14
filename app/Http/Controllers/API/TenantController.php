@@ -270,7 +270,7 @@ class TenantController extends Controller
 
         $userType = UserType::where('name', 'tenant')->first();
         if ($this->isEmpty($userType)) {
-            $data['data'] = null;
+            DB::rollBack();
             return $this->notFoundResponse('UserType');
         }
 

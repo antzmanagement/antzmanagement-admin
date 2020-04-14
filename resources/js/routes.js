@@ -10,6 +10,9 @@ import UserManagement from './components/Management/UserManagement/UserManagemen
 import AllTenants from './components/Management/UserManagement/TenantManagement/AllTenants.vue';
 import Tenant from './components/Management/UserManagement/TenantManagement/Tenant.vue'
 
+import AllRooms from './components/Management/RoomManagement/AllRooms.vue';
+import Room from './components/Management/RoomManagement/Room.vue';
+
 export const routes = [
    
     { 
@@ -64,6 +67,18 @@ export const routes = [
         component:Tenant,
         name : 'tenant',
     },
+    
+    { 
+        path:'/rooms',
+        component:AllRooms,
+        name : 'rooms',
+    },
+    { 
+        path:'/room/:uid',
+        component:Room,
+        name : 'room',
+    },
+ 
  
  
 ];

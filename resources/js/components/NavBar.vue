@@ -65,7 +65,7 @@ export default {
     items: [
       { icon: "mdi-view-dashboard-outline", text: "Dashboard", name : 'management' },
       { icon: "mdi-account-multiple", text: "User Management" , name : 'usermanagement' },
-      { icon: "mdi-home-city-outline", text: "Room Management" , name : 'management' },
+      { icon: "mdi-home-city-outline", text: "Room Management" , name : 'rooms' },
       { icon: "mdi-playlist-play", text: "Playlists" , name : 'management' },
       { icon: "mdi-clock", text: "Watch Later", name : 'management'  }
     ],

@@ -12,6 +12,8 @@ require('./progressbar');
 require('./alert');
 //Import components html tag
 require('./components');
+//Import vue filter function
+require('./filter');
 
 
 

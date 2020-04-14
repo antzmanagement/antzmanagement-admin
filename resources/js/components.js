@@ -8,3 +8,6 @@ Vue.component('confirm-dialog', require('./components/ConfirmDialog.vue').defaul
 Vue.component('change-password-dialog', require('./components/Management/UserManagement/ChangePasswordDialog.vue').default);
 
 Vue.component('tenant-form', require('./components/Management/UserManagement/TenantManagement/TenantForm.vue').default);
+
+Vue.component('room-form', require('./components/Management/RoomManagement/RoomForm.vue').default);
+Vue.component('room-type-form', require('./components/Management/RoomTypeManagement/RoomTypeForm.vue').default);

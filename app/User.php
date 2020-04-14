@@ -94,109 +94,11 @@ class User extends Authenticatable
         return $this->belongsToMany('App\UserType','users_types', 'user_id', 'user_type_id')->withPivot('remark','status','created_at','updated_at');
     }
 
-
-    /**
-     * Get the group belongs to user.
-     */
-    public function groups()
-    {
-        return $this->belongsToMany('App\Group')->withPivot('desc', 'status', 'created_at', 'updated_at');
-    }
-
-
-     /**
-     *  activity that done by user
-     */
-    public function activitylogs()
-    {
-        return $this->belongsToMany('App\User','logs','operator_id','affector_id')->withPivot('id', 'action','model','created_at','updated_at');
-    }
-
-
-    /**
-     * activity that affected the user
-     */
-    public function affectedlogs()
-    {
-        return $this->belongsToMany('App\User','logs','affector_id','operator_id')->withPivot('id', 'action','model','created_at','updated_at');
-    }
-
-    /**
-     * Get the created payments of the user.
-     */
-    public function payments()
-    {
-        return $this->hasMany('App\Payment');
-    }
-
-    /**
-     * Get the created sales of the user.
-     */
-    public function sales()
-    {
-        return $this->hasMany('App\Sale');
-    }
-
-    /**
-     * Get the created purchases of the user.
-     */
-    public function purchases()
-    {
-        return $this->hasMany('App\Purchase', 'user_id');
-    }
-
-    /**
-     * Get the created purchases of the user.
-     */
-    public function productreviews()
-    {
-        return $this->hasMany('App\ProductReview');
-    }
     
-    /**
-     * Get the created purchases of the user.
-     */
-    public function stores()
+    public function rentrooms()
     {
-        return $this->hasMany('App\Store');
-    }
-    /**
-     * Get the created purchases of the user.
-     */
-    public function storereviews()
-    {
-        return $this->hasMany('App\StoreReview');
+        return $this->belongsToMany('App\Room','tenants_rooms', 'user_id', 'room_id')->withPivot('remark','status','created_at','updated_at');
     }
 
-    public function bloggers()
-    {
-        return $this->hasMany('App\Blogger');
-    }
 
-    public function channels()
-    {
-        return $this->hasMany('App\Channel');
-    }
-    
-    public function comments()
-    {
-        return $this->hasMany('App\Comment');
-    }
-    
-    public function secondcomments()
-    {
-        return $this->hasMany('App\SecondComment');
-    }
-
-    
-    public function purchasevideos()
-    {
-         return $this->belongsToMany('App\Video','user_purchased_video', 'user_id' , 'video_id' )->withPivot('status');
-
-    }
-    
-    public function channelsales()
-    {
-        return $this->hasMany('App\ChannelSale');
-    }
 }

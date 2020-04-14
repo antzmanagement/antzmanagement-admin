@@ -286,13 +286,21 @@ export default {
       }
     }
   },
+  watch: {
+    dialog: function(val) {
+      if (val) {
+        this.data.reset();
+        this.$v.$reset();
+      }
+    }
+  },
   created() {
     this.$vuetify.theme.dark = true;
     if (this.editMode) {
       this.showLoadingAction();
       this.getTenantAction({ uid: this.uid })
         .then(data => {
-          this.data = data.data;
+          this.data = new Form(data.data);
           this.endLoadingAction();
         })
         .catch(error => {
@@ -335,7 +343,8 @@ export default {
             });
             this.$Progress.finish();
             this.endLoadingAction();
-            this.$emit("created", data.data.uid);
+            this.$emit("created", data.data);
+            this.dialog = false;
           })
           .catch(error => {
             Toast.fire({
@@ -367,7 +376,8 @@ export default {
             });
             this.$Progress.finish();
             this.endLoadingAction();
-            this.$emit("updated");
+            this.$emit("updated", data.data);
+            this.dialog = false;
           })
           .catch(error => {
             Toast.fire({

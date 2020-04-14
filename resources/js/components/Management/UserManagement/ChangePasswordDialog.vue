@@ -151,11 +151,11 @@ export default {
     return {
       dialog: false,
       verified: false,
-      data: {
+      data: new Form({
         oldpassword: "",
         password: "",
         password_confirmation: ""
-      }
+      })
     };
   },
 
@@ -235,6 +235,14 @@ export default {
       }
     }
   },
+  watch: {
+    dialog: function(val) {
+      if(val){
+        this.data.reset();
+        this.$v.$reset();
+      }
+    },
+  },
   created() {
     this.$vuetify.theme.dark = true;
   },
@@ -261,6 +269,7 @@ export default {
               this.$Progress.finish();
               this.endLoadingAction();
               this.$emit("updated");
+              this.dialog = false;
             })
             .catch(error => {
               Toast.fire({

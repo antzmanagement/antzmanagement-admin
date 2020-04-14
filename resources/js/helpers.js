@@ -1,4 +1,11 @@
 const helpers = {
+    toDouble(data){
+        var double = parseFloat(data).toFixed(2);
+        if(double == "NaN"){
+            double = 0;
+        }
+        return double;
+    },
     capitalizeFirstLetter(str) {
         return str.charAt(0).toUpperCase() + str.slice(1);
     },
@@ -45,7 +52,7 @@ const helpers = {
         });
 
 
-    }
+    },
 };
 
 

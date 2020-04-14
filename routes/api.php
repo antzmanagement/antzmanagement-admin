@@ -37,6 +37,12 @@ Route::group(['middleware' => ['auth:api']], function (){
     Route::resource('tenant', 'API\TenantController');
     Route::get('/filter/tenant', 'API\TenantController@filter');
 
+    Route::resource('room', 'API\RoomController');
+    Route::get('/filter/room', 'API\RoomController@filter');
+
+    Route::resource('roomtype', 'API\RoomTypeController');
+    Route::get('/filter/roomtype', 'API\RoomTypeController@filter');
+
 
 
     

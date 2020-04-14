@@ -13,7 +13,6 @@
         "axios": "^0.19.2",
         "bootstrap": "^4.4.1",
         "case-sensitive-paths-webpack-plugin": "^2.3.0",
-        "cross-env": "^5.1",
         "deepmerge": "^4.2.2",
         "fibers": "^4.0.2",
         "jquery": "^3.2",
@@ -24,13 +23,16 @@
         "sass": "^1.26.1",
         "sass-loader": "^7.3.1",
         "vue": "^2.6.11",
-        "vue-template-compiler": "^2.6.11"
+        "vue-template-compiler": "^2.6.11",
+        "vuetify-loader": "^1.4.3",
+        "webpack": "^4.42.1"
     },
     "dependencies": {
         "@fortawesome/fontawesome-free": "^5.12.1",
         "@nagoos/vue-image-picker": "^1.0.4",
         "laravel-vue-pagination": "^2.3.1",
         "material-design-icons-iconfont": "^5.0.1",
+        "moment": "^2.24.0",
         "sweetalert2": "^9.8.2",
         "vform": "^1.0.1",
         "vue-axios": "^2.1.5",
