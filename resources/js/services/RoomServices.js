@@ -13,6 +13,16 @@ const RoomServices = {
     })
   },
 
+  filter(data) {
+    PassportServices.AuthenticationServices.setHeader();
+
+    const clonedata = Object.assign({}, data);
+    console.log(clonedata);
+    return Vue.axios.get('/api/filter/room', {
+      params: clonedata
+    })
+  },
+
   show(data) {
     PassportServices.AuthenticationServices.setHeader();
     return Vue.axios.get('/api/room/' + data.uid);

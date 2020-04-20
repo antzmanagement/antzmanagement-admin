@@ -36,9 +36,11 @@
 
     <v-app-bar app clipped-left color="#443737" dense>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-icon class="mx-4" large>mdi-youtube</v-icon>
-      <v-toolbar-title class="mr-12 align-center">
-        <span class="title">Antz Management</span>
+      <v-toolbar-title class=" align-center">
+        <v-btn text :to="{ name : 'home'}">
+          <v-icon class="mr-2">mdi-home-outline</v-icon>
+          Antz Management
+        </v-btn>
       </v-toolbar-title>
       <v-spacer />
       <v-row align="center" style="max-width: 650px">
@@ -63,11 +65,19 @@ export default {
   data: () => ({
     drawer: null,
     items: [
-      { icon: "mdi-view-dashboard-outline", text: "Dashboard", name : 'management' },
-      { icon: "mdi-account-multiple", text: "User Management" , name : 'usermanagement' },
-      { icon: "mdi-home-city-outline", text: "Room Management" , name : 'rooms' },
-      { icon: "mdi-playlist-play", text: "Playlists" , name : 'management' },
-      { icon: "mdi-clock", text: "Watch Later", name : 'management'  }
+      {
+        icon: "mdi-view-dashboard-outline",
+        text: "Dashboard",
+        name: "management"
+      },
+      {
+        icon: "mdi-account-multiple",
+        text: "User Management",
+        name: "usermanagement"
+      },
+      { icon: "mdi-home-city-outline", text: "Room Management", name: "rooms" },
+      { icon: "mdi-playlist-play", text: "Playlists", name: "management" },
+      { icon: "mdi-clock", text: "Watch Later", name: "management" }
     ],
     items2: [
       { picture: 28, text: "Joseph" },

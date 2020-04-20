@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use DB;
 use Carbon\Carbon;
 use App\Tenant;
+use App\Room;
 use App\UserType;
 use Illuminate\Support\Facades\Hash;
 use App\Traits\AllServices;
@@ -56,64 +57,7 @@ class TenantController extends Controller
         }
     }
 
-    /**
-     * @OA\Get(
-     *      path="/api/filter/tenant",
-     *      operationId="filterTenants",
-     *      tags={"TenantControllerService"},
-     *      summary="Filter list of tenants",
-     *      description="Returns list of filtered tenants",
-     *   @OA\Parameter(
-     *     name="pageNumber",
-     *     in="query",
-     *     description="Page number",
-     *     @OA\Schema(type="integer")
-     *   ),
-     *   @OA\Parameter(
-     *     name="pageSize",
-     *     in="query",
-     *     description="number of pageSize",
-     *     @OA\Schema(type="integer")
-     *   ),
-     *   @OA\Parameter(
-     *     name="keyword",
-     *     in="query",
-     *     description="Keyword for filter",
-     *     @OA\Schema(type="string")
-     *   ),
-     *   @OA\Parameter(
-     *     name="fromdate",
-     *     in="query",
-     *     description="From Date for filter",
-     *     @OA\Schema(type="string")
-     *   ),
-     *   @OA\Parameter(
-     *     name="todate",
-     *     in="query",
-     *     description="To string for filter",
-     *     @OA\Schema(type="string")
-     *   ),
-     *   @OA\Parameter(
-     *     name="status",
-     *     in="query",
-     *     description="status for filter",
-     *     @OA\Schema(type="string")
-     *   ),
-     *   @OA\Parameter(
-     *     name="company_id",
-     *     in="query",
-     *     description="Company id for filter",
-     *     @OA\Schema(type="string")
-     *   ),
-     *      @OA\Response(
-     *          response=200,
-     *          description="Successfully retrieved list of filtered tenants"
-     *       ),
-     *       @OA\Response(
-     *          response="default",
-     *          description="Unable to retrieve list of tenants")
-     *    )
-     */
+    
     public function filter(Request $request)
     {
         error_log($this->controllerName . 'Retrieving list of filtered tenants.');
@@ -122,12 +66,12 @@ class TenantController extends Controller
             'keyword' => $request->keyword,
             'fromdate' => $request->fromdate,
             'todate' => $request->todate,
-            'status' => $request->status,
-            'company_id' => $request->company_id,
+            'roomTypes' => $request->roomTypes,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
-        $tenants = $this->filterTenants($request->tenant(), $params);
+        $tenants = $this->getTenants($request->user());
+        $tenants = $this->filterTenants($tenants, $params);
 
         if ($this->isEmpty($tenants)) {
             return $this->errorPaginateResponse('Tenants');
@@ -275,10 +219,25 @@ class TenantController extends Controller
         }
 
         try {
-            $userType->users()->syncWithoutDetaching([$tenant->id]);
+            $userType->users()->syncWithoutDetaching([$tenant->id => ['status' => true]]);
         } catch (Exception $e) {
             DB::rollBack();
             return $this->errorResponse();
+        }
+
+        if ($request->rooms) {
+
+            $rooms = Room::find($request->rooms);
+            if ($this->isEmpty($rooms)) {
+                DB::rollBack();
+                return $this->notFoundResponse('Rooms');
+            }
+            try {
+                $tenant->rentrooms()->sync($rooms->pluck('id'));
+            } catch (Exception $e) {
+                DB::rollBack();
+                return $this->errorResponse();
+            }
         }
 
         DB::commit();
@@ -397,10 +356,46 @@ class TenantController extends Controller
         if ($this->isEmpty($tenant)) {
             DB::rollBack();
             return $this->errorResponse();
-        } else {
-            DB::commit();
-            return $this->successResponse('Tenant', $tenant, 'update');
         }
+
+        if ($request->rooms) {
+
+            $rooms = Room::find($request->rooms);
+            if ($this->isEmpty($rooms)) {
+                DB::rollBack();
+                return $this->notFoundResponse('Rooms');
+            }
+            $origrooms = $tenant->rentrooms()->wherePivot('status', true)->where('rooms.status', true)->get();
+
+            //Add New Room
+            foreach ($rooms as $room) {
+                if (!$origrooms->contains('id', $room->id)) {
+
+                    try {
+                        $tenant->rentrooms()->syncWithoutDetaching([$room->id => ['status' => true]]);
+                    } catch (Exception $e) {
+                        DB::rollBack();
+                        return $this->errorResponse();
+                    }
+                }
+            }
+            
+            //Delete Room
+            foreach ($origrooms as $origroom) {
+                if (!$rooms->contains('id', $origroom->id)) {
+
+                    try {
+                        $tenant->rentrooms()->updateExistingPivot([$origroom->id], ['status' => false]);
+                    } catch (Exception $e) {
+                        DB::rollBack();
+                        return $this->errorResponse();
+                    }
+                }
+            }
+        }
+
+        DB::commit();
+        return $this->successResponse('Tenant', $tenant, 'update');
     }
 
     public function destroy(Request $request, $uid)

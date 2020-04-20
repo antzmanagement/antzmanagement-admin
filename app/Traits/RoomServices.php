@@ -30,32 +30,32 @@ trait RoomServices
     private function filterRooms($data, $params)
     {
         $data = $this->globalFilter($data, $params);
-        $params = $this->checkUndefinedProperty($params, $this->roo, FilterCols());
+        $params = $this->checkUndefinedProperty($params, $this->roomFilterCols());
 
         if ($params->keyword) {
             $keyword = $params->keyword;
             $data = $data->filter(function ($item) use ($keyword) {
                 //check string exist inside or not
-                if (stristr($item->title, $keyword) == TRUE) {
+                if (stristr($item->uid, $keyword) == TRUE) {
                     return true;
                 } else {
                     return false;
                 }
             });
         }
-
-        if ($params->scope) {
-            error_log('Filtering rooms with scope....');
-            $scope = $params->scope;
-            if ($scope == 'private') {
-                $data = $data->filter(function ($item) {
-                    return $item->scope == 'private';
-                });
-            } else {
-                $data = $data->filter(function ($item) {
-                    return $item->scope == 'public';
-                });
-            }
+        if ($params->roomTypes) {
+            error_log('Filtering rooms with roomTypes....');
+            $roomTypes = collect($params->roomTypes);
+            $data = $data->filter(function ($item) use ($roomTypes) {
+                $item = $item->roomTypes()->wherePivot('status', true)->where('room_types.status', true)->get();
+                $ids = $item->pluck('id');
+                foreach($roomTypes as $roomType){
+                    if(!$ids->contains($roomType)){
+                        return false;
+                    }
+                }
+                return true;
+            })->values();
         }
 
         $data = $data->unique('id');
@@ -69,7 +69,7 @@ trait RoomServices
         $data = Room::where('uid', $uid)->with(['roomTypes' => function ($q) {
             // Query the name field in status table
             $q->wherePivot('status', true);
-        }])->where('status',true)->first();
+        }])->where('status', true)->first();
         return $data;
     }
 
@@ -136,7 +136,7 @@ trait RoomServices
         return $data->refresh();
     }
 
-  
+
     // Modifying Display Data
     // -----------------------------------------------------------------------------------------------------------------------------------------
     public function roomAllCols()
@@ -170,7 +170,7 @@ trait RoomServices
     public function roomFilterCols()
     {
 
-        return ['keyword', 'scope'];
+        return ['keyword', 'roomTypes'];
     }
 
     private function validateUserPurchasedRoom($user, $room)

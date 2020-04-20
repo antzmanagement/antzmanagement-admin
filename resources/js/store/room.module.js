@@ -11,6 +11,10 @@ export const actions = {
         const { data } = await RoomServices.index(payload);
         return data;
     },
+    async filterRooms(context, payload) {
+        const { data } = await RoomServices.filter(payload);
+        return data;
+    },
     async getRoom(context, payload) {
         const { data } = await RoomServices.show(payload);
         return data;

@@ -108,6 +108,27 @@
                 :error-messages="passwordConfirmErrors"
               ></v-text-field>
             </v-col>
+
+            <v-col cols="6">
+              <v-autocomplete
+                v-model="data.rooms"
+                :items="rooms"
+                item-text="name"
+                item-value="id"
+                chips
+                deletable-chips
+                label="Room"
+                multiple
+              >
+                <template v-slot:append-outer>
+                  <room-filter-dialog
+                    :buttonStyle="roomFilterDialogConfig.buttonStyle"
+                    :dialogStyle="roomFilterDialogConfig.dialogStyle"
+                    @submitFilter="initRoomFilter($event)"
+                  ></room-filter-dialog>
+                </template>
+              </v-autocomplete>
+            </v-col>
           </v-row>
         </v-container>
       </v-card-text>
@@ -149,14 +170,37 @@ export default {
   data() {
     return {
       dialog: false,
+      roomTypes: [],
+      rooms: [],
       data: new Form({
         name: "",
         icno: "",
         tel1: "",
         email: "",
         password: "",
-        password_confirmation: ""
-      })
+        password_confirmation: "",
+        roomTypes: [],
+        rooms: []
+      }),
+      roomFilterGroup: new Form({
+        roomTypes: [],
+        pageNumber: -1,
+        pageSize: -1
+      }),
+      roomFilterDialogConfig: {
+        buttonStyle: {
+          class: "ma-1",
+          text: "",
+          icon: "mdi-magnify",
+          isIcon: true
+        },
+        dialogStyle: {
+          persistent: true,
+          maxWidth: "1200px",
+          fullscreen: false,
+          hideOverlay: true
+        }
+      }
     };
   },
 
@@ -296,20 +340,38 @@ export default {
   },
   created() {
     this.$vuetify.theme.dark = true;
-    if (this.editMode) {
-      this.showLoadingAction();
-      this.getTenantAction({ uid: this.uid })
-        .then(data => {
-          this.data = new Form(data.data);
-          this.endLoadingAction();
-        })
-        .catch(error => {
-          this.endLoadingAction();
-        });
-    }
+
+    this.showLoadingAction();
+    this.getRoomsAction({
+      pageNumber: -1,
+      pageSize: -1
+    }).then(data => {
+      this.rooms = data.data;
+      if (this.editMode) {
+        this.getTenantAction({ uid: this.uid })
+          .then(data => {
+            var ids = data.data.rentrooms.map(function(room) {
+              return room.id;
+            });
+            //Should assign data first before creating form because the form will reset after triggered
+            //Create the form before assigning the data, the form will not keep track the original/default value of data
+            Object.assign(data.data, { rooms: ids });
+            this.data = new Form(data.data);
+            this.endLoadingAction();
+          })
+          .catch(error => {
+            this.endLoadingAction();
+          });
+      } else {
+        this.endLoadingAction();
+      }
+    });
   },
   methods: {
     ...mapActions({
+      getRoomsAction: "getRooms",
+      filterRoomsAction: "filterRooms",
+      getRoomTypesAction: "getRoomTypes",
       getTenantAction: "getTenant",
       createTenantAction: "createTenant",
       updateTenantAction: "updateTenant",
@@ -388,6 +450,40 @@ export default {
             this.endLoadingAction();
           });
       }
+    },
+
+    initRoomFilter(filterGroup) {
+      this.roomFilterGroup.reset();
+      this.data.rooms = [];
+      if (filterGroup) {
+        this.roomFilterGroup.roomTypes = filterGroup.roomTypes.map(function(
+          roomType
+        ) {
+          return roomType.id;
+        });
+      }
+      this.applyRoomFilter();
+    },
+
+    applyRoomFilter() {
+      this.showLoadingAction();
+      this.filterRoomsAction(this.roomFilterGroup)
+        .then(data => {
+          if (data.data) {
+            this.rooms = data.data;
+          } else {
+            this.rooms = [];
+          }
+          this.endLoadingAction();
+        })
+        .catch(error => {
+          Toast.fire({
+            icon: "error",
+            title: "Something went wrong. "
+          });
+          this.$Progress.finish();
+          this.endLoadingAction();
+        });
     }
   }
 };

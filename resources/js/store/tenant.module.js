@@ -11,6 +11,10 @@ export const actions = {
         const { data } = await TenantServices.index(payload);
         return data;
     },
+    async filterTenants(context, payload) {
+        const { data } = await TenantServices.filter(payload);
+        return data;
+    },
     async getTenant(context, payload) {
         const { data } = await TenantServices.show(payload);
         return data;

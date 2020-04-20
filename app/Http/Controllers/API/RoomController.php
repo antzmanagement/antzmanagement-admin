@@ -37,12 +37,13 @@ class RoomController extends Controller
             'keyword' => $request->keyword,
             'fromdate' => $request->fromdate,
             'todate' => $request->todate,
+            'roomTypes' => $request->roomTypes,
             'status' => $request->status,
-            'company_id' => $request->company_id,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
-        $rooms = $this->filterRooms($request->room(), $params);
+        $rooms = $this->getRooms($request->user());
+        $rooms = $this->filterRooms( $rooms , $params);
 
         if ($this->isEmpty($rooms)) {
             return $this->errorPaginateResponse('Rooms');

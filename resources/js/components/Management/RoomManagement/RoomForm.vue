@@ -41,25 +41,26 @@
         <v-container>
           <v-row>
             <v-col cols="12">
-              <v-select
+              <v-autocomplete
                 v-model="data.roomTypes"
                 :item-text="item => helpers.capitalizeFirstLetter(item.name)"
                 item-value="id"
                 :items="roomTypes"
                 label="Room Type"
                 chips
+                deletable-chips
                 multiple
                 @change="updateFormDetails()"
               >
                 <template v-slot:append>
                   <room-type-form
                     :editMode="false"
-                    :dialogStyle="formDialogStyle"
-                    :buttonStyle="formButtonStyle"
+                    :dialogStyle="formDialogConfig.dialogStyle"
+                    :buttonStyle="formDialogConfig.buttonStyle"
                     @created="appendRoomTypeList($event)"
                   ></room-type-form>
                 </template>
-              </v-select>
+              </v-autocomplete>
             </v-col>
             <v-col cols="6">
               <v-text-field
@@ -199,18 +200,20 @@ export default {
         country: "",
         roomTypes: []
       }),
-      formDialogStyle: {
-        persistent: true,
-        maxWidth: "600px",
-        fullscreen: false,
-        hideOverlay: true
-      },
-      formButtonStyle: {
-        block: false,
-        color: "primary",
-        class: "ma-4",
-        text: "Add New Room Type",
-        icon: "mdi-plus"
+      formDialogConfig: {
+        dialogStyle: {
+          persistent: true,
+          maxWidth: "600px",
+          fullscreen: false,
+          hideOverlay: true
+        },
+        buttonStyle: {
+          block: false,
+          color: "primary",
+          class: "ma-4",
+          text: "Add New Room Type",
+          icon: "mdi-plus"
+        }
       }
     };
   },
@@ -334,10 +337,10 @@ export default {
     this.$vuetify.theme.dark = true;
     console.log("form created");
 
+    this.showLoadingAction();
     this.getRoomTypesAction({ pageNumber: -1, pageSize: -1 }).then(data => {
       this.roomTypes = data.data;
       if (this.editMode) {
-        this.showLoadingAction();
         this.getRoomAction({ uid: this.uid })
           .then(data => {
             var ids = data.data.room_types.map(function(roomType) {
@@ -353,6 +356,8 @@ export default {
           .catch(error => {
             this.endLoadingAction();
           });
+      } else {
+        this.endLoadingAction();
       }
     });
   },

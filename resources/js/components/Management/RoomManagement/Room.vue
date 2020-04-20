@@ -100,7 +100,7 @@
                 @updated="refreshPage()"
               ></room-form>
               <confirm-dialog
-                :activatorStyle="deleteButtonConfig.activatorStyle"
+                :activatorStyle="deleteButtonConfig.buttonStyle"
                 @confirmed="deleteRoom($event,data.uid)"
               ></confirm-dialog>
             </v-row>
@@ -123,7 +123,7 @@ export default {
       icon: "mdi-pencil"
     },
     deleteButtonConfig: {
-      activatorStyle: {
+      buttonStyle: {
         block: false,
         color: "error",
         class: "m-3",

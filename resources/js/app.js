@@ -14,6 +14,8 @@ require('./alert');
 require('./components');
 //Import vue filter function
 require('./filter');
+//Import google maps
+require('./maps');
 
 
 

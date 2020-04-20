@@ -10,6 +10,33 @@
           </v-col>
         </v-row>
 
+        <v-row justify="center" align="center" class="mx-3">
+          <v-col cols="12">
+            <v-card>
+              <v-card-subtitle v-show="!keywordEmpty">
+                Keyword :
+                <v-chip class="mx-2">{{ tenantFilterGroup.keyword }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="!fromdateEmpty">
+                From Date :
+                <v-chip class="mx-2">{{ tenantFilterGroup.keyword }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="!todateEmpty">
+                To Date :
+                <v-chip class="mx-2">{{ tenantFilterGroup.todate }}</v-chip>
+              </v-card-subtitle>
+
+              <v-card-subtitle v-show="!roomTypesEmpty">
+                Room Types :
+                <v-chip
+                  class="mx-2"
+                  v-for="roomType in tenantFilterGroup.selectedRoomTypes"
+                  :key="roomType.id"
+                >{{ roomType.name | capitalizeFirstLetter }}</v-chip>
+              </v-card-subtitle>
+            </v-card>
+          </v-col>
+        </v-row>
         <v-row justify="center" align="center" class="ma-3">
           <v-col cols="12">
             <v-data-table
@@ -20,6 +47,15 @@
               :loading="loading"
               class="elevation-1"
             >
+              <template v-slot:top>
+                <v-toolbar flat>
+                  <tenant-filter-dialog
+                    :buttonStyle="tenantFilterDialogConfig.buttonStyle"
+                    :dialogStyle="tenantFilterDialogConfig.dialogStyle"
+                    @submitFilter="initTenantFilter($event)"
+                  ></tenant-filter-dialog>
+                </v-toolbar>
+              </template>
               <template v-slot:item="props">
                 <tr @click="showTenant(props.item)">
                   <td>{{props.item.name}}</td>
@@ -46,6 +82,29 @@ export default {
       data: [],
       loading: true,
       options: {},
+      tenantFilterGroup: new Form({
+        roomTypes: [],
+        selectedRoomTypes: [],
+        keyword: null,
+        fromdate: null,
+        todate: null
+      }),
+      tenantFilterDialogConfig: {
+        buttonStyle: {
+          block: true,
+          class: "ma-2",
+          text: "Filter",
+          icon: "mdi-magnify",
+          isIcon: false,
+          color: "primary"
+        },
+        dialogStyle: {
+          persistent: true,
+          maxWidth: "1200px",
+          fullscreen: false,
+          hideOverlay: true
+        }
+      },
       headers: [
         {
           text: "Name",
@@ -67,8 +126,24 @@ export default {
       deep: true
     }
   },
-  created(){
-
+  computed: {
+    isLoading() {
+      return this.$store.getters.isLoading;
+    },
+    keywordEmpty() {
+      return this.helpers.isEmpty(this.tenantFilterGroup.keyword);
+    },
+    fromdateEmpty() {
+      return this.helpers.isEmpty(this.tenantFilterGroup.fromdate);
+    },
+    todateEmpty() {
+      return this.helpers.isEmpty(this.tenantFilterGroup.todate);
+    },
+    roomTypesEmpty() {
+      return this.helpers.isEmpty(this.tenantFilterGroup.selectedRoomTypes);
+    }
+  },
+  created() {
     this.$vuetify.theme.dark = true;
   },
   mounted() {
@@ -77,11 +152,25 @@ export default {
   methods: {
     ...mapActions({
       getTenantsAction: "getTenants",
+      filterTenantsAction: "filterTenants",
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction"
     }),
-    showTenant($data){
-      this.$router.push('/tenant/'+$data.uid);
+    initTenantFilter(filterGroup) {
+      this.tenantFilterGroup.reset();
+      if (filterGroup) {
+        this.tenantFilterGroup.selectedRoomTypes = filterGroup.roomTypes;
+        this.tenantFilterGroup.roomTypes = filterGroup.roomTypes.map(function(
+          roomType
+        ) {
+          return roomType.id;
+        });
+        this.tenantFilterGroup.keyword = filterGroup.keyword;
+      }
+      this.getTenants();
+    },
+    showTenant($data) {
+      this.$router.push("/tenant/" + $data.uid);
     },
     getTenants() {
       this.loading = true;
@@ -90,22 +179,30 @@ export default {
       var totalResult = itemsPerPage;
       //Show All Items
       if (totalResult == -1) {
-        totalResult = this.totalDataLength;
+        this.tenantFilterGroup.pageNumber = -1;
+        this.tenantFilterGroup.pageSize = -1;
+      } else {
+        this.tenantFilterGroup.pageNumber = page;
+        this.tenantFilterGroup.pageSize = itemsPerPage;
       }
-      this.getTenantsAction({ pageNumber: page, pageSize: totalResult })
+
+      this.filterTenantsAction(this.tenantFilterGroup)
         .then(data => {
-          console.log(data);
-          this.data = data.data;
+          if (data.data) {
+            this.data = data.data;
+          } else {
+            this.data = [];
+          }
           this.totalDataLength = data.totalResult;
+          this.loading = false;
         })
         .catch(error => {
-        Toast.fire({
-          icon: "warning",
-          title: "Something went wrong... "
+          this.loading = false;
+          Toast.fire({
+            icon: "warning",
+            title: "Something went wrong... "
+          });
         });
-          console.log(error.response);
-        });
-      this.loading = false;
     }
   }
 };

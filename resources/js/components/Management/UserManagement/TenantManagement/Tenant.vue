@@ -44,6 +44,27 @@
                 </div>
               </v-col>
             </v-row>
+
+            <v-divider class="mx-3" color="#ffffff"></v-divider>
+
+            <v-row>
+              <v-col cols="12" class="m-3">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Room</label>
+                  <div class="form-control-plaintext">
+                    <v-chip
+                      class="ma-2"
+                      v-for="room in data.rentrooms"
+                      :key="room.uid"
+                      @click="showRoom(room)"
+                    >
+                      <h4 class="text-center ma-2">{{room.name | capitalizeFirstLetter }}</h4>
+                    </v-chip>
+                  </div>
+                </div>
+              </v-col>
+            </v-row>
+
             <v-row>
               <v-col col="12">
                 <v-divider class="mx-3" color="#ffffff"></v-divider>
@@ -55,7 +76,7 @@
               <tenant-form
                 :editMode="true"
                 :buttonStyle="editButtonStyle"
-                :uid="this.$route.params.uid" 
+                :uid="this.$route.params.uid"
                 @updated="refreshPage()"
               ></tenant-form>
               <confirm-dialog
@@ -99,7 +120,6 @@ export default {
     })
   }),
 
-
   computed: {
     isLoading() {
       return this.$store.getters.isLoading;
@@ -108,12 +128,12 @@ export default {
   created() {
     this.$vuetify.theme.dark = true;
 
-    
     this.$Progress.start();
     this.showLoadingAction();
     this.getTenantAction({ uid: this.$route.params.uid })
       .then(data => {
         this.data = data.data;
+        console.log(data.data);
         this.$Progress.finish();
         this.endLoadingAction();
       })
@@ -134,6 +154,9 @@ export default {
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction"
     }),
+    showRoom($data) {
+      this.$router.push("/room/" + $data.uid);
+    },
     deleteTenant($isConfirmed, $uid) {
       if ($isConfirmed) {
         this.$Progress.start();

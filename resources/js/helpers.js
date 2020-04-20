@@ -24,6 +24,13 @@ const helpers = {
 
         return false;
     },
+    isEmpty(value) {
+        if (value == null || value == 'undefined' || value == ""  || value == "N/A" || value == []) {
+            return true;
+        }
+
+        return false;
+    },
     isIcFormat(value) {
         if (value) {
             if (value.length >= 0 && value.length == 14) {

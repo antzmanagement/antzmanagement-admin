@@ -336,7 +336,7 @@ trait GlobalFunctions
         }
 
         if ($params->todate) {
-            $date = Carbon::parse($request->todate)->endOfDay();
+            $date = Carbon::parse($params->todate)->endOfDay();
             $data = $data->filter(function ($item) use ($date) {
                 return (Carbon::parse(data_get($item, 'created_at')) <= $date);
             });

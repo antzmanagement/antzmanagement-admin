@@ -1,6 +1,11 @@
 <template>
   <v-app>
-    <v-app-bar app color="white" height="100">
+    <v-app-bar
+      app
+      :color="appBarConfig.color"
+      :height="appBarConfig.height"
+      :hide-on-scroll="appBarConfig.hideOnScroll"
+    >
       <v-avatar class="mr-3" color="grey lighten-5" size="70">
         <v-img
           contain
@@ -9,19 +14,33 @@
         ></v-img>
       </v-avatar>
 
-      <v-row>
-        <v-col col="4">
-          <v-toolbar-title class="font-weight-black headline">Antz Management</v-toolbar-title>
-        </v-col>
-        <v-spacer></v-spacer>
-        <v-col col="2">
-          <v-btn :to="'management'">Test</v-btn>
-        </v-col>
-      </v-row>
+      <v-toolbar-title class="font-weight-black headline">Antz Management</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-btn-toggle tile group v-show="$vuetify.breakpoint.mdAndUp">
+        <v-btn
+          v-for="(item, i) in navbarItems"
+          :key="i"
+          :to="{ name : item.name}"
+        >{{ item.text | capitalizeFirstLetter }}</v-btn>
+      </v-btn-toggle>
+
+      <v-menu v-show="$vuetify.breakpoint.smAndDown">
+        <template v-slot:activator="{ on }">
+          <v-btn icon v-on="on" v-show="$vuetify.breakpoint.smAndDown">
+            <v-icon>mdi-dots-vertical</v-icon>
+          </v-btn>
+        </template>
+
+        <v-list>
+          <v-list-item v-for="(item, i) in navbarItems" :key="i" :to="{ name : item.name}">
+            <v-list-item-title>{{ item.text | capitalizeFirstLetter }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
     </v-app-bar>
 
     <v-content>
-      <section id="hero">
+      <section id="head" :class="sectionConfig.head.class">
         <v-row no-gutters>
           <v-img
             :min-height="'calc(100vh - ' + $vuetify.application.top + 'px)'"
@@ -44,7 +63,7 @@
                     >Antz Management</span>
                   </v-col>
 
-                  <v-btn class="align-self-end" fab outlined @click="$vuetify.goTo('#about-me')">
+                  <v-btn class="align-self-end" fab outlined @click="$vuetify.goTo('#aboutMe')">
                     <v-icon>mdi-chevron-double-down</v-icon>
                   </v-btn>
                 </v-row>
@@ -54,16 +73,16 @@
         </v-row>
       </section>
 
-      <section id="about-me">
+      <section id="aboutMe" :class="sectionConfig.aboutMe.class">
         <div class="py-12"></div>
 
         <v-container class="text-center">
-          <h2 class="display-2 font-weight-bold mb-3">ABOUT ME</h2>
+          <h2 class="display-2 font-weight-bold mb-3">ABOUT US</h2>
 
-          <v-responsive class="mx-auto mb-8" width="56">
-            <v-divider class="mb-1"></v-divider>
+          <v-responsive class="mx-auto mb-12" width="56">
+            <v-divider class="mb-1 black"></v-divider>
 
-            <v-divider></v-divider>
+            <v-divider class="black"></v-divider>
           </v-responsive>
 
           <v-responsive
@@ -77,43 +96,94 @@
 
           <div></div>
 
-          <v-btn color="grey" href="https://vuetifyjs.com" outlined large>
-            <span class="grey--text text--darken-1 font-weight-bold">Vuetify Documentation</span>
+          <v-btn color="grey" @click="$vuetify.goTo('#contact')" outlined large>
+            <span class="grey--text text--darken-1 font-weight-bold">Contact Us Now !</span>
           </v-btn>
         </v-container>
 
         <div class="py-12"></div>
       </section>
 
-      <section id="features" class="grey lighten-3">
+      <section id="services" :class="sectionConfig.services.class">
         <div class="py-12"></div>
 
-        <v-container class="text-center">
-          <h2 class="display-2 font-weight-bold mb-3">VUETIFY FEATURES</h2>
+        <v-container>
+          <h2 class="display-2 font-weight-bold mb-3 text-uppercase text-center">OUR SERVICES</h2>
 
           <v-responsive class="mx-auto mb-12" width="56">
-            <v-divider class="mb-1"></v-divider>
+            <v-divider class="mb-1 black"></v-divider>
 
-            <v-divider></v-divider>
+            <v-divider class="black"></v-divider>
           </v-responsive>
 
-          <v-row>
-            <v-col v-for="({ icon, title, text }, i) in features" :key="i" cols="12" md="4">
-              <v-card class="py-12 px-4" color="grey lighten-5" flat>
-                <v-theme-provider dark>
-                  <div>
-                    <v-avatar color="primary" size="88">
-                      <v-icon large v-text="icon"></v-icon>
-                    </v-avatar>
-                  </div>
-                </v-theme-provider>
+          <v-row justify="center">
+            <v-card
+              flat
+              hover
+              width="150px"
+              class="ma-2 white lighten-3"
+              v-for="(service, i) in services"
+              :key="i"
+            >
+              <v-card-title class="justify-center">
+                <v-icon large>{{service.icon}}</v-icon>
+              </v-card-title>
+              <v-card-text>
+                <v-responsive class="text-center font-weight-bold">{{service.text}}</v-responsive>
+              </v-card-text>
+            </v-card>
+          </v-row>
+        </v-container>
 
-                <v-card-title
-                  class="justify-center font-weight-black text-uppercase"
-                  v-text="title"
-                ></v-card-title>
+        <div class="py-12"></div>
+      </section>
 
-                <v-card-text class="subtitle-1" v-text="text"></v-card-text>
+      <section id="rooms" :class="sectionConfig.rooms.class">
+        <div class="py-12"></div>
+        <v-container class="text-center">
+          <h2
+            class="display-2 font-weight-bold ma-5 text-uppercase text-center text-white"
+          >OUR ROOMS</h2>
+
+          <v-responsive class="mx-auto mb-12" width="56">
+            <v-divider class="mb-1 white"></v-divider>
+
+            <v-divider class="white"></v-divider>
+          </v-responsive>
+        </v-container>
+
+        <room-type-sliders></room-type-sliders>
+      </section>
+
+      <section id="whyPickUs" :class="sectionConfig.whyPickUs.class">
+        <div class="py-12"></div>
+
+        <v-container>
+          <h2 class="display-2 font-weight-bold mb-3 text-uppercase text-center">WHY PICK US?</h2>
+
+          <v-responsive class="mx-auto mb-12" width="56">
+            <v-divider class="mb-1 black"></v-divider>
+
+            <v-divider class="black"></v-divider>
+          </v-responsive>
+
+          <v-row justify="center">
+            <v-col cols="6">
+              <v-card flat width="100% " height="100%" class="ma-2 grey lighten-3">
+                <v-list-item dense three-line v-for="(item, i) in whyPickUsItems" :key="i">
+                  <v-list-item-icon left  >
+                    <v-icon x-large color="black">mdi-circle-small</v-icon>
+                  </v-list-item-icon>
+                  <v-list-item-content>
+                    <v-list-item-title class="title">{{ item.text | capitalizeFirstLetter }}</v-list-item-title>
+                    <v-list-item-subtitle>{{ item.desc | capitalizeFirstLetter }}</v-list-item-subtitle>
+                  </v-list-item-content>
+                </v-list-item>
+              </v-card>
+            </v-col>
+            <v-col cols="6">
+              <v-card flat width="100% " height="100%" class="ma-2 black lighten-3">
+                <google-map></google-map>
               </v-card>
             </v-col>
           </v-row>
@@ -122,92 +192,47 @@
         <div class="py-12"></div>
       </section>
 
-      <section id="stats">
-        <v-parallax
-          :height="$vuetify.breakpoint.smAndDown ? 700 : 500"
-          src="https://images.unsplash.com/photo-1510915228340-29c85a43dcfe?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1950&q=80"
-        >
-          <v-container fill-height>
-            <v-row class="mx-auto">
-              <v-col v-for="[value, title] of stats" :key="title" cols="12" md="3">
-                <div class="text-center">
-                  <div class="display-3 font-weight-black mb-4" v-text="value"></div>
+      <section id="contactUs" :class="sectionConfig.contactUs.class">
+        <v-sheet id="contact" color="#333333" dark tag="section" tile>
+          <div class="py-12"></div>
 
-                  <div class="title font-weight-regular text-uppercase" v-text="title"></div>
-                </div>
-              </v-col>
-            </v-row>
+          <v-container>
+            <h2 class="display-2 font-weight-bold mb-3 text-uppercase text-center">Contact Us</h2>
+
+            <v-responsive class="mx-auto mb-12" width="56">
+              <v-divider class="mb-1"></v-divider>
+
+              <v-divider></v-divider>
+            </v-responsive>
+
+            <v-theme-provider light>
+              <v-row>
+                <v-col cols="12">
+                  <v-text-field flat label="Name*" solo></v-text-field>
+                </v-col>
+
+                <v-col cols="12">
+                  <v-text-field flat label="Email*" solo></v-text-field>
+                </v-col>
+
+                <v-col cols="12">
+                  <v-text-field flat label="Subject*" solo></v-text-field>
+                </v-col>
+
+                <v-col cols="12">
+                  <v-textarea flat label="Message*" solo></v-textarea>
+                </v-col>
+
+                <v-col class="mx-auto" cols="auto">
+                  <v-btn color="accent" x-large>Submit</v-btn>
+                </v-col>
+              </v-row>
+            </v-theme-provider>
           </v-container>
-        </v-parallax>
+
+          <div class="py-12"></div>
+        </v-sheet>
       </section>
-
-      <section id="blog">
-        <div class="py-12"></div>
-
-        <v-container>
-          <h2 class="display-2 font-weight-bold mb-3 text-uppercase text-center">Blog</h2>
-
-          <v-responsive class="mx-auto mb-12" width="56">
-            <v-divider class="mb-1"></v-divider>
-
-            <v-divider></v-divider>
-          </v-responsive>
-
-          <v-row>
-            <v-col v-for="({ src, text, title }, i) in articles" :key="i" cols="12" md="4">
-              <v-img :src="src" class="mb-4" height="275" max-width="100%"></v-img>
-
-              <h3 class="font-weight-black mb-4 text-uppercase" v-text="title"></h3>
-
-              <div class="title font-weight-light mb-5" v-text="text"></div>
-
-              <v-btn class="ml-n4 font-weight-black" text>Continue Reading</v-btn>
-            </v-col>
-          </v-row>
-        </v-container>
-
-        <div class="py-12"></div>
-      </section>
-
-      <v-sheet id="contact" color="#333333" dark tag="section" tile>
-        <div class="py-12"></div>
-
-        <v-container>
-          <h2 class="display-2 font-weight-bold mb-3 text-uppercase text-center">Contact Me</h2>
-
-          <v-responsive class="mx-auto mb-12" width="56">
-            <v-divider class="mb-1"></v-divider>
-
-            <v-divider></v-divider>
-          </v-responsive>
-
-          <v-theme-provider light>
-            <v-row>
-              <v-col cols="12">
-                <v-text-field flat label="Name*" solo></v-text-field>
-              </v-col>
-
-              <v-col cols="12">
-                <v-text-field flat label="Email*" solo></v-text-field>
-              </v-col>
-
-              <v-col cols="12">
-                <v-text-field flat label="Subject*" solo></v-text-field>
-              </v-col>
-
-              <v-col cols="12">
-                <v-textarea flat label="Message*" solo></v-textarea>
-              </v-col>
-
-              <v-col class="mx-auto" cols="auto">
-                <v-btn color="accent" x-large>Submit</v-btn>
-              </v-col>
-            </v-row>
-          </v-theme-provider>
-        </v-container>
-
-        <div class="py-12"></div>
-      </v-sheet>
     </v-content>
 
     <v-footer class="justify-center" color="#292929" height="100">
@@ -220,6 +245,80 @@
 
 <script>
 export default {
+  data: () => ({
+    appBarConfig: {
+      color: "white",
+      hideOnScroll: true,
+      height: "100"
+    },
+    sectionConfig: {
+      head: {
+        class: "grey lighten-3"
+      },
+      aboutMe: {
+        class: "grey lighten-3"
+      },
+      services: {
+        class: "white lighten-3"
+      },
+      rooms: {
+        class: "black lighten-3"
+      },
+      whyPickUs: {
+        class: "grey lighten-3"
+      },
+      contactUs: {
+        class: "grey lighten-3"
+      }
+    },
+    navbarItems: [
+      { text: "Management", name: "management" },
+      { text: "Management", name: "management" },
+      { text: "Management", name: "management" },
+      { text: "Management", name: "management" },
+      { text: "Management", name: "management" },
+      { text: "Management", name: "management" }
+    ],
+    services: [
+      { text: "Free Wifi", name: "freeWifi", icon: "mdi-wifi" },
+      {
+        text: "Laundry Services",
+        name: "laundry",
+        icon: "mdi-washing-machine"
+      },
+      { text: "Cleaning Services", name: "cleaning", icon: "mdi-broom" },
+      { text: "Gym", name: "gym", icon: "mdi-dumbbell" },
+      { text: "Free Parking", name: "parking", icon: "mdi-parking" },
+      { text: "Fully Furnished", name: "furnished", icon: "mdi-table-chair" },
+      {
+        text: "Van Transportation",
+        name: "transportation",
+        icon: "mdi-van-passenger"
+      },
+      { text: "Kitchen", name: "kitchen", icon: "mdi-chef-hat" },
+      { text: "Air Cond", name: "aircon", icon: "mdi-air-conditioner" },
+      {
+        text: "Heater",
+        name: "heater",
+        icon: "mdi-hot-tub"
+      }
+    ],
+    whyPickUsItems: [
+      { text: "Cheapest double room price at the town", desc: "" },
+      { text: "Friendly Housemate", desc: "" },
+      { text: "Well-Handled Management", desc: "" },
+      {
+        text: "5 mins to UTAR Campus",
+        desc: "Driving car with only few minutes"
+      },
+      {
+        text: "Convenience Mart Around",
+        desc: "Walking distance to nearest 99 speedmart"
+      },
+      { text: "24 Hours Secure", desc: "CCTV operates at the corners." },
+      { text: "Quiet Environment", desc: "" }
+    ]
+  }),
   created() {
     this.$vuetify.theme.dark = false;
   },
