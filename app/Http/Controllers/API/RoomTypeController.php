@@ -157,56 +157,18 @@ class RoomTypeController extends Controller
     }
 
 
-    public function authentication(Request $request)
+    public function getPublicRoomTypes(Request $request)
     {
-        // TODO Authenticate currently logged in roomType
-        error_log($this->controllerName . 'Authenticating roomType.');
-        return response()->json($request->roomType(), 200);
-    }
-
-    public function register(Request $request)
-    {
-        // TODO Registers roomTypes without needing authorization
-        error_log($this->controllerName . 'Registering roomType.');
-        // api/register (POST)
-        $this->validate($request, [
-            'name' => 'required|string|max:191',
-            'email' => 'required|string|email|max:191|unique:roomTypes',
-            'password' => 'required|string|min:6|confirmed',
-        ]);
-        DB::beginTransaction();
-        $roomType = new RoomType();
-        $roomType->uid = Carbon::now()->timestamp . RoomType::count();
-        $roomType->name = $request->name;
-        $roomType->email = $request->email;
-        $roomType->password = Hash::make($request->password);
-        $roomType->status = true;
-        try {
-            DB::commit();
-            $roomType->save();
-            $data['status'] = 'success';
-            $data['msg'] = $this->getCreatedSuccessMsg('RoomType Account');
-            $data['data'] = $roomType;
-            $data['code'] = 200;
-            return response()->json($data, 200);
-        } catch (Exception $e) {
-            DB::rollBack();
-            return $this->errorResponse();
+        error_log($this->controllerName . 'Retrieving list of roomTypes.');
+        // api/roomType (GET)
+        $roomTypes = $this->getRoomTypes($request->user());
+        if ($this->isEmpty($roomTypes)) {
+            return $this->errorPaginateResponse('RoomTypes');
+        } else {
+            error_log($roomTypes);
+            return $this->successPaginateResponse('RoomTypes', $roomTypes, $this->toInt($request->pageSize), $this->toInt($request->pageNumber));
         }
     }
 
-
-    public function roomTypeRoles(Request $request)
-    {
-        // TODO Authenticate currently logged in roomType
-        $roomType = $this->getRoomTypeById($request->roomType()->id);
-        if ($this->isEmpty($roomType)) {
-            DB::rollBack();
-            return $this->errorResponse();
-        }
-
-        $roles = $roomType->roles()->wherePivot('status', true)->get();
-
-        return $this->successResponse('Role', $roles, 'retrieve');
-    }
+    
 }

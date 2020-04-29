@@ -1,5 +1,4 @@
 import Example from './components/ExampleComponent.vue'
-import Home from './components/Home/Home.vue'
 import ManagementHome from './components/Management/ManagementHome.vue'
 import Profile from './components/Profile/Profile.vue'
 import Login from './components/Login/Login.vue'
@@ -13,6 +12,11 @@ import Tenant from './components/Management/UserManagement/TenantManagement/Tena
 import AllRooms from './components/Management/RoomManagement/AllRooms.vue';
 import Room from './components/Management/RoomManagement/Room.vue';
 
+import Home from './components/Home/Home.vue'
+import RoomPage from './components/Home/RoomPage.vue';
+import ServicesPage from './components/Home/ServicesPage.vue';
+import ProfilePage from './components/Home/Profile.vue';
+
 export const routes = [
    
     { 
@@ -23,6 +27,21 @@ export const routes = [
         path:'/home',
         component:Home,
         name : 'home',
+    },
+    { 
+        path:'/roompages',
+        component:RoomPage,
+        name : 'roompages',
+    },
+    { 
+        path:'/servicespage',
+        component:ServicesPage,
+        name : 'servicespage',
+    },
+    { 
+        path:'/profile',
+        component:ProfilePage,
+        name : 'profile',
     },
     { 
         path:'/management',

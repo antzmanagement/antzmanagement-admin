@@ -18,6 +18,7 @@ class CreateRoomTypesTable extends Migration
             $table->increments('id')->unique();
             $table->string('uid')->unique();
             $table->string('name')->nullable();
+            $table->longText('desc')->nullable();
             $table->decimal('price',8,2)->default(0.00);
             $table->boolean('status')->default(1);
             $table->timestamps();

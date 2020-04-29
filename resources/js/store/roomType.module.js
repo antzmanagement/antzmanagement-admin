@@ -27,6 +27,11 @@ export const actions = {
         const { data } = await RoomTypeServices.delete(payload);
         return data;
     },
+
+    async getPublicRoomTypes(context, payload) {
+        const { data } = await RoomTypeServices.getPublicRoomTypes(payload);
+        return data;
+    },
 };
 
 // export const mutations = {

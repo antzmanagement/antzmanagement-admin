@@ -11,6 +11,7 @@
 |
 */
 
+use Illuminate\Http\Request;
 Route::get('/', function () {
     return view('welcome');
 });
@@ -18,3 +19,9 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('{any}', 'HomeController@index')->where('any', '.*');
+
+Route::post('/upload', function (Request $request) {
+    error_log( $request);
+    error_log( "file");
+    dd($request->file('file'));
+});

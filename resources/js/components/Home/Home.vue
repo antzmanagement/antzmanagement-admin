@@ -1,44 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar
-      app
-      :color="appBarConfig.color"
-      :height="appBarConfig.height"
-      :hide-on-scroll="appBarConfig.hideOnScroll"
-    >
-      <v-avatar class="mr-3" color="grey lighten-5" size="70">
-        <v-img
-          contain
-          max-height="70%"
-          src="https://res.cloudinary.com/ipoh-drum/image/upload/v1587403784/mountain-hostel-logo-design-template-vector-M5TFNF_vngjr3.jpg"
-        ></v-img>
-      </v-avatar>
-
-      <v-toolbar-title class="font-weight-black headline">Antz Management</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn-toggle tile group v-show="$vuetify.breakpoint.mdAndUp">
-        <v-btn
-          v-for="(item, i) in navbarItems"
-          :key="i"
-          :to="{ name : item.name}"
-        >{{ item.text | capitalizeFirstLetter }}</v-btn>
-      </v-btn-toggle>
-
-      <v-menu v-show="$vuetify.breakpoint.smAndDown">
-        <template v-slot:activator="{ on }">
-          <v-btn icon v-on="on" v-show="$vuetify.breakpoint.smAndDown">
-            <v-icon>mdi-dots-vertical</v-icon>
-          </v-btn>
-        </template>
-
-        <v-list>
-          <v-list-item v-for="(item, i) in navbarItems" :key="i" :to="{ name : item.name}">
-            <v-list-item-title>{{ item.text | capitalizeFirstLetter }}</v-list-item-title>
-          </v-list-item>
-        </v-list>
-      </v-menu>
-    </v-app-bar>
-
+    <home-navbar></home-navbar>
     <v-content>
       <section id="head" :class="sectionConfig.head.class">
         <v-row no-gutters>
@@ -58,7 +20,7 @@
                     <br />
 
                     <span
-                      :class="[$vuetify.breakpoint.smAndDown ? 'display-3': 'display-4']"
+                      :class="[$vuetify.breakpoint.smAndDown ? 'display-3': 'display-5']"
                       class="font-weight-black"
                     >Antz Management</span>
                   </v-col>
@@ -79,6 +41,8 @@
         <v-container class="text-center">
           <h2 class="display-2 font-weight-bold mb-3">ABOUT US</h2>
 
+          <!-- <v-file-input show-size v-model="file" enctype="multipart/form-data" label="File input"></v-file-input>
+          <v-btn @click="uploadFile()">Submit</v-btn>-->
           <v-responsive class="mx-auto mb-12" width="56">
             <v-divider class="mb-1 black"></v-divider>
 
@@ -90,9 +54,16 @@
             max-width="720"
           >Vuetify is the #1 component library for Vue.js and has been in active development since 2016. The goal of the project is to provide users with everything that is needed to build rich and engaging web applications using the Material Design specification. It accomplishes that with a consistent update cycle, Long-term Support (LTS) for previous versions, responsive community engagement, a vast ecosystem of resources and a dedication to quality components.</v-responsive>
 
-          <v-avatar class="elevation-12 mb-12" size="128">
-            <v-img src="https://cdn.vuetifyjs.com/images/john.png"></v-img>
-          </v-avatar>
+          <v-row justify="center">
+            <v-avatar
+              class="elevation-12 ma-12"
+              size="128"
+              v-for="(aboutPic, i) in aboutPics"
+              :key="i"
+            >
+              <v-img :src="aboutPic.imgpath"></v-img>
+            </v-avatar>
+          </v-row>
 
           <div></div>
 
@@ -151,7 +122,6 @@
             <v-divider class="white"></v-divider>
           </v-responsive>
         </v-container>
-
         <room-type-sliders></room-type-sliders>
         <div class="py-5"></div>
       </section>
@@ -169,7 +139,7 @@
           </v-responsive>
 
           <v-row justify="center">
-            <v-col cols="6">
+            <v-col cols="12" md="6">
               <v-card flat width="100% " height="100%" class="ma-2 grey lighten-3">
                 <v-list-item dense three-line v-for="(item, i) in whyPickUsItems" :key="i">
                   <v-list-item-icon left>
@@ -182,8 +152,13 @@
                 </v-list-item>
               </v-card>
             </v-col>
-            <v-col cols="6">
-              <v-card flat width="100% " height="100%" class="ma-2 black lighten-3">
+            <v-col cols="12" md="6">
+              <v-card
+                flat
+                width="100%"
+                :height="$vuetify.breakpoint.mdAndUp ?'100%' : '500px' "
+                class="ma-2 black lighten-3"
+              >
                 <google-map></google-map>
               </v-card>
             </v-col>
@@ -193,110 +168,20 @@
         <div class="py-5"></div>
       </section>
 
-      <section id="contactUs" :class="sectionConfig.contactUs.class">
-        <v-sheet id="contact" color="#333333" dark tag="section" tile>
-          <div class="py-5"></div>
-
-          <v-container>
-            <h2 class="display-2 font-weight-bold mb-3 text-uppercase text-center">Contact Us</h2>
-
-            <v-responsive class="mx-auto mb-5" width="56">
-              <v-divider class="mb-1 white"></v-divider>
-
-              <v-divider class="white"></v-divider>
-            </v-responsive>
-
-            <v-theme-provider dark>
-              <v-row justify="space-between">
-                <v-col cols="4">
-                  <v-card class="mx-4" flat color="#333333">
-                    <v-list-item three-line>
-                      <v-list-item-content>
-                        <v-list-item-subtitle class="d-inline-block headline ma-2">
-                          <v-icon class="mr-2">mdi-google-maps</v-icon>
-                          {{address}}
-                        </v-list-item-subtitle>
-                        <v-list-item-subtitle class="d-inline-block subtitle-1 ma-2">
-                          <v-icon class="mr-2">mdi-email</v-icon>
-                          {{email}}
-                        </v-list-item-subtitle>
-                        <v-list-item-subtitle class="d-inline-block subtitle-1 ma-2">
-                          <v-icon class="mr-2">mdi-phone</v-icon>
-                          {{phone}}
-                        </v-list-item-subtitle>
-                        <v-list-item-subtitle class="text-left ma-2">
-                          <v-btn
-                            class="ma-2"
-                            icon
-                            v-for="(item, i) in socialLinks"
-                            :key="i"
-                            :href="item.link"
-                            target="_blank"
-                          >
-                            <v-icon>{{item.icon}}</v-icon>
-                          </v-btn>
-                        </v-list-item-subtitle>
-                      </v-list-item-content>
-                    </v-list-item>
-                  </v-card>
-                </v-col>
-
-                <v-col cols="4">
-                  <v-card class="mx-4" flat color="#333333">
-                    <v-list-item three-line>
-                      <v-list-item-content>
-                        <v-list-title class="d-inline-block title text-center">Contact</v-list-title>
-                        <v-list-subtitle>
-                          <v-text-field
-                            :maxlength="300"
-                            v-model="data.contact"
-                            light
-                            background-color="white"
-                          ></v-text-field>
-                        </v-list-subtitle>
-                        <v-list-item-subtitle class="text-center">
-                          <v-btn block dark outlined>Submit</v-btn>
-                        </v-list-item-subtitle>
-                      </v-list-item-content>
-                    </v-list-item>
-                  </v-card>
-                </v-col>
-
-                <v-col cols="4" align-self="auto">
-                  <v-card class="mx-4" flat color="#333333">
-                    <v-list-item three-line>
-                      <v-list-item-content>
-                        <v-list-item-title class="d-inline-block headline ma-4">Opening Hours :</v-list-item-title>
-                        <v-list-item-subtitle
-                          class="d-inline-block subtitle-1 ma-2"
-                          v-for="(item, i) in openingHours"
-                          :key="i"
-                        >
-                          <v-icon class="mr-2">mdi-circle-small</v-icon>
-                          {{item.day}} : {{item.hours}}
-                        </v-list-item-subtitle>
-                      </v-list-item-content>
-                    </v-list-item>
-                  </v-card>
-                </v-col>
-              </v-row>
-            </v-theme-provider>
-          </v-container>
-        </v-sheet>
+    
+       <section id="contactUs" class="grey lighten-3">
+         <contact-us></contact-us>
       </section>
     </v-content>
 
-    <v-footer class="justify-center" color="#292929" height="100">
-      <div
-        class="title font-weight-light grey--text text--lighten-1 text-center"
-      >&copy; {{ (new Date()).getFullYear() }} — Vuetify, LLC — Made with 💜 by John Leider</div>
-    </v-footer>
+    <home-footer></home-footer>
   </v-app>
 </template>
 
 <script>
 export default {
   data: () => ({
+    file: "",
     appBarConfig: {
       color: "white",
       hideOnScroll: true,
@@ -322,13 +207,19 @@ export default {
         class: "grey lighten-3"
       }
     },
-    navbarItems: [
-      { text: "Management", name: "management" },
-      { text: "Management", name: "management" },
-      { text: "Management", name: "management" },
-      { text: "Management", name: "management" },
-      { text: "Management", name: "management" },
-      { text: "Management", name: "management" }
+    aboutPics: [
+      {
+        imgpath:
+          "https://res.cloudinary.com/ipoh-drum/image/upload/v1587403963/CP-B1112-2_olvbdv.jpg"
+      },
+      {
+        imgpath:
+          "https://res.cloudinary.com/ipoh-drum/image/upload/v1587403962/maxresdefault_ra18v3.jpg"
+      },
+      {
+        imgpath:
+          "https://res.cloudinary.com/ipoh-drum/image/upload/v1587278991/Hostel_Dormitory_kp3ulz.jpg"
+      },
     ],
     services: [
       { text: "Free Wifi", name: "freeWifi", icon: "mdi-wifi" },
@@ -369,33 +260,34 @@ export default {
       { text: "24 Hours Secure", desc: "CCTV operates at the corners." },
       { text: "Quiet Environment", desc: "" }
     ],
-    openingHours: [
-      { day: "Monday", hours: "9am-6pm" },
-      { day: "Tuesday", hours: "9am-6pm" },
-      { day: "Wednesday", hours: "9am-6pm" },
-      { day: "Thursday", hours: "9am-6pm" },
-      { day: "Friday", hours: "9am-6pm" },
-      { day: "Saturday", hours: "Closed" },
-      { day: "Sunday", hours: "Closed" }
-    ],
-    socialLinks: [
-      { icon: "mdi-facebook", link: "#" },
-      { icon: "mdi-instagram", link: "#" },
-      { icon: "mdi-twitter", link: "#" }
-    ],
-    address:
-      "47G, Pusat Perdagangan Jalan Kampar Barat 1, 31900 Kampar, Perak.",
-    email: "antz.customerservice@gmail.com",
-    phone: "010-2898012",
-    data: {
-      contact: ""
-    }
   }),
   created() {
     this.$vuetify.theme.dark = false;
+    console.log(this.$vuetify.breakpoint.name);
   },
   mounted() {
     console.log("Component mounted.");
+  },
+  methods: {
+    uploadFile() {
+      console.log(this.file);
+      axios
+        .post(
+          "/upload",
+          { file: "" },
+          {
+            headers: {
+              "Content-Type": "multipart/form-data"
+            }
+          }
+        )
+        .then(data => {
+          console.log(data);
+        })
+        .catch(error => {
+          console.log(error.response);
+        });
+    }
   }
 };
 </script>

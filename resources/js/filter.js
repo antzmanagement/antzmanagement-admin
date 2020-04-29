@@ -16,3 +16,10 @@ Vue.filter("formatDate", function (date) {
 	return moment(date).format('MMMM Do YYYY');
 
 }); 
+
+
+Vue.filter("toDouble", function (value) {
+
+	return helpers.toDouble(value);
+
+}); 

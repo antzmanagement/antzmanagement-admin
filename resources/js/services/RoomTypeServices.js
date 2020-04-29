@@ -42,7 +42,18 @@ const RoomTypeServices = {
     const clonedata = Object.assign({}, data);
     console.log(clonedata);
     return Vue.axios.delete('/api/roomtype/' + data.uid);
-  }
+  },
+
+  
+  getPublicRoomTypes(data) {
+    PassportServices.AuthenticationServices.setHeader();
+
+    const clonedata = Object.assign({}, data);
+    console.log(clonedata);
+    return Vue.axios.get('/api/public/roomtype', {
+      params: clonedata
+    })
+  },
 };
 
 export default RoomTypeServices;

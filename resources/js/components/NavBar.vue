@@ -87,8 +87,5 @@ export default {
       { picture: 78, text: "MKBHD" }
     ]
   }),
-  created() {
-    this.$vuetify.theme.dark = true;
-  }
 };
 </script>

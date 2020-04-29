@@ -43,8 +43,8 @@ Route::group(['middleware' => ['auth:api']], function (){
     Route::resource('roomtype', 'API\RoomTypeController');
     Route::get('/filter/roomtype', 'API\RoomTypeController@filter');
 
-
-
-    
 });
+
+
+Route::get('/public/roomtype', 'API\RoomTypeController@getPublicRoomTypes');
 
