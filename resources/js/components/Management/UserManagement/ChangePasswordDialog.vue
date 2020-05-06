@@ -27,7 +27,7 @@
                 required
                 :maxlength="255"
                 v-model="data.oldpassword"
-                @input="$v.data.oldpassword.$touch(); checkPassword(data.oldpassword);"
+                @change="$v.data.oldpassword.$touch(); checkPassword(data.oldpassword);"
                 @blur="$v.data.oldpassword.$touch()"
                 :error-messages="oldPasswordErrors"
               ></v-text-field>
