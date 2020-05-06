@@ -1,18 +1,18 @@
 <template>
   <v-app>
     <navbar></navbar>
-    <v-content>
+    <v-content :class="helpers.managementStyles().backgroundClass">
       <v-container class="fill-height" fluid>
         <loading></loading>
         <v-row justify="center" align="center" class="ma-3">
           <v-col cols="12">
-            <tenant-form :editMode="false" @created="showTenant($event)"></tenant-form>
+            <tenant-form :editMode="false" :buttonStyle="tenantFormDialogConfig.buttonStyle" @created="showTenant($event)"></tenant-form>
           </v-col>
         </v-row>
 
         <v-row justify="center" align="center" class="mx-3">
           <v-col cols="12">
-            <v-card>
+            <v-card raised>
               <v-card-subtitle v-show="!keywordEmpty">
                 Keyword :
                 <v-chip class="mx-2">{{ tenantFilterGroup.keyword }}</v-chip>
@@ -39,32 +39,33 @@
         </v-row>
         <v-row justify="center" align="center" class="ma-3">
           <v-col cols="12">
-            <v-data-table
-              :headers="headers"
-              :items="data"
-              :options.sync="options"
-              :server-items-length="totalDataLength"
-              :loading="loading"
-              class="elevation-1"
-            >
-              <template v-slot:top>
-                <v-toolbar flat>
-                  <tenant-filter-dialog
-                    :buttonStyle="tenantFilterDialogConfig.buttonStyle"
-                    :dialogStyle="tenantFilterDialogConfig.dialogStyle"
-                    @submitFilter="initTenantFilter($event)"
-                  ></tenant-filter-dialog>
-                </v-toolbar>
-              </template>
-              <template v-slot:item="props">
-                <tr @click="showTenant(props.item)">
-                  <td>{{props.item.name}}</td>
-                  <td>{{props.item.icno}}</td>
-                  <td>{{props.item.tel1}}</td>
-                  <td>{{props.item.email}}</td>
-                </tr>
-              </template>
-            </v-data-table>
+            <v-card class="pa-8" raised>
+              <v-data-table
+                :headers="headers"
+                :items="data"
+                :options.sync="options"
+                :server-items-length="totalDataLength"
+                :loading="loading"
+              >
+                <template v-slot:top>
+                  <v-toolbar flat class="mb-5">
+                    <tenant-filter-dialog
+                      :buttonStyle="tenantFilterDialogConfig.buttonStyle"
+                      :dialogStyle="tenantFilterDialogConfig.dialogStyle"
+                      @submitFilter="initTenantFilter($event)"
+                    ></tenant-filter-dialog>
+                  </v-toolbar>
+                </template>
+                <template v-slot:item="props">
+                  <tr @click="showTenant(props.item)">
+                    <td>{{props.item.name}}</td>
+                    <td>{{props.item.icno}}</td>
+                    <td>{{props.item.tel1}}</td>
+                    <td>{{props.item.email}}</td>
+                  </tr>
+                </template>
+              </v-data-table>
+            </v-card>
           </v-col>
         </v-row>
       </v-container>
@@ -89,6 +90,17 @@ export default {
         fromdate: null,
         todate: null
       }),
+      tenantFormDialogConfig: {
+        buttonStyle: {
+          block: true,
+          class: "title font-weight-bold ma-2",
+          text: "Add Tenant",
+          icon: "mdi-plus",
+          isIcon: false,
+          color: "primary",
+          evalation : "5",
+        },
+      },
       tenantFilterDialogConfig: {
         buttonStyle: {
           block: true,
@@ -109,7 +121,6 @@ export default {
         {
           text: "Name",
           align: "start",
-          sortable: false,
           value: "name"
         },
         { text: "Ic No", value: "icno" },
@@ -144,7 +155,8 @@ export default {
     }
   },
   created() {
-    this.$vuetify.theme.dark = true;
+    var styles = this.helpers.managementStyles();
+    console.log(styles);
   },
   mounted() {
     this.getTenants();

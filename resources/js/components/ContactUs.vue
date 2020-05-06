@@ -3,7 +3,10 @@
     <div class="py-5"></div>
 
     <v-container>
-      <h2 class="display-2 font-weight-bold mb-3 text-uppercase text-center">Contact Us</h2>
+      <div
+        :class="$vuetify.breakpoint.mdAndUp ? 'display-2' : 'headline' "
+        class="display-2 font-weight-bold mb-3 text-uppercase text-center"
+      >Contact Us</div>
 
       <v-responsive class="mx-auto mb-5" width="56">
         <v-divider class="mb-1 white"></v-divider>
@@ -17,15 +20,24 @@
             <v-card class="mx-4" flat color="#333333">
               <v-list-item three-line>
                 <v-list-item-content>
-                  <v-list-item-subtitle class="d-inline-block headline ma-2">
+                  <v-list-item-subtitle
+                    :class="$vuetify.breakpoint.mdAndUp ? 'headline' : 'subtitle-1' "
+                    class="d-inline-block ma-2"
+                  >
                     <v-icon class="mr-2">mdi-google-maps</v-icon>
                     {{address}}
                   </v-list-item-subtitle>
-                  <v-list-item-subtitle class="d-inline-block subtitle-1 ma-2">
+                  <v-list-item-subtitle
+                    :class="$vuetify.breakpoint.mdAndUp ? 'subtitle-1' : 'body-2' "
+                    class="d-inline-block ma-2"
+                  >
                     <v-icon class="mr-2">mdi-email</v-icon>
                     {{email}}
                   </v-list-item-subtitle>
-                  <v-list-item-subtitle class="d-inline-block subtitle-1 ma-2">
+                  <v-list-item-subtitle
+                    :class="$vuetify.breakpoint.mdAndUp ? 'subtitle-1' : 'body-2' "
+                    class="d-inline-block ma-2"
+                  >
                     <v-icon class="mr-2">mdi-phone</v-icon>
                     {{phone}}
                   </v-list-item-subtitle>
@@ -37,9 +49,13 @@
             <v-card class="mx-4" flat color="#333333">
               <v-list-item three-line>
                 <v-list-item-content>
-                  <v-list-item-title class="d-inline-block headline ma-4">Opening Hours :</v-list-item-title>
+                  <v-list-item-title
+                    :class="$vuetify.breakpoint.mdAndUp ? 'headline' : 'subtitle-2' "
+                    class="d-inline-block  ma-4"
+                  >Opening Hours :</v-list-item-title>
                   <v-list-item-subtitle
-                    class="d-inline-block subtitle-1 ma-2"
+                    :class="$vuetify.breakpoint.mdAndUp ? 'subtitle-1' : 'body-2' "
+                    class="d-inline-block  ma-2"
                     v-for="(item, i) in openingHours"
                     :key="i"
                   >
@@ -54,7 +70,10 @@
             <v-card class="mx-4" flat color="#333333">
               <v-list-item three-line>
                 <v-list-item-content>
-                  <v-list-item-title class="d-inline-block title text-center">Contact</v-list-item-title>
+                  <v-list-item-title
+                    :class="$vuetify.breakpoint.mdAndUp ? 'title' : 'body-2' "
+                    class="d-inline-block  text-center"
+                  >Contact</v-list-item-title>
                   <v-list-item-subtitle>
                     <v-text-field
                       :maxlength="300"

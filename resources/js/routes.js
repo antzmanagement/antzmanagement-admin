@@ -41,7 +41,7 @@ export const routes = [
     { 
         path:'/profile',
         component:ProfilePage,
-        name : 'profile',
+        name : 'profile ',
     },
     { 
         path:'/management',

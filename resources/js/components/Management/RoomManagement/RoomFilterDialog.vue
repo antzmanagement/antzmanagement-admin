@@ -123,7 +123,6 @@ export default {
     }
   },
   mounted() {
-    this.$vuetify.theme.dark = true;
 
     this.showLoadingAction();
     this.getRoomTypesAction({ pageNumber: -1, pageSize: -1 }).then(data => {

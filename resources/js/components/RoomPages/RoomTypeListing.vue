@@ -11,9 +11,9 @@
       </v-col>
     </v-row>
     <v-row justify="center" class="ma-4" v-for="(roomType,x) in roomTypes" :key="x">
-      <v-col cols="8">
+      <v-col cols="12" md="8">
         <!-- <v-btn @click="test()">TEst</v-btn> -->
-        <v-card class="mx-auto" outlined>
+        <v-card class="mx-auto" raised>
           <v-container>
             <v-row justify="center" no-gutters>
               <v-col cols="12">
@@ -26,13 +26,13 @@
                   ref="slider"
                 >
                   <v-carousel-item v-for="(img, y) in roomType.images" :key="y" class="pb-12">
-                    <v-img contain :aspect-ratio="513/300" :src="img.imgpath"></v-img>
+                    <v-img contain height="100%" width="100%"  :src="img.imgpath"></v-img>
                   </v-carousel-item>
                 </v-carousel>
               </v-col>
             </v-row>
 
-            <v-row no-gutters class="ma-2">
+            <v-row no-gutters class="ma-2" v-show="$vuetify.breakpoint.mdAndUp">
               <v-col
                 cols="1"
                 v-for="(img, z) in roomType.images"

@@ -1,7 +1,7 @@
 const helpers = {
-    toDouble(data){
+    toDouble(data) {
         var double = parseFloat(data).toFixed(2);
-        if(double == "NaN"){
+        if (double == "NaN") {
             double = 0;
         }
         return double;
@@ -25,7 +25,7 @@ const helpers = {
         return false;
     },
     isEmpty(value) {
-        if (value == null || value == 'undefined' || value == ""  || value == "N/A" || value == []) {
+        if (value == null || value == 'undefined' || value == "" || value == "N/A" || value == []) {
             return true;
         }
 
@@ -60,7 +60,25 @@ const helpers = {
 
 
     },
-    
+
+    //This data centralization is only valid for static constant data.
+    //If you are consider for using dynamic variable data can be modified by web. Please use vuex instead =)
+    managementStyles() {
+        const styles = {
+            backgroundClass: 'grey lighten-2',
+            backgroundColor: '#EEEEEE',
+            formCardClass: 'grey lighten-5',
+            formCardColor: '#FAFAFA',
+            dividerColor: '#BDBDBD',
+            mainButtonColor: 'blue lighten-3',
+            titleClass : 'font-weight-black display-1 d-inline-block',
+
+        }
+
+        return styles;
+
+    },
+
 };
 
 

@@ -1,15 +1,18 @@
 <template>
   <v-app>
-    <v-container>
-      <navbar></navbar>
-      <v-content>
+    <navbar></navbar>
+    <v-content :class="helpers.managementStyles().backgroundClass">
+      <v-container class="pa-5">
         <loading></loading>
-        <v-card class="mx-2" outlined color="#1b262c">
-          <v-card-title class="headline">Tenant - {{data.uid}}</v-card-title>
-          <v-divider class="mx-3" color="#ffffff"></v-divider>
+        <v-card class="ma-2" :color="helpers.managementStyles().formCardColor" raised>
+          <v-card-title
+            class="ma-2"
+            :class="helpers.managementStyles().titleClass"
+          >Tenant - {{data.uid}}</v-card-title>
+          <v-divider class="mx-3" :color="helpers.managementStyles().dividerColor"></v-divider>
           <v-container>
-            <v-row>
-              <v-col cols="6" class="m-3">
+            <v-row justify="start" align="center" class="pa-2">
+              <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Name</label>
                   <div class="form-control-plaintext">
@@ -17,7 +20,7 @@
                   </div>
                 </div>
               </v-col>
-              <v-col cols="6" class="m-3">
+              <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">IC-NO</label>
                   <div class="form-control-plaintext">
@@ -25,9 +28,7 @@
                   </div>
                 </div>
               </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="4" class="m-3">
+              <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Phone</label>
                   <div class="form-control-plaintext">
@@ -35,7 +36,7 @@
                   </div>
                 </div>
               </v-col>
-              <v-col cols="4" class="m-3">
+              <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Email</label>
                   <div class="form-control-plaintext">
@@ -45,17 +46,17 @@
               </v-col>
             </v-row>
 
-            <v-divider class="mx-3" color="#ffffff"></v-divider>
+            <v-divider class="mx-3" :color="helpers.managementStyles().dividerColor"></v-divider>
 
-            <v-row>
-              <v-col cols="12" class="m-3">
+            <v-row justify="start" align="center" class="pa-2">
+              <v-col cols="12">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Room</label>
                   <div class="form-control-plaintext">
                     <v-chip
-                      class="ma-2"
                       v-for="room in data.rentrooms"
                       :key="room.uid"
+                      class="mr-2 my-2"
                       @click="showRoom(room)"
                     >
                       <h4 class="text-center ma-2">{{room.name | capitalizeFirstLetter }}</h4>
@@ -67,27 +68,32 @@
 
             <v-row>
               <v-col col="12">
-                <v-divider class="mx-3" color="#ffffff"></v-divider>
+                <v-divider class="mx-3" :color="helpers.managementStyles().dividerColor"></v-divider>
               </v-col>
             </v-row>
-            <v-row>
-              <v-spacer></v-spacer>
-              <change-password-dialog :uid="this.$route.params.uid" @updated="refreshPage()"></change-password-dialog>
-              <tenant-form
-                :editMode="true"
-                :buttonStyle="editButtonStyle"
-                :uid="this.$route.params.uid"
-                @updated="refreshPage()"
-              ></tenant-form>
-              <confirm-dialog
-                :activatorStyle="deleteButtonConfig.activatorStyle"
-                @confirmed="deleteTenant($event,data.uid)"
-              ></confirm-dialog>
+            <v-row class="pa-2" justify="end" align="center">
+              <v-col cols="auto">
+                <change-password-dialog :uid="this.$route.params.uid" @updated="refreshPage()"></change-password-dialog>
+              </v-col>
+              <v-col cols="auto">
+                <tenant-form
+                  :editMode="true"
+                  :buttonStyle="editButtonStyle"
+                  :uid="this.$route.params.uid"
+                  @updated="refreshPage()"
+                ></tenant-form>
+              </v-col>
+              <v-col cols="auto">
+                <confirm-dialog
+                  :activatorStyle="deleteButtonConfig.activatorStyle"
+                  @confirmed="deleteTenant($event,data.uid)"
+                ></confirm-dialog>
+              </v-col>
             </v-row>
           </v-container>
         </v-card>
-      </v-content>
-    </v-container>
+      </v-container>
+    </v-content>
   </v-app>
 </template>
 
@@ -126,8 +132,6 @@ export default {
     }
   },
   created() {
-    this.$vuetify.theme.dark = true;
-
     this.$Progress.start();
     this.showLoadingAction();
     this.getTenantAction({ uid: this.$route.params.uid })

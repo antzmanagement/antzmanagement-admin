@@ -23,3 +23,4 @@ Vue.component('room-filter-dialog', require('./components/Management/RoomManagem
 Vue.component('room-type-sliders', require('./components/RoomPages/RoomTypeSliders.vue').default);
 Vue.component('room-details', require('./components/RoomPages/RoomDetails.vue').default);
 Vue.component('room-type-listing', require('./components/RoomPages/RoomTypeListing.vue').default);
+

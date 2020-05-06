@@ -28,7 +28,7 @@
         </v-sheet>
 
         <v-card
-          class="mx-auto  black"
+          class="mx-auto black"
           width="100%"
           height="100%"
           v-show="$vuetify.breakpoint.smAndDown"
@@ -38,17 +38,17 @@
             height="200px"
             contain
             :aspect-ratio="4/3"
-            :src="roomType.imgpath"
+            :src="roomType.images[0].imgpath"
           ></v-img>
 
-          <v-card-subtitle class="ma-2 headline">{{roomType.name}} - RM {{roomType.price}}</v-card-subtitle>
+          <v-card-subtitle
+            class="ma-2 headline"
+          >{{roomType.name | capitalizeFirstLetter}} - RM {{roomType.price | toDouble}}</v-card-subtitle>
 
           <v-card-text class="ma-2">{{roomType.desc}}</v-card-text>
 
           <v-card-actions class="ma-2">
-            <v-btn text>Share</v-btn>
-
-            <v-btn text>Explore</v-btn>
+            <v-btn text :to="{ name : 'roompages'}">View More</v-btn>
           </v-card-actions>
         </v-card>
       </v-carousel-item>
@@ -62,8 +62,7 @@ export default {
   props: {
     roomTypes: {
       type: Array,
-      default: () => [
-      ]
+      default: () => []
     }
   },
   data: () => ({}),

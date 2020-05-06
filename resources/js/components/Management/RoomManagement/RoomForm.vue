@@ -13,6 +13,7 @@
         tile
         :color="buttonStyle.color"
         :block="buttonStyle.block"
+        :elevation="buttonStyle.elevation"
         v-on="on"
         :disabled="isLoading"
       >
@@ -62,7 +63,7 @@
                 </template>
               </v-autocomplete>
             </v-col>
-            <v-col cols="6">
+            <v-col cols="12" md="6">
               <v-text-field
                 label="Unit No*"
                 required
@@ -73,7 +74,7 @@
                 :error-messages="nameErrors"
               ></v-text-field>
             </v-col>
-            <v-col cols="6">
+            <v-col cols="12" md="6">
               <v-text-field
                 label="Price"
                 type="number"
@@ -97,7 +98,7 @@
                 :error-messages="addressErrors"
               ></v-text-field>
             </v-col>
-            <v-col cols="6">
+            <v-col cols="12" md="6">
               <v-text-field
                 label="State"
                 required
@@ -108,7 +109,7 @@
                 :error-messages="stateErrors"
               ></v-text-field>
             </v-col>
-            <v-col cols="6">
+            <v-col cols="12" md="6">
               <v-text-field
                 label="Postcode"
                 v-model="data.postcode"
@@ -118,7 +119,7 @@
                 :error-messages="postcodeErrors"
               ></v-text-field>
             </v-col>
-            <v-col cols="6">
+            <v-col cols="12" md="6">
               <v-text-field
                 label="City"
                 required
@@ -129,7 +130,7 @@
                 :error-messages="cityErrors"
               ></v-text-field>
             </v-col>
-            <v-col cols="6">
+            <v-col cols="12" md="6">
               <v-text-field
                 label="Country"
                 required
@@ -173,7 +174,8 @@ export default {
         color: "primary",
         class: "ma-1",
         text: "Add Room",
-        icon: ""
+        icon: "",
+        elevation : 5,
       })
     },
     dialogStyle: {
@@ -334,7 +336,6 @@ export default {
     }
   },
   mounted() {
-    this.$vuetify.theme.dark = true;
     console.log("form created");
 
     this.showLoadingAction();

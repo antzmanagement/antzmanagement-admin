@@ -5,8 +5,8 @@
     <v-content>
       <section id="services" class="grey lighten-3">
         <v-container>
-          <v-row no-gutters class="ma-12" >
-            <v-col cols="6">
+          <v-row no-gutters :class="$vuetify.breakpoint.mdAndUp ? 'ma-12' :null ">
+            <v-col cols="12" md="6">
               <v-card
                 outlined
                 tile
@@ -15,25 +15,33 @@
                 height="100%"
               >
                 <v-container>
-                  <v-row no-gutters justify="start" align="center" class="ma-5">
+                  <v-row
+                    no-gutters
+                    justify="start"
+                    align="center"
+                    :class="$vuetify.breakpoint.mdAndUp ? 'ma-5' : 'ma-1' "
+                  >
                     <v-col cols="2">
                       <div
-                        class="d-inline-block display-3 text-left font-weight-black text--secondary"
+                        :class="$vuetify.breakpoint.mdAndUp ? 'display-3' : 'display-1' "
+                        class="d-inline-block text-left font-weight-black text--secondary"
                       >{{title}}</div>
                     </v-col>
                   </v-row>
-                  <v-row no-gutters justify="start" align="center" class="ma-5">
+                  <v-row no-gutters justify="start" align="center" 
+                    :class="$vuetify.breakpoint.mdAndUp ? 'ma-5' : 'ma-1' ">
                     <v-col cols="12">
                       <div
-                        class="d-inline-block headline text-left font-weight-thin text-white"
+                        :class="$vuetify.breakpoint.mdAndUp ? 'headline' : 'caption' "
+                        class="d-inline-block text-left font-weight-thin text-white"
                       >{{slogan}}</div>
                     </v-col>
                   </v-row>
-                  <v-divider class="ma-5"></v-divider>
+                  <v-divider :class="$vuetify.breakpoint.mdAndUp ? 'ma-5' : 'ma-1' "></v-divider>
                 </v-container>
               </v-card>
             </v-col>
-            <v-col cols="6">
+            <v-col cols="12" md="6">
               <v-card
                 outlined
                 tile
@@ -41,18 +49,18 @@
                 color="#D6D6D6"
                 height="100%"
               >
-                <div class="d-inline-block headline text-left font-weight-light ma-5">{{desc}}</div>
+                <div :class="$vuetify.breakpoint.mdAndUp ? 'headline' : 'body-1' " class="d-inline-block text-left font-weight-light ma-5">{{desc}}</div>
               </v-card>
             </v-col>
           </v-row>
 
-          <v-row class="ma-12" v-for="(service, x) in services" :key="x" >
-            <v-col cols="4" :order="x % 2 == 0 ? '1' : '2'">
+          <v-row class="ma-12" v-for="(service, x) in services" :key="x">
+            <v-col cols="12" md="4" :order="x % 2 == 0  && $vuetify.breakpoint.mdAndUp ? '1' : '2'">
               <v-card flat tile height="103%">
                 <v-img :src="service.images[0]" height="100%"></v-img>
               </v-card>
             </v-col>
-            <v-col cols="4" :order="x % 2 == 0 ? '2' : '3'">
+            <v-col cols="12" md="4" :order="x % 2 == 0  && $vuetify.breakpoint.mdAndUp ? '2' : '3'">
               <v-card flat tile class="mb-3" width="100%" height="50%">
                 <v-img :src="service.images[1]" height="100%"></v-img>
               </v-card>
@@ -60,16 +68,19 @@
                 <v-img :src="service.images[2]" height="100%"></v-img>
               </v-card>
             </v-col>
-            <v-col cols="4" :order="x % 2 == 0 ? '3' : '1'">
+            <v-col cols="12" md="4" :order="x % 2 == 0  && $vuetify.breakpoint.mdAndUp ? '3' : '1'">
               <v-card
                 outlined
                 tile
                 color="#80A6AD"
                 height="30%"
-                class="mb-3 d-flex justify-center align-center"
+                class="mb-3 d-flex justify-center align-center flex-wrap"
                 width="100%"
               >
-                <div class="d-inline-block display-1 text-center font-weight-black text--secondary">{{service.text}}</div>
+                <div
+                :class="$vuetify.breakpoint.mdAndUp ? 'display-1' : 'title' "
+                  class="d-inline-block text-center font-weight-black text--secondary"
+                >{{service.text}}</div>
               </v-card>
               <v-card flat tile class="mt-3" width="100%" height="70%">
                 <v-img :src="service.images[3]" height="100%"></v-img>
@@ -154,7 +165,7 @@ export default {
           "https://res.cloudinary.com/ipoh-drum/image/upload/v1588147829/What-Is-Human-Resource-Management-HERO_taeifj.jpg",
           "https://res.cloudinary.com/ipoh-drum/image/upload/v1588147855/RE2uCzt_ovbspa.jpg"
         ]
-      },
+      }
     ]
   }),
   methods: {}

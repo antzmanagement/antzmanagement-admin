@@ -175,7 +175,6 @@ export default {
     },
   },
   created() {
-    this.$vuetify.theme.dark = true;
     if (this.editMode) {
       this.showLoadingAction();
       this.getRoomTypeAction({ uid: this.uid })

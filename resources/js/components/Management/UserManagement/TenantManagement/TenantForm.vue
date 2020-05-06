@@ -8,12 +8,13 @@
         :block="buttonStyle.block"
         v-on="on"
         :disabled="isLoading"
+        :elevation="buttonStyle.elevation"
       >
         <v-icon left>{{buttonStyle.icon}}</v-icon>
         {{buttonStyle.text}}
       </v-btn>
     </template>
-    <v-card>
+    <v-card >
       <v-toolbar dark color="primary">
         <v-btn icon dark @click="dialog = false">
           <v-icon>mdi-close</v-icon>
@@ -33,7 +34,7 @@
       <v-card-text>
         <v-container>
           <v-row>
-            <v-col cols="6">
+            <v-col cols="12" md="6">
               <v-text-field
                 label="Name*"
                 required
@@ -44,7 +45,7 @@
                 :error-messages="nameErrors"
               ></v-text-field>
             </v-col>
-            <v-col cols="6">
+            <v-col cols="12" md="6">
               <v-text-field
                 label="IC-No*"
                 hint="Example of IC-No : 1234-56-7890 (With Dash)"
@@ -57,7 +58,7 @@
                 :error-messages="icnoErrors"
               ></v-text-field>
             </v-col>
-            <v-col cols="6">
+            <v-col cols="12" md="6">
               <v-text-field
                 label="Phone No"
                 hint="Example of Phone No : 014-12019231 (With Dash)"
@@ -109,7 +110,7 @@
               ></v-text-field>
             </v-col>
 
-            <v-col cols="6">
+            <v-col cols="12" md="6">
               <v-autocomplete
                 v-model="data.rooms"
                 :items="rooms"
@@ -163,7 +164,8 @@ export default {
         color: "primary",
         class: "ma-1",
         text: "Add Tenant",
-        icon: ""
+        icon: "mdi-plus",
+        elevation : 5,
       })
     }
   },
@@ -339,7 +341,6 @@ export default {
     }
   },
   created() {
-    this.$vuetify.theme.dark = true;
 
     this.showLoadingAction();
     this.getRoomsAction({

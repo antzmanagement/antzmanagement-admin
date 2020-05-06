@@ -83,7 +83,7 @@ export default {
       type: Object,
       default: () => ({
         block: true,
-        color: "primary",
+        color: 'primary',
         class: "ma-1",
         text: "Tenant Filter",
         icon: "",
@@ -114,7 +114,7 @@ export default {
   computed: {
     isLoading() {
       return this.$store.getters.isLoading;
-    }
+    },
   },
   watch: {
     dialog: function(val) {
@@ -124,7 +124,6 @@ export default {
     }
   },
   mounted() {
-    this.$vuetify.theme.dark = true;
 
     this.showLoadingAction();
     this.getRoomTypesAction({ pageNumber: -1, pageSize: -1 }).then(data => {

@@ -1,31 +1,32 @@
 <template>
   <v-app>
-    <v-container>
-      <navbar></navbar>
-      <v-content>
+    <navbar></navbar>
+    <v-content :class="helpers.managementStyles().backgroundClass">
+      <v-container>
         <loading></loading>
-        <v-card class="mx-2" outlined color="#1b262c">
-          <v-card-title class="headline">Room - {{data.uid}}</v-card-title>
-          <v-divider class="mx-3" color="#ffffff"></v-divider>
+        <v-card class="ma-2" :color="helpers.managementStyles().formCardColor" raised>
+          <v-card-title
+            class="ma-2"
+            :class="helpers.managementStyles().titleClass"
+          >Room - {{data.uid}}</v-card-title>
+          <v-divider class="mx-3" :color="helpers.managementStyles().dividerColor"></v-divider>
           <v-container>
-            <v-row>
-              <v-col cols="12" class="m-3">
+            <v-row justify="start" align="center" class="pa-2">
+              <v-col cols="12">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">RoomType</label>
-                  <div class="form-control-plaintext ">
-                    <v-chip
-                      class="ma-2"
-                      v-for="roomType in data.room_types"
-                      :key="roomType.uid"
-                    ><h4 class="text-center ma-2">{{roomType.name | capitalizeFirstLetter }}</h4></v-chip>
+                  <div class="form-control-plaintext">
+                    <v-chip class="ma-2" v-for="roomType in data.room_types" :key="roomType.uid">
+                      <h4 class="text-center ma-2">{{roomType.name | capitalizeFirstLetter }}</h4>
+                    </v-chip>
                   </div>
                 </div>
               </v-col>
             </v-row>
-            
-          <v-divider class="mx-3" color="#ffffff"></v-divider>
-            <v-row>
-              <v-col cols="6" class="m-3">
+
+            <v-divider class="mx-3" color="#ffffff"></v-divider>
+            <v-row justify="start" align="center" class="pa-2">
+              <v-col cols="12" md="6">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Name</label>
                   <div class="form-control-plaintext">
@@ -33,17 +34,16 @@
                   </div>
                 </div>
               </v-col>
-              <v-col cols="4" class="m-3">
+              <v-col cols="12" md="6">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Price</label>
                   <div class="form-control-plaintext">
-                    <h4>{{data.price}}</h4>
+                    <h4>RM {{data.price}}</h4>
                   </div>
                 </div>
               </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="12" class="m-3">
+
+              <v-col cols="12">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Address</label>
                   <div class="form-control-plaintext">
@@ -51,9 +51,8 @@
                   </div>
                 </div>
               </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="4" class="m-3">
+
+              <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Postcode</label>
                   <div class="form-control-plaintext">
@@ -61,7 +60,7 @@
                   </div>
                 </div>
               </v-col>
-              <v-col cols="4" class="m-3">
+              <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">State</label>
                   <div class="form-control-plaintext">
@@ -69,7 +68,7 @@
                   </div>
                 </div>
               </v-col>
-              <v-col cols="4" class="m-3">
+              <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">City</label>
                   <div class="form-control-plaintext">
@@ -77,7 +76,7 @@
                   </div>
                 </div>
               </v-col>
-              <v-col cols="4" class="m-3">
+              <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Country</label>
                   <div class="form-control-plaintext">
@@ -86,28 +85,28 @@
                 </div>
               </v-col>
             </v-row>
-            <v-row>
-              <v-col col="12">
-                <v-divider class="mx-3" color="#ffffff"></v-divider>
+
+            <v-divider class="mx-3" color="#ffffff"></v-divider>
+            <v-row class="pa-2" justify="end" align="center">
+              <v-col cols="auto">
+                <room-form
+                  :editMode="true"
+                  :buttonStyle="editButtonStyle"
+                  :uid="this.$route.params.uid"
+                  @updated="refreshPage()"
+                ></room-form>
               </v-col>
-            </v-row>
-            <v-row>
-              <v-spacer></v-spacer>
-              <room-form
-                :editMode="true"
-                :buttonStyle="editButtonStyle"
-                :uid="this.$route.params.uid"
-                @updated="refreshPage()"
-              ></room-form>
-              <confirm-dialog
-                :activatorStyle="deleteButtonConfig.buttonStyle"
-                @confirmed="deleteRoom($event,data.uid)"
-              ></confirm-dialog>
+              <v-col cols="auto">
+                <confirm-dialog
+                  :activatorStyle="deleteButtonConfig.buttonStyle"
+                  @confirmed="deleteRoom($event,data.uid)"
+                ></confirm-dialog>
+              </v-col>
             </v-row>
           </v-container>
         </v-card>
-      </v-content>
-    </v-container>
+      </v-container>
+    </v-content>
   </v-app>
 </template>
 
@@ -150,8 +149,6 @@ export default {
     }
   },
   created() {
-    this.$vuetify.theme.dark = true;
-
     this.$Progress.start();
     this.showLoadingAction();
     this.getRoomAction({ uid: this.$route.params.uid })

@@ -1,18 +1,22 @@
 <template>
   <v-app>
     <navbar></navbar>
-    <v-content>
+    <v-content :class="helpers.managementStyles().backgroundClass">
       <v-container class="fill-height" fluid>
         <loading></loading>
         <v-row justify="center" align="center" class="ma-3">
           <v-col cols="12">
-            <room-form :editMode="false" @created="showRoom($event)"></room-form>
+            <room-form
+              :editMode="false"
+              :buttonStyle="roomFormDialogConfig.buttonStyle"
+              @created="showRoom($event)"
+            ></room-form>
           </v-col>
         </v-row>
 
         <v-row justify="center" align="center" class="mx-3">
           <v-col cols="12">
-            <v-card>
+            <v-card raised>
               <v-card-subtitle v-show="!keywordEmpty">
                 Keyword :
                 <v-chip class="mx-2">{{ roomFilterGroup.keyword }}</v-chip>
@@ -39,37 +43,37 @@
         </v-row>
         <v-row justify="center" align="center" class="ma-3">
           <v-col cols="12">
-            <v-data-table
-              :headers="headers"
-              :items="data"
-              :options.sync="options"
-              :server-items-length="totalDataLength"
-              :loading="loading"
-              class="elevation-1"
-            >
-              <template v-slot:top>
-                <v-toolbar flat>
-                  <room-filter-dialog
-                    :buttonStyle="roomFilterDialogConfig.buttonStyle"
-                    :dialogStyle="roomFilterDialogConfig.dialogStyle"
-                    @submitFilter="initRoomFilter($event)"
-                  ></room-filter-dialog>
-                </v-toolbar>
-              </template>
-              <template v-slot:item="props">
-                <tr @click="showRoom(props.item)">
-                  <td>{{props.item.name}}</td>
-                  <td>{{props.item.price}}</td>
-                </tr>
-              </template>
-            </v-data-table>
+            <v-card class="pa-8" raised>
+              <v-data-table
+                :headers="headers"
+                :items="data"
+                :options.sync="options"
+                :server-items-length="totalDataLength"
+                :loading="loading"
+              >
+                <template v-slot:top>
+                  <v-toolbar flat class="mb-5">
+                    <room-filter-dialog
+                      :buttonStyle="roomFilterDialogConfig.buttonStyle"
+                      :dialogStyle="roomFilterDialogConfig.dialogStyle"
+                      @submitFilter="initRoomFilter($event)"
+                    ></room-filter-dialog>
+                  </v-toolbar>
+                </template>
+                <template v-slot:item="props">
+                  <tr @click="showRoom(props.item)">
+                    <td>{{props.item.name}}</td>
+                    <td>{{props.item.price}}</td>
+                  </tr>
+                </template>
+              </v-data-table>
+            </v-card>
           </v-col>
         </v-row>
       </v-container>
     </v-content>
   </v-app>
 </template>
-
 
 <script>
 import { mapActions } from "vuex";
@@ -102,6 +106,18 @@ export default {
           fullscreen: false,
           hideOverlay: true
         }
+      },
+      
+      roomFormDialogConfig: {
+        buttonStyle: {
+          block: true,
+          class: "title font-weight-bold ma-2",
+          text: "Add Room",
+          icon: "mdi-plus",
+          isIcon: false,
+          color: "primary",
+          evalation : "5",
+        },
       },
       headers: [
         {
@@ -139,9 +155,7 @@ export default {
       return this.helpers.isEmpty(this.roomFilterGroup.selectedRoomTypes);
     }
   },
-  created() {
-    this.$vuetify.theme.dark = true;
-  },
+  created() {},
   mounted() {
     this.getRooms();
   },

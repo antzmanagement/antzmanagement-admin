@@ -36,6 +36,28 @@ import { helpers } from "./helpers";
 import VueSpinners from 'vue-spinners'
 import VueAxios from "vue-axios";
 import axios from "axios";
+import VueApexCharts from 'vue-apexcharts'
+import JsonExcel from 'vue-json-excel'
+import VueHtmlToPaper from 'vue-html-to-paper';
+
+const options = {
+  name: '_blank',
+  specs: [
+    'fullscreen=yes',
+    'titlebar=yes',
+    'scrollbars=yes'
+  ],
+  styles: [
+    'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css',
+    'https://unpkg.com/kidlat-css/css/kidlat.css'
+  ]
+}
+
+Vue.use(VueHtmlToPaper, options);
+ 
+Vue.component('download-excel', JsonExcel)
+Vue.use(VueApexCharts)
+Vue.component('apexchart', VueApexCharts)
 
 Vue.use(VueSpinners)
 Vue.use(VueRouter)
