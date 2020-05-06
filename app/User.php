@@ -100,5 +100,11 @@ class User extends Authenticatable
         return $this->belongsToMany('App\Room','tenants_rooms', 'user_id', 'room_id')->withPivot('remark','status','created_at','updated_at');
     }
 
+    
+    public function ownrooms()
+    {
+        return $this->belongsToMany('App\Room','owners_rooms', 'user_id', 'room_id')->withPivot('remark','status','created_at','updated_at');
+    }
+
 
 }

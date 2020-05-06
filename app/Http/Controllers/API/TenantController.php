@@ -57,7 +57,7 @@ class TenantController extends Controller
         }
     }
 
-    
+
     public function filter(Request $request)
     {
         error_log($this->controllerName . 'Retrieving list of filtered tenants.');
@@ -193,7 +193,16 @@ class TenantController extends Controller
             'name' => 'required|string|max:300',
             'icno' => 'required|string|max:14',
             'tel1' => 'nullable|string|max:20',
-            'email' => 'required|string|email|max:191|unique:users',
+            'email' =>
+            [
+                'required',
+                'string',
+                'email',
+                'max:191',
+                Rule::unique('users')->where(function ($query) {
+                    $query->where('status', true);
+                }),
+            ],
             'password' => 'required|string|min:6|confirmed',
         ]);
         error_log($this->controllerName . 'Creating tenant.');
@@ -206,7 +215,7 @@ class TenantController extends Controller
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
-        $tenant = $this->createUser($params);
+        $tenant = $this->createTenant($params);
         if ($this->isEmpty($tenant)) {
             DB::rollBack();
             return $this->errorResponse();
@@ -337,7 +346,17 @@ class TenantController extends Controller
         error_log($this->controllerName . 'Updating tenant of uid: ' . $uid);
         $tenant = $this->getTenant($uid);
         $this->validate($request, [
-            'email' => 'required|string|max:191|unique:users,email,' . $tenant->id,
+            'email' =>
+            [
+                'required',
+                'string',
+                'email',
+                'max:191',
+                Rule::unique('users')->where(function ($query) use ($tenant) {
+                    $query->where('status', true);
+                    $query->where('id', '!=', $tenant->id);
+                }),
+            ],
             'name' => 'required|string|max:191',
         ]);
         if ($this->isEmpty($tenant)) {
@@ -352,7 +371,7 @@ class TenantController extends Controller
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
-        $tenant = $this->updateUser($tenant, $params);
+        $tenant = $this->updateTenant($tenant, $params);
         if ($this->isEmpty($tenant)) {
             DB::rollBack();
             return $this->errorResponse();
@@ -379,7 +398,7 @@ class TenantController extends Controller
                     }
                 }
             }
-            
+
             //Delete Room
             foreach ($origrooms as $origroom) {
                 if (!$rooms->contains('id', $origroom->id)) {
@@ -409,20 +428,8 @@ class TenantController extends Controller
             DB::rollBack();
             return $this->notFoundResponse('Tenant');
         }
-        $tenant = $this->deleteUser($tenant);
+        $tenant = $this->deleteTenant($tenant);
         if ($this->isEmpty($tenant)) {
-            DB::rollBack();
-            return $this->errorResponse();
-        }
-
-        $userType = UserType::where('name', 'tenant')->first();
-        if ($this->isEmpty($userType)) {
-            $data['data'] = null;
-            return $this->notFoundResponse('UserType');
-        }
-        try {
-            $userType->users()->updateExistingPivot($tenant->id, ['status' => false]);
-        } catch (Exception $e) {
             DB::rollBack();
             return $this->errorResponse();
         }
@@ -430,136 +437,5 @@ class TenantController extends Controller
 
         DB::commit();
         return $this->successResponse('Tenant', $tenant, 'delete');
-    }
-
-
-
-    /**
-     * @OA\Post(
-     *   tags={"TenantControllerService"},
-     *   summary="Authenticates current request's tenant.",
-     *     operationId="authenticateCurrentRequestsTenant",
-     * path="/api/authentication",
-     *   @OA\Response(
-     *     response=200,
-     *     description="Tenant is already authenticated."
-     *   ),
-     *   @OA\Response(
-     *     response="default",
-     *     description="Tenant is not authenticated."
-     *   )
-     * )
-     */
-    public function authentication(Request $request)
-    {
-        // TODO Authenticate currently logged in tenant
-        error_log($this->controllerName . 'Authenticating tenant.');
-        return response()->json($request->tenant(), 200);
-    }
-
-    /**
-     * @OA\Post(
-     *   tags={"TenantControllerService"},
-     *   summary="Creates a tenant without needing authorization.",
-     *     operationId="createTenantWithoutAuthorization",
-     * path="/api/register",
-     *   @OA\Parameter(
-     *     name="name",
-     *     in="query",
-     *     description="Tenantname.",
-     *     required=true,
-     *     @OA\Schema(type="string")
-     *   ),
-     *   @OA\Parameter(
-     *     name="email",
-     *     in="query",
-     *     description="Email.",
-     *     required=true,
-     *     @OA\Schema(type="string")
-     *   ),
-     *   @OA\Parameter(
-     *     name="password",
-     *     in="query",
-     *     description="Password.",
-     *     required=true,
-     *     @OA\Schema(type="string")
-     *   ),
-     *   @OA\Parameter(
-     *     name="password_confirmation",
-     *     in="query",
-     *     description="Confirm Password.",
-     *     required=true,
-     *     @OA\Schema(type="string")
-     *   ),
-     *   @OA\Response(
-     *     response=200,
-     *     description="Tenant has been successfully created."
-     *   ),
-     *   @OA\Response(
-     *     response="default",
-     *     description="Tenant is not created."
-     *   )
-     * )
-     */
-    public function register(Request $request)
-    {
-        // TODO Registers tenants without needing authorization
-        error_log($this->controllerName . 'Registering tenant.');
-        // api/register (POST)
-        $this->validate($request, [
-            'name' => 'required|string|max:191',
-            'email' => 'required|string|email|max:191|unique:tenants',
-            'password' => 'required|string|min:6|confirmed',
-        ]);
-        DB::beginTransaction();
-        $tenant = new Tenant();
-        $tenant->uid = Carbon::now()->timestamp . Tenant::count();
-        $tenant->name = $request->name;
-        $tenant->email = $request->email;
-        $tenant->password = Hash::make($request->password);
-        $tenant->status = true;
-        try {
-            DB::commit();
-            $tenant->save();
-            $data['status'] = 'success';
-            $data['msg'] = $this->getCreatedSuccessMsg('Tenant Account');
-            $data['data'] = $tenant;
-            $data['code'] = 200;
-            return response()->json($data, 200);
-        } catch (Exception $e) {
-            DB::rollBack();
-            return $this->errorResponse();
-        }
-    }
-
-
-    /**
-     * @OA\Get(
-     *   tags={"TenantControllerService"},
-     *   summary="get current request's tenant role.",
-     *     operationId="getCurrentRequestTenantRole",
-     * path="/api/tenantroles",
-     *   @OA\Response(
-     *     response=200,
-     *     description="Tenant role is retrieved."
-     *   ),
-     *   @OA\Response(
-     *     response="default",
-     *     description="Tenant role is not retrieved."
-     *   )
-     * )
-     */
-    public function tenantRoles(Request $request)
-    {
-        // TODO Authenticate currently logged in tenant
-        $tenant = $this->getTenantById($request->tenant()->id);
-        if ($this->isEmpty($tenant)) {
-            DB::rollBack();
-            return $this->errorResponse();
-        }
-
-        $roles = $tenant->roles()->wherePivot('status', true)->get();
-
-        return $this->successResponse('Role', $roles, 'retrieve');
     }
 }

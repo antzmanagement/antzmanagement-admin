@@ -43,7 +43,7 @@ export default {
       {
         icon: "mdi-account-tie-outline",
         text: "Owner",
-        path: "management"
+        path: "owners"
       },
     ]
   }),

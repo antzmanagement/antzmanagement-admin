@@ -43,5 +43,20 @@ class UserTableSeeder extends Seeder
             $userType = UserType::where('name', 'tenant')->first();
             $userType->users()->syncWithoutDetaching([$user->refresh()->id]);
         }
+
+        for ($x = 0; $x < 100; $x++) {
+
+            $user = new User();
+            $user->uid = Carbon::now()->timestamp . User::count();
+            $user->name = $faker->userName;
+            $user->icno = $faker->ean13;
+            $user->tel1 = $faker->ean13;
+            $user->email =  $faker->unique()->safeEmail;
+            $user->password = Hash::make('111111');
+            $user->save();
+            
+            $userType = UserType::where('name', 'owner')->first();
+            $userType->users()->syncWithoutDetaching([$user->refresh()->id]);
+        }
     }
 }

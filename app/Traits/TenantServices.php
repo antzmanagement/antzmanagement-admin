@@ -13,15 +13,12 @@ trait TenantServices
 
     use AllServices;
 
-    //Tenant
-    private $type = "1";
-
     private function getTenants($requester)
     {
 
         $data = collect();
         //Role Based Retrieve Done in Store
-        $userType = $this->getUserTypeById($this->type);
+        $userType = $this->getUserTypeById($this->tenantType);
         $data = $data->merge($userType->users()->wherePivot('status', true)->where('users.status', true)->get());
 
         $data = $data->unique('id')->sortBy('id')->flatten(1);
@@ -79,7 +76,7 @@ trait TenantServices
     private function getTenant($uid)
     {
 
-        $userType = $this->getUserTypeById($this->type);
+        $userType = $this->getUserTypeById($this->tenantType);
         $data = $userType->users()->where('uid', $uid)->wherePivot('status', 1)->with(['rentrooms' => function ($q) {
             // Query the name field in status table
             $q->wherePivot('status', true);
@@ -94,7 +91,7 @@ trait TenantServices
 
     private function getTenantById($id)
     {
-        $userType = $this->getUserTypeById($this->type);
+        $userType = $this->getUserTypeById($this->tenantType);
         $data = $userType->users()->where('id', $id)->wherePivot('status', 1)->first();
         return $data;
     }
@@ -102,204 +99,20 @@ trait TenantServices
     private function createTenant($params)
     {
 
-        $params = $this->checkUndefinedProperty($params, $this->tenantAllCols());
-
-        $data = new User();
-        $data->uid = Carbon::now()->timestamp . User::count();
-        $data->title  = $params->title;
-        $data->desc = $params->desc;
-        $data->tenantpath = $params->tenantpath;
-        $data->tenantpublicid = $params->tenantpublicid;
-        $data->totallength = $params->totallength;
-        $data->agerestrict = false;
-        $data->like = 0;
-        $data->dislike = 0;
-        $data->view = 0;
-
-        if ($params->scope == 'private') {
-            $data->scope = $params->scope;
-        } else {
-            $data->scope = 'public';
-        }
-
-        if ($this->isEmpty($params->free)) {
-            return null;
-        } else {
-            $data->free = $params->free;
-            if ($data->free) {
-                $data->price = 0;
-                $data->disc = 0;
-                $data->discpctg = 0;
-            } else {
-                $data->price = $this->toDouble($params->price);
-                if ($this->isEmpty($params->discbyprice)) {
-                    return null;
-                } else {
-                    if ($data->discbyprice) {
-                        $data->disc = $this->toDouble($params->disc);
-                        $data->discpctg = $this->toInt($this->toDouble($data->disc / $data->price) * 100);
-                    } else {
-                        $data->discpctg = $this->toInt($params->discpctg);
-                        $data->disc = $this->toDouble($data->price * ($data->discpctg / 100));
-                    }
-                }
-            }
-        }
-
-        $channel = $this->getChannelById($params->channel_id);
-        if ($this->isEmpty($channel)) {
-            error_log('here');
-            return null;
-        }
-        $data->channel()->associate($channel);
-
-        if (!$this->saveModel($data)) {
-            return null;
-        }
-
-        return $data->refresh();
+      
+        return $this->createUser($params);
     }
 
     //Make Sure Tenant is not empty when calling this function
     private function updateTenant($data,  $params)
     {
-
-        $params = $this->checkUndefinedProperty($params, $this->tenantAllCols());
-
-        $data->title  = $params->title;
-        $data->desc = $params->desc;
-        $data->tenantpath = $params->tenantpath;
-        $data->tenantpublicid = $params->tenantpublicid;
-        $data->totallength = $params->totallength;
-        $data->agerestrict = false;
-
-        if ($params->scope == 'private') {
-            $data->scope = $params->scope;
-        } else {
-            $data->scope = 'public';
-        }
-
-        if ($this->isEmpty($params->free)) {
-            return null;
-        } else {
-            $data->free = $params->free;
-            if ($data->free) {
-                $data->price = 0;
-                $data->disc = 0;
-                $data->discpctg = 0;
-            } else {
-                $data->price = $this->toDouble($params->price);
-                if ($this->isEmpty($params->discbyprice)) {
-                    return null;
-                } else {
-                    if ($data->discbyprice) {
-                        $data->disc = $this->toDouble($params->disc);
-                        $data->discpctg = $this->toInt($this->toDouble($data->disc / $data->price) * 100);
-                    } else {
-                        $data->discpctg = $this->toInt($params->discpctg);
-                        $data->disc = $this->toDouble($data->price * ($data->discpctg / 100));
-                    }
-                }
-            }
-        }
-
-        $channel = $this->getChannelById($params->channel_id);
-        if ($this->isEmpty($channel)) {
-            error_log('here');
-            return null;
-        }
-        $data->channel()->associate($channel);
-
-        if (!$this->saveModel($data)) {
-            return null;
-        }
-
-        return $data->refresh();
+        return $this->updateUser($data, $params);
     }
 
     private function deleteTenant($data)
     {
 
-        $comments = $data->comments;
-        foreach ($comments as $comment) {
-            if (!$this->deleteComment($comment)) {
-                return null;
-            }
-        }
-
-        $data->status = false;
-        if ($this->saveModel($data)) {
-            return $data->refresh();
-        } else {
-            return null;
-        }
-
-        return $data->refresh();
-    }
-
-    public function calculateTenantPromotionPrice($data)
-    {
-        if (!$data->free) {
-            if ($data->discbyprice &&  $data->disc > 0) {
-                $data->promoprice =  $this->toDouble($data->price - $data->disc);
-                $data->promopctg =  $this->toInt($this->toDouble($data->promoprice / $data->price) * 100);
-            } else if ($data->discpctg > 0) {
-                $data->promopctg =  $this->toInt($data->discpctg);
-                $data->promoprice =  $this->toDouble($data->price - ($data->price * ($data->promopctg / 100)));
-            } else {
-                $data->promoprice = $data->price;
-                $data->promopctg = 0;
-            }
-        }
-
-        return $data;
-    }
-    private function getAllPublicTenants()
-    {
-
-        $data = User::where('status', true)->where('scope', 'public')->get();
-
-        return $data;
-    }
-
-    private function likeTenant($data)
-    {
-
-        $data->like += 1;
-        if ($this->saveModel($data)) {
-            return $data->refresh();
-        } else {
-            return null;
-        }
-
-
-        return true;
-    }
-
-    private function tenantChangeToTrailerSources($tenant)
-    {
-
-        if ($this->isEmpty($tenant)) {
-            return null;
-        }
-
-        if ($tenant->free) {
-            return null;
-        }
-
-        $trailer = $tenant->trailers()->where('status', true)->where('scope', 'public')->first();
-        if ($this->isEmpty($trailer)) {
-            return null;
-        }
-
-        $tenant->tenantpath = $trailer->tenantpath;
-        $tenant->tenantpublicid = $trailer->tenantpublicid;
-        $tenant->imgpath = $trailer->imgpath;
-        $tenant->imgpublicid = $trailer->imgpublicid;
-        $tenant->totallength = $trailer->totallength;
-        $tenant->view = $trailer->view;
-
-        return $tenant;
+        return $this->deleteUser($data);
     }
 
     // Modifying Display Data
@@ -343,32 +156,4 @@ trait TenantServices
         return ['keyword', 'roomTypes'];
     }
 
-    private function validateUserPurchasedTenant($user, $tenant)
-    {
-
-        if ($this->isEmpty($user)) {
-            return false;
-        }
-
-        if ($this->isEmpty($tenant)) {
-            return false;
-        }
-
-
-        if ($tenant->free) {
-            return true;
-        }
-
-        $purchasedtenants = $user->purchasetenants()->wherePivot('status', true)->get();
-
-        $ids = $purchasedtenants->pluck('id');
-        $ids = $ids->filter(function ($id) use ($tenant) {
-            return $id == $tenant->id;
-        });
-        if (!$this->isEmpty($ids)) {
-            return true;
-        }
-
-        return false;
-    }
 }

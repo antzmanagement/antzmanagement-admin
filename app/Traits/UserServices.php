@@ -111,10 +111,28 @@ trait UserServices {
     private function deleteUser($data) {
         
      
+        try {
+            $ids = $data->usertypes()->wherePivot('status', true)->get();
+            $ids = $ids->pluck('id');
+            $data->usertypes()->updateExistingPivot($ids, ['status' => false]);
+
+            $ids = $data->rentrooms()->wherePivot('status', true)->get();
+            $ids = $ids->pluck('id');
+            $data->rentrooms()->updateExistingPivot($ids,['status' => false]);
+            
+            $ids = $data->ownrooms()->wherePivot('status', true)->get();
+            $ids = $ids->pluck('id');
+            $data->ownrooms()->updateExistingPivot($ids,['status' => false]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->errorResponse();
+        }
+
+      
         $data->status = false;
-        if($this->saveModel($data)){
+        if ($this->saveModel($data)) {
             return $data->refresh();
-        }else{
+        } else {
             return null;
         }
 

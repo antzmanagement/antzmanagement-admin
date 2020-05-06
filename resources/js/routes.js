@@ -9,6 +9,10 @@ import UserManagement from './components/Management/UserManagement/UserManagemen
 import AllTenants from './components/Management/UserManagement/TenantManagement/AllTenants.vue';
 import Tenant from './components/Management/UserManagement/TenantManagement/Tenant.vue'
 
+
+import AllOwners from './components/Management/UserManagement/OwnerManagement/AllOwners.vue';
+import Owner from './components/Management/UserManagement/OwnerManagement/Owner.vue'
+
 import AllRooms from './components/Management/RoomManagement/AllRooms.vue';
 import Room from './components/Management/RoomManagement/Room.vue';
 
@@ -70,12 +74,15 @@ export const routes = [
         name : 'stores',
     },
 
-    
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Management Route //
     { 
         path:'/usermanagement',
         component:UserManagement,
         name : 'usermanagement',
     },
+
+    // Tenant
     { 
         path:'/tenants',
         component:AllTenants,
@@ -87,6 +94,19 @@ export const routes = [
         name : 'tenant',
     },
     
+    //Owner
+    { 
+        path:'/owners',
+        component:AllOwners,
+        name : 'owners',
+    },
+    { 
+        path:'/owner/:uid',
+        component:Owner,
+        name : 'owner',
+    },
+    
+
     { 
         path:'/rooms',
         component:AllRooms,

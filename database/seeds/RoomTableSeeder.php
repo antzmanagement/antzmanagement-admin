@@ -44,6 +44,31 @@ class RoomTableSeeder extends Seeder
             $room->tenants()->syncWithoutDetaching([$tenant->refresh()->id]);
         }
 
+        
+        $userType = UserType::where('name', 'owner')->first();
+        $owners = $userType->users()->wherePivot('status', true)->get();
+
+        foreach($owners as $owner) {
+
+            $roomType = RoomType::find(
+                $faker->randomElement([1, 2, 3])
+            );
+            $room = new Room();
+            $room->uid = Carbon::now()->timestamp . Room::count();
+            $room->name = $faker->ean13;
+            $room->price = $roomType->price;
+            $room->address = $faker->address;
+            $room->state = $faker->state;
+            $room->postcode = $faker->postcode;
+            $room->city = $faker->city;
+            $room->country = $faker->country;
+            $room->save();
+
+
+            $roomType->rooms()->syncWithoutDetaching([$room->refresh()->id]);
+            $room->owners()->syncWithoutDetaching([$owner->refresh()->id]);
+        }
+
         for($x = 0; $x < 100; $x++) {
 
             $roomType = RoomType::find(
