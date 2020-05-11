@@ -10,6 +10,8 @@ use App\Tenant;
 use App\Room;
 use App\UserType;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
+
 use App\Traits\AllServices;
 
 class TenantController extends Controller

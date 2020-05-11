@@ -33,7 +33,7 @@ export default {
       {
         icon: "mdi-account-cog-outline",
         text: "Management Staff",
-        path: "management"
+        path: "staffs"
       },
       {
         icon: "mdi-nature-people",

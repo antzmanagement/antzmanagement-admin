@@ -4,8 +4,8 @@ use Illuminate\Database\Seeder;
 use Faker\Factory as Faker;
 use App\RoomType;
 use App\RoomTypeImage;
-use App\RoomTypeService;
-use App\RoomTypeProperty;
+use App\Service;
+use App\Property;
 use Carbon\Carbon;
 
 class RoomTypeTableSeeder extends Seeder
@@ -52,13 +52,13 @@ class RoomTypeTableSeeder extends Seeder
             $image->save();
         }
         
-        $properties = RoomTypeProperty::where('status', true)->get();
+        $properties = Property::where('status', true)->get();
         foreach ($properties as $property) {
 
             $roomType->properties()->attach($property->id);
         }
 
-        $services = RoomTypeService::where('status', true)->get();
+        $services = Service::where('status', true)->get();
         foreach ($services as $service) {
 
             $roomType->services()->attach($service->id);
@@ -80,13 +80,13 @@ class RoomTypeTableSeeder extends Seeder
             $image->save();
         }
 
-        $properties = RoomTypeProperty::where('status', true)->get();
+        $properties = Property::where('status', true)->get();
         foreach ($properties as $property) {
 
             $roomType->properties()->attach($property->id);
         }
 
-        $services = RoomTypeService::where('status', true)->get();
+        $services = Service::where('status', true)->get();
         foreach ($services as $service) {
 
             $roomType->services()->attach($service->id);
@@ -108,13 +108,13 @@ class RoomTypeTableSeeder extends Seeder
         }
 
         
-        $properties = RoomTypeProperty::where('status', true)->get();
+        $properties = Property::where('status', true)->get();
         foreach ($properties as $property) {
 
             $roomType->properties()->attach($property->id);
         }
 
-        $services = RoomTypeService::where('status', true)->get();
+        $services = Service::where('status', true)->get();
         foreach ($services as $service) {
 
             $roomType->services()->attach($service->id);

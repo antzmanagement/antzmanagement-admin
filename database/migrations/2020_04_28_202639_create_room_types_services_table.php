@@ -17,7 +17,7 @@ class CreateRoomTypesServicesTable extends Migration
             
             $table->increments('id');
             $table->unsignedInteger('room_type_id')->unsigned();
-            $table->unsignedInteger('room_type_service_id')->unsigned();
+            $table->unsignedInteger('service_id')->unsigned();
             $table->text('remark')->nullable();
             $table->boolean('status')->default(true);
             $table->timestamps();
@@ -28,9 +28,9 @@ class CreateRoomTypesServicesTable extends Migration
             ->onUpdate('cascade')
             ->onDelete('restrict');
 
-            $table->foreign('room_type_service_id')
+            $table->foreign('service_id')
             ->references('id')
-            ->on('room_type_services')
+            ->on('services')
             ->onUpdate('cascade')
             ->onDelete('restrict');
         });

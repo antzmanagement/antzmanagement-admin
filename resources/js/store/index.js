@@ -5,6 +5,7 @@ import auth from "./auth.module";
 import loading from "./loading,module";
 import tenant from "./tenant.module";
 import owner from "./owner.module";
+import staff from "./staff.module";
 import user from "./user.module";
 import room from "./room.module";
 import roomType from "./roomType.module";
@@ -15,6 +16,7 @@ export default new Vuex.Store({
   modules: {
     tenant,
     owner,
+    staff,
     room,
     roomType,
     user,

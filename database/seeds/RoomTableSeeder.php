@@ -23,7 +23,7 @@ class RoomTableSeeder extends Seeder
         $userType = UserType::where('name', 'tenant')->first();
         $tenants = $userType->users()->wherePivot('status', true)->get();
 
-        foreach($tenants as $tenant) {
+        foreach ($tenants as $tenant) {
 
             $roomType = RoomType::find(
                 $faker->randomElement([1, 2, 3])
@@ -42,13 +42,26 @@ class RoomTableSeeder extends Seeder
 
             $roomType->rooms()->syncWithoutDetaching([$room->refresh()->id]);
             $room->tenants()->syncWithoutDetaching([$tenant->refresh()->id]);
+
+            
+            //Assign Owner For Tenant
+            if ($faker->boolean()) {
+
+                $userType = UserType::where('name', 'owner')->first();
+                $owners = $userType->users()->wherePivot('status', true)->get();
+                $owner = $owners->random();
+
+                $room->owners()->syncWithoutDetaching([$owner->refresh()->id]);
+
+    
+            }
         }
 
-        
+
         $userType = UserType::where('name', 'owner')->first();
         $owners = $userType->users()->wherePivot('status', true)->get();
 
-        foreach($owners as $owner) {
+        foreach ($owners as $owner) {
 
             $roomType = RoomType::find(
                 $faker->randomElement([1, 2, 3])
@@ -69,7 +82,7 @@ class RoomTableSeeder extends Seeder
             $room->owners()->syncWithoutDetaching([$owner->refresh()->id]);
         }
 
-        for($x = 0; $x < 100; $x++) {
+        for ($x = 0; $x < 100; $x++) {
 
             $roomType = RoomType::find(
                 $faker->randomElement([1, 2, 3])
@@ -85,9 +98,8 @@ class RoomTableSeeder extends Seeder
             $room->country = $faker->country;
             $room->save();
 
-            
+
             $roomType->rooms()->syncWithoutDetaching([$room->refresh()->id]);
         }
-
     }
 }

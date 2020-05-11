@@ -19,11 +19,11 @@ class RoomType extends Model
     
     public function properties()
     {
-        return $this->belongsToMany('App\RoomTypeProperty','room_types_properties','room_type_id', 'room_type_property_id')->withPivot('remark','status','qty','created_at','updated_at');
+        return $this->belongsToMany('App\Property','room_types_properties','room_type_id', 'property_id')->withPivot('remark','status','qty','created_at','updated_at');
     }
     
     public function services()
     {
-        return $this->belongsToMany('App\RoomTypeService','room_types_services','room_type_id', 'room_type_service_id')->withPivot('remark','status','created_at','updated_at');
+        return $this->belongsToMany('App\Service','room_types_services','room_type_id', 'service_id')->withPivot('remark','status','created_at','updated_at');
     }
 }

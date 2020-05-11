@@ -13,6 +13,9 @@ import Tenant from './components/Management/UserManagement/TenantManagement/Tena
 import AllOwners from './components/Management/UserManagement/OwnerManagement/AllOwners.vue';
 import Owner from './components/Management/UserManagement/OwnerManagement/Owner.vue'
 
+import AllStaffs from './components/Management/UserManagement/StaffManagement/AllStaffs.vue';
+import Staff from './components/Management/UserManagement/StaffManagement/Staff.vue'
+
 import AllRooms from './components/Management/RoomManagement/AllRooms.vue';
 import Room from './components/Management/RoomManagement/Room.vue';
 
@@ -104,6 +107,18 @@ export const routes = [
         path:'/owner/:uid',
         component:Owner,
         name : 'owner',
+    },
+    
+    //Staff
+    { 
+        path:'/staffs',
+        component:AllStaffs,
+        name : 'staffs',
+    },
+    { 
+        path:'/staff/:uid',
+        component:Staff,
+        name : 'staff',
     },
     
 

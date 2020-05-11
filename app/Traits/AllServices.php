@@ -13,6 +13,7 @@ use App\Traits\UserServices;
 use App\Traits\UserTypeServices;
 use App\Traits\RoomServices;
 use App\Traits\RoomTypeServices;
+use App\Traits\StaffServices;
 
 
 trait AllServices {
@@ -26,7 +27,8 @@ trait AllServices {
     RoomTypeServices,
     TenantServices,
     UserServices,
-    UserTypeServices;
+    UserTypeServices,
+    StaffServices;
 
 
     

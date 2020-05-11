@@ -17,6 +17,9 @@ Vue.component('tenant-filter-dialog', require('./components/Management/UserManag
 Vue.component('owner-form', require('./components/Management/UserManagement/OwnerManagement/OwnerForm.vue').default);
 Vue.component('owner-filter-dialog', require('./components/Management/UserManagement/OwnerManagement/OwnerFilterDialog.vue').default);
 
+Vue.component('staff-form', require('./components/Management/UserManagement/StaffManagement/StaffForm.vue').default);
+Vue.component('staff-filter-dialog', require('./components/Management/UserManagement/StaffManagement/StaffFilterDialog.vue').default);
+
 
 Vue.component('room-form', require('./components/Management/RoomManagement/RoomForm.vue').default);
 Vue.component('room-type-form', require('./components/Management/RoomTypeManagement/RoomTypeForm.vue').default);

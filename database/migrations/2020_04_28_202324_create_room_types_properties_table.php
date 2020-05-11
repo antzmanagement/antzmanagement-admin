@@ -16,7 +16,7 @@ class CreateRoomTypesPropertiesTable extends Migration
         Schema::create('room_types_properties', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('room_type_id')->unsigned();
-            $table->unsignedInteger('room_type_property_id')->unsigned();
+            $table->unsignedInteger('property_id')->unsigned();
             $table->integer('qty')->default(0);
             $table->text('remark')->nullable();
             $table->boolean('status')->default(true);
@@ -28,9 +28,9 @@ class CreateRoomTypesPropertiesTable extends Migration
             ->onUpdate('cascade')
             ->onDelete('restrict');
 
-            $table->foreign('room_type_property_id')
+            $table->foreign('property_id')
             ->references('id')
-            ->on('room_type_properties')
+            ->on('properties')
             ->onUpdate('cascade')
             ->onDelete('restrict');
         });

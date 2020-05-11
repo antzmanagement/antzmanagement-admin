@@ -18,7 +18,7 @@ class UserTypeTableSeeder extends Seeder
 
         $userType = new UserType();
         $userType->uid = Carbon::now()->timestamp . UserType::count();
-        $userType->name = 'management';
+        $userType->name = 'staff';
         $userType->save();
         
         $userType = new UserType();
