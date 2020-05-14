@@ -73,7 +73,7 @@ export default {
         name: "usermanagement"
       },
       { icon: "mdi-home-city-outline", text: "Room Management", name: "rooms" },
-      { icon: "mdi-screwdriver", text: "Room Maintenance", name: "" }
+      { icon: "mdi-screwdriver", text: "Room Maintenance", name: "maintenances" }
     ]
   })
 };

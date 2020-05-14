@@ -23,10 +23,10 @@ trait RoomTypeServices
             $q->where('status', true);
         }, 'properties' => function ($q){
             $q->wherePivot('status', true);
-            $q->where('room_type_properties.status', true);
+            $q->where('properties.status', true);
         }, 'services' => function ($q){
             $q->wherePivot('status', true);
-            $q->where('room_type_services.status', true);
+            $q->where('services.status', true);
         }])->get();
 
         $data = $data->unique('id')->sortBy('id')->flatten(1);

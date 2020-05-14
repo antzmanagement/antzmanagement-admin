@@ -24,7 +24,7 @@
               </v-col>
             </v-row>
 
-            <v-divider class="mx-3" color="#ffffff"></v-divider>
+            <v-divider class="mx-3" :color="helpers.managementStyles().dividerColor"></v-divider>
             <v-row justify="start" align="center" class="pa-2">
               <v-col cols="12" md="6">
                 <div class="form-group mb-0">
@@ -86,7 +86,54 @@
               </v-col>
             </v-row>
 
-            <v-divider class="mx-3" color="#ffffff"></v-divider>
+            <v-divider class="mx-3" :color="helpers.managementStyles().dividerColor"></v-divider>
+            <!-- <v-row class="pa-2" justify="end" align="center">
+              <v-col cols="12">
+                <div class="headline font-weight-bold">Maintenance Records</div>
+              </v-col>
+            </v-row>-->
+            <v-row class="pa-2" justify="end" align="center">
+              <v-col cols="12">
+                <v-card class="pa-8" raised>
+                  <v-data-table
+                    :headers="maintenanceHeaders"
+                    :items="data.maintenances"
+                    items-per-page="5"
+                    item-key="uid"
+                  >
+                    <template v-slot:top>
+                      <v-container>
+                        <v-row>
+                          <v-col cols="auto">
+                            <div
+                              class="headline font-weight-bold text-left mb-5 d-inline-block"
+                            >Maintenance Records</div>
+                          </v-col>
+                          <v-spacer></v-spacer>
+                          <v-col cols="auto">
+                            <maintenance-form
+                              :editMode="false"
+                              :buttonStyle="maintenanceFormDialogConfig.buttonStyle"
+                              :dialogStyle="maintenanceFormDialogConfig.dialogStyle"
+                              :roomId="data.id"
+                              @created="refreshPage()"
+                            ></maintenance-form>
+                          </v-col>
+                        </v-row>
+                      </v-container>
+                    </template>
+                    <template v-slot:item="props">
+                      <tr @click="showMaintenance(props.item)">
+                        <td>{{props.item.uid}}</td>
+                        <td>{{props.item.property.name}}</td>
+                        <td>{{props.item.price}}</td>
+                      </tr>
+                    </template>
+                  </v-data-table>
+                </v-card>
+              </v-col>
+            </v-row>
+            <v-divider class="mx-3" :color="helpers.managementStyles().dividerColor"></v-divider>
             <v-row class="pa-2" justify="end" align="center">
               <v-col cols="auto">
                 <room-form
@@ -130,6 +177,24 @@ export default {
         icon: "mdi-trash-can-outline"
       }
     },
+
+    maintenanceFormDialogConfig: {
+      buttonStyle: {
+        block: false,
+        class: "",
+        text: "Add New",
+        icon: "mdi-plus",
+        color: "primary",
+        evalation: "5",
+        isIcon: false
+      },
+      dialogStyle: {
+          persistent: true,
+          maxWidth: "50%",
+          fullscreen: false,
+          hideOverlay: true
+      }
+    },
     data: new Form({
       name: "",
       price: "",
@@ -139,8 +204,20 @@ export default {
       city: "",
       country: "",
       //Original is roomTypes but Laravel auto convert carmelCase to snake_case
-      room_types: []
-    })
+      room_types: [],
+      maintenances: []
+    }),
+    maintenanceHeaders: [
+      {
+        text: "ID",
+        value: "uid"
+      },
+      {
+        text: "Property",
+        value: "property.name"
+      },
+      { text: "Price (RM)", value: "price" }
+    ]
   }),
 
   computed: {
@@ -175,6 +252,10 @@ export default {
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction"
     }),
+
+    showMaintenance($data) {
+      this.$router.push("/maintenance/" + $data.uid);
+    },
     deleteRoom($isConfirmed, $uid) {
       if ($isConfirmed) {
         this.$Progress.start();

@@ -29,3 +29,7 @@ Vue.component('room-type-sliders', require('./components/RoomPages/RoomTypeSlide
 Vue.component('room-details', require('./components/RoomPages/RoomDetails.vue').default);
 Vue.component('room-type-listing', require('./components/RoomPages/RoomTypeListing.vue').default);
 
+Vue.component('maintenance-form', require('./components/Management/MaintenanceManagement/MaintenanceForm.vue').default);
+Vue.component('maintenance-filter-dialog', require('./components/Management/MaintenanceManagement/MaintenanceFilterDialog.vue').default);
+
+Vue.component('property-form', require('./components/Management/PropertyManagement/PropertyForm.vue').default);

@@ -7,7 +7,9 @@ use App\Traits\GlobalFunctions;
 use App\Traits\NotificationFunctions;
 
 //Model Services
+use App\Traits\MaintenanceServices;
 use App\Traits\OwnerServices;
+use App\Traits\PropertyServices;
 use App\Traits\TenantServices;
 use App\Traits\UserServices;
 use App\Traits\UserTypeServices;
@@ -22,7 +24,9 @@ trait AllServices {
     GlobalFunctions,
     NotificationFunctions, 
 
+    MaintenanceServices,
     OwnerServices,
+    PropertyServices,
     RoomServices,
     RoomTypeServices,
     TenantServices,

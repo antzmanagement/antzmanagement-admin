@@ -49,8 +49,8 @@ trait RoomServices
             $data = $data->filter(function ($item) use ($roomTypes) {
                 $item = $item->roomTypes()->wherePivot('status', true)->where('room_types.status', true)->get();
                 $ids = $item->pluck('id');
-                foreach($roomTypes as $roomType){
-                    if(!$ids->contains($roomType)){
+                foreach ($roomTypes as $roomType) {
+                    if (!$ids->contains($roomType)) {
                         return false;
                     }
                 }
@@ -66,7 +66,11 @@ trait RoomServices
     private function getRoom($uid)
     {
 
-        $data = Room::where('uid', $uid)->with(['roomTypes' => function ($q) {
+        $data = Room::where('uid', $uid)->with(['maintenances' => function ($q) {
+            // Query the name field in status table
+            $q->with('property');
+            $q->where('status', true);
+        }, 'roomTypes' => function ($q) {
             // Query the name field in status table
             $q->wherePivot('status', true);
         }])->where('status', true)->first();
@@ -75,8 +79,14 @@ trait RoomServices
 
     private function getRoomById($id)
     {
-        $userType = $this->getUserTypeById($this->type);
-        $data = $userType->users()->where('id', $id)->wherePivot('status', 1)->first();
+        $data = Room::where('id', $id)->with(['maintenances' => function ($q) {
+            // Query the name field in status table
+            $q->with('property');
+            $q->where('status', true);
+        }, 'roomTypes' => function ($q) {
+            // Query the name field in status table
+            $q->wherePivot('status', true);
+        }])->where('status', true)->first();
         return $data;
     }
 
@@ -171,34 +181,5 @@ trait RoomServices
     {
 
         return ['keyword', 'roomTypes'];
-    }
-
-    private function validateUserPurchasedRoom($user, $room)
-    {
-
-        if ($this->isEmpty($user)) {
-            return false;
-        }
-
-        if ($this->isEmpty($room)) {
-            return false;
-        }
-
-
-        if ($room->free) {
-            return true;
-        }
-
-        $purchasedrooms = $user->purchaserooms()->wherePivot('status', true)->get();
-
-        $ids = $purchasedrooms->pluck('id');
-        $ids = $ids->filter(function ($id) use ($room) {
-            return $id == $room->id;
-        });
-        if (!$this->isEmpty($ids)) {
-            return true;
-        }
-
-        return false;
     }
 }

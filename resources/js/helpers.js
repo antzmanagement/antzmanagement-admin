@@ -69,7 +69,7 @@ const helpers = {
             backgroundColor: '#EEEEEE',
             formCardClass: 'grey lighten-5',
             formCardColor: '#FAFAFA',
-            dividerColor: '#BDBDBD',
+            dividerColor: '#ffffff',
             mainButtonColor: 'blue lighten-3',
             titleClass : 'font-weight-black display-1 d-inline-block',
 

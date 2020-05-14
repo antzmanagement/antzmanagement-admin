@@ -14,7 +14,7 @@
         {{buttonStyle.text}}
       </v-btn>
     </template>
-    <v-card >
+    <v-card>
       <v-toolbar dark color="primary">
         <v-btn icon dark @click="dialog = false">
           <v-icon>mdi-close</v-icon>
@@ -165,7 +165,7 @@ export default {
         class: "ma-1",
         text: "Add Owner",
         icon: "mdi-plus",
-        elevation : 5,
+        elevation: 5
       })
     }
   },
@@ -341,32 +341,43 @@ export default {
     }
   },
   created() {
-
     this.showLoadingAction();
     this.getRoomsAction({
       pageNumber: -1,
       pageSize: -1
-    }).then(data => {
-      this.rooms = data.data;
-      if (this.editMode) {
-        this.getOwnerAction({ uid: this.uid })
-          .then(data => {
-            var ids = data.data.ownrooms.map(function(room) {
-              return room.id;
+    })
+      .then(data => {
+        this.rooms = data.data;
+        if (this.editMode) {
+          this.getOwnerAction({ uid: this.uid })
+            .then(data => {
+              var ids = data.data.ownrooms.map(function(room) {
+                return room.id;
+              });
+              //Should assign data first before creating form because the form will reset after triggered
+              //Create the form before assigning the data, the form will not keep track the original/default value of data
+              Object.assign(data.data, { rooms: ids });
+              this.data = new Form(data.data);
+              this.endLoadingAction();
+            })
+            .catch(error => {
+              Toast.fire({
+                icon: "warning",
+                title: "Something went wrong... "
+              });
+              this.endLoadingAction();
             });
-            //Should assign data first before creating form because the form will reset after triggered
-            //Create the form before assigning the data, the form will not keep track the original/default value of data
-            Object.assign(data.data, { rooms: ids });
-            this.data = new Form(data.data);
-            this.endLoadingAction();
-          })
-          .catch(error => {
-            this.endLoadingAction();
-          });
-      } else {
+        } else {
+          this.endLoadingAction();
+        }
+      })
+      .catch(error => {
         this.endLoadingAction();
-      }
-    });
+        Toast.fire({
+          icon: "warning",
+          title: "Something went wrong... "
+        });
+      });
   },
   methods: {
     ...mapActions({

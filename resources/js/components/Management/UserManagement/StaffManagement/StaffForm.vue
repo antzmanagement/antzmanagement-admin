@@ -14,7 +14,7 @@
         {{buttonStyle.text}}
       </v-btn>
     </template>
-    <v-card >
+    <v-card>
       <v-toolbar dark color="primary">
         <v-btn icon dark @click="dialog = false">
           <v-icon>mdi-close</v-icon>
@@ -109,7 +109,6 @@
                 :error-messages="passwordConfirmErrors"
               ></v-text-field>
             </v-col>
-
           </v-row>
         </v-container>
       </v-card-text>
@@ -145,7 +144,7 @@ export default {
         class: "ma-1",
         text: "Add Staff",
         icon: "mdi-plus",
-        elevation : 5,
+        elevation: 5
       })
     }
   },
@@ -158,8 +157,8 @@ export default {
         tel1: "",
         email: "",
         password: "",
-        password_confirmation: "",
-      }),
+        password_confirmation: ""
+      })
     };
   },
 
@@ -298,20 +297,23 @@ export default {
     }
   },
   created() {
-
     this.showLoadingAction();
     if (this.editMode) {
-        this.getStaffAction({ uid: this.uid })
-          .then(data => {
-            this.data = new Form(data.data);
-            this.endLoadingAction();
-          })
-          .catch(error => {
-            this.endLoadingAction();
+      this.getStaffAction({ uid: this.uid })
+        .then(data => {
+          this.data = new Form(data.data);
+          this.endLoadingAction();
+        })
+        .catch(error => {
+          this.endLoadingAction();
+          Toast.fire({
+            icon: "warning",
+            title: "Something went wrong... "
           });
-      } else {
-        this.endLoadingAction();
-      }
+        });
+    } else {
+      this.endLoadingAction();
+    }
   },
   methods: {
     ...mapActions({
@@ -393,8 +395,7 @@ export default {
             this.endLoadingAction();
           });
       }
-    },
-
+    }
   }
 };
 </script>

@@ -19,6 +19,9 @@ import Staff from './components/Management/UserManagement/StaffManagement/Staff.
 import AllRooms from './components/Management/RoomManagement/AllRooms.vue';
 import Room from './components/Management/RoomManagement/Room.vue';
 
+import AllMaintenances from './components/Management/MaintenanceManagement/AllMaintenances.vue';
+import Maintenance from './components/Management/MaintenanceManagement/Maintenance.vue';
+
 import Home from './components/Home/Home.vue'
 import RoomPage from './components/Home/RoomPage.vue';
 import ServicesPage from './components/Home/ServicesPage.vue';
@@ -121,7 +124,7 @@ export const routes = [
         name : 'staff',
     },
     
-
+    //Room
     { 
         path:'/rooms',
         component:AllRooms,
@@ -133,6 +136,17 @@ export const routes = [
         name : 'room',
     },
  
+    //Maintenance
+    { 
+        path:'/maintenances',
+        component:AllMaintenances,
+        name : 'maintenances',
+    },
+    { 
+        path:'/maintenance/:uid',
+        component:Maintenance,
+        name : 'maintenance',
+    },
  
  
 ];

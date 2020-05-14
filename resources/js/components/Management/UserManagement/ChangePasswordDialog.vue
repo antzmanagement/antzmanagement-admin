@@ -237,14 +237,13 @@ export default {
   },
   watch: {
     dialog: function(val) {
-      if(val){
+      if (val) {
         this.data.reset();
         this.$v.$reset();
       }
-    },
+    }
   },
-  created() {
-  },
+  created() {},
   methods: {
     ...mapActions({
       changePasswordAction: "changePassword",
@@ -255,39 +254,47 @@ export default {
     changePassword() {
       this.$Progress.start();
       this.showLoadingAction();
-      this.checkPassword(this.data.oldpassword).then(verified => {
-        if (this.verified && !this.$v.$invalid) {
-          this.data.uid = this.uid;
-          this.changePasswordAction(this.data)
-            .then(data => {
-              Toast.fire({
-                icon: "success",
-                title: "Successful Updated. "
+      this.checkPassword(this.data.oldpassword)
+        .then(verified => {
+          if (this.verified && !this.$v.$invalid) {
+            this.data.uid = this.uid;
+            this.changePasswordAction(this.data)
+              .then(data => {
+                Toast.fire({
+                  icon: "success",
+                  title: "Successful Updated. "
+                });
+                console.log(data);
+                this.$Progress.finish();
+                this.endLoadingAction();
+                this.$emit("updated");
+                this.dialog = false;
+              })
+              .catch(error => {
+                Toast.fire({
+                  icon: "warning",
+                  title: "Fail to change the password!!!!! "
+                });
+                console.log(error.response);
+                this.$Progress.finish();
+                this.endLoadingAction();
               });
-              console.log(data);
-              this.$Progress.finish();
-              this.endLoadingAction();
-              this.$emit("updated");
-              this.dialog = false;
-            })
-            .catch(error => {
-              Toast.fire({
-                icon: "warning",
-                title: "Fail to change the password!!!!! "
-              });
-              console.log(error.response);
-              this.$Progress.finish();
-              this.endLoadingAction();
+          } else {
+            Toast.fire({
+              icon: "warning",
+              title: "Fail to change the password!!!!! "
             });
-        } else {
+            this.$Progress.finish();
+            this.endLoadingAction();
+          }
+        })
+        .catch(error => {
+          this.endLoadingAction();
           Toast.fire({
             icon: "warning",
-            title: "Fail to change the password!!!!! "
+            title: "Something went wrong... "
           });
-          this.$Progress.finish();
-          this.endLoadingAction();
-        }
-      });
+        });
     },
     async checkPassword(password) {
       this.checkPasswordAction({

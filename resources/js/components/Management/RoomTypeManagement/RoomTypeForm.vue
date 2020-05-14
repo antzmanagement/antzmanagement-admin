@@ -183,6 +183,10 @@ export default {
           this.endLoadingAction();
         })
         .catch(error => {
+          Toast.fire({
+            icon: "warning",
+            title: "Something went wrong... "
+          });
           this.endLoadingAction();
         });
     }

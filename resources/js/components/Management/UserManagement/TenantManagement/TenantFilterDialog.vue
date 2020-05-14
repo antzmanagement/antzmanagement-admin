@@ -50,8 +50,7 @@
                 deletable-chips
                 :return-object="true"
                 multiple
-              >
-              </v-autocomplete>
+              ></v-autocomplete>
             </v-col>
           </v-row>
         </v-container>
@@ -83,7 +82,7 @@ export default {
       type: Object,
       default: () => ({
         block: true,
-        color: 'primary',
+        color: "primary",
         class: "ma-1",
         text: "Tenant Filter",
         icon: "",
@@ -114,7 +113,7 @@ export default {
   computed: {
     isLoading() {
       return this.$store.getters.isLoading;
-    },
+    }
   },
   watch: {
     dialog: function(val) {
@@ -124,12 +123,19 @@ export default {
     }
   },
   mounted() {
-
     this.showLoadingAction();
-    this.getRoomTypesAction({ pageNumber: -1, pageSize: -1 }).then(data => {
-      this.roomTypes = data.data;
-      this.endLoadingAction();
-    });
+    this.getRoomTypesAction({ pageNumber: -1, pageSize: -1 })
+      .then(data => {
+        this.roomTypes = data.data;
+        this.endLoadingAction();
+      })
+      .catch(error => {
+        this.endLoadingAction();
+        Toast.fire({
+          icon: "warning",
+          title: "Something went wrong... "
+        });
+      });
   },
   methods: {
     ...mapActions({

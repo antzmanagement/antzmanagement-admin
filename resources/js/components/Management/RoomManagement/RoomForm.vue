@@ -175,7 +175,7 @@ export default {
         class: "ma-1",
         text: "Add Room",
         icon: "",
-        elevation : 5,
+        elevation: 5
       })
     },
     dialogStyle: {
@@ -339,28 +339,40 @@ export default {
     console.log("form created");
 
     this.showLoadingAction();
-    this.getRoomTypesAction({ pageNumber: -1, pageSize: -1 }).then(data => {
-      this.roomTypes = data.data;
-      if (this.editMode) {
-        this.getRoomAction({ uid: this.uid })
-          .then(data => {
-            var ids = data.data.room_types.map(function(roomType) {
-              return roomType.id;
+    this.getRoomTypesAction({ pageNumber: -1, pageSize: -1 })
+      .then(data => {
+        this.roomTypes = data.data;
+        if (this.editMode) {
+          this.getRoomAction({ uid: this.uid })
+            .then(data => {
+              var ids = data.data.room_types.map(function(roomType) {
+                return roomType.id;
+              });
+              //Should assign data first before creating form because the form will reset after triggered
+              //Create the form before assigning the data, the form will not keep track the original/default value of data
+              Object.assign(data.data, { roomTypes: ids });
+              this.data = new Form(data.data);
+              console.log(this.data.roomTypes);
+              this.endLoadingAction();
+            })
+            .catch(error => {
+              Toast.fire({
+                icon: "warning",
+                title: "Something went wrong... "
+              });
+              this.endLoadingAction();
             });
-            //Should assign data first before creating form because the form will reset after triggered
-            //Create the form before assigning the data, the form will not keep track the original/default value of data
-            Object.assign(data.data, { roomTypes: ids });
-            this.data = new Form(data.data);
-            console.log(this.data.roomTypes);
-            this.endLoadingAction();
-          })
-          .catch(error => {
-            this.endLoadingAction();
-          });
-      } else {
+        } else {
+          this.endLoadingAction();
+        }
+      })
+      .catch(error => {
+        Toast.fire({
+          icon: "warning",
+          title: "Something went wrong... "
+        });
         this.endLoadingAction();
-      }
-    });
+      });
   },
   methods: {
     ...mapActions({

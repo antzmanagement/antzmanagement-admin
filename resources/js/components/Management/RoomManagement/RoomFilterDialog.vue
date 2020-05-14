@@ -29,16 +29,16 @@
         <v-toolbar-title v->Room Filter</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-toolbar-items>
-          <v-btn
-            dark
-            text
-            :disabled="isLoading"
-            @click="submitFilter()"
-          >Apply</v-btn>
+          <v-btn dark text :disabled="isLoading" @click="submitFilter()">Apply</v-btn>
         </v-toolbar-items>
       </v-toolbar>
       <v-card-text>
         <v-container>
+          <v-row>
+            <v-col cols="12">
+              <v-text-field label="Keyword" :maxlength="300" v-model="data.keyword"></v-text-field>
+            </v-col>
+          </v-row>
           <v-row>
             <v-col cols="12">
               <v-autocomplete
@@ -50,8 +50,7 @@
                 deletable-chips
                 multiple
                 :return-object="true"
-              >
-              </v-autocomplete>
+              ></v-autocomplete>
             </v-col>
           </v-row>
         </v-container>
@@ -87,7 +86,7 @@ export default {
         class: "ma-1",
         text: "Room Filter",
         icon: "",
-        isIcon: false,
+        isIcon: false
       })
     },
     dialogStyle: {
@@ -105,15 +104,18 @@ export default {
       dialog: false,
       roomTypes: [],
       data: new Form({
-        roomTypes: [],
-      }),
+        keyword: "",
+        fromdate: null,
+        todate: null,
+        roomTypes: []
+      })
     };
   },
 
   computed: {
     isLoading() {
       return this.$store.getters.isLoading;
-    },
+    }
   },
   watch: {
     dialog: function(val) {
@@ -123,12 +125,19 @@ export default {
     }
   },
   mounted() {
-
     this.showLoadingAction();
-    this.getRoomTypesAction({ pageNumber: -1, pageSize: -1 }).then(data => {
-      this.roomTypes = data.data;
-    this.endLoadingAction();
-    });
+    this.getRoomTypesAction({ pageNumber: -1, pageSize: -1 })
+      .then(data => {
+        this.roomTypes = data.data;
+        this.endLoadingAction();
+      })
+      .catch(error => {
+        Toast.fire({
+          icon: "warning",
+          title: "Something went wrong... "
+        });
+        this.endLoadingAction();
+      });
   },
   methods: {
     ...mapActions({
@@ -136,8 +145,8 @@ export default {
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction"
     }),
-    submitFilter(){
-      this.$emit('submitFilter', this.data);
+    submitFilter() {
+      this.$emit("submitFilter", this.data);
       this.dialog = false;
     }
   }
