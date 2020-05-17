@@ -26,4 +26,9 @@ class Room extends Model
     {
         return $this->hasMany('App\Maintenance');
     }
+    
+    public function roomcontracts()
+    {
+        return $this->hasMany('App\RoomContract');
+    }
 }

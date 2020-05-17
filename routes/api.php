@@ -56,6 +56,12 @@ Route::group(['middleware' => ['auth:api']], function (){
     Route::resource('maintenance', 'API\MaintenanceController');
     Route::get('/filter/maintenance', 'API\MaintenanceController@filter');
 
+    Route::resource('contract', 'API\ContractController');
+    Route::get('/filter/contract', 'API\ContractController@filter');
+
+    Route::resource('rentalpayment', 'API\RentalPaymentController');
+    Route::get('/filter/rentalpayment', 'API\RentalPaymentController@filter');
+
 });
 
 

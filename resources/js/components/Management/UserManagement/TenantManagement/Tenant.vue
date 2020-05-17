@@ -54,12 +54,12 @@
                   <label class="form-label mb-0">Room</label>
                   <div class="form-control-plaintext">
                     <v-chip
-                      v-for="room in data.rentrooms"
-                      :key="room.uid"
+                      v-for="roomcontract in data.roomcontracts"
+                      :key="roomcontract.uid"
                       class="mr-2 my-2"
-                      @click="showRoom(room)"
+                      @click="showTenantRoom(roomcontract)"
                     >
-                      <h4 class="text-center ma-2">{{room.name | capitalizeFirstLetter }}</h4>
+                      <h4 class="text-center ma-2">{{roomcontract.room.name | capitalizeFirstLetter }}</h4>
                     </v-chip>
                   </div>
                 </div>
@@ -92,6 +92,10 @@
             </v-row>
           </v-container>
         </v-card>
+
+        <v-dialog v-model="tenantRoomDialog" max-width="50%">
+          <tenant-room :tenant="tenantRoomData.tenant" :room="tenantRoomData.room" :roomcontract="tenantRoomData" :rentalpayments="tenantRoomData.rentalpayments"></tenant-room>
+        </v-dialog>
       </v-container>
     </v-content>
   </v-app>
@@ -101,6 +105,12 @@
 import { mapActions } from "vuex";
 export default {
   data: () => ({
+    tenantRoomDialog : false,
+    tenantRoomData : {
+      tenant : {},
+      room : {},
+      contract : {},
+    },
     editButtonStyle: {
       block: false,
       color: "success",
@@ -158,8 +168,9 @@ export default {
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction"
     }),
-    showRoom($data) {
-      this.$router.push("/room/" + $data.uid);
+    showTenantRoom($data) {
+      this.tenantRoomDialog = true;
+      this.tenantRoomData = $data;
     },
     deleteTenant($isConfirmed, $uid) {
       if ($isConfirmed) {

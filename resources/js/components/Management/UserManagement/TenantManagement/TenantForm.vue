@@ -70,7 +70,7 @@
                 :error-messages="tel1Errors"
               ></v-text-field>
             </v-col>
-            <v-col cols="12">
+            <v-col cols="6">
               <v-text-field
                 label="Email*"
                 hint="Email that used to login the website"
@@ -110,17 +110,25 @@
               ></v-text-field>
             </v-col>
 
-            <v-col cols="12" md="6">
+            <v-col cols="12" md="12">
               <v-autocomplete
                 v-model="data.rooms"
                 :items="rooms"
                 item-text="name"
-                item-value="id"
                 chips
                 deletable-chips
                 label="Room"
                 multiple
+                return-object
               >
+                <template v-slot:append>
+                  <room-form
+                    :editMode="false"
+                    :dialogStyle="roomFormDialogConfig.dialogStyle"
+                    :buttonStyle="roomFormDialogConfig.buttonStyle"
+                    @created="appendRoomList($event)"
+                  ></room-form>
+                </template>
                 <template v-slot:append-outer>
                   <room-filter-dialog
                     :buttonStyle="roomFilterDialogConfig.buttonStyle"
@@ -129,6 +137,58 @@
                   ></room-filter-dialog>
                 </template>
               </v-autocomplete>
+            </v-col>
+          </v-row>
+          <v-row v-show="!helpers.isEmpty(data.rooms)">
+            <v-col cols="12">
+              <v-card>
+                <v-simple-table fixed-header height="300px">
+                  <template v-slot:default>
+                    <thead>
+                      <tr>
+                        <th class="text-left">Room</th>
+                        <th class="text-left">Contract</th>
+                        <th class="text-left">Contract Start Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(room) in data.rooms" :key="room.uid">
+                        <td>{{ room.name }}</td>
+                        <td>
+                          <v-autocomplete
+                            v-model="room.contract_id"
+                            :items="contracts"
+                            item-text="name"
+                            item-value="id"
+                            label="Contract"
+                          ></v-autocomplete>
+                        </td>
+                        <td>
+                          <v-menu
+                            ref="menu"
+                            v-model="room.menu"
+                            :close-on-content-click="true"
+                            transition="scale-transition"
+                            offset-y
+                          >
+                            <template v-slot:activator="{ on }">
+                              <v-text-field
+                                v-model="room.contractstartdate"
+                                label="Start Date"
+                                prepend-icon="event"
+                                readonly
+                                v-on="on"
+                              ></v-text-field>
+                            </template>
+                            <v-date-picker v-model="room.contractstartdate" no-title scrollable>
+                            </v-date-picker>
+                          </v-menu>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </template>
+                </v-simple-table>
+              </v-card>
             </v-col>
           </v-row>
         </v-container>
@@ -172,8 +232,10 @@ export default {
   data() {
     return {
       dialog: false,
+      menu : false,
       roomTypes: [],
       rooms: [],
+      contracts: [],
       data: new Form({
         name: "",
         icno: "",
@@ -184,6 +246,21 @@ export default {
         roomTypes: [],
         rooms: []
       }),
+      roomFormDialogConfig: {
+        dialogStyle: {
+          persistent: true,
+          maxWidth: "600px",
+          fullscreen: false,
+          hideOverlay: true
+        },
+        buttonStyle: {
+          block: false,
+          color: "primary",
+          class: "ma-4",
+          text: "Add New Room",
+          icon: "mdi-plus"
+        }
+      },
       roomFilterGroup: new Form({
         roomTypes: [],
         pageNumber: -1,
@@ -348,28 +425,43 @@ export default {
     })
       .then(data => {
         this.rooms = data.data;
-        if (this.editMode) {
-          this.getTenantAction({ uid: this.uid })
-            .then(data => {
-              var ids = data.data.rentrooms.map(function(room) {
-                return room.id;
-              });
-              //Should assign data first before creating form because the form will reset after triggered
-              //Create the form before assigning the data, the form will not keep track the original/default value of data
-              Object.assign(data.data, { rooms: ids });
-              this.data = new Form(data.data);
+        this.getContractsAction({
+          pageNumber: -1,
+          pageSize: -1
+        })
+          .then(data => {
+            this.contracts = data.data;
+
+            if (this.editMode) {
+              this.getTenantAction({ uid: this.uid })
+                .then(data => {
+                  var ids = data.data.rentrooms.map(function(room) {
+                    return room.id;
+                  });
+                  //Should assign data first before creating form because the form will reset after triggered
+                  //Create the form before assigning the data, the form will not keep track the original/default value of data
+                  Object.assign(data.data, { rooms: ids });
+                  this.data = new Form(data.data);
+                  this.endLoadingAction();
+                })
+                .catch(error => {
+                  Toast.fire({
+                    icon: "warning",
+                    title: "Something went wrong... "
+                  });
+                  this.endLoadingAction();
+                });
+            } else {
               this.endLoadingAction();
-            })
-            .catch(error => {
-              Toast.fire({
-                icon: "warning",
-                title: "Something went wrong... "
-              });
-              this.endLoadingAction();
+            }
+          })
+          .catch(error => {
+            this.endLoadingAction();
+            Toast.fire({
+              icon: "warning",
+              title: "Something went wrong... "
             });
-        } else {
-          this.endLoadingAction();
-        }
+          });
       })
       .catch(error => {
         this.endLoadingAction();
@@ -381,6 +473,7 @@ export default {
   },
   methods: {
     ...mapActions({
+      getContractsAction: "getContracts",
       getRoomsAction: "getRooms",
       filterRoomsAction: "filterRooms",
       getRoomTypesAction: "getRoomTypes",
@@ -391,6 +484,10 @@ export default {
       endLoadingAction: "endLoadingAction"
     }),
 
+    appendRoomList($data) {
+      this.rooms.push($data);
+      this.data.rooms.push($data);
+    },
     customValidate() {
       return (
         (!this.data.tel1 || this.helpers.isPhoneFormat(this.data.tel1)) &&

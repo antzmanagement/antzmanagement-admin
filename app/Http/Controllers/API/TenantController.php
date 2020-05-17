@@ -8,6 +8,7 @@ use DB;
 use Carbon\Carbon;
 use App\Tenant;
 use App\Room;
+use App\RoomContract;
 use App\UserType;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -236,18 +237,39 @@ class TenantController extends Controller
             return $this->errorResponse();
         }
 
-        if ($request->rooms) {
+        if (!$this->isEmpty($request->rooms)) {
 
-            $rooms = Room::find($request->rooms);
-            if ($this->isEmpty($rooms)) {
-                DB::rollBack();
-                return $this->notFoundResponse('Rooms');
-            }
-            try {
-                $tenant->rentrooms()->sync($rooms->pluck('id'));
-            } catch (Exception $e) {
-                DB::rollBack();
-                return $this->errorResponse();
+            foreach ($request->rooms as $room) {
+                $room = json_decode(json_encode($room));
+                $contract = $this->getContractById($room->contract_id);
+                if ($this->isEmpty($contract)) {
+                    DB::rollBack();
+                    return $this->notFoundResponse('Contract');
+                }
+                $startdate = Carbon::parse($room->contractstartdate)->format('Y-m-d');
+                $room = $this->getRoomById($room->id);
+                if ($this->isEmpty($room)) {
+                    DB::rollBack();
+                    return $this->notFoundResponse('Room');
+                }
+
+                $params = collect([
+                    'room_id' => $room->id,
+                    'tenant_id' => $tenant->id,
+                    'contract_id' => $contract->id,
+                    'name' => $contract->name,
+                    'duration' => $contract->duration,
+                    'terms' => $contract->terms,
+                    'autorenew' => $contract->autorenew,
+                    'startdate' => $startdate,
+                ]);
+                //Convert To Json Object
+                $params = json_decode(json_encode($params));
+                $roomContract = $this->createRoomContract($params);
+                if ($this->isEmpty($roomContract)) {
+                    DB::rollBack();
+                    return $this->errorResponse();
+                }
             }
         }
 

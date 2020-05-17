@@ -13,6 +13,8 @@ Vue.component('change-password-dialog', require('./components/Management/UserMan
 
 Vue.component('tenant-form', require('./components/Management/UserManagement/TenantManagement/TenantForm.vue').default);
 Vue.component('tenant-filter-dialog', require('./components/Management/UserManagement/TenantManagement/TenantFilterDialog.vue').default);
+Vue.component('tenant-room', require('./components/Management/UserManagement/TenantManagement/TenantRoom.vue').default);
+
 
 Vue.component('owner-form', require('./components/Management/UserManagement/OwnerManagement/OwnerForm.vue').default);
 Vue.component('owner-filter-dialog', require('./components/Management/UserManagement/OwnerManagement/OwnerFilterDialog.vue').default);

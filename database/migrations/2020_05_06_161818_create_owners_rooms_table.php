@@ -17,7 +17,7 @@ class CreateOwnersRoomsTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('user_id')->unsigned();
             $table->unsignedInteger('room_id')->unsigned();
-            $table->text('remark')->nullable();
+            $table->longText('remark')->nullable();
             $table->boolean('status')->default(true);
             $table->timestamps();
 

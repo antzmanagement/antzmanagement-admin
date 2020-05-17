@@ -1,8 +1,10 @@
 <?php
 
+use App\Contract;
 use Illuminate\Database\Seeder;
 use Faker\Factory as Faker;
 use App\Room;
+use App\RoomContract;
 use App\RoomType;
 use App\UserType;
 use Illuminate\Support\Facades\Hash;
@@ -41,7 +43,22 @@ class RoomTableSeeder extends Seeder
 
 
             $roomType->rooms()->syncWithoutDetaching([$room->refresh()->id]);
-            $room->tenants()->syncWithoutDetaching([$tenant->refresh()->id]);
+
+            //Create Contract For Tenant
+            $contract = Contract::find($faker->randomElement([1, 2, 3]));
+            
+            $roomcontract = new RoomContract();
+            $roomcontract->uid = Carbon::now()->timestamp . RoomContract::count();
+            $roomcontract->name = $contract->name;
+            $roomcontract->duration = $contract->duration;
+            $roomcontract->terms = $contract->terms;
+            $roomcontract->autorenew = $contract->autorenew;
+            $roomcontract->leftmonth = $contract->duration;
+            $roomcontract->startdate = Carbon::now()->addMonth($faker->numberBetween(-36,36))->startOfMonth();
+            $roomcontract->room()->associate($room);
+            $roomcontract->tenant()->associate($tenant);
+            $roomcontract->contract()->associate($contract);
+            $roomcontract->save();
 
             
             //Assign Owner For Tenant
@@ -52,8 +69,6 @@ class RoomTableSeeder extends Seeder
                 $owner = $owners->random();
 
                 $room->owners()->syncWithoutDetaching([$owner->refresh()->id]);
-
-    
             }
         }
 

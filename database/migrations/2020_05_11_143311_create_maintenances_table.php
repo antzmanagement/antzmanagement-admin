@@ -19,7 +19,7 @@ class CreateMaintenancesTable extends Migration
             $table->unsignedInteger('property_id')->unsigned();
             $table->string('uid');
             $table->decimal('price',8,2)->default(0.00);
-            $table->text('remark')->nullable();
+            $table->longText('remark')->nullable();
             $table->boolean('status')->default(true);
             $table->timestamps();
 

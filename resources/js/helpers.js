@@ -72,6 +72,10 @@ const helpers = {
             dividerColor: '#ffffff',
             mainButtonColor: 'blue lighten-3',
             titleClass : 'font-weight-black display-1 d-inline-block',
+            subtitleClass : 'font-weight-bold title d-inline-block',
+            lightSubtitleClass : 'font-weight-regular title d-inline-block ',
+            textClass : 'font-weight-regular title-1 d-inline-block',
+            centerWrapperClass : 'd-flex flex-wrap justify-center align-center',
 
         }
 

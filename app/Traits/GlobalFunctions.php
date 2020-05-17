@@ -219,7 +219,7 @@ trait GlobalFunctions
         if ($this->isEmpty($data)) {
             return null;
         } else {
-            return Carbon::parse($data);
+            return Carbon::parse($data)->format("Y-m-d");
         }
     }
 

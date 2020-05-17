@@ -13,9 +13,13 @@ Vue.filter("capitalizeFirstLetter", function (text) {
 
 Vue.filter("formatDate", function (date) {
 
-	return moment(date).format('MMMM Do YYYY');
+	if (date) {
+		return moment(date).format('MMMM Do YYYY');
+	}else{
+		return 'N/A'
+	}
 
-}); 
+});
 
 
 Vue.filter("toDouble", function (value) {

@@ -56,8 +56,8 @@
                 <template v-slot:append>
                   <room-type-form
                     :editMode="false"
-                    :dialogStyle="formDialogConfig.dialogStyle"
-                    :buttonStyle="formDialogConfig.buttonStyle"
+                    :dialogStyle="roomFormDialogConfig.dialogStyle"
+                    :buttonStyle="roomFormDialogConfig.buttonStyle"
                     @created="appendRoomTypeList($event)"
                   ></room-type-form>
                 </template>
@@ -202,7 +202,7 @@ export default {
         country: "",
         roomTypes: []
       }),
-      formDialogConfig: {
+      roomFormDialogConfig: {
         dialogStyle: {
           persistent: true,
           maxWidth: "600px",

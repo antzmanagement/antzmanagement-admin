@@ -18,7 +18,7 @@ class CreateRoomTypesPropertiesTable extends Migration
             $table->unsignedInteger('room_type_id')->unsigned();
             $table->unsignedInteger('property_id')->unsigned();
             $table->integer('qty')->default(0);
-            $table->text('remark')->nullable();
+            $table->longText('remark')->nullable();
             $table->boolean('status')->default(true);
             $table->timestamps();
 

@@ -77,14 +77,10 @@ trait TenantServices
     {
 
         $userType = $this->getUserTypeById($this->tenantType);
-        $data = $userType->users()->where('uid', $uid)->wherePivot('status', 1)->with(['rentrooms' => function ($q) {
+        $data = $userType->users()->where('users.uid', $uid)->wherePivot('status', 1)->with(['roomcontracts' => function ($q) {
             // Query the name field in status table
-            $q->wherePivot('status', true);
-            $q->where('rooms.status', true);
-            $q->with(['roomTypes' => function($q1){
-                $q1->wherePivot('status', true);
-                $q1->where('room_types.status', true);
-            }]);
+            $q->where('status', true);
+            $q->with(['room', 'contract', 'rentalpayments', 'tenant']);
         }])->where('users.status', true)->first();
         return $data;
     }
@@ -92,7 +88,11 @@ trait TenantServices
     private function getTenantById($id)
     {
         $userType = $this->getUserTypeById($this->tenantType);
-        $data = $userType->users()->where('id', $id)->wherePivot('status', 1)->first();
+        $data = $userType->users()->where('users.id', $id)->wherePivot('status', 1)->with(['roomcontracts' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+            $q->with(['room', 'contract', 'rentalpayments', 'tenant']);
+        }])->where('users.status', true)->first();
         return $data;
     }
 
