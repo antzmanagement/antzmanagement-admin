@@ -61,13 +61,13 @@ trait RentalPaymentServices
     private function getRentalPayment($uid)
     {
 
-        $data = RentalPayment::where('uid', $uid)->with(['room', 'tenant', 'contract'])->where('status', true)->first();
+        $data = RentalPayment::where('uid', $uid)->with(['roomcontract'])->where('status', true)->first();
         return $data;
     }
 
     private function getRentalPaymentById($id)
     {
-        $data = RentalPayment::where('id', $id)->with(['room', 'tenant', 'contract'])->where('status', true)->first();
+        $data = RentalPayment::where('id', $id)->with(['roomcontract'])->where('status', true)->first();
         return $data;
     }
 
@@ -80,10 +80,11 @@ trait RentalPaymentServices
         $data->uid = Carbon::now()->timestamp . RentalPayment::count();
         $data->price = $this->toDouble($params->price);
         $data->payment = 0;
+        $data->penalty = 0;
         $data->outstanding = $this->toDouble($data->price - $data->payment);
         $data->paid = false;
-        error_log($params->rentaldate);
         $data->rentaldate = $this->toDate($params->rentaldate);
+        $data->paymentdate = null;
         $data->remark = $params->remark;
         
         $roomContract = $this->getRoomContractById($params->room_contract_id);
@@ -105,12 +106,13 @@ trait RentalPaymentServices
     {
 
         $params = $this->checkUndefinedProperty($params, $this->rentalPaymentAllCols());
-        $data->uid = Carbon::now()->timestamp . RentalPayment::count();
         $data->price = $this->toDouble($params->price);
-        $data->payment = 0;
+        $data->payment = $this->toDouble($params->payment);
+        $data->penalty =  $this->toDouble($params->penalty);
         $data->outstanding = $this->toDouble($data->price - $data->payment);
-        $data->paid = false;
+        $data->paid = $params->paid;
         $data->rentaldate = $this->toDate($params->rentaldate);
+        $data->paymentdate = $this->toDate($params->paymentdate);
         $data->remark = $params->remark;
         
         $roomContract = $this->getRoomContractById($params->room_contract_id);
@@ -138,7 +140,6 @@ trait RentalPaymentServices
 
         return $data->refresh();
     }
-
 
     // Modifying Display Data
     // -----------------------------------------------------------------------------------------------------------------------------------------

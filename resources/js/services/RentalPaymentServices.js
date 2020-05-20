@@ -52,6 +52,13 @@ const RentalPaymentServices = {
     const clonedata = Object.assign({}, data);
     console.log(clonedata);
     return Vue.axios.delete('/api/rentalpayment/' + data.uid);
+  },
+  
+  makePayment(data) {
+    PassportServices.AuthenticationServices.setHeader();
+    const clonedata = Object.assign({}, data);
+    console.log(clonedata);
+    return Vue.axios.post('/api/rentalpayment/'+ data.uid + '/makepayment', clonedata);
   }
 };
 

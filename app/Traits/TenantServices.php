@@ -80,8 +80,18 @@ trait TenantServices
         $data = $userType->users()->where('users.uid', $uid)->wherePivot('status', 1)->with(['roomcontracts' => function ($q) {
             // Query the name field in status table
             $q->where('status', true);
-            $q->with(['room', 'contract', 'rentalpayments', 'tenant']);
+            $q->with(['room' => function ($q) {
+                // Query the name field in status table
+                $q->where('status', true);
+            }, 'contract' => function ($q) {
+                // Query the name field in status table
+                $q->where('status', true);
+            }, 'rentalpayments' => function ($q) {
+                // Query the name field in status table
+                $q->where('status', true);
+            }]);
         }])->where('users.status', true)->first();
+
         return $data;
     }
 
@@ -91,6 +101,7 @@ trait TenantServices
         $data = $userType->users()->where('users.id', $id)->wherePivot('status', 1)->with(['roomcontracts' => function ($q) {
             // Query the name field in status table
             $q->where('status', true);
+            $q->where('expired', false);
             $q->with(['room', 'contract', 'rentalpayments', 'tenant']);
         }])->where('users.status', true)->first();
         return $data;

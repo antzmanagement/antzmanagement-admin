@@ -51,7 +51,7 @@
             <v-row justify="start" align="center" class="pa-2">
               <v-col cols="12">
                 <div class="form-group mb-0">
-                  <label class="form-label mb-0">Room</label>
+                  <label class="form-label mb-0">Room Contract</label>
                   <div class="form-control-plaintext">
                     <v-chip
                       v-for="roomcontract in data.roomcontracts"
@@ -59,7 +59,7 @@
                       class="mr-2 my-2"
                       @click="showTenantRoom(roomcontract)"
                     >
-                      <h4 class="text-center ma-2">{{roomcontract.room.name | capitalizeFirstLetter }}</h4>
+                      <div class="text-center ma-2 title">{{roomcontract.startdate }} {{roomcontract.name}}</div>
                     </v-chip>
                   </div>
                 </div>
@@ -94,7 +94,7 @@
         </v-card>
 
         <v-dialog v-model="tenantRoomDialog" max-width="50%">
-          <tenant-room :tenant="tenantRoomData.tenant" :room="tenantRoomData.room" :roomcontract="tenantRoomData" :rentalpayments="tenantRoomData.rentalpayments"></tenant-room>
+          <tenant-room :tenant="data" :room="tenantRoomData.room" :roomcontract="tenantRoomData" :rentalpayments="tenantRoomData.rentalpayments"></tenant-room>
         </v-dialog>
       </v-container>
     </v-content>
@@ -107,9 +107,9 @@ export default {
   data: () => ({
     tenantRoomDialog : false,
     tenantRoomData : {
-      tenant : {},
       room : {},
       contract : {},
+      rentalpayments : [],
     },
     editButtonStyle: {
       block: false,

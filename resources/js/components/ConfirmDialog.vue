@@ -7,9 +7,11 @@
         :color="activatorStyle.color"
         :block="activatorStyle.block"
         v-on="on"
+        :icon="activatorStyle.isIcon"
         :disabled="isLoading"
       >
-        <v-icon left>{{activatorStyle.icon}}</v-icon>
+        <v-icon left 
+        :small="activatorStyle.smallIcon">{{activatorStyle.icon}}</v-icon>
         {{activatorStyle.text}}
       </v-btn>
     </template>
@@ -64,7 +66,9 @@ export default {
         color: "",
         class: " headline",
         text: "Are you sure?",
-        icon: ""
+        icon: "",
+        isIcon : false,
+        smallIcon : false,
       })
     },
 

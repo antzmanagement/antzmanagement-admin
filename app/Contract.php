@@ -9,6 +9,6 @@ class Contract extends Model
     
     public function roomcontracts()
     {
-        return $this->hasMany('App\RoomContract', 'room_contract_id');
+        return $this->hasMany('App\RoomContract', 'contract_id');
     }
 }

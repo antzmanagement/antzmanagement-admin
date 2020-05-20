@@ -45,7 +45,13 @@
       <v-row>
         <v-col cols="12" :class="helpers.managementStyles().centerWrapperClass">
           <v-card raised width="100%">
-            <v-data-table :headers="rentalPaymentHeaders" :items="rentalpayments" fixed-header height="300px" items-per-page="5">
+            <v-data-table
+              :headers="rentalPaymentHeaders"
+              :items="sortedRentalPayments"
+              fixed-header
+              height="300px"
+              :items-per-page="5"
+            >
               <template v-slot:top>
                 <v-toolbar flat color="white">
                   <v-toolbar-title :class="helpers.managementStyles().subtitleClass">Rental Payment</v-toolbar-title>
@@ -59,7 +65,7 @@
                 </v-toolbar>
               </template>
               <template v-slot:item="props">
-                <tr @click="showTenant(props.item)">
+                <tr>
                   <td>{{props.item.rentaldate | formatDate}}</td>
                   <td>{{props.item.price | toDouble}}</td>
                   <td v-if="props.item.paid">
@@ -70,8 +76,25 @@
                   </td>
                   <td>{{props.item.paymentdate | formatDate}}</td>
                   <td>
-                    <v-icon small class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
-                    <v-icon small @click="deleteItem(item)">mdi-delete</v-icon>
+                    <v-icon
+                      small
+                      class="mr-2"
+                      @click="openPaymentDialog(props.item.uid, false)"
+                      v-if="props.item.paid"
+                      color="success"
+                    >mdi-pencil</v-icon>
+                    <v-icon
+                      small
+                      class="mr-2"
+                      @click="openPaymentDialog(props.item.uid, true)"
+                      color="warning"
+                      v-else
+                    >mdi-currency-usd</v-icon>
+
+                    <confirm-dialog
+                      :activatorStyle="deleteButtonConfig.activatorStyle"
+                      @confirmed="deleteRentalPayment($event, props.item.uid)"
+                    ></confirm-dialog>
                   </td>
                 </tr>
               </template>
@@ -79,6 +102,13 @@
           </v-card>
         </v-col>
       </v-row>
+
+      <rental-payment-form
+        :dialog="paymentDialog"
+        :uid="selectedPayment.uid"
+        @close="paymentDialog = false"
+        @makePayment="updateRentalPaymentDetails($event)"
+      ></rental-payment-form>
     </v-container>
   </v-card>
 </template>
@@ -113,6 +143,23 @@ export default {
     }
   },
   data: () => ({
+    paymentDialog: false,
+    payonly: false,
+    selectedPayment: {
+      uid: ""
+    },
+
+    deleteButtonConfig: {
+      activatorStyle: {
+        block: false,
+        color: "error",
+        class: "",
+        text: "",
+        icon: "mdi-trash-can-outline",
+        isIcon: true,
+        smallIcon: true
+      }
+    },
     rentalPaymentHeaders: [
       {
         text: "Rental",
@@ -134,6 +181,9 @@ export default {
   computed: {
     isLoading() {
       return this.$store.getters.isLoading;
+    },
+    sortedRentalPayments(){
+      return this.helpers.sortByDate( this.rentalpayments, 'rentaldate');
     }
   },
   created() {},
@@ -141,6 +191,8 @@ export default {
   methods: {
     ...mapActions({
       createRentalPaymentAction: "createRentalPayment",
+      makePaymentAction: "makePayment",
+      deleteRentalPaymentAction: "deleteRentalPayment",
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction"
     }),
@@ -166,6 +218,55 @@ export default {
           this.$Progress.finish();
           this.endLoadingAction();
         });
+    },
+    openPaymentDialog(uid, payonly) {
+      this.paymentDialog = true;
+      this.selectedPayment.uid = uid;
+      this.payonly = payonly;
+    },
+
+    updateRentalPaymentDetails(data) {
+      var id = data.id;
+      var rentalpayment = data;
+      this.rentalpayments = this.rentalpayments.map(function(item) {
+        if (item.id == id) {
+          return rentalpayment;
+        } else {
+          return item;
+        }
+      });
+    },
+    deleteRentalPaymentDetails(data) {
+      var id = data.id;
+      this.rentalpayments = this.rentalpayments.filter(function(item) {
+        return item.id != id;
+      });
+    },
+    deleteRentalPayment($isConfirmed, $uid) {
+      if ($isConfirmed) {
+        this.$Progress.start();
+        this.showLoadingAction();
+        console.log('uid');
+        console.log($uid);
+        this.deleteRentalPaymentAction({ uid: $uid })
+          .then(data => {
+            Toast.fire({
+              icon: "success",
+              title: "Successful Deleted. "
+            });
+            this.deleteRentalPaymentDetails(data.data);
+            this.$Progress.finish();
+            this.endLoadingAction();
+          })
+          .catch(error => {
+            Toast.fire({
+              icon: "warning",
+              title: "Fail to delete the tenant!!!!! "
+            });
+            this.$Progress.finish();
+            this.endLoadingAction();
+          });
+      }
     }
   }
 };

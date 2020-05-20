@@ -18,11 +18,11 @@ class RoomContract extends Model
     
     public function tenant()
     {
-        return $this->belongsTo('App\User', 'user_id');
+        return $this->belongsTo('App\User', 'tenant_id');
     }
     
     public function contract()
     {
-        return $this->belongsTo('App\Contract');
+        return $this->belongsTo('App\Contract', 'contract_id');
     }
 }

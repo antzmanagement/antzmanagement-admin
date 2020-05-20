@@ -31,6 +31,10 @@ export const actions = {
         const { data } = await RentalPaymentServices.delete(payload);
         return data;
     },
+    async makePayment(context, payload) {
+        const { data } = await RentalPaymentServices.makePayment(payload);
+        return data;
+    },
 };
 
 // export const mutations = {

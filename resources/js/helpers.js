@@ -1,3 +1,6 @@
+
+import moment from "moment"; //Import Moment
+
 const helpers = {
     toDouble(data) {
         var double = parseFloat(data).toFixed(2);
@@ -61,6 +64,39 @@ const helpers = {
 
     },
 
+    sortBy(data, col) {
+        if(this.isEmpty(data) || this.isEmpty(col)){
+            return null;
+        }
+
+        data = data.sort(function(a, b){
+            return a[col] - b[col];
+        })
+
+    },
+    
+
+    sortByDate(data, col) {
+        if(this.isEmpty(data) || this.isEmpty(col)){
+            return [];
+        }
+
+        data = data.sort(function(a, b){
+            if(moment(a[col]).isSame(moment(b[col]), 'year') && moment(a[col]).isSame(moment(b[col]), 'month')){
+                console.log('same');
+                return 0;
+            }else if(moment(a[col]).isSameOrBefore(moment(b[col]), 'year') && moment(a[col]).isBefore(moment(b[col]), 'month')){
+                console.log('small');
+                return -1;
+            }else{
+                console.log('big');
+                return 1;
+            }
+        })
+
+        return data;
+
+    },
     //This data centralization is only valid for static constant data.
     //If you are consider for using dynamic variable data can be modified by web. Please use vuex instead =)
     managementStyles() {

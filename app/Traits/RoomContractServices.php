@@ -76,12 +76,13 @@ trait RoomContractServices
     {
 
         $params = $this->checkUndefinedProperty($params, $this->roomContractAllCols());
-
         $data = new RoomContract();
         $data->uid = Carbon::now()->timestamp . RoomContract::count();
         $data->name = $params->name;
         $data->duration = $this->toInt($params->duration);
         $data->leftmonth = $data->duration;
+        $data->latestmonth = 0;
+        $data->expired = false;
         $data->terms  = $params->terms;
         $data->autorenew  = $params->autorenew;
         $data->startdate  = $this->toDate($params->startdate);
@@ -97,7 +98,7 @@ trait RoomContractServices
             return false;
         }
         $data->contract()->associate($contract);
-        
+
         $tenant = $this->getTenantById($params->tenant_id);
         if ($this->isEmpty($tenant)) {
             return false;
@@ -149,9 +150,71 @@ trait RoomContractServices
         } else {
             return null;
         }
-
-        return $data->refresh();
     }
+
+
+    private function syncWithRentalPayment($data)
+    {
+
+        $rentalpayments = $data->rentalpayments()->where('status', true)->get();
+
+        $duration = $data->duration;
+        $data->leftmonth = $data->duration - $rentalpayments->count();
+
+
+        $startdate = $data->startdate;
+        $latestmonth = 0;
+        for ($x = 0; $x < $duration; $x++) {
+
+            $latestdate = Carbon::parse($startdate)->addMonth($latestmonth);
+
+            $latest = true;
+            foreach ($rentalpayments as $rentalpayment) {
+                if (Carbon::parse($rentalpayment->rentaldate)->year == Carbon::parse($latestdate)->year && Carbon::parse($rentalpayment->rentaldate)->month == Carbon::parse($latestdate)->month) {
+
+                    $latest = false;
+                    break;
+                }
+            }
+            if ($latest) {
+                $data->latestmonth = $latestmonth;
+                break;
+            }
+
+            $latestmonth++;
+        }
+
+        if ($data->leftmonth <= 0) {
+            $data->expired = true;
+            if ($data->autorenew) {
+                $startdate =  Carbon::parse($data->startdate)->addYear(1)->addMonth(1)->startOfMonth()->format('Y-m-d');
+                $params = collect([
+                    'room_id' => $data->room_id,
+                    'tenant_id' => $data->tenant_id,
+                    'contract_id' => $data->contract_id,
+                    'name' => $data->name,
+                    'duration' => $data->duration,
+                    'terms' => $data->terms,
+                    'autorenew' => $data->autorenew,
+                    'startdate' => $startdate,
+                ]);
+                //Convert To Json Object
+                $params = json_decode(json_encode($params));
+                $roomContract = $this->createRoomContract($params);
+                if($this->isEmpty($roomContract)){
+                    return null;
+                }
+             }
+        }
+
+
+        if ($this->saveModel($data)) {
+            return $data->refresh();
+        } else {
+            return null;
+        }
+    }
+
 
 
     // Modifying Display Data

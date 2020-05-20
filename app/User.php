@@ -103,6 +103,6 @@ class User extends Authenticatable
 
     public function roomcontracts()
     {
-        return $this->hasMany('App\RoomContract', 'user_id');
+        return $this->hasMany('App\RoomContract', 'tenant_id');
     }
 }

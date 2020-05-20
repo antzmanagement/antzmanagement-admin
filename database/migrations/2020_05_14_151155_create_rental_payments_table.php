@@ -19,6 +19,7 @@ class CreateRentalPaymentsTable extends Migration
             $table->string('uid');
             $table->decimal('price',8,2)->default(0.00);
             $table->decimal('payment',8,2)->default(0.00);
+            $table->decimal('penalty',8,2)->default(0.00);
             $table->decimal('outstanding',8,2)->default(0.00);
             $table->boolean('paid')->default(false);
             $table->date('paymentdate')->nullable();

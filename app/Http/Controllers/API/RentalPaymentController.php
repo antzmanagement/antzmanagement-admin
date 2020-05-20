@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use DB;
 use Carbon\Carbon;
 use App\RentalPayment;
+use App\RoomContract;
 use Illuminate\Support\Facades\Hash;
 use App\Traits\AllServices;
 
@@ -81,14 +82,14 @@ class RentalPaymentController extends Controller
             return $this->errorResponse();
         }
 
-        if ($roomContract->leftmonth > 0) {
+        if ($roomContract->leftmonth > 0 && !$roomContract->expired ) {
 
             $room = $roomContract->room;
             if ($this->isEmpty($room)) {
                 DB::rollBack();
                 return $this->errorResponse();
             }
-            $rentalDate = $this->toDate(Carbon::parse($roomContract->startdate)->addMonth($roomContract->duration - $roomContract->leftmonth)->startOfMonth());
+            $rentalDate = $this->toDate(Carbon::parse($roomContract->startdate)->addMonth($roomContract->latestmonth)->startOfMonth());
             $rentalPayment = new RentalPayment();
             $rentalPayment->uid = Carbon::now()->timestamp . RentalPayment::count();
             $params = collect([
@@ -100,21 +101,22 @@ class RentalPaymentController extends Controller
             //Convert To Json Object
             $params = json_decode(json_encode($params));
             $rentalPayment = $this->createRentalPayment($params);
-
+    
             if ($this->isEmpty($rentalPayment)) {
                 DB::rollBack();
                 return $this->errorResponse();
             }
-
-            $roomContract->leftmonth -= 1;
-            if (!$this->saveModel($roomContract)) {
+    
+            if (!$this->syncWithRentalPayment($roomContract)) {
                 DB::rollBack();
                 return $this->errorResponse();
             }
-        } else {
+    
+          
+        }else{
+            DB::rollBack();
+            return $this->errorResponse();
 
-            //Renew Contract
-            if ($roomContract->autorenew) { }
         }
 
 
@@ -194,8 +196,49 @@ class RentalPaymentController extends Controller
             return $this->errorResponse();
         }
 
+        if (!$this->syncWithRentalPayment($rentalPayment->roomcontract)) {
+            DB::rollBack();
+            return $this->errorResponse();
+        }
+
 
         DB::commit();
         return $this->successResponse('RentalPayment', $rentalPayment, 'delete');
+    }
+
+    public function makePayment(Request $request, $uid)
+    {
+        DB::beginTransaction();
+        $this->validate($request, [
+            'penalty' => 'nullable|numeric',
+        ]);
+        $rentalPayment = $this->getRentalPayment($uid);
+        if ($this->isEmpty($rentalPayment)) {
+            DB::rollBack();
+            return $this->notFoundResponse('RentalPayment');
+        }
+
+        $params = collect([
+            'price' => $rentalPayment->price,
+            'payment' => $rentalPayment->price,
+            'paid' => true,
+            'penalty' => $this->toDouble($request->penalty),
+            'paymentdate' => Carbon::now()->format('Y-m-d'),
+            'rentaldate' => $rentalPayment->rentaldate,
+            'remark' => $rentalPayment->remark,
+            'room_contract_id' => $rentalPayment->roomcontract->id,
+        ]);
+        //Convert To Json Object
+        $params = json_decode(json_encode($params));
+        $rentalPayment = $this->updateRentalPayment($rentalPayment, $params);
+
+        if ($this->isEmpty($rentalPayment)) {
+            DB::rollBack();
+            return $this->errorResponse();
+        }
+
+
+        DB::commit();
+        return $this->successResponse('RentalPayment', $rentalPayment, 'update');
     }
 }

@@ -61,6 +61,7 @@ Route::group(['middleware' => ['auth:api']], function (){
 
     Route::resource('rentalpayment', 'API\RentalPaymentController');
     Route::get('/filter/rentalpayment', 'API\RentalPaymentController@filter');
+    Route::post('/rentalpayment/{uid}/makepayment', 'API\RentalPaymentController@makePayment');
 
 });
 

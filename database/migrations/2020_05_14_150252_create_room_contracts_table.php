@@ -19,11 +19,12 @@ class CreateRoomContractsTable extends Migration
             $table->unsignedInteger('room_id')->unsigned();
             //Keep Track of room assigned to this contract
             $table->unsignedInteger('contract_id')->unsigned();
-            $table->unsignedInteger('user_id')->unsigned();
+            $table->unsignedInteger('tenant_id')->unsigned();
             $table->string('uid');
             $table->string('name');
             $table->integer('duration')->default(0);
             $table->integer('leftmonth')->default(0);
+            $table->integer('latestmonth')->default(0);
             $table->longText('terms')->nullable();
             $table->boolean('autorenew')->default(true);
             $table->date('startdate')->default(Carbon::now()->startOfMonth());
@@ -43,7 +44,7 @@ class CreateRoomContractsTable extends Migration
             ->onUpdate('cascade')
             ->onDelete('restrict');
             
-            $table->foreign('user_id')
+            $table->foreign('tenant_id')
             ->references('id')
             ->on('users')
             ->onUpdate('cascade')

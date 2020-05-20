@@ -55,7 +55,7 @@ class CreateRental extends Command
                     DB::rollback();
                     break;
                 }
-                $rentalDate = Carbon::parse($roomContract->startdate)->addMonth($roomContract->duration - $roomContract->leftmonth)->startOfMonth();
+                $rentalDate = $this->toDate(Carbon::parse($roomContract->startdate)->addMonth($roomContract->latestmonth)->startOfMonth());
                 $rentalPayment = new RentalPayment();
                 $rentalPayment->uid = Carbon::now()->timestamp . RentalPayment::count();
                 $params = collect([
@@ -67,20 +67,20 @@ class CreateRental extends Command
                 //Convert To Json Object
                 $params = json_decode(json_encode($params));
                 $rentalPayment = $this->createRentalPayment($params);
+    
                 if ($this->isEmpty($rentalPayment)) {
                     $this->info("error occured");
                     DB::rollback();
                     break;
                 }
-
-                $roomContract->leftmonth -= 1;
-                if (!$this->saveModel($roomContract)) {
+    
+                if (!$this->syncWithRentalPayment($roomContract)) {
                     $this->info("error occured");
                     DB::rollback();
                     break;
                 }
             } else {
-
+    
                 //Renew Contract
                 if ($roomContract->autorenew) { }
             }
