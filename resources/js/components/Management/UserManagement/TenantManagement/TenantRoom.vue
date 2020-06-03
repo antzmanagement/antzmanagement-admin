@@ -9,13 +9,35 @@
         <v-col cols="auto" :class="helpers.managementStyles().centerWrapperClass">
           <div :class="helpers.managementStyles().lightSubtitleClass">{{tenant.name}}</div>
         </v-col>
+        <v-col cols="auto" :class="helpers.managementStyles().centerWrapperClass">
+          <confirm-dialog
+            :activatorStyle="shuffleButtonConfig.activatorStyle"
+            @confirmed="$event ? transferRoomContract() : null"
+          >
+            <template v-slot:header>
+              <div :class="helpers.managementStyles().subtitleClass">Transfer Contract</div>
+            </template>
+
+            <template v-slot:body>
+              <v-autocomplete
+                v-model="selectedTenant"
+                item-text="name"
+                item-value="id"
+                :items="tenants"
+                label="Tenant"
+              ></v-autocomplete>
+            </template>
+          </confirm-dialog>
+        </v-col>
       </v-row>
       <v-row>
         <v-col cols="auto" :class="helpers.managementStyles().centerWrapperClass ">
           <div :class="helpers.managementStyles().subtitleClass">Room :</div>
         </v-col>
         <v-col cols="auto" :class="helpers.managementStyles().centerWrapperClass">
-          <div :class="helpers.managementStyles().lightSubtitleClass">{{room.name}}</div>
+          <v-chip class="mr-2 my-2" @click="showRoom(room)">
+            <div :class="helpers.managementStyles().lightSubtitleClass">{{room.name}}</div>
+          </v-chip>
         </v-col>
       </v-row>
       <v-row>
@@ -93,7 +115,7 @@
 
                     <confirm-dialog
                       :activatorStyle="deleteButtonConfig.activatorStyle"
-                      @confirmed="deleteRentalPayment($event, props.item.uid)"
+                      @confirmed="$event ? deleteRentalPayment(props.item.uid) : null"
                     ></confirm-dialog>
                   </td>
                 </tr>
@@ -145,10 +167,11 @@ export default {
   data: () => ({
     paymentDialog: false,
     payonly: false,
+    selectedTenant: "",
     selectedPayment: {
       uid: ""
     },
-
+    tenants: [],
     deleteButtonConfig: {
       activatorStyle: {
         block: false,
@@ -158,6 +181,12 @@ export default {
         icon: "mdi-trash-can-outline",
         isIcon: true,
         smallIcon: true
+      }
+    },
+    shuffleButtonConfig: {
+      activatorStyle: {
+        icon: "mdi-shuffle-variant",
+        isIcon: true
       }
     },
     rentalPaymentHeaders: [
@@ -182,20 +211,65 @@ export default {
     isLoading() {
       return this.$store.getters.isLoading;
     },
-    sortedRentalPayments(){
-      return this.helpers.sortByDate( this.rentalpayments, 'rentaldate');
+    sortedRentalPayments() {
+      return this.helpers.sortByDate(this.rentalpayments, "rentaldate");
     }
   },
-  created() {},
+  created() {
+    this.$Progress.start();
+    this.showLoadingAction();
+    this.getTenantsAction({ pageNumber: -1, pageSize: -1 })
+      .then(data => {
+        this.tenants = data.data;
+        this.$Progress.finish();
+        this.endLoadingAction();
+      })
+      .catch(error => {
+        Toast.fire({
+          icon: "warning",
+          title: "Fail to retrieve the tenants!!!!! "
+        });
+        this.$Progress.finish();
+        this.endLoadingAction();
+      });
+  },
 
   methods: {
     ...mapActions({
+      getTenantsAction: "getTenants",
+      transferRoomContractAction : 'transferRoomContract',
       createRentalPaymentAction: "createRentalPayment",
       makePaymentAction: "makePayment",
       deleteRentalPaymentAction: "deleteRentalPayment",
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction"
     }),
+    showRoom($data) {
+      this.$router.push("/room/" + $data.uid);
+    },
+    transferRoomContract() {
+      this.showLoadingAction();
+      this.$Progress.start();
+      this.transferRoomContractAction({ room_contract_id : this.roomcontract.id , tenant_id : this.selectedTenant })
+        .then(data => {
+          Toast.fire({
+            icon: "success",
+            title: "Successful Transfer. "
+          });
+          console.log(data.data);
+          this.$Progress.finish();
+          this.endLoadingAction();
+          window.location.reload();
+        })
+        .catch(error => {
+          Toast.fire({
+            icon: "warning",
+            title: "Fail to transfer the contract!!!!! "
+          });
+          this.$Progress.finish();
+          this.endLoadingAction();
+        });
+    },
     createRentalPayment() {
       this.showLoadingAction();
       this.$Progress.start();
@@ -242,31 +316,29 @@ export default {
         return item.id != id;
       });
     },
-    deleteRentalPayment($isConfirmed, $uid) {
-      if ($isConfirmed) {
-        this.$Progress.start();
-        this.showLoadingAction();
-        console.log('uid');
-        console.log($uid);
-        this.deleteRentalPaymentAction({ uid: $uid })
-          .then(data => {
-            Toast.fire({
-              icon: "success",
-              title: "Successful Deleted. "
-            });
-            this.deleteRentalPaymentDetails(data.data);
-            this.$Progress.finish();
-            this.endLoadingAction();
-          })
-          .catch(error => {
-            Toast.fire({
-              icon: "warning",
-              title: "Fail to delete the tenant!!!!! "
-            });
-            this.$Progress.finish();
-            this.endLoadingAction();
+    deleteRentalPayment($uid) {
+      this.$Progress.start();
+      this.showLoadingAction();
+      console.log("uid");
+      console.log($uid);
+      this.deleteRentalPaymentAction({ uid: $uid })
+        .then(data => {
+          Toast.fire({
+            icon: "success",
+            title: "Successful Deleted. "
           });
-      }
+          this.deleteRentalPaymentDetails(data.data);
+          this.$Progress.finish();
+          this.endLoadingAction();
+        })
+        .catch(error => {
+          Toast.fire({
+            icon: "warning",
+            title: "Fail to delete the tenant!!!!! "
+          });
+          this.$Progress.finish();
+          this.endLoadingAction();
+        });
     }
   }
 };

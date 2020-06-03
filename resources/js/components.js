@@ -35,6 +35,9 @@ Vue.component('maintenance-form', require('./components/Management/MaintenanceMa
 Vue.component('maintenance-filter-dialog', require('./components/Management/MaintenanceManagement/MaintenanceFilterDialog.vue').default);
 
 Vue.component('property-form', require('./components/Management/PropertyManagement/PropertyForm.vue').default);
+Vue.component('property-filter-form', require('./components/Management/PropertyManagement/PropertyFilterForm.vue').default);
 
+Vue.component('service-form', require('./components/Management/ServiceManagement/ServiceForm.vue').default);
+Vue.component('service-filter-form', require('./components/Management/ServiceManagement/ServiceFilterForm.vue').default);
 
 Vue.component('rental-payment-form', require('./components/Management/RentalPaymentManagement/RentalPaymentForm.vue').default);

@@ -148,7 +148,6 @@ trait RoomTypeServices
 
         $channel = $this->getChannelById($params->channel_id);
         if ($this->isEmpty($channel)) {
-            error_log('here');
             return null;
         }
         $data->channel()->associate($channel);

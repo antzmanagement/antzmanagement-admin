@@ -12,7 +12,9 @@ import rentalpayment from "./rentalpayment.module";
 import staff from "./staff.module";
 import user from "./user.module";
 import room from "./room.module";
+import roomContract from "./roomContract.module";
 import roomType from "./roomType.module";
+import service from "./service.module";
 
 Vue.use(Vuex);
 
@@ -21,11 +23,13 @@ export default new Vuex.Store({
     tenant,
     owner,
     staff,
-    room,
+    room, 
+    roomContract,
     roomType,
     maintenance,
     contract,
     property,
+    service,
     rentalpayment,
     user,
     auth,

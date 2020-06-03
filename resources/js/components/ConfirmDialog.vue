@@ -10,40 +10,46 @@
         :icon="activatorStyle.isIcon"
         :disabled="isLoading"
       >
-        <v-icon left 
-        :small="activatorStyle.smallIcon">{{activatorStyle.icon}}</v-icon>
+        <v-icon left :small="activatorStyle.smallIcon">{{activatorStyle.icon}}</v-icon>
         {{activatorStyle.text}}
       </v-btn>
     </template>
+
     <v-card>
-      <v-card-title :class="titleStyle.class">{{titleStyle.text}}</v-card-title>
-      <v-card-text :class="contentStyle.class">{{contentStyle.text}}</v-card-text>
+      <v-card-title :class="titleStyle.class">
+        <slot name="header">{{titleStyle.text}}</slot>
+      </v-card-title>
+
+      <v-card-text :class="contentStyle.class">
+        <slot name="body">{{contentStyle.text}}</slot>
+      </v-card-text>
+
       <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn
-          :class="yesButtonStyle.class"
-          text
-          :color="yesButtonStyle.color"
-          :block="yesButtonStyle.block"
-          :disabled="isLoading"
-          @click="clicked(true)"
-        >
-          <v-icon left>{{yesButtonStyle.icon}}</v-icon>
-          {{yesButtonStyle.text}}
-        </v-btn>
-        <v-btn
-          :class="noButtonStyle.class"
-          text
-          :color="noButtonStyle.color"
-          :block="noButtonStyle.block"
-          :disabled="isLoading"
-          @click="clicked(false)"
-        >
-          <v-icon left>{{noButtonStyle.icon}}</v-icon>
-          {{noButtonStyle.text}}
-        </v-btn>
-        <!-- <v-btn color="green darken-1" text @click="dialog = false">Disagree</v-btn>
-        <v-btn color="green darken-1" text @click="dialog = false">Agree</v-btn> -->
+        <slot name="footer">
+          <v-spacer></v-spacer>
+          <v-btn
+            :class="yesButtonStyle.class"
+            text
+            :color="yesButtonStyle.color"
+            :block="yesButtonStyle.block"
+            :disabled="isLoading"
+            @click="clicked(true)"
+          >
+            <v-icon left>{{yesButtonStyle.icon}}</v-icon>
+            {{yesButtonStyle.text}}
+          </v-btn>
+          <v-btn
+            :class="noButtonStyle.class"
+            text
+            :color="noButtonStyle.color"
+            :block="noButtonStyle.block"
+            :disabled="isLoading"
+            @click="clicked(false)"
+          >
+            <v-icon left>{{noButtonStyle.icon}}</v-icon>
+            {{noButtonStyle.text}}
+          </v-btn>
+        </slot>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -54,27 +60,27 @@ export default {
   props: {
     dialogStyle: {
       type: Object,
-      default: ()=>({
+      default: () => ({
         persistent: false,
-        maxWidth: "600px",
+        maxWidth: "600px"
       })
     },
     activatorStyle: {
       type: Object,
-      default: ()=>({
+      default: () => ({
         block: false,
         color: "",
         class: " headline",
         text: "Are you sure?",
         icon: "",
-        isIcon : false,
-        smallIcon : false,
+        isIcon: false,
+        smallIcon: false
       })
     },
 
     titleStyle: {
       type: Object,
-      default: ()=>({
+      default: () => ({
         text: "Are you sure?",
         class: "ma-1"
       })
@@ -82,7 +88,7 @@ export default {
 
     contentStyle: {
       type: Object,
-      default: ()=>({
+      default: () => ({
         text: "This action will not be able to undo. Do you want to continue?",
         class: ""
       })
@@ -90,7 +96,7 @@ export default {
 
     yesButtonStyle: {
       type: Object,
-      default: ()=>({
+      default: () => ({
         block: false,
         color: "green darken-1",
         class: "",
@@ -101,7 +107,7 @@ export default {
 
     noButtonStyle: {
       type: Object,
-      default: ()=>({
+      default: () => ({
         block: false,
         color: "red darken-1",
         class: "",
@@ -112,7 +118,7 @@ export default {
   },
   data() {
     return {
-      dialog: false,
+      dialog: false
     };
   },
 
@@ -121,11 +127,9 @@ export default {
       return this.$store.getters.isLoading;
     }
   },
-  created() {
-    
-  },
+  created() {},
   methods: {
-    clicked($isConfirmed){
+    clicked($isConfirmed) {
       this.$emit("confirmed", $isConfirmed);
       this.dialog = false;
     }

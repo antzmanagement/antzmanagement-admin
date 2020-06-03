@@ -161,6 +161,7 @@
                             item-text="name"
                             item-value="id"
                             label="Contract"
+                            :error-messages="helpers.isEmpty(room.contract_id) ? 'Contract is required' : ''"
                           ></v-autocomplete>
                         </td>
                         <td>
@@ -178,10 +179,10 @@
                                 prepend-icon="event"
                                 readonly
                                 v-on="on"
+                                :error-messages="helpers.isEmpty(room.contractstartdate) ? 'Date is required' : ''"
                               ></v-text-field>
                             </template>
-                            <v-date-picker v-model="room.contractstartdate" no-title scrollable>
-                            </v-date-picker>
+                            <v-date-picker v-model="room.contractstartdate" no-title scrollable></v-date-picker>
                           </v-menu>
                         </td>
                       </tr>
@@ -232,7 +233,7 @@ export default {
   data() {
     return {
       dialog: false,
-      menu : false,
+      menu: false,
       roomTypes: [],
       rooms: [],
       contracts: [],
@@ -432,15 +433,9 @@ export default {
           .then(data => {
             this.contracts = data.data;
 
-            if (this.editMode) {
+            if (this.editMode && this.uid) {
               this.getTenantAction({ uid: this.uid })
-                .then(data => {
-                  var ids = data.data.rentrooms.map(function(room) {
-                    return room.id;
-                  });
-                  //Should assign data first before creating form because the form will reset after triggered
-                  //Create the form before assigning the data, the form will not keep track the original/default value of data
-                  Object.assign(data.data, { rooms: ids });
+                .then(data => {          
                   this.data = new Form(data.data);
                   this.endLoadingAction();
                 })
@@ -483,16 +478,29 @@ export default {
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction"
     }),
-
     appendRoomList($data) {
       this.rooms.push($data);
       this.data.rooms.push($data);
     },
     customValidate() {
-      return (
-        (!this.data.tel1 || this.helpers.isPhoneFormat(this.data.tel1)) &&
-        this.helpers.isIcFormat(this.data.icno)
-      );
+      for (var x = 0; x < this.data.rooms.length; x++) {
+        if (
+          this.helpers.isEmpty(this.data.rooms[x].contract_id) ||
+          this.helpers.isEmpty(this.data.rooms[x].contractstartdate)
+        ) {
+          console.log(this.data.rooms[x].contract_id);
+          console.log(this.data.rooms[x].contractstartdate);
+          return false;
+        }
+      }
+      if (  
+        (!this.data.tel1 && !this.helpers.isPhoneFormat(this.data.tel1)) &&
+        !this.helpers.isIcFormat(this.data.icno)
+      ) {
+        return false;
+      }
+
+      return true;
     },
 
     createTenant() {

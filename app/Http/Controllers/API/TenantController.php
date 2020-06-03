@@ -111,7 +111,6 @@ class TenantController extends Controller
         error_log($this->controllerName . 'Retrieving tenant of uid:' . $uid);
         $tenant = $this->getTenant($uid);
         if ($this->isEmpty($tenant)) {
-            $data['data'] = null;
             return $this->notFoundResponse('Tenant');
         } else {
             return $this->successResponse('Tenant', $tenant, 'retrieve');

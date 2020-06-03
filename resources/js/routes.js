@@ -2,25 +2,30 @@ import Example from './components/ExampleComponent.vue'
 import ManagementHome from './components/Management/ManagementHome.vue'
 import Profile from './components/Profile/Profile.vue'
 import Login from './components/Login/Login.vue'
-import AllStores from './components/Profile/MyStore/AllStores.vue'
 
 import UserManagement from './components/Management/UserManagement/UserManagement.vue';
 
-import AllTenants from './components/Management/UserManagement/TenantManagement/AllTenants.vue';
+import AllTenant from './components/Management/UserManagement/TenantManagement/AllTenant.vue';
 import Tenant from './components/Management/UserManagement/TenantManagement/Tenant.vue'
 
 
-import AllOwners from './components/Management/UserManagement/OwnerManagement/AllOwners.vue';
+import AllOwner from './components/Management/UserManagement/OwnerManagement/AllOwner.vue';
 import Owner from './components/Management/UserManagement/OwnerManagement/Owner.vue'
 
-import AllStaffs from './components/Management/UserManagement/StaffManagement/AllStaffs.vue';
+import AllStaff from './components/Management/UserManagement/StaffManagement/AllStaff.vue';
 import Staff from './components/Management/UserManagement/StaffManagement/Staff.vue'
 
-import AllRooms from './components/Management/RoomManagement/AllRooms.vue';
+import AllRoom from './components/Management/RoomManagement/AllRoom.vue';
 import Room from './components/Management/RoomManagement/Room.vue';
 
-import AllMaintenances from './components/Management/MaintenanceManagement/AllMaintenances.vue';
+import AllMaintenance from './components/Management/MaintenanceManagement/AllMaintenance.vue';
 import Maintenance from './components/Management/MaintenanceManagement/Maintenance.vue';
+
+import AllProperty from './components/Management/PropertyManagement/AllProperty.vue';
+import Property from './components/Management/PropertyManagement/Property.vue';
+
+import AllService from './components/Management/ServiceManagement/AllService.vue';
+import Service from './components/Management/ServiceManagement/Service.vue';
 
 import Home from './components/Home/Home.vue'
 import RoomPage from './components/Home/RoomPage.vue';
@@ -74,11 +79,6 @@ export const routes = [
         component:Profile,
         name : 'profile',
     },
-    { 
-        path:'/stores',
-        component:AllStores,
-        name : 'stores',
-    },
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //Management Route //
@@ -91,7 +91,7 @@ export const routes = [
     // Tenant
     { 
         path:'/tenants',
-        component:AllTenants,
+        component:AllTenant,
         name : 'tenants',
     },
     { 
@@ -103,7 +103,7 @@ export const routes = [
     //Owner
     { 
         path:'/owners',
-        component:AllOwners,
+        component:AllOwner,
         name : 'owners',
     },
     { 
@@ -115,7 +115,7 @@ export const routes = [
     //Staff
     { 
         path:'/staffs',
-        component:AllStaffs,
+        component:AllStaff,
         name : 'staffs',
     },
     { 
@@ -127,7 +127,7 @@ export const routes = [
     //Room
     { 
         path:'/rooms',
-        component:AllRooms,
+        component:AllRoom,
         name : 'rooms',
     },
     { 
@@ -139,7 +139,7 @@ export const routes = [
     //Maintenance
     { 
         path:'/maintenances',
-        component:AllMaintenances,
+        component:AllMaintenance,
         name : 'maintenances',
     },
     { 
@@ -148,5 +148,28 @@ export const routes = [
         name : 'maintenance',
     },
  
+    //Property
+    { 
+        path:'/properties',
+        component:AllProperty,
+        name : 'properties',
+    },
+    { 
+        path:'/property/:uid',
+        component:Property,
+        name : 'property',
+    },
+ 
+    //Service
+    { 
+        path:'/services',
+        component:AllService,
+        name : 'services',
+    },
+    { 
+        path:'/service/:uid',
+        component:Service,
+        name : 'service',
+    },
  
 ];

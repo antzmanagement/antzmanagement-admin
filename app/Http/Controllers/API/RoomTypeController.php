@@ -24,7 +24,6 @@ class RoomTypeController extends Controller
         if ($this->isEmpty($roomTypes)) {
             return $this->errorPaginateResponse('RoomTypes');
         } else {
-            error_log($roomTypes);
             return $this->successPaginateResponse('RoomTypes', $roomTypes, $this->toInt($request->pageSize), $this->toInt($request->pageNumber));
         }
     }
@@ -165,7 +164,6 @@ class RoomTypeController extends Controller
         if ($this->isEmpty($roomTypes)) {
             return $this->errorPaginateResponse('RoomTypes');
         } else {
-            error_log($roomTypes);
             return $this->successPaginateResponse('RoomTypes', $roomTypes, $this->toInt($request->pageSize), $this->toInt($request->pageNumber));
         }
     }

@@ -44,7 +44,6 @@ trait RoomServices
             });
         }
         if ($params->roomTypes) {
-            error_log('Filtering rooms with roomTypes....');
             $roomTypes = collect($params->roomTypes);
             $data = $data->filter(function ($item) use ($roomTypes) {
                 $item = $item->roomTypes()->wherePivot('status', true)->where('room_types.status', true)->get();

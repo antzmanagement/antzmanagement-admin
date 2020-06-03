@@ -13,7 +13,7 @@
           </v-list-item>
         </v-list>
 
-        <v-list :style="{ position : 'absolute', bottom : '0', left : '0'}">
+        <!-- <v-list :style="{ position : 'absolute', bottom : '0', left : '0'}">
           <v-list-item class="mt-4" link>
             <v-list-item-action>
               <v-icon>mdi-plus-circle-outline</v-icon>
@@ -26,7 +26,7 @@
             </v-list-item-action>
             <v-list-item-title>Manage Subscriptions</v-list-item-title>
           </v-list-item>
-        </v-list>
+        </v-list> -->
       </v-navigation-drawer>
     </v-theme-provider>
 
@@ -69,11 +69,13 @@ export default {
       },
       {
         icon: "mdi-account-multiple",
-        text: "User Management",
+        text: "User",
         name: "usermanagement"
       },
-      { icon: "mdi-home-city-outline", text: "Room Management", name: "rooms" },
-      { icon: "mdi-screwdriver", text: "Room Maintenance", name: "maintenances" }
+      { icon: "mdi-home-city-outline", text: "Room", name: "rooms" },
+      { icon: "mdi-screwdriver", text: "Room Maintenance", name: "maintenances" },
+      { icon: "mdi-chair-rolling", text: "Property", name: "properties" },
+      { icon: "mdi-chair-rolling", text: "Service", name: "services" },
     ]
   })
 };

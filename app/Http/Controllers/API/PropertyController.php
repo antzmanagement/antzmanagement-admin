@@ -33,7 +33,6 @@ class PropertyController extends Controller
             'keyword' => $request->keyword,
             'fromdate' => $request->fromdate,
             'todate' => $request->todate,
-            'propertyTypes' => $request->propertyTypes,
             'status' => $request->status,
         ]);
         //Convert To Json Object
@@ -98,10 +97,10 @@ class PropertyController extends Controller
         error_log($this->controllerName . 'Updating property of uid: ' . $uid);
       
         $this->validate($request, [
-            'remark' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'room_id' => 'required|numeric',
-            'property_id' => 'nullable|numeric',
+            'name' => 'required|string|max:300',
+            'text' => 'nullable|string|max:300',
+            'desc' => 'nullable|string|max:2500',
+            'icon' => 'nullable|string|max:300',
         ]);
 
         $property = $this->getProperty($uid);
@@ -110,10 +109,10 @@ class PropertyController extends Controller
             return $this->notFoundResponse('Property');
         }
         $params = collect([
-            'remark' => $request->remark,
-            'price' => $request->price,
-            'room_id' => $request->room_id,
-            'property_id' => $request->property_id,
+            'name' => $request->name,
+            'text' => $request->text,
+            'desc' => $request->desc,
+            'icon' => $request->icon,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

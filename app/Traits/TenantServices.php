@@ -45,7 +45,6 @@ trait TenantServices
         }
 
         if ($params->roomTypes) {
-            error_log('Filtering tenants with roomTypes....');
             $roomTypes = collect($params->roomTypes);
             $data = $data->filter(function ($item) use ($roomTypes) {
                 $rooms = $item->rentrooms()->wherePivot('status', true)->where('rooms.status', true)->get();

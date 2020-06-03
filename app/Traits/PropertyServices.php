@@ -35,26 +35,12 @@ trait PropertyServices
             $keyword = $params->keyword;
             $data = $data->filter(function ($item) use ($keyword) {
                 //check string exist inside or not
-                if (stristr($item->uid, $keyword) == TRUE) {
+                if (stristr($item->uid, $keyword) == TRUE || stristr($item->name, $keyword) == TRUE  ) {
                     return true;
                 } else {
                     return false;
                 }
             });
-        }
-        if ($params->propertyTypes) {
-            error_log('Filtering properties with propertyTypes....');
-            $propertyTypes = collect($params->propertyTypes);
-            $data = $data->filter(function ($item) use ($propertyTypes) {
-                $item = $item->propertyTypes()->wherePivot('status', true)->where('property_types.status', true)->get();
-                $ids = $item->pluck('id');
-                foreach($propertyTypes as $propertyType){
-                    if(!$ids->contains($propertyType)){
-                        return false;
-                    }
-                }
-                return true;
-            })->values();
         }
 
         $data = $data->unique('id');
@@ -100,12 +86,9 @@ trait PropertyServices
 
         $params = $this->checkUndefinedProperty($params, $this->propertyAllCols());
         $data->name  = $params->name;
-        $data->address = $params->address;
-        $data->postcode = $params->postcode;
-        $data->state = $params->state;
-        $data->city = $params->city;
-        $data->country =  $params->country;
-        $data->price = $this->toDouble($params->price);
+        $data->text = $params->text;
+        $data->desc = $params->desc;
+        $data->icon = $params->icon;
 
         if (!$this->saveModel($data)) {
             return null;

@@ -205,6 +205,8 @@ trait RoomContractServices
                     return null;
                 }
              }
+        }else{
+           $data->expired = false; 
         }
 
 
@@ -215,6 +217,30 @@ trait RoomContractServices
         }
     }
 
+    public function transferRoomContract($room_contract_id, $tenant_id)
+    {
+        
+        $roomContract = $this->getRoomContractById($room_contract_id);
+        if($this->isEmpty($roomContract)){
+            return null;
+        }
+
+        $tenant = $this->getTenantById($tenant_id);
+        if($this->isEmpty($tenant)){
+            return null;
+        }
+
+        error_log($roomContract->tenant_id);
+        $roomContract->tenant()->associate($tenant);
+
+        if (!$this->saveModel($roomContract)) {
+            return null;
+        }
+
+        error_log($roomContract->refresh()->tenant_id);
+
+        return $roomContract->refresh();
+    }
 
 
     // Modifying Display Data

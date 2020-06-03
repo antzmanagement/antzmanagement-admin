@@ -53,6 +53,9 @@ Route::group(['middleware' => ['auth:api']], function (){
     Route::resource('property', 'API\PropertyController');
     Route::get('/filter/property', 'API\PropertyController@filter');
 
+    Route::resource('service', 'API\ServiceController');
+    Route::get('/filter/service', 'API\ServiceController@filter');
+
     Route::resource('maintenance', 'API\MaintenanceController');
     Route::get('/filter/maintenance', 'API\MaintenanceController@filter');
 
@@ -62,6 +65,10 @@ Route::group(['middleware' => ['auth:api']], function (){
     Route::resource('rentalpayment', 'API\RentalPaymentController');
     Route::get('/filter/rentalpayment', 'API\RentalPaymentController@filter');
     Route::post('/rentalpayment/{uid}/makepayment', 'API\RentalPaymentController@makePayment');
+
+    Route::resource('roomcontract', 'API\RoomContractController');
+    Route::get('/filter/contract', 'API\RoomContractController@filter');
+    Route::post('/transfer/roomcontract', 'API\RoomContractController@transfer');
 
 });
 
