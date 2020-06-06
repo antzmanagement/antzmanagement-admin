@@ -27,6 +27,9 @@ import Property from './components/Management/PropertyManagement/Property.vue';
 import AllService from './components/Management/ServiceManagement/AllService.vue';
 import Service from './components/Management/ServiceManagement/Service.vue';
 
+import AllContract from './components/Management/ContractManagement/AllContract.vue';
+import Contract from './components/Management/ContractManagement/Contract.vue';
+
 import Home from './components/Home/Home.vue'
 import RoomPage from './components/Home/RoomPage.vue';
 import ServicesPage from './components/Home/ServicesPage.vue';
@@ -170,6 +173,18 @@ export const routes = [
         path:'/service/:uid',
         component:Service,
         name : 'service',
+    },
+    
+    //Contract
+    { 
+        path:'/contracts',
+        component:AllContract,
+        name : 'contracts',
+    },
+    { 
+        path:'/contract/:uid',
+        component:Contract,
+        name : 'contract',
     },
  
 ];

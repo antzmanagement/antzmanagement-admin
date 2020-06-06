@@ -35,23 +35,12 @@ trait ContractServices
             $keyword = $params->keyword;
             $data = $data->filter(function ($item) use ($keyword) {
                 //check string exist inside or not
-                if (stristr($item->uid, $keyword) == TRUE) {
+                if (stristr($item->uid, $keyword) == TRUE || stristr($item->name, $keyword) == TRUE  ) {
                     return true;
                 } else {
                     return false;
                 }
             });
-        }
-        if ($params->rooms) {
-            error_log('Filtering contracts with rooms....');
-            $rooms = collect($params->rooms);
-            $data = $data->filter(function ($item) use ($rooms) {
-
-                if (!$rooms->contains($item->room->id)) {
-                    return false;
-                }
-                return true;
-            })->values();
         }
 
         $data = $data->unique('id');

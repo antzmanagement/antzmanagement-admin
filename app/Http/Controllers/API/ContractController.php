@@ -33,7 +33,6 @@ class ContractController extends Controller
             'keyword' => $request->keyword,
             'fromdate' => $request->fromdate,
             'todate' => $request->todate,
-            'rooms' => $request->rooms,
             'status' => $request->status,
         ]);
         //Convert To Json Object

@@ -76,6 +76,7 @@ export default {
       { icon: "mdi-screwdriver", text: "Room Maintenance", name: "maintenances" },
       { icon: "mdi-chair-rolling", text: "Property", name: "properties" },
       { icon: "mdi-chair-rolling", text: "Service", name: "services" },
+      { icon: "mdi-chair-rolling", text: "Contract", name: "contracts" },
     ]
   })
 };
