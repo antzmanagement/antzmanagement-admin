@@ -32,17 +32,17 @@ class RoomContractController extends Controller
     public function filter(Request $request)
     {
         error_log($this->controllerName . 'Retrieving list of filtered roomContracts.');
-        // api/roomContract/filter (GET)
+        // api/property/filter (GET)
         $params = collect([
             'keyword' => $request->keyword,
             'fromdate' => $request->fromdate,
             'todate' => $request->todate,
             'status' => $request->status,
-            'company_id' => $request->company_id,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
-        $roomContracts = $this->filterRoomContracts($request->roomContract(), $params);
+        $roomContracts = $this->getRoomContracts($request->user());
+        $roomContracts = $this->filterRoomContracts( $roomContracts , $params);
 
         if ($this->isEmpty($roomContracts)) {
             return $this->errorPaginateResponse('RoomContracts');

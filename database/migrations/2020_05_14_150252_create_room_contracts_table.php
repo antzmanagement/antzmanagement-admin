@@ -28,8 +28,12 @@ class CreateRoomContractsTable extends Migration
             $table->longText('terms')->nullable();
             $table->boolean('autorenew')->default(true);
             $table->date('startdate')->default(Carbon::now()->startOfMonth());
+            $table->decimal('booking_fees',8,2)->default(0.00);
+            $table->decimal('deposit',8,2)->default(0.00);
+            $table->decimal('rental',8,2)->default(0.00);
             $table->boolean('expired')->default(false);
             $table->boolean('status')->default(true);
+            $table->longText('remark')->nullable();
             $table->timestamps();
 
             $table->foreign('room_id')

@@ -10,6 +10,10 @@ export const actions = {
         const { data } = await RoomContractServices.index(payload);
         return data;
     },
+    async filterRoomContracts(context, payload) {
+        const { data } = await RoomContractServices.filter(payload);
+        return data;
+    },
     async getRoomContract(context, payload) {
         const { data } = await RoomContractServices.show(payload);
         return data;

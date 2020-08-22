@@ -78,7 +78,7 @@ class RoomController extends Controller
             'city' => 'nullable|string|max:300',
             'country' => 'nullable|string|max:300',
             'price' => 'required|numeric',
-            'roomTypes' => 'required',
+            'roomType' => 'required',
         ]);
         error_log($this->controllerName . 'Creating room.');
         $params = collect([
@@ -99,14 +99,18 @@ class RoomController extends Controller
         }
 
       
-        $roomTypes = RoomType::find($request->roomTypes);
-        if ($this->isEmpty($roomTypes)) {
+        $roomType = RoomType::find($request->roomType);
+        if ($this->isEmpty($roomType)) {
             DB::rollBack();
             return $this->notFoundResponse('RoomType');
         }
 
+        error_log($roomType);
+        error_log($request->roomType);
+        error_log($roomType->pluck('id'));
+
         try {
-            $room->roomTypes()->sync($roomTypes->pluck('id'));
+            $room->roomTypes()->sync($roomType->id);
         } catch (Exception $e) {
             DB::rollBack();
             return $this->errorResponse();
@@ -130,7 +134,7 @@ class RoomController extends Controller
             'city' => 'nullable|string|max:300',
             'country' => 'nullable|string|max:300',
             'price' => 'required|numeric',
-            'roomTypes' => 'required',
+            'roomType' => 'required',
         ]);
         if ($this->isEmpty($room)) {
             DB::rollBack();
@@ -154,14 +158,14 @@ class RoomController extends Controller
             return $this->errorResponse();
         }
 
-        $roomTypes = RoomType::find($request->roomTypes);
-        if ($this->isEmpty($roomTypes)) {
+        $roomType = RoomType::find($request->roomType);
+        if ($this->isEmpty($roomType)) {
             DB::rollBack();
             return $this->notFoundResponse('RoomType');
         }
 
         try {
-            $room->roomTypes()->sync($roomTypes->pluck('id'));
+            $room->roomTypes()->sync($roomType->pluck('id'));
         } catch (Exception $e) {
             DB::rollBack();
             return $this->errorResponse();

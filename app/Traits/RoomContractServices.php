@@ -42,17 +42,6 @@ trait RoomContractServices
                 }
             });
         }
-        if ($params->rooms) {
-            error_log('Filtering roomContracts with rooms....');
-            $rooms = collect($params->rooms);
-            $data = $data->filter(function ($item) use ($rooms) {
-
-                if (!$rooms->contains($item->room->id)) {
-                    return false;
-                }
-                return true;
-            })->values();
-        }
 
         $data = $data->unique('id');
 

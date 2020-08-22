@@ -168,9 +168,8 @@
         <div class="py-5"></div>
       </section>
 
-    
-       <section id="contactUs" class="grey lighten-3">
-         <contact-us></contact-us>
+      <section id="contactUs" class="grey lighten-3">
+        <contact-us></contact-us>
       </section>
     </v-content>
 
@@ -219,7 +218,7 @@ export default {
       {
         imgpath:
           "https://res.cloudinary.com/ipoh-drum/image/upload/v1587278991/Hostel_Dormitory_kp3ulz.jpg"
-      },
+      }
     ],
     services: [
       { text: "Free Wifi", name: "freeWifi", icon: "mdi-wifi" },
@@ -259,11 +258,11 @@ export default {
       },
       { text: "24 Hours Secure", desc: "CCTV operates at the corners." },
       { text: "Quiet Environment", desc: "" }
-    ],
+    ]
   }),
   created() {
     this.$vuetify.theme.dark = false;
-    console.log(this.$vuetify.breakpoint.name);
+    this.$vuetify.goTo(0);
   },
   mounted() {
     console.log("Component mounted.");

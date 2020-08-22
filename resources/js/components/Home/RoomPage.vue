@@ -13,8 +13,8 @@
         <room-type-listing></room-type-listing>
       </section>
 
-       <section id="contactUs" class="grey lighten-3">
-         <contact-us></contact-us>
+      <section id="contactUs" class="grey lighten-3">
+        <contact-us></contact-us>
       </section>
     </v-content>
     <home-footer></home-footer>
@@ -26,9 +26,11 @@ export default {
   props: {
     roomTypes: {
       type: Array,
-      default: () => [
-      ]
+      default: () => []
     }
+  },
+  created() {
+    this.$vuetify.goTo(0);
   },
   data: () => ({}),
   methods: {}

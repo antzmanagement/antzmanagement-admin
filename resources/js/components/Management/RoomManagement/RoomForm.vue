@@ -43,24 +43,23 @@
           <v-row>
             <v-col cols="12">
               <v-autocomplete
-                v-model="data.roomTypes"
+                v-model="data.roomType"
                 :item-text="item => helpers.capitalizeFirstLetter(item.name)"
                 item-value="id"
                 :items="roomTypes"
                 label="Room Type"
                 chips
                 deletable-chips
-                multiple
                 @change="updateFormDetails()"
               >
-                <template v-slot:append>
+                <!-- <template v-slot:append>
                   <room-type-form
                     :editMode="false"
                     :dialogStyle="roomFormDialogConfig.dialogStyle"
                     :buttonStyle="roomFormDialogConfig.buttonStyle"
                     @created="appendRoomTypeList($event)"
                   ></room-type-form>
-                </template>
+                </template>-->
               </v-autocomplete>
             </v-col>
             <v-col cols="12" md="6">
@@ -200,7 +199,7 @@ export default {
         state: "",
         city: "",
         country: "",
-        roomTypes: []
+        roomType: []
       }),
       roomFormDialogConfig: {
         dialogStyle: {
@@ -352,7 +351,7 @@ export default {
               //Create the form before assigning the data, the form will not keep track the original/default value of data
               Object.assign(data.data, { roomTypes: ids });
               this.data = new Form(data.data);
-              console.log(this.data.roomTypes);
+              console.log(this.data.roomType);
               this.endLoadingAction();
             })
             .catch(error => {
@@ -449,20 +448,19 @@ export default {
           });
       }
     },
-    appendRoomTypeList($data) {
-      this.roomTypes.push($data);
-      this.data.roomTypes.push($data.id);
-    },
+    // appendRoomTypeList($data) {
+    //   this.roomTypes.push($data);
+    //   // this.data.roomType.push($data.id);
+    // },
     updateFormDetails() {
-      if (this.data.roomTypes.length == 1) {
-        var id = this.data.roomTypes[0];
-        var roomType = this.roomTypes.find(function(roomType) {
-          return roomType.id == id;
-        });
-        this.data.price = this.helpers.toDouble(roomType.price);
-      } else {
-        this.data.price = 0;
-      }
+      var roomType;
+      var id = this.data.roomType;
+
+      roomType = this.roomTypes.find(function(roomType) {
+        return roomType.id == id;
+      });
+      console.log(roomType);
+      this.data.price = this.helpers.toDouble(roomType ? (roomType.price ? roomType.price : 0 ) : 0);
     }
   }
 };

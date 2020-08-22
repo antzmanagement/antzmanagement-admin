@@ -15,11 +15,19 @@ class CreateUsersTable extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->increments('id')->unique();
+            $table->unsignedInteger('role_id')->unsigned();
             $table->string('uid')->unique();
             $table->string('name')->nullable();
             $table->string('email')->nullable();
             $table->string('icno')->nullable();
             $table->string('tel1')->nullable();
+            $table->string('mother_name')->nullable();
+            $table->string('mother_tel')->nullable();
+            $table->string('father_name')->nullable();
+            $table->string('father_tel')->nullable();
+            $table->string('emergency_name')->nullable();
+            $table->string('emergency_contact')->nullable();
+            $table->string('emergency_relationship')->nullable();
             $table->string('password');
             $table->boolean('status')->default(1);
             $table->dateTime('last_login')->nullable();
@@ -27,6 +35,11 @@ class CreateUsersTable extends Migration
             $table->rememberToken();
             $table->timestamps();
 
+            $table->foreign('role_id')
+            ->references('id')
+            ->on('roles')
+            ->onUpdate('cascade')
+            ->onDelete('restrict');
         });
     }
 

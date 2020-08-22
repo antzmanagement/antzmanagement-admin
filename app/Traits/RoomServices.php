@@ -49,11 +49,11 @@ trait RoomServices
                 $item = $item->roomTypes()->wherePivot('status', true)->where('room_types.status', true)->get();
                 $ids = $item->pluck('id');
                 foreach ($roomTypes as $roomType) {
-                    if (!$ids->contains($roomType)) {
-                        return false;
+                    if ($ids->contains($roomType)) {
+                        return true;
                     }
                 }
-                return true;
+                return false;
             })->values();
         }
 

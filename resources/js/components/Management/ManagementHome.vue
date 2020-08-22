@@ -1,5 +1,6 @@
 <template>
   <v-app id="inspire">
+    <loading></loading>
     <navbar></navbar>
     <v-content class="grey lighten-2">
       <div class="pb-5"></div>
@@ -42,7 +43,7 @@
             </v-col>
           </v-row>
           <button @click="print">Print</button>
-        </div> -->
+        </div>-->
         <v-row justify="start" align="center">
           <v-col cols="12" md="4">
             <v-card class="d-flex flex-wrap justify-center align-center pa-5" height="300px" raised>
@@ -275,6 +276,7 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
 export default {
   data() {
     return {
@@ -620,8 +622,24 @@ export default {
     };
   },
   created() {
+    this.$vuetify.goTo(0);
+    this.showLoadingAction();
+    this.authenticationAction()
+      .then(data => {
+        this.endLoadingAction();
+      })
+      .catch(error => {
+        console.log("error");
+        this.endLoadingAction();
+        this.$router.push("/login");
+      });
   },
   methods: {
+    ...mapActions({
+      authenticationAction: "authentication",
+      showLoadingAction: "showLoadingAction",
+      endLoadingAction: "endLoadingAction"
+    }),
     print() {
       this.$htmlToPaper("printMe");
     }

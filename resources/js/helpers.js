@@ -97,6 +97,32 @@ const helpers = {
         return data;
 
     },
+
+    includedInArray(value, array, col) {
+        if(this.isEmpty(value) || this.isEmpty(array) || this.isEmpty(col)){
+            return [];
+        }
+
+       return array.includes(function(item){
+            return item[col] == value;
+        })
+
+
+    },
+    // filterWithArrayCol(array1, array2, array1Col , array2Col) {
+    //     if(this.isEmpty(array1) || this.isEmpty(array2) || this.isEmpty(array1Col)|| this.isEmpty(array2Col)){
+    //         return [];
+    //     }
+
+    //     var data = array1.filter(function(array1Item){
+    //         return array2.find(function(array2item){
+    //             return array2item[array2Col] == array1Item[array1Col];
+    //         })
+    //     })
+
+    //     return data;
+
+    // },
     //This data centralization is only valid for static constant data.
     //If you are consider for using dynamic variable data can be modified by web. Please use vuex instead =)
     managementStyles() {

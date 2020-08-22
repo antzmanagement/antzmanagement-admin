@@ -26,12 +26,12 @@
             </v-list-item-action>
             <v-list-item-title>Manage Subscriptions</v-list-item-title>
           </v-list-item>
-        </v-list> -->
+        </v-list>-->
       </v-navigation-drawer>
     </v-theme-provider>
 
     <v-theme-provider dark>
-      <v-app-bar app clipped-left  color="#424242">
+      <v-app-bar app clipped-left color="#424242">
         <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
         <v-toolbar-title class="align-center">Antz Management</v-toolbar-title>
         <v-spacer />
@@ -60,24 +60,70 @@ export default {
       {
         icon: "mdi-home-outline",
         text: "Home",
-        name: "home"
+        name: "home",
+        modulename: "home"
       },
       {
         icon: "mdi-view-dashboard-outline",
         text: "Dashboard",
-        name: "management"
+        name: "management",
+        modulename: "management"
       },
       {
         icon: "mdi-account-multiple",
         text: "User",
-        name: "usermanagement"
+        name: "usermanagement",
+        modulename: "room"
       },
-      { icon: "mdi-home-city-outline", text: "Room", name: "rooms" },
-      { icon: "mdi-screwdriver", text: "Room Maintenance", name: "maintenances" },
-      { icon: "mdi-chair-rolling", text: "Property", name: "properties" },
-      { icon: "mdi-chair-rolling", text: "Service", name: "services" },
-      { icon: "mdi-chair-rolling", text: "Contract", name: "contracts" },
+      {
+        icon: "mdi-home-city-outline",
+        text: "Room",
+        name: "rooms",
+        modulename: "room"
+      },
+      {
+        icon: "mdi-screwdriver",
+        text: "Room Maintenance",
+        name: "maintenances",
+        modulename: "maintenance"
+      },
+      {
+        icon: "mdi-chair-rolling",
+        text: "Property",
+        name: "properties",
+        modulename: "property"
+      },
+      {
+        icon: "mdi-washing-machine",
+        text: "Service",
+        name: "services",
+        modulename: "service"
+      },
+      {
+        icon: "mdi-file-document-edit-outline",
+        text: "Contract",
+        name: "contracts",
+        modulename: "contract"
+      },
+      {
+        icon: "mdi-file-document-edit-outline",
+        text: "Room Contract",
+        name: "roomcontracts",
+        modulename: "roomcontract"
+      }
     ]
-  })
+  }),
+  computed: {
+    isLoading() {
+      return this.$store.getters.isLoading;
+    },
+    userModules() {
+      console.log(this.$store.getters.userModules);
+      return this.$store.getters.userModules;
+    }
+  },
+  methods:{
+
+  }
 };
 </script>

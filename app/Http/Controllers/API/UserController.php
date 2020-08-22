@@ -166,7 +166,14 @@ class UserController extends Controller
     {
         // TODO Authenticate currently logged in user
         error_log($this->controllerName . 'Authenticating user.');
-        return response()->json($request->user(), 200);
+        
+        $user = $this->getUserById($request->user()->id);
+        if ($this->isEmpty($user)) {
+            DB::rollBack();
+            return $this->errorResponse();
+        }
+
+        return $this->successResponse('User', $user, 'retrieve');
     }
 
     public function register(Request $request)

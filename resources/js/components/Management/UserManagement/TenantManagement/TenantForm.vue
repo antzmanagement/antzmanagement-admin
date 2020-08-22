@@ -83,7 +83,77 @@
                 :error-messages="emailErrors"
               ></v-text-field>
             </v-col>
-            <v-col cols="12" v-if="!editMode">
+            <v-col cols="6">
+              <v-text-field
+                label="Mother Name"
+                required
+                :maxlength="255"
+                v-model="data.mother_name"
+                @input="$v.data.mother_name.$touch()"
+                @blur="$v.data.mother_name.$touch()"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                label="Mother Contact"
+                required
+                :maxlength="255"
+                v-model="data.mother_tel"
+                @input="$v.data.mother_tel.$touch()"
+                @blur="$v.data.mother_tel.$touch()"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                label="Father Name"
+                required
+                :maxlength="255"
+                v-model="data.father_name"
+                @input="$v.data.father_name.$touch()"
+                @blur="$v.data.father_name.$touch()"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                label="Father Contact"
+                required
+                :maxlength="255"
+                v-model="data.father_tel"
+                @input="$v.data.father_tel.$touch()"
+                @blur="$v.data.father_tel.$touch()"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                label="Emergency Contact Person"
+                required
+                :maxlength="255"
+                v-model="data.emergency_name"
+                @input="$v.data.emergency_name.$touch()"
+                @blur="$v.data.emergency_name.$touch()"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                label="Emergency Contact"
+                required
+                :maxlength="255"
+                v-model="data.emergency_contact"
+                @input="$v.data.emergency_contact.$touch()"
+                @blur="$v.data.emergency_contact.$touch()"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                label="Emergency Person Relationship"
+                required
+                :maxlength="255"
+                v-model="data.emergency_relationship"
+                @input="$v.data.emergency_relationship.$touch()"
+                @blur="$v.data.emergency_relationship.$touch()"
+              ></v-text-field>
+            </v-col>
+            <!-- <v-col cols="12" v-if="!editMode">
               <v-text-field
                 label="Password*"
                 hint="Password should be more than 8 characters."
@@ -108,7 +178,7 @@
                 @blur="$v.data.password_confirmation.$touch()"
                 :error-messages="passwordConfirmErrors"
               ></v-text-field>
-            </v-col>
+            </v-col> -->
 
             <v-col cols="12" md="12">
               <v-autocomplete
@@ -121,14 +191,14 @@
                 multiple
                 return-object
               >
-                <template v-slot:append>
+                <!-- <template v-slot:append>
                   <room-form
                     :editMode="false"
                     :dialogStyle="roomFormDialogConfig.dialogStyle"
                     :buttonStyle="roomFormDialogConfig.buttonStyle"
                     @created="appendRoomList($event)"
                   ></room-form>
-                </template>
+                </template> -->
                 <template v-slot:append-outer>
                   <room-filter-dialog
                     :buttonStyle="roomFilterDialogConfig.buttonStyle"
@@ -242,8 +312,13 @@ export default {
         icno: "",
         tel1: "",
         email: "",
-        password: "",
-        password_confirmation: "",
+        mother_name : "",
+        mother_tel : "",
+        father_name : "",
+        father_tel : "",
+        emergency_name : "",
+        emergency_contact : "",
+        emergency_relationship : "",
         roomTypes: [],
         rooms: []
       }),

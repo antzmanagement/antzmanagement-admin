@@ -18,6 +18,7 @@ class CreateTenantsRoomsTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('user_id')->unsigned();
             $table->unsignedInteger('room_id')->unsigned();
+            $table->unsignedInteger('agent_id')->nullable();
             $table->longText('remark')->nullable();
             $table->boolean('status')->default(true);
             $table->timestamps();
@@ -31,6 +32,12 @@ class CreateTenantsRoomsTable extends Migration
             $table->foreign('room_id')
             ->references('id')
             ->on('rooms')
+            ->onUpdate('cascade')
+            ->onDelete('restrict');
+            
+            $table->foreign('agent_id')
+            ->references('id')
+            ->on('users')
             ->onUpdate('cascade')
             ->onDelete('restrict');
         });

@@ -3,7 +3,7 @@
       
       <div
         class="title font-weight-light grey--text text--lighten-1 text-center"
-      >&copy; {{ (new Date()).getFullYear() }} — Vuetify, LLC — Made with 💜 by John Leider</div>
+      >&copy; {{ (new Date()).getFullYear() }} — Antz Village Website — Made with 💜 by Simon Ng Sian Siong</div>
     </v-footer>
 </template>
 

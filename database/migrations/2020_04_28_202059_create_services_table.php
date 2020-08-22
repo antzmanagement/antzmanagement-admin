@@ -19,7 +19,7 @@ class CreateServicesTable extends Migration
             $table->string('name')->nullable();
             $table->string('text')->nullable();
             $table->longText('desc')->nullable();
-            $table->string('icon')->nullable();
+            $table->decimal('price',8,2)->default(0.00);
             $table->boolean('status')->default(true);
             $table->timestamps();
         });

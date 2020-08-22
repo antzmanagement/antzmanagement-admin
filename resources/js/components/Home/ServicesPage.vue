@@ -168,6 +168,9 @@ export default {
       }
     ]
   }),
+  created() {
+    this.$vuetify.goTo(0);
+  },
   methods: {}
 };
 </script>

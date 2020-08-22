@@ -19,19 +19,19 @@ class ServiceTableSeeder extends Seeder
 
         $service = new Service();
         $service->uid = Carbon::now()->timestamp . Service::count();
-        $service->name = 'freeWifi';
-        $service->text = 'Free Wifi';
+        $service->name = 'wifi';
+        $service->text = 'Wifi';
         $service->desc = $faker->paragraph();
-        $service->icon = "mdi-wifi";
+        $service->price = 38.00;
         $service->save();
 
         
         $service = new Service();
         $service->uid = Carbon::now()->timestamp . Service::count();
         $service->name = 'laundry';
-        $service->text = 'Laundry Services';
+        $service->text = 'Laundry';
         $service->desc = $faker->paragraph();
-        $service->icon = "mdi-washing-machine";
+        $service->price = 43.00;
         $service->save();
 
         $service = new Service();
@@ -39,50 +39,26 @@ class ServiceTableSeeder extends Seeder
         $service->name = 'cleaning';
         $service->text = 'Cleaning';
         $service->desc = $faker->paragraph();
-        $service->icon = "mdi-broom";
+        $service->price = 43.00;
         $service->save();
 
+        $service = new Service();
+        $service->uid = Carbon::now()->timestamp . Service::count();
+        $service->name = 'facilityRoom';
+        $service->text = 'Facility Room';
+        $service->desc = $faker->paragraph();
+        $service->price = 28.00;
+        $service->save();
+
+        
         $service = new Service();
         $service->uid = Carbon::now()->timestamp . Service::count();
         $service->name = 'gym';
         $service->text = 'Gym';
         $service->desc = $faker->paragraph();
-        $service->icon = "mdi-dumbbell";
-        $service->save();
-
-        
-        $service = new Service();
-        $service->uid = Carbon::now()->timestamp . Service::count();
-        $service->name = 'parking';
-        $service->text = 'Free Parking';
-        $service->desc = $faker->paragraph();
-        $service->icon = "mdi-parking";
+        $service->price = 38.00;
         $service->save();
         
-        $service = new Service();
-        $service->uid = Carbon::now()->timestamp . Service::count();
-        $service->name = 'furnished';
-        $service->text = 'Fully Furnished';
-        $service->desc = $faker->paragraph();
-        $service->icon = "mdi-table-chair";
-        $service->save();
-
-        
-        $service = new Service();
-        $service->uid = Carbon::now()->timestamp . Service::count();
-        $service->name = 'transportation';
-        $service->text = 'Van Transportation';
-        $service->desc = $faker->paragraph();
-        $service->icon = "mdi-van-passenger";
-        $service->save();
-        
-        $service = new Service();
-        $service->uid = Carbon::now()->timestamp . Service::count();
-        $service->name = 'kitchen';
-        $service->text = 'Kitchen';
-        $service->desc = $faker->paragraph();
-        $service->icon = "mdi-chef-hat";
-        $service->save();
     
     }
 }

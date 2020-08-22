@@ -18,107 +18,103 @@ class RoomTypeTableSeeder extends Seeder
     public function run()
     {
 
-        $imgs = [
-            "https://res.cloudinary.com/ipoh-drum/image/upload/v1587403963/CP-B1112-2_olvbdv.jpg",
-            "https://res.cloudinary.com/ipoh-drum/image/upload/v1587403962/maxresdefault_ra18v3.jpg",
-            "https://res.cloudinary.com/ipoh-drum/image/upload/v1587278994/217486835_jw9ndq.jpg",
-            "https://res.cloudinary.com/ipoh-drum/image/upload/v1587278992/badhostels_o9brym.jpg",
-            "https://res.cloudinary.com/ipoh-drum/image/upload/v1587278991/Hostel_Dormitory_kp3ulz.jpg",
-            "https://res.cloudinary.com/ipoh-drum/image/upload/v1587278990/182381214_kdfpz3.jpg",
-            "https://res.cloudinary.com/ipoh-drum/image/upload/v1587998042/Hilton_Panama_Alienware_Room_Gaming_hotel_room_12_ynjtji.jpg",
-            "https://res.cloudinary.com/ipoh-drum/image/upload/v1587998035/Screen_Shot_2019_10_08_at_2.29.55_PM.0_qy5nih.jpg",
-            "https://res.cloudinary.com/ipoh-drum/image/upload/v1587998029/DesignbyEmilyHendersonDesignandPhotobySaraLigorria-Tramp_654-b8122ec9f66b4c69a068859958d8db37_v0evbc.jpg",
-            "https://res.cloudinary.com/ipoh-drum/image/upload/v1587998024/download_k8zcpq.jpg",
-            "https://res.cloudinary.com/ipoh-drum/image/upload/v1587998020/Guest-bedroom-refresh_zvdt8y.jpg",
-            "https://res.cloudinary.com/ipoh-drum/image/upload/v1587998018/GettyImages-9261821821-5c69c1b7c9e77c0001675a49_hotr3e.jpg",
-            "https://res.cloudinary.com/ipoh-drum/image/upload/v1587998015/213503505_y75krx.jpg"
-
-
-        ];
         $faker = Faker::create();
 
         $roomType = new RoomType();
         $roomType->uid = Carbon::now()->timestamp . RoomType::count();
-        $roomType->name = 'normal';
-        $roomType->price = 210.00;
-        $roomType->desc = $faker->paragraph();
+        $roomType->name = 'premium1';
+        $roomType->text = "Premium Unit With Laundry";
+        $roomType->price = 278.00;
+        $roomType->desc = "";
         $roomType->save();
 
-        for ($x = 0; $x < 5; $x++) {
-            $image = new RoomTypeImage();
-            $image->uid = Carbon::now()->timestamp . RoomTypeImage::count();
-            $image->imgpath = $imgs[$faker->numberBetween($min = 0, $max = 12)];
-            $image->roomType()->associate($roomType->id);
-            $image->save();
-        }
-        
-        $properties = Property::where('status', true)->get();
+        $properties = Property::find([1,2,3,4,5,6,7,8,9,10,11]);
         foreach ($properties as $property) {
 
             $roomType->properties()->attach($property->id);
         }
 
-        $services = Service::where('status', true)->get();
+        $services = Service::find([1,3,4,5]);
         foreach ($services as $service) {
-
             $roomType->services()->attach($service->id);
         }
 
 
         $roomType = new RoomType();
         $roomType->uid = Carbon::now()->timestamp . RoomType::count();
-        $roomType->name = 'premium';
-        $roomType->price = 290.00;
-        $roomType->desc = $faker->paragraph();
+        $roomType->name = 'premium1';
+        $roomType->text = "Premium Unit With Cleaning";
+        $roomType->price = 278.00;
+        $roomType->desc = "";
         $roomType->save();
 
-        for ($x = 0; $x < 6; $x++) {
-            $image = new RoomTypeImage();
-            $image->uid = Carbon::now()->timestamp . RoomTypeImage::count();
-            $image->imgpath = $imgs[$faker->numberBetween($min = 0, $max = 12)];
-            $image->roomType()->associate($roomType->id);
-            $image->save();
-        }
-
-        $properties = Property::where('status', true)->get();
+        $properties = Property::find([1,2,3,4,5,6,7,8,9,10,11]);
         foreach ($properties as $property) {
 
             $roomType->properties()->attach($property->id);
         }
 
-        $services = Service::where('status', true)->get();
+        $services = Service::find([1,2,4,5]);
         foreach ($services as $service) {
-
             $roomType->services()->attach($service->id);
         }
+        
+        $roomType = new RoomType();
+        $roomType->uid = Carbon::now()->timestamp . RoomType::count();
+        $roomType->name = 'premium3';
+        $roomType->text = "Premium Unit With Full Package";
+        $roomType->price = 298.00;
+        $roomType->desc = "";
+        $roomType->save();
+
+        $properties = Property::find([1,2,3,4,5,6,7,8,9,10,11]);
+        foreach ($properties as $property) {
+
+            $roomType->properties()->attach($property->id);
+        }
+
+        $services = Service::find([1,2,3,4,5]);
+        foreach ($services as $service) {
+            $roomType->services()->attach($service->id);
+        }
+        
 
         $roomType = new RoomType();
         $roomType->uid = Carbon::now()->timestamp . RoomType::count();
-        $roomType->name = 'owner';
-        $roomType->desc = $faker->paragraph();
-        $roomType->price = 0.00;
+        $roomType->name = 'wifiZone';
+        $roomType->text = "Wifi Zone";
+        $roomType->price = 248.00;
+        $roomType->desc = "";
         $roomType->save();
 
-        for ($x = 0; $x < 7; $x++) {
-            $image = new RoomTypeImage();
-            $image->uid = Carbon::now()->timestamp . RoomTypeImage::count();
-            $image->imgpath = $imgs[$faker->numberBetween($min = 0, $max = 12)];
-            $image->roomType()->associate($roomType->id);
-            $image->save();
-        }
-
-        
-        $properties = Property::where('status', true)->get();
+        $properties = Property::find([1,2,3,4,5,6,7,8]);
         foreach ($properties as $property) {
 
             $roomType->properties()->attach($property->id);
         }
 
-        $services = Service::where('status', true)->get();
+        $services = Service::find([1]);
         foreach ($services as $service) {
-
             $roomType->services()->attach($service->id);
         }
+        
+        $roomType = new RoomType();
+        $roomType->uid = Carbon::now()->timestamp . RoomType::count();
+        $roomType->name = 'basic';
+        $roomType->text = "Basic";
+        $roomType->price = 218.00;
+        $roomType->desc = "";
+        $roomType->save();
 
+        $properties = Property::find([1,2,3,4,5,6,7,8]);
+        foreach ($properties as $property) {
+
+            $roomType->properties()->attach($property->id);
+        }
+
+        $services = Service::find([]);
+        foreach ($services as $service) {
+            $roomType->services()->attach($service->id);
+        }
     }
 }

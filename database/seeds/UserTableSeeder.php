@@ -1,5 +1,6 @@
 <?php
 
+use App\Role;
 use Illuminate\Database\Seeder;
 use Faker\Factory as Faker;
 use App\User;
@@ -24,6 +25,9 @@ class UserTableSeeder extends Seeder
         $user->icno = '111111-11-1111';
         $user->email = 'admin@gmail.com';
         $user->password = Hash::make('111111');
+
+        $role = Role::where('name', 'superadmin')->first();
+        $user->role()->associate($role);
         $user->save();
 
         $userType = UserType::where('name', 'staff')->first();
@@ -38,10 +42,13 @@ class UserTableSeeder extends Seeder
             $user->tel1 = $faker->ean13;
             $user->email =  $faker->unique()->safeEmail;
             $user->password = Hash::make('111111');
+            $role = Role::where('name', 'tenant')->first();
+            $user->role()->associate($role);
             $user->save();
-            
+
             $userType = UserType::where('name', 'tenant')->first();
             $userType->users()->syncWithoutDetaching([$user->refresh()->id]);
+
         }
 
         for ($x = 0; $x < 100; $x++) {
@@ -53,13 +60,16 @@ class UserTableSeeder extends Seeder
             $user->tel1 = $faker->ean13;
             $user->email =  $faker->unique()->safeEmail;
             $user->password = Hash::make('111111');
+            $role = Role::where('name', 'owner')->first();
+            $user->role()->associate($role);
             $user->save();
-            
+
             $userType = UserType::where('name', 'owner')->first();
             $userType->users()->syncWithoutDetaching([$user->refresh()->id]);
+
         }
 
-        
+
         for ($x = 0; $x < 100; $x++) {
 
             $user = new User();
@@ -69,10 +79,13 @@ class UserTableSeeder extends Seeder
             $user->tel1 = $faker->ean13;
             $user->email =  $faker->unique()->safeEmail;
             $user->password = Hash::make('111111');
+            $role = Role::where('name', 'manager')->first();
+            $user->role()->associate($role);
             $user->save();
-            
+
             $userType = UserType::where('name', 'staff')->first();
             $userType->users()->syncWithoutDetaching([$user->refresh()->id]);
+
         }
     }
 }

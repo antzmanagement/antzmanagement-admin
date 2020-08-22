@@ -28,8 +28,10 @@ const AuthenticationServices = {
     return Vue.axios.post('oauth/token', clonedata)
   },
 
-  register(resource, params) {
-    return Vue.axios.put(`${resource}`, params);
+  authenticate() {
+    this.init();
+    this.setHeader();
+    return Vue.axios.get('/api/authenticate');
   },
 
   register(resource, params) {

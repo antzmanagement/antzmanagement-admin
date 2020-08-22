@@ -30,6 +30,13 @@ import Service from './components/Management/ServiceManagement/Service.vue';
 import AllContract from './components/Management/ContractManagement/AllContract.vue';
 import Contract from './components/Management/ContractManagement/Contract.vue';
 
+import AllRoomContract from './components/Management/RoomContractManagement/AllRoomContract.vue';
+import RoomContract from './components/Management/RoomContractManagement/RoomContract.vue';
+
+import AllRentalPayment from './components/Management/RentalPaymentManagement/AllRentalPayment.vue';
+import RentalPayment from './components/Management/RentalPaymentManagement/RentalPayment.vue';
+
+
 import Home from './components/Home/Home.vue'
 import RoomPage from './components/Home/RoomPage.vue';
 import ServicesPage from './components/Home/ServicesPage.vue';
@@ -185,6 +192,31 @@ export const routes = [
         path:'/contract/:uid',
         component:Contract,
         name : 'contract',
+    },
+
+    
+    //Room Contract
+    { 
+        path:'/roomcontracts',
+        component:AllRoomContract,
+        name : 'roomcontracts',
+    },
+    { 
+        path:'/roomcontract/:uid',
+        component: RoomContract,
+        name : 'roomcontract',
+    },
+
+    //Rental Payment
+    { 
+        path:'/rentalpayments',
+        component:AllRentalPayment,
+        name : 'rentalpayments',
+    },
+    { 
+        path:'/rentalpayment/:uid',
+        component: RentalPayment,
+        name : 'rentalpayment',
     },
  
 ];
