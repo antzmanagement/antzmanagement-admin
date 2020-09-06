@@ -28,7 +28,7 @@ const helpers = {
         return false;
     },
     isEmpty(value) {
-        if (value == null || value == 'undefined' || value == "" || value == "N/A" || value == []) {
+        if (value == null || value == 'undefined' || value == "" || value == "N/A" || value == [] || value == {}) {
             return true;
         }
 
