@@ -1,5 +1,11 @@
 <template>
-  <v-dialog v-model="dialog" fullscreen hide-overlay transition="dialog-bottom-transition">
+  <v-dialog
+    v-model="dialog"
+    fullscreen
+    hide-overlay
+    persistent
+    transition="dialog-bottom-transition"
+  >
     <template v-slot:activator="{ on }">
       <v-btn
         :class="buttonStyle.class"
@@ -178,7 +184,7 @@
                 @blur="$v.data.password_confirmation.$touch()"
                 :error-messages="passwordConfirmErrors"
               ></v-text-field>
-            </v-col> -->
+            </v-col>-->
 
             <v-col cols="12" md="12">
               <v-autocomplete
@@ -198,7 +204,7 @@
                     :buttonStyle="roomFormDialogConfig.buttonStyle"
                     @created="appendRoomList($event)"
                   ></room-form>
-                </template> -->
+                </template>-->
                 <template v-slot:append-outer>
                   <room-filter-dialog
                     :buttonStyle="roomFilterDialogConfig.buttonStyle"
@@ -217,13 +223,18 @@
                     <thead>
                       <tr>
                         <th class="text-left">Room</th>
+                        <th class="text-left">Price</th>
                         <th class="text-left">Contract</th>
                         <th class="text-left">Contract Start Date</th>
+                        <th class="text-left">Services</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr v-for="(room) in data.rooms" :key="room.uid">
                         <td>{{ room.name }}</td>
+                        <td>
+                          <v-text-field v-model="room.price" prefix="RM" type="number" step="0.01"></v-text-field>
+                        </td>
                         <td>
                           <v-autocomplete
                             v-model="room.contract_id"
@@ -255,6 +266,15 @@
                             <v-date-picker v-model="room.contractstartdate" no-title scrollable></v-date-picker>
                           </v-menu>
                         </td>
+                        <td>
+                          <services-dialog
+                            :dialogStyle="servicesDialogConfig.dialogStyle"
+                            :buttonStyle="servicesDialogConfig.buttonStyle"
+                            :services="pluckUid(room.room_types[0].services)"
+                            editMode
+                            @submit="(e) => {roomServiceUpdated(room , e)}"
+                          ></services-dialog>
+                        </td>
                       </tr>
                     </tbody>
                   </template>
@@ -275,18 +295,18 @@ import {
   minLength,
   maxLength,
   sameAs,
-  email
+  email,
 } from "vuelidate/lib/validators";
 import { mapActions } from "vuex";
 export default {
   props: {
     editMode: {
       type: Boolean,
-      default: false
+      default: false,
     },
     uid: {
       type: String,
-      default: ""
+      default: "",
     },
     buttonStyle: {
       type: Object,
@@ -296,9 +316,9 @@ export default {
         class: "ma-1",
         text: "Add Tenant",
         icon: "mdi-plus",
-        elevation: 5
-      })
-    }
+        elevation: 5,
+      }),
+    },
   },
   data() {
     return {
@@ -312,50 +332,64 @@ export default {
         icno: "",
         tel1: "",
         email: "",
-        mother_name : "",
-        mother_tel : "",
-        father_name : "",
-        father_tel : "",
-        emergency_name : "",
-        emergency_contact : "",
-        emergency_relationship : "",
+        mother_name: "",
+        mother_tel: "",
+        father_name: "",
+        father_tel: "",
+        emergency_name: "",
+        emergency_contact: "",
+        emergency_relationship: "",
         roomTypes: [],
-        rooms: []
+        rooms: [],
       }),
       roomFormDialogConfig: {
         dialogStyle: {
           persistent: true,
           maxWidth: "600px",
           fullscreen: false,
-          hideOverlay: true
+          hideOverlay: true,
         },
         buttonStyle: {
           block: false,
           color: "primary",
           class: "ma-4",
           text: "Add New Room",
-          icon: "mdi-plus"
-        }
+          icon: "mdi-plus",
+        },
       },
       roomFilterGroup: new Form({
         roomTypes: [],
         pageNumber: -1,
-        pageSize: -1
+        pageSize: -1,
       }),
       roomFilterDialogConfig: {
         buttonStyle: {
           class: "ma-1",
           text: "",
           icon: "mdi-magnify",
-          isIcon: true
+          isIcon: true,
         },
         dialogStyle: {
           persistent: true,
           maxWidth: "1200px",
           fullscreen: false,
-          hideOverlay: true
-        }
-      }
+          hideOverlay: true,
+        },
+      },
+      servicesDialogConfig: {
+        buttonStyle: {
+          class: "ma-1",
+          text: "",
+          icon: "mdi-filter-menu",
+          isIcon: true,
+        },
+        dialogStyle: {
+          persistent: true,
+          maxWidth: "1200px",
+          fullscreen: false,
+          hideOverlay: true,
+        },
+      },
     };
   },
 
@@ -370,9 +404,9 @@ export default {
           password: { required, minLength: minLength(8) },
           password_confirmation: {
             required,
-            sameAsPassword: sameAs("password")
-          }
-        }
+            sameAsPassword: sameAs("password"),
+          },
+        },
       };
     } else {
       return {
@@ -380,8 +414,8 @@ export default {
           name: { required, maxLength: maxLength(100) },
           icno: { required, maxLength: maxLength(14) },
           tel1: {},
-          email: { required, email }
-        }
+          email: { required, email },
+        },
       };
     }
   },
@@ -483,41 +517,42 @@ export default {
         errors.push("Password Confirmation didn't match");
         return errors;
       }
-    }
+    },
   },
   watch: {
-    dialog: function(val) {
+    dialog: function (val) {
       if (val) {
         this.data.reset();
         this.$v.$reset();
       }
-    }
+    },
   },
   created() {
     this.showLoadingAction();
     this.getRoomsAction({
       pageNumber: -1,
-      pageSize: -1
+      pageSize: -1,
     })
-      .then(data => {
+      .then((data) => {
+        console.log(data.data);
         this.rooms = data.data;
         this.getContractsAction({
           pageNumber: -1,
-          pageSize: -1
+          pageSize: -1,
         })
-          .then(data => {
+          .then((data) => {
             this.contracts = data.data;
 
             if (this.editMode && this.uid) {
               this.getTenantAction({ uid: this.uid })
-                .then(data => {          
+                .then((data) => {
                   this.data = new Form(data.data);
                   this.endLoadingAction();
                 })
-                .catch(error => {
+                .catch((error) => {
                   Toast.fire({
                     icon: "warning",
-                    title: "Something went wrong... "
+                    title: "Something went wrong... ",
                   });
                   this.endLoadingAction();
                 });
@@ -525,19 +560,19 @@ export default {
               this.endLoadingAction();
             }
           })
-          .catch(error => {
+          .catch((error) => {
             this.endLoadingAction();
             Toast.fire({
               icon: "warning",
-              title: "Something went wrong... "
+              title: "Something went wrong... ",
             });
           });
       })
-      .catch(error => {
+      .catch((error) => {
         this.endLoadingAction();
         Toast.fire({
           icon: "warning",
-          title: "Something went wrong... "
+          title: "Something went wrong... ",
         });
       });
   },
@@ -551,7 +586,7 @@ export default {
       createTenantAction: "createTenant",
       updateTenantAction: "updateTenant",
       showLoadingAction: "showLoadingAction",
-      endLoadingAction: "endLoadingAction"
+      endLoadingAction: "endLoadingAction",
     }),
     appendRoomList($data) {
       this.rooms.push($data);
@@ -568,8 +603,9 @@ export default {
           return false;
         }
       }
-      if (  
-        (!this.data.tel1 && !this.helpers.isPhoneFormat(this.data.tel1)) &&
+      if (
+        !this.data.tel1 &&
+        !this.helpers.isPhoneFormat(this.data.tel1) &&
         !this.helpers.isIcFormat(this.data.icno)
       ) {
         return false;
@@ -584,26 +620,26 @@ export default {
       if (this.$v.$invalid || !this.customValidate()) {
         Toast.fire({
           icon: "warning",
-          title: "Please make sure all the data is valid. "
+          title: "Please make sure all the data is valid. ",
         });
       } else {
         this.$Progress.start();
         this.showLoadingAction();
         this.createTenantAction(this.data)
-          .then(data => {
+          .then((data) => {
             Toast.fire({
               icon: "success",
-              title: "Successful Created. "
+              title: "Successful Created. ",
             });
             this.$Progress.finish();
             this.endLoadingAction();
             this.$emit("created", data.data);
             this.dialog = false;
           })
-          .catch(error => {
+          .catch((error) => {
             Toast.fire({
               icon: "error",
-              title: "Something went wrong. "
+              title: "Something went wrong. ",
             });
             this.$Progress.finish();
             this.endLoadingAction();
@@ -617,30 +653,52 @@ export default {
       if (this.$v.$invalid || !this.customValidate()) {
         Toast.fire({
           icon: "warning",
-          title: "Please make sure all the data is valid. "
+          title: "Please make sure all the data is valid. ",
         });
       } else {
         this.$Progress.start();
         this.showLoadingAction();
         this.updateTenantAction(this.data)
-          .then(data => {
+          .then((data) => {
             Toast.fire({
               icon: "success",
-              title: "Successful Updated. "
+              title: "Successful Updated. ",
             });
             this.$Progress.finish();
             this.endLoadingAction();
             this.$emit("updated", data.data);
             this.dialog = false;
           })
-          .catch(error => {
+          .catch((error) => {
             Toast.fire({
               icon: "error",
-              title: "Something went wrong. "
+              title: "Something went wrong. ",
             });
             this.$Progress.finish();
             this.endLoadingAction();
           });
+      }
+    },
+    roomServiceUpdated(room, event) {
+      let selectedServices = event.services;
+      if (selectedServices.length > 0) {
+        let insertService = [];
+        let insertPrice = 0;
+
+        selectedServices.forEach(function (service) {
+          let existed = room.room_types[0].services.some(function (item) {
+            return item.uid == service.uid;
+          });
+
+          if (!existed) {
+            insertService.push(service);
+            insertPrice += parseFloat(service.price);
+          }
+        });
+        room.room_types[0].services = room.room_types[0].services.concat(
+          insertService
+        );
+        room.price = parseFloat(room.price) + parseFloat(insertPrice);
       }
     },
 
@@ -648,7 +706,7 @@ export default {
       this.roomFilterGroup.reset();
       this.data.rooms = [];
       if (filterGroup) {
-        this.roomFilterGroup.roomTypes = filterGroup.roomTypes.map(function(
+        this.roomFilterGroup.roomTypes = filterGroup.roomTypes.map(function (
           roomType
         ) {
           return roomType.id;
@@ -660,7 +718,7 @@ export default {
     applyRoomFilter() {
       this.showLoadingAction();
       this.filterRoomsAction(this.roomFilterGroup)
-        .then(data => {
+        .then((data) => {
           if (data.data) {
             this.rooms = data.data;
           } else {
@@ -668,15 +726,24 @@ export default {
           }
           this.endLoadingAction();
         })
-        .catch(error => {
+        .catch((error) => {
           Toast.fire({
             icon: "error",
-            title: "Something went wrong. "
+            title: "Something went wrong. ",
           });
           this.$Progress.finish();
           this.endLoadingAction();
         });
-    }
-  }
+    },
+    pluckUid(data) {
+      if (data.length > 0) {
+        return data.map(function (item) {
+          return item.uid;
+        });
+      } else {
+        return [];
+      }
+    },
+  },
 };
 </script>

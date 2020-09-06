@@ -19,7 +19,15 @@ trait RoomServices
 
         $data = collect();
 
-        $data = Room::where('status', true)->get();
+        $data = Room::with(['maintenances' => function ($q) {
+            // Query the name field in status table
+            $q->with('property');
+            $q->where('status', true);
+        }, 'roomTypes' => function ($q) {
+            // Query the name field in status table
+            $q->with('services');
+            $q->wherePivot('status', true);
+        }])->where('status', true)->get();
 
         $data = $data->unique('id')->sortBy('id')->flatten(1);
 
@@ -71,6 +79,7 @@ trait RoomServices
             $q->where('status', true);
         }, 'roomTypes' => function ($q) {
             // Query the name field in status table
+            $q->with('services');
             $q->wherePivot('status', true);
         }])->where('status', true)->first();
         return $data;
@@ -84,6 +93,7 @@ trait RoomServices
             $q->where('status', true);
         }, 'roomTypes' => function ($q) {
             // Query the name field in status table
+            $q->with('services');
             $q->wherePivot('status', true);
         }])->where('status', true)->first();
         return $data;

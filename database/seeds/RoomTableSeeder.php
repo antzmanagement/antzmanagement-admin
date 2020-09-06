@@ -28,11 +28,11 @@ class RoomTableSeeder extends Seeder
         foreach ($tenants as $tenant) {
 
             $roomType = RoomType::find(
-                $faker->randomElement([1, 2, 3])
+                $faker->randomElement([1,2,3,4,5])
             );
             $room = new Room();
             $room->uid = Carbon::now()->timestamp . Room::count();
-            $room->name = $faker->ean13;
+            $room->name = $roomType->text . Room::count();
             $room->price = $roomType->price;
             $room->address = $faker->address;
             $room->state = $faker->state;
@@ -83,7 +83,7 @@ class RoomTableSeeder extends Seeder
             );
             $room = new Room();
             $room->uid = Carbon::now()->timestamp . Room::count();
-            $room->name = $faker->ean13;
+            $room->name = $roomType->text . Room::count();
             $room->price = $roomType->price;
             $room->address = $faker->address;
             $room->state = $faker->state;
@@ -104,7 +104,7 @@ class RoomTableSeeder extends Seeder
             );
             $room = new Room();
             $room->uid = Carbon::now()->timestamp . Room::count();
-            $room->name = $faker->ean13;
+            $room->name = $roomType->text . Room::count();
             $room->price = $roomType->price;
             $room->address = $faker->address;
             $room->state = $faker->state;

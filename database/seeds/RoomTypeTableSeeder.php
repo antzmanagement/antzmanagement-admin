@@ -42,7 +42,7 @@ class RoomTypeTableSeeder extends Seeder
 
         $roomType = new RoomType();
         $roomType->uid = Carbon::now()->timestamp . RoomType::count();
-        $roomType->name = 'premium1';
+        $roomType->name = 'premium2';
         $roomType->text = "Premium Unit With Cleaning";
         $roomType->price = 278.00;
         $roomType->desc = "";
