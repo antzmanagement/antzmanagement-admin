@@ -8,6 +8,7 @@ use DB;
 use Carbon\Carbon;
 use App\Tenant;
 use App\Room;
+use App\Role;
 use App\RoomContract;
 use App\UserType;
 use Illuminate\Support\Facades\Hash;
@@ -188,6 +189,7 @@ class TenantController extends Controller
      */
     public function store(Request $request)
     {
+        error_log("creating");
         DB::beginTransaction();
         // Can only be used by Authorized personnel
         // api/tenant (POST)
@@ -205,15 +207,26 @@ class TenantController extends Controller
                     $query->where('status', true);
                 }),
             ],
-            'password' => 'required|string|min:6|confirmed',
         ]);
         error_log($this->controllerName . 'Creating tenant.');
+        $role = Role::where('name', 'tenant')->where('status', true)->first();
+        if ($this->isEmpty($role)) {
+            DB::rollBack();
+            return $this->errorResponse();
+        }
         $params = collect([
             'name' => $request->name,
             'icno' => $request->icno,
             'tel1' => $request->tel1,
             'email' => $request->email,
-            'password' => $request->password,
+            'mother_name' => $request->mother_name,
+            'mother_tel' => $request->mother_tel,
+            'father_name' => $request->father_name,
+            'father_tel' => $request->father_tel,
+            'emergency_name' => $request->emergency_name,
+            'emergency_contact' => $request->emergency_contact,
+            'emergency_relationship' => $request->emergency_relationship,
+            'role_id' => $role->id,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
@@ -246,21 +259,29 @@ class TenantController extends Controller
                     return $this->notFoundResponse('Contract');
                 }
                 $startdate = Carbon::parse($room->contractstartdate)->format('Y-m-d');
-                $room = $this->getRoomById($room->id);
-                if ($this->isEmpty($room)) {
+                $origRoom = $this->getRoomById($room->id);
+                if ($this->isEmpty($origRoom)) {
                     DB::rollBack();
                     return $this->notFoundResponse('Room');
                 }
 
+                $servicesIds = collect($room->services)->pluck('id');
+                $origServiceIds = collect($room->origServices)->pluck('id');
+                $addOnServicesIds = $servicesIds->diff($origServiceIds);
                 $params = collect([
-                    'room_id' => $room->id,
+                    'room_id' => $origRoom->id,
                     'tenant_id' => $tenant->id,
                     'contract_id' => $contract->id,
+                    'orig_service_ids' => $origServiceIds,
+                    'add_on_service_ids' => $addOnServicesIds,
                     'name' => $contract->name,
                     'duration' => $contract->duration,
                     'terms' => $contract->terms,
                     'autorenew' => $contract->autorenew,
                     'startdate' => $startdate,
+                    'rental' => $room->price,
+                    'deposit' => $room->deposit,
+                    'booking_fees' => $room->booking_fees,
                 ]);
                 //Convert To Json Object
                 $params = json_decode(json_encode($params));
@@ -368,6 +389,16 @@ class TenantController extends Controller
         // api/tenant/{tenantid} (PUT)
         error_log($this->controllerName . 'Updating tenant of uid: ' . $uid);
         $tenant = $this->getTenant($uid);
+        if ($this->isEmpty($tenant)) {
+            DB::rollBack();
+            return $this->notFoundResponse('Tenant');
+        }
+
+        $role = Role::where('name', 'tenant')->where('status', true)->first();
+        if ($this->isEmpty($role)) {
+            DB::rollBack();
+            return $this->errorResponse();
+        }
         $this->validate($request, [
             'email' =>
             [
@@ -382,15 +413,19 @@ class TenantController extends Controller
             ],
             'name' => 'required|string|max:191',
         ]);
-        if ($this->isEmpty($tenant)) {
-            DB::rollBack();
-            return $this->notFoundResponse('Tenant');
-        }
         $params = collect([
             'icno' => $request->icno,
             'name' => $request->name,
             'email' => $request->email,
             'tel1' => $request->tel1,
+            'mother_name' => $request->mother_name,
+            'mother_tel' => $request->mother_tel,
+            'father_name' => $request->father_name,
+            'father_tel' => $request->father_tel,
+            'emergency_name' => $request->emergency_name,
+            'emergency_contact' => $request->emergency_contact,
+            'emergency_relationship' => $request->emergency_relationship,
+            'role_id' => $role->id,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
@@ -400,41 +435,41 @@ class TenantController extends Controller
             return $this->errorResponse();
         }
 
-        if ($request->rooms) {
+        // if ($request->rooms) {
 
-            $rooms = Room::find($request->rooms);
-            if ($this->isEmpty($rooms)) {
-                DB::rollBack();
-                return $this->notFoundResponse('Rooms');
-            }
-            $origrooms = $tenant->rentrooms()->wherePivot('status', true)->where('rooms.status', true)->get();
+        //     $rooms = Room::find($request->rooms);
+        //     if ($this->isEmpty($rooms)) {
+        //         DB::rollBack();
+        //         return $this->notFoundResponse('Rooms');
+        //     }
+        //     $origrooms = $tenant->rentrooms()->wherePivot('status', true)->where('rooms.status', true)->get();
 
-            //Add New Room
-            foreach ($rooms as $room) {
-                if (!$origrooms->contains('id', $room->id)) {
+        //     //Add New Room
+        //     foreach ($rooms as $room) {
+        //         if (!$origrooms->contains('id', $room->id)) {
 
-                    try {
-                        $tenant->rentrooms()->syncWithoutDetaching([$room->id => ['status' => true]]);
-                    } catch (Exception $e) {
-                        DB::rollBack();
-                        return $this->errorResponse();
-                    }
-                }
-            }
+        //             try {
+        //                 $tenant->rentrooms()->syncWithoutDetaching([$room->id => ['status' => true]]);
+        //             } catch (Exception $e) {
+        //                 DB::rollBack();
+        //                 return $this->errorResponse();
+        //             }
+        //         }
+        //     }
 
-            //Delete Room
-            foreach ($origrooms as $origroom) {
-                if (!$rooms->contains('id', $origroom->id)) {
+        //     //Delete Room
+        //     foreach ($origrooms as $origroom) {
+        //         if (!$rooms->contains('id', $origroom->id)) {
 
-                    try {
-                        $tenant->rentrooms()->updateExistingPivot([$origroom->id], ['status' => false]);
-                    } catch (Exception $e) {
-                        DB::rollBack();
-                        return $this->errorResponse();
-                    }
-                }
-            }
-        }
+        //             try {
+        //                 $tenant->rentrooms()->updateExistingPivot([$origroom->id], ['status' => false]);
+        //             } catch (Exception $e) {
+        //                 DB::rollBack();
+        //                 return $this->errorResponse();
+        //             }
+        //         }
+        //     }
+        // }
 
         DB::commit();
         return $this->successResponse('Tenant', $tenant, 'update');

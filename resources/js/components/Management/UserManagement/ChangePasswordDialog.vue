@@ -191,7 +191,6 @@ export default {
 
       if (!this.verified && this.data.oldpassword) {
         errors.push("Password is incorrect");
-        console.log(errors);
         return errors;
       }
     },
@@ -264,7 +263,6 @@ export default {
                   icon: "success",
                   title: "Successful Updated. "
                 });
-                console.log(data);
                 this.$Progress.finish();
                 this.endLoadingAction();
                 this.$emit("updated");

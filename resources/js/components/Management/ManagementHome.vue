@@ -6,44 +6,6 @@
       <div class="pb-5"></div>
 
       <v-container>
-        <!-- <div id="printMe">
-          <v-row justify="start" align="center">
-            <v-col cols="12" md="4">
-              <v-card class="d-flex flex-wrap justify-center align-center pa-5" height="300px">
-                <apexchart
-                  width="100%"
-                  height="100%"
-                  type="bar"
-                  :options="options"
-                  :series="series"
-                ></apexchart>
-              </v-card>
-            </v-col>
-            <v-col cols="12" md="4">
-              <v-card class="d-flex flex-wrap justify-center align-center pa-5" height="300px">
-                <apexchart
-                  width="100%"
-                  height="100%"
-                  type="bar"
-                  :options="options"
-                  :series="series1"
-                ></apexchart>
-              </v-card>
-            </v-col>
-            <v-col cols="12" md="4">
-              <v-card class="d-flex flex-wrap justify-center align-center pa-5" height="300px">
-                <apexchart
-                  width="100%"
-                  height="100%"
-                  type="bar"
-                  :options="options"
-                  :series="series2"
-                ></apexchart>
-              </v-card>
-            </v-col>
-          </v-row>
-          <button @click="print">Print</button>
-        </div>-->
         <v-row justify="start" align="center">
           <v-col cols="12" md="4">
             <v-card class="d-flex flex-wrap justify-center align-center pa-5" height="300px" raised>

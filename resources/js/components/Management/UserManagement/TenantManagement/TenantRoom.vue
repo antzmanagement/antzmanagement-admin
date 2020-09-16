@@ -239,7 +239,6 @@ export default {
       getTenantsAction: "getTenants",
       transferRoomContractAction : 'transferRoomContract',
       createRentalPaymentAction: "createRentalPayment",
-      makePaymentAction: "makePayment",
       deleteRentalPaymentAction: "deleteRentalPayment",
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction"
@@ -256,7 +255,6 @@ export default {
             icon: "success",
             title: "Successful Transfer. "
           });
-          console.log(data.data);
           this.$Progress.finish();
           this.endLoadingAction();
           window.location.reload();
@@ -276,7 +274,6 @@ export default {
       this.createRentalPaymentAction({ room_contract_id: this.roomcontract.id })
         .then(data => {
           this.rentalpayments.push(data.data);
-          console.log(data.data);
           Toast.fire({
             icon: "success",
             title: "Successful Created. "
@@ -319,8 +316,6 @@ export default {
     deleteRentalPayment($uid) {
       this.$Progress.start();
       this.showLoadingAction();
-      console.log("uid");
-      console.log($uid);
       this.deleteRentalPaymentAction({ uid: $uid })
         .then(data => {
           Toast.fire({

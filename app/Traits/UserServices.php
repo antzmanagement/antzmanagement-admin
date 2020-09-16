@@ -97,8 +97,21 @@ trait UserServices
         $data->icno = $params->icno;
         $data->email = $params->email;
         $data->tel1 = $params->tel1;
+        $data->mother_name = $params->mother_name;
+        $data->mother_tel = $params->mother_tel;
+        $data->father_name = $params->father_name;
+        $data->father_tel = $params->father_tel;
+        $data->emergency_name = $params->emergency_name;
+        $data->emergency_contact = $params->emergency_contact;
+        $data->emergency_relationship = $params->emergency_relationship;
+
         $data->password = Hash::make($params->password);
 
+        $role = $this->getRoleById($params->role_id);
+        if ($this->isEmpty($role)) {
+            return null;
+        }
+        $data->role()->associate($role);
         if (!$this->saveModel($data)) {
             return null;
         }
@@ -116,6 +129,19 @@ trait UserServices
         $data->icno = $params->icno;
         $data->email = $params->email;
         $data->tel1 = $params->tel1;
+        $data->mother_name = $params->mother_name;
+        $data->mother_tel = $params->mother_tel;
+        $data->father_name = $params->father_name;
+        $data->father_tel = $params->father_tel;
+        $data->emergency_name = $params->emergency_name;
+        $data->emergency_contact = $params->emergency_contact;
+        $data->emergency_relationship = $params->emergency_relationship;
+
+        $role = $this->getRoleById($params->role_id);
+        if ($this->isEmpty($role)) {
+            return false;
+        }
+        $data->role()->associate($role);
 
         if (!$this->saveModel($data)) {
             return null;
@@ -215,7 +241,8 @@ trait UserServices
 
         return [
             'id', 'uid', 'name', 'email',
-            'icno', 'tel1', 'password', 'status'
+            'icno', 'tel1', 'mother_name', 'mother_tel', 'father_name',
+            'father_tel', 'emergency_name', 'emergency_contact', 'emergency_relationship', 'password', 'status'
         ];
     }
 
@@ -223,10 +250,8 @@ trait UserServices
     {
 
         return [
-            'id', 'channel_id', 'playlist_id', 'uid',
-            'title', 'desc', 'userpath', 'userpublicid', 'imgpublicid', 'imgpath', 'totallength', 'view',
-            'like', 'dislike', 'price', 'discpctg', 'disc', 'discbyprice', 'free', 'salesqty', 'scope',
-            'agerestrict', 'status'
+            'id', 'uid', 'name', 'email',
+            'icno', 'tel1', 'password', 'status'
         ];
     }
     public function userFilterCols()

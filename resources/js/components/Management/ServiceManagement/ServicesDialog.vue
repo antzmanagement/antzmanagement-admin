@@ -89,6 +89,10 @@ export default {
       type: Array,
       default: () => [],
     },
+    origServices: {
+      type: Array,
+      default: () => [],
+    },
   },
   data() {
     return {
@@ -131,7 +135,7 @@ export default {
       });
 
     this.data.services = this.services;
-    this.fixedServices = this.services;
+    this.fixedServices = this.origServices;
   },
   methods: {
     ...mapActions({

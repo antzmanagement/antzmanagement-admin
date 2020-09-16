@@ -70,13 +70,48 @@ class RoomContractController extends Controller
         // Can only be used by Authorized personnel
         // api/roomContract (POST)
         $this->validate($request, [
-            'name' => 'required|string|max:300',
-            'price' => 'nullable|numeric',
+            'tenant' => 'required',
+            'room' => 'required',
         ]);
         error_log($this->controllerName . 'Creating roomContract.');
+        $tenant = $this->getTenantById($request->tenant);
+        if ($this->isEmpty($tenant)) {
+            DB::rollBack();
+            return $this->notFoundResponse('Tenant');
+        }
+        $request->room = json_decode(json_encode($request->room));
+        $room = $this->getRoomById($request->room->id);
+        if ($this->isEmpty($room)) {
+            DB::rollBack();
+            return $this->notFoundResponse('Room');
+        }
+
+        $contract = $this->getContractById($request->room->contract_id);
+        if ($this->isEmpty($contract)) {
+            DB::rollBack();
+            return $this->notFoundResponse('Contract');
+        }
+
+        $startdate = Carbon::parse($request->room->contractstartdate)->format('Y-m-d');
+
+        $servicesIds = collect($request->room->services)->pluck('id');
+        $origServiceIds = collect($request->room->origServices)->pluck('id');
+        $addOnServicesIds = $servicesIds->diff($origServiceIds);
         $params = collect([
-            'name' => $request->name,
-            'price' => $request->price,
+            'tenant_id' => $tenant->id,
+            'room_id' => $room->id,
+            'contract_id' => $contract->id,
+            'orig_service_ids' => $origServiceIds,
+            'add_on_service_ids' => $addOnServicesIds,
+            'name' => $room->name . $startdate . $contract->name,
+            'duration' => $contract->duration,
+            'terms' => $contract->terms,
+            'autorenew' => $contract->autorenew,
+            'startdate' => $startdate,
+            'rental' => $request->room->price,
+            'deposit' => $request->room->deposit,
+            'booking_fees' => $request->room->booking_fees,
+
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
@@ -96,30 +131,65 @@ class RoomContractController extends Controller
         // api/roomContract/{roomContractid} (PUT)
         error_log($this->controllerName . 'Updating roomContract of uid: ' . $uid);
         $roomContract = $this->getRoomContract($uid);
-        $this->validate($request, [
-            'email' => 'required|string|max:191|unique:users,email,' . $roomContract->id,
-            'name' => 'required|string|max:191',
-        ]);
         if ($this->isEmpty($roomContract)) {
             DB::rollBack();
             return $this->notFoundResponse('RoomContract');
         }
+        $this->validate($request, [
+            'tenant' => 'required',
+            'room' => 'required',
+        ]);
+        $tenant = $this->getTenantById($request->tenant);
+        if ($this->isEmpty($tenant)) {
+            DB::rollBack();
+            return $this->notFoundResponse('Tenant');
+        }
+        $request->room = json_decode(json_encode($request->room));
+        $room = $this->getRoomById($request->room->id);
+        if ($this->isEmpty($room)) {
+            DB::rollBack();
+            return $this->notFoundResponse('Room');
+        }
+
+        $contract = $this->getContractById($request->room->contract_id);
+        if ($this->isEmpty($contract)) {
+            DB::rollBack();
+            return $this->notFoundResponse('Contract');
+        }
+
+      
+        $startdate = Carbon::parse($request->room->contractstartdate)->format('Y-m-d');
+
+        $servicesIds = collect($request->room->services)->pluck('id');
+        $origServiceIds = collect($request->room->origServices)->pluck('id');
+        $addOnServicesIds = $servicesIds->diff($origServiceIds);
         $params = collect([
-            'icno' => $request->icno,
-            'name' => $request->name,
-            'email' => $request->email,
-            'tel1' => $request->tel1,
+            'tenant_id' => $tenant->id,
+            'room_id' => $room->id,
+            'contract_id' => $contract->id,
+            'orig_service_ids' => $origServiceIds,
+            'add_on_service_ids' => $addOnServicesIds,
+            'name' => $room->name . $startdate . $contract->name,
+            'duration' => $contract->duration,
+            'terms' => $contract->terms,
+            'autorenew' => $contract->autorenew,
+            'startdate' => $startdate,
+            'rental' => $request->room->price,
+            'deposit' => $request->room->deposit,
+            'booking_fees' => $request->room->booking_fees,
+            'outstanding_deposit' => $request->room->outstanding_deposit,
+
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
-        $roomContract = $this->updateRoom($roomContract, $params);
+        $roomContract = $this->updateRoomContract($roomContract , $params);
         if ($this->isEmpty($roomContract)) {
             DB::rollBack();
             return $this->errorResponse();
-        } else {
-            DB::commit();
-            return $this->successResponse('RoomContract', $roomContract, 'update');
         }
+
+        DB::commit();
+        return $this->successResponse('RoomContract', $roomContract, 'update');
     }
 
     public function destroy(Request $request, $uid)
@@ -133,24 +203,11 @@ class RoomContractController extends Controller
             DB::rollBack();
             return $this->notFoundResponse('RoomContract');
         }
-        $roomContract = $this->deleteRoom($roomContract);
+        $roomContract = $this->deleteRoomContract($roomContract);
         if ($this->isEmpty($roomContract)) {
             DB::rollBack();
             return $this->errorResponse();
         }
-
-        $userType = RoomContract::where('name', 'roomContract')->first();
-        if ($this->isEmpty($userType)) {
-            $data['data'] = null;
-            return $this->notFoundResponse('RoomContract');
-        }
-        try {
-            $userType->users()->updateExistingPivot($roomContract->id, ['status' => false]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            return $this->errorResponse();
-        }
-
 
         DB::commit();
         return $this->successResponse('RoomContract', $roomContract, 'delete');

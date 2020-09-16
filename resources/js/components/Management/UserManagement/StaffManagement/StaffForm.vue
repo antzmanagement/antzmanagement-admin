@@ -109,6 +109,16 @@
                 :error-messages="passwordConfirmErrors"
               ></v-text-field>
             </v-col>
+            <v-col cols="12">
+              <v-autocomplete
+                v-model="data.role_id"
+                :items="roles"
+                item-value="id"
+                item-text="name"
+                label="Role"
+                :error-messages="helpers.isEmpty(data.role_id) ? 'Role is required' : ''"
+              ></v-autocomplete>
+            </v-col>
           </v-row>
         </v-container>
       </v-card-text>
@@ -123,18 +133,18 @@ import {
   minLength,
   maxLength,
   sameAs,
-  email
+  email,
 } from "vuelidate/lib/validators";
 import { mapActions } from "vuex";
 export default {
   props: {
     editMode: {
       type: Boolean,
-      default: false
+      default: false,
     },
     uid: {
       type: String,
-      default: ""
+      default: "",
     },
     buttonStyle: {
       type: Object,
@@ -144,21 +154,23 @@ export default {
         class: "ma-1",
         text: "Add Staff",
         icon: "mdi-plus",
-        elevation: 5
-      })
-    }
+        elevation: 5,
+      }),
+    },
   },
   data() {
     return {
       dialog: false,
+      roles: [],
       data: new Form({
         name: "",
         icno: "",
         tel1: "",
         email: "",
         password: "",
-        password_confirmation: ""
-      })
+        password_confirmation: "",
+        role_id: "",
+      }),
     };
   },
 
@@ -173,9 +185,9 @@ export default {
           password: { required, minLength: minLength(8) },
           password_confirmation: {
             required,
-            sameAsPassword: sameAs("password")
-          }
-        }
+            sameAsPassword: sameAs("password"),
+          },
+        },
       };
     } else {
       return {
@@ -183,8 +195,8 @@ export default {
           name: { required, maxLength: maxLength(100) },
           icno: { required, maxLength: maxLength(14) },
           tel1: {},
-          email: { required, email }
-        }
+          email: { required, email },
+        },
       };
     }
   },
@@ -286,29 +298,29 @@ export default {
         errors.push("Password Confirmation didn't match");
         return errors;
       }
-    }
+    },
   },
   watch: {
-    dialog: function(val) {
+    dialog: function (val) {
       if (val) {
         this.data.reset();
         this.$v.$reset();
       }
-    }
+    },
   },
   created() {
     this.showLoadingAction();
     if (this.editMode) {
       this.getStaffAction({ uid: this.uid })
-        .then(data => {
+        .then((data) => {
           this.data = new Form(data.data);
           this.endLoadingAction();
         })
-        .catch(error => {
+        .catch((error) => {
           this.endLoadingAction();
           Toast.fire({
             icon: "warning",
-            title: "Something went wrong... "
+            title: "Something went wrong... ",
           });
         });
     } else {
@@ -321,7 +333,7 @@ export default {
       createStaffAction: "createStaff",
       updateStaffAction: "updateStaff",
       showLoadingAction: "showLoadingAction",
-      endLoadingAction: "endLoadingAction"
+      endLoadingAction: "endLoadingAction",
     }),
 
     customValidate() {
@@ -337,26 +349,26 @@ export default {
       if (this.$v.$invalid || !this.customValidate()) {
         Toast.fire({
           icon: "warning",
-          title: "Please make sure all the data is valid. "
+          title: "Please make sure all the data is valid. ",
         });
       } else {
         this.$Progress.start();
         this.showLoadingAction();
         this.createStaffAction(this.data)
-          .then(data => {
+          .then((data) => {
             Toast.fire({
               icon: "success",
-              title: "Successful Created. "
+              title: "Successful Created. ",
             });
             this.$Progress.finish();
             this.endLoadingAction();
             this.$emit("created", data.data);
             this.dialog = false;
           })
-          .catch(error => {
+          .catch((error) => {
             Toast.fire({
               icon: "error",
-              title: "Something went wrong. "
+              title: "Something went wrong. ",
             });
             this.$Progress.finish();
             this.endLoadingAction();
@@ -370,32 +382,32 @@ export default {
       if (this.$v.$invalid || !this.customValidate()) {
         Toast.fire({
           icon: "warning",
-          title: "Please make sure all the data is valid. "
+          title: "Please make sure all the data is valid. ",
         });
       } else {
         this.$Progress.start();
         this.showLoadingAction();
         this.updateStaffAction(this.data)
-          .then(data => {
+          .then((data) => {
             Toast.fire({
               icon: "success",
-              title: "Successful Updated. "
+              title: "Successful Updated. ",
             });
             this.$Progress.finish();
             this.endLoadingAction();
             this.$emit("updated", data.data);
             this.dialog = false;
           })
-          .catch(error => {
+          .catch((error) => {
             Toast.fire({
               icon: "error",
-              title: "Something went wrong. "
+              title: "Something went wrong. ",
             });
             this.$Progress.finish();
             this.endLoadingAction();
           });
       }
-    }
-  }
+    },
+  },
 };
 </script>

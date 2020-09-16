@@ -17,6 +17,7 @@ class CreateRoomContractsTable extends Migration
         Schema::create('room_contracts', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('room_id')->unsigned();
+            $table->unsignedInteger('room_contract_id')->unsigned()->nullable();
             //Keep Track of room assigned to this contract
             $table->unsignedInteger('contract_id')->unsigned();
             $table->unsignedInteger('tenant_id')->unsigned();
@@ -30,11 +31,22 @@ class CreateRoomContractsTable extends Migration
             $table->date('startdate')->default(Carbon::now()->startOfMonth());
             $table->decimal('booking_fees',8,2)->default(0.00);
             $table->decimal('deposit',8,2)->default(0.00);
+            $table->decimal('outstanding_deposit',8,2)->default(0.00);
             $table->decimal('rental',8,2)->default(0.00);
+            $table->boolean('checkedout')->default(false);
+            $table->decimal('checkout_charges',8,2)->default(0.00);
+            $table->decimal('return_deposit',8,2)->default(0.00);
+            $table->longText('checkout_remark')->nullable();
             $table->boolean('expired')->default(false);
             $table->boolean('status')->default(true);
             $table->longText('remark')->nullable();
             $table->timestamps();
+
+            $table->foreign('room_contract_id')
+            ->references('id')
+            ->on('room_contracts')
+            ->onUpdate('cascade')
+            ->onDelete('restrict');
 
             $table->foreign('room_id')
             ->references('id')

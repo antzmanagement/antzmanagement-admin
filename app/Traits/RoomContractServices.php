@@ -18,7 +18,7 @@ trait RoomContractServices
 
         $data = collect();
 
-        $data = RoomContract::where('status', true)->get();
+        $data = RoomContract::where('status', true)->with(['room', 'tenant', 'contract'])->get();
 
         $data = $data->unique('id')->sortBy('id')->flatten(1);
 
@@ -51,13 +51,57 @@ trait RoomContractServices
     private function getRoomContract($uid)
     {
 
-        $data = RoomContract::where('uid', $uid)->with(['room', 'tenant', 'contract'])->where('status', true)->first();
+        $data = RoomContract::where('uid', $uid)->with(['room' => function ($q) {
+            // Query the name field in status table
+            $q->with(['roomtypes' => function ($q1) {
+                // Query the name field in status table
+                $q1->wherePivot('status', true);
+            }]);
+            $q->where('status', true);
+        }, 'contract' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        }, 'tenant' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        }, 'addonservices' => function ($q) {
+            // Query the name field in status table
+            $q->wherePivot('status', true);
+        }, 'origservices' => function ($q) {
+            // Query the name field in status table
+            $q->wherePivot('status', true);
+        }, 'rentalpayments' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        }])->where('status', true)->first();
         return $data;
     }
 
     private function getRoomContractById($id)
     {
-        $data = RoomContract::where('id', $id)->with(['room', 'tenant', 'contract'])->where('status', true)->first();
+        $data = RoomContract::where('id', $id)->with(['room' => function ($q) {
+            // Query the name field in status table
+            $q->with(['roomtypes' => function ($q1) {
+                // Query the name field in status table
+                $q1->wherePivot('status', true);
+            }]);
+            $q->where('status', true);
+        }, 'contract' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        }, 'tenant' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        }, 'addonservices' => function ($q) {
+            // Query the name field in status table
+            $q->wherePivot('status', true);
+        }, 'origservices' => function ($q) {
+            // Query the name field in status table
+            $q->wherePivot('status', true);
+        }, 'rentalpayments' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        }])->where('status', true)->first();
         return $data;
     }
 
@@ -75,28 +119,59 @@ trait RoomContractServices
         $data->terms  = $params->terms;
         $data->autorenew  = $params->autorenew;
         $data->startdate  = $this->toDate($params->startdate);
+        $data->booking_fees  = $this->toDouble($params->booking_fees);
+        $data->deposit  = $this->toDouble($params->deposit);
+        $data->outstanding_deposit  = $this->toDouble($data->deposit - $data->booking_fees);
+        $data->rental  = $this->toDouble($params->rental);
 
         $room = $this->getRoomById($params->room_id);
         if ($this->isEmpty($room)) {
-            return false;
+            return null;
         }
         $data->room()->associate($room);
 
         $contract = $this->getContractById($params->contract_id);
         if ($this->isEmpty($contract)) {
-            return false;
+            return null;
         }
+        
         $data->contract()->associate($contract);
 
         $tenant = $this->getTenantById($params->tenant_id);
         if ($this->isEmpty($tenant)) {
-            return false;
+            return null;
         }
         $data->tenant()->associate($tenant);
 
         if (!$this->saveModel($data)) {
             return null;
         }
+
+
+        $data = $data->refresh();
+        foreach ($params->add_on_service_ids as $id) {
+            $service = $this->getServiceById($id);
+            if ($this->isEmpty($service)) {
+                return null;
+            }
+            try {
+                $data->addonservices()->syncWithoutDetaching([$id => ['status' => true]]);
+            } catch (Exception $e) {
+                return null;
+            }
+        }
+        foreach ($params->orig_service_ids as $id) {
+            $service = $this->getServiceById($id);
+            if ($this->isEmpty($service)) {
+                return null;
+            }
+            try {
+                $data->origservices()->syncWithoutDetaching([$id => ['status' => true]]);
+            } catch (Exception $e) {
+                return null;
+            }
+        }
+
 
         return $data->refresh();
     }
@@ -106,26 +181,66 @@ trait RoomContractServices
     {
 
         $params = $this->checkUndefinedProperty($params, $this->roomContractAllCols());
-        $data->price  = $this->toDouble($params->price);
-        $data->remark = $params->remark;
+        $data->name = $params->name;
+        $data->duration = $this->toInt($params->duration);
+        $data->leftmonth = $data->duration;
+        $data->latestmonth = 0;
+        $data->expired = false;
+        $data->terms  = $params->terms;
+        $data->autorenew  = $params->autorenew;
+        $data->startdate  = $this->toDate($params->startdate);
+        $data->booking_fees  = $this->toDouble($params->booking_fees);
+        $data->deposit  = $this->toDouble($params->deposit);
+        $data->outstanding_deposit  = $this->toDouble($params->outstanding_deposit);
+        $data->rental  = $this->toDouble($params->rental);
 
         $room = $this->getRoomById($params->room_id);
         if ($this->isEmpty($room)) {
-            return false;
+            return null;
         }
         $data->room()->associate($room);
 
-        if ($params->property_id) {
-            $property = $this->getPropertyById($params->property_id);
-            if ($this->isEmpty($property)) {
-                return false;
-            }
-            $data->property()->associate($property);
+        $contract = $this->getContractById($params->contract_id);
+        if ($this->isEmpty($contract)) {
+            return null;
         }
+        $data->contract()->associate($contract);
+
+        $tenant = $this->getTenantById($params->tenant_id);
+        if ($this->isEmpty($tenant)) {
+            return null;
+        }
+        $data->tenant()->associate($tenant);
 
         if (!$this->saveModel($data)) {
             return null;
         }
+
+
+        $data = $data->refresh();
+        foreach ($params->add_on_service_ids as $id) {
+            $service = $this->getServiceById($id);
+            if ($this->isEmpty($service)) {
+                return null;
+            }
+            try {
+                $data->addonservices()->syncWithoutDetaching([$id => ['status' => true]]);
+            } catch (Exception $e) {
+                return null;
+            }
+        }
+        foreach ($params->orig_service_ids as $id) {
+            $service = $this->getServiceById($id);
+            if ($this->isEmpty($service)) {
+                return null;
+            }
+            try {
+                $data->origservices()->syncWithoutDetaching([$id => ['status' => true]]);
+            } catch (Exception $e) {
+                return null;
+            }
+        }
+
 
         return $data->refresh();
     }
@@ -133,12 +248,40 @@ trait RoomContractServices
     private function deleteRoomContract($data)
     {
 
+        $rentalpayments = $data->rentalpayments()->where('status', true)->get();
+        foreach ($rentalpayments as $rentalpayment) {
+            $this->deleteRentalPayment($rentalpayment);
+        }
+        $data = $this->syncWithRentalPayment($data);
+
+
+        $childrenroomcontracts = $data->childrenroomcontracts()->where('status', true)->get();
+        foreach ($childrenroomcontracts as $childrenroomcontract) {
+            $this->deleteRoomContract($childrenroomcontract);
+        }
+        try {
+            $ids = $data->addonservices()->wherePivot('status', true)->get();
+            $ids = $ids->pluck('id');
+            $data->addonservices()->updateExistingPivot($ids, ['status' => false]);
+
+            $ids = $data->origservices()->wherePivot('status', true)->get();
+            $ids = $ids->pluck('id');
+            $data->origservices()->updateExistingPivot($ids, ['status' => false]);
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->errorResponse();
+        }
+
+
         $data->status = false;
         if ($this->saveModel($data)) {
             return $data->refresh();
         } else {
             return null;
         }
+
+        return $data->refresh();
     }
 
 
@@ -177,15 +320,25 @@ trait RoomContractServices
             $data->expired = true;
             if ($data->autorenew) {
                 $startdate =  Carbon::parse($data->startdate)->addYear(1)->addMonth(1)->startOfMonth()->format('Y-m-d');
+                $origServiceIds = $data->origservices()->wherePivot('status', true)->get();
+                $origServiceIds = $origServiceIds->pluck('id');
+                $addOnServicesIds = $data->addonservices()->wherePivot('status', true)->get();
+                $addOnServicesIds = $addOnServicesIds->pluck('id');
                 $params = collect([
                     'room_id' => $data->room_id,
                     'tenant_id' => $data->tenant_id,
                     'contract_id' => $data->contract_id,
+                    'orig_service_ids' => $origServiceIds,
+                    'add_on_service_ids' => $addOnServicesIds,
                     'name' => $data->name,
                     'duration' => $data->duration,
                     'terms' => $data->terms,
                     'autorenew' => $data->autorenew,
                     'startdate' => $startdate,
+                    'rental' => $data->price,
+                    'deposit' => $data->deposit,
+                    'booking_fees' => $data->booking_fees,
+                    'outstanding_deposit' => $data->outstanding_deposit,
                 ]);
                 //Convert To Json Object
                 $params = json_decode(json_encode($params));
@@ -236,8 +389,10 @@ trait RoomContractServices
     // -----------------------------------------------------------------------------------------------------------------------------------------
     public function roomContractAllCols()
     {
-
-        return ['id', 'uid', 'price', 'remark'];
+        return ['id', 'uid', 'name', 'room_id', 'tenant_id','duration', 'leftmonth' ,
+        'latestmonth', 'expired', 'terms', 'autorenew', 'startdate',
+        'booking_fees','deposit','rental', 'outstanding_deposit',
+         'orig_service_ids', 'add_on_service_ids'];
     }
 
     public function roomContractDefaultCols()

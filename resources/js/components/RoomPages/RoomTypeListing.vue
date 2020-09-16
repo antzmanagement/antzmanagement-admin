@@ -166,7 +166,6 @@ export default {
       endLoadingAction: "endLoadingAction"
     }),
     test() {
-      console.log(this.$refs.slider);
     }
   }
 };

@@ -48,7 +48,7 @@
 
             <v-divider class="mx-3" :color="helpers.managementStyles().dividerColor"></v-divider>
 
-            <v-row justify="start" align="center" class="pa-2">
+            <v-row justify="start" align="center" class="pa-2" >
               <v-col cols="12">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Room Contract</label>
@@ -57,7 +57,7 @@
                       v-for="roomcontract in data.roomcontracts"
                       :key="roomcontract.uid"
                       class="mr-2 my-2"
-                      @click="showTenantRoom(roomcontract)"
+                      @click="showRoomContract(roomcontract)"
                     >
                       <div class="text-center ma-2 title">{{roomcontract.startdate }} {{roomcontract.name}}</div>
                     </v-chip>
@@ -72,9 +72,9 @@
               </v-col>
             </v-row>
             <v-row class="pa-2" justify="end" align="center">
-              <v-col cols="auto">
+              <!-- <v-col cols="auto">
                 <change-password-dialog :uid="this.$route.params.uid" @updated="refreshPage()"></change-password-dialog>
-              </v-col>
+              </v-col> -->
               <v-col cols="auto">
                 <tenant-form
                   :editMode="true"
@@ -147,7 +147,6 @@ export default {
     this.getTenantAction({ uid: this.$route.params.uid })
       .then(data => {
         this.data = data.data;
-        console.log(data.data);
         this.$Progress.finish();
         this.endLoadingAction();
       })
@@ -168,6 +167,9 @@ export default {
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction"
     }),
+    showRoomContract($data) {
+      this.$router.push("/roomcontract/" + $data.uid);
+    },
     showTenantRoom($data) {
       this.tenantRoomDialog = true;
       this.tenantRoomData = $data;

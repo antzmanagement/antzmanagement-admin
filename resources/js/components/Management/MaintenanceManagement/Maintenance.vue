@@ -124,7 +124,6 @@ export default {
     this.getMaintenanceAction({ uid: this.$route.params.uid })
       .then(data => {
         this.data = data.data;
-        console.log(this.data);
         this.$Progress.finish();
         this.endLoadingAction();
       })

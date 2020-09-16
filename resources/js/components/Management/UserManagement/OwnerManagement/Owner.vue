@@ -137,7 +137,6 @@ export default {
     this.getOwnerAction({ uid: this.$route.params.uid })
       .then(data => {
         this.data = data.data;
-        console.log(data.data);
         this.$Progress.finish();
         this.endLoadingAction();
       })

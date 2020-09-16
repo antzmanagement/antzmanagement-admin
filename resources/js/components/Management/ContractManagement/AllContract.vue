@@ -178,7 +178,6 @@ export default {
         .then(data => {
           if (data.data) {
             this.data = data.data;
-            console.log(data.data);
           } else {
             this.data = [];
           }

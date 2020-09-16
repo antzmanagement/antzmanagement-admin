@@ -335,7 +335,6 @@ export default {
     }
   },
   mounted() {
-    console.log("form created");
 
     this.showLoadingAction();
     this.getRoomTypesAction({ pageNumber: -1, pageSize: -1 })
@@ -351,7 +350,6 @@ export default {
               //Create the form before assigning the data, the form will not keep track the original/default value of data
               Object.assign(data.data, { roomTypes: ids });
               this.data = new Form(data.data);
-              console.log(this.data.roomType);
               this.endLoadingAction();
             })
             .catch(error => {
@@ -459,7 +457,6 @@ export default {
       roomType = this.roomTypes.find(function(roomType) {
         return roomType.id == id;
       });
-      console.log(roomType);
       this.data.price = this.helpers.toDouble(roomType ? (roomType.price ? roomType.price : 0 ) : 0);
     }
   }

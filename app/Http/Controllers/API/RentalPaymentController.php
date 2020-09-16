@@ -37,7 +37,6 @@ class RentalPaymentController extends Controller
             'keyword' => $request->keyword,
             'fromdate' => $request->fromdate,
             'todate' => $request->todate,
-            'rentalPaymentTypes' => $request->rentalPaymentTypes,
             'status' => $request->status,
         ]);
         //Convert To Json Object
@@ -175,6 +174,11 @@ class RentalPaymentController extends Controller
             DB::rollBack();
             return $this->errorResponse();
         }
+        $rentalPayment = $this->getRentalPaymentById($rentalPayment->id);
+        if ($this->isEmpty($rentalPayment)) {
+            DB::rollBack();
+            return $this->errorResponse();
+        }
         DB::commit();
         return $this->successResponse('RentalPayment', $rentalPayment, 'update');
     }
@@ -219,8 +223,8 @@ class RentalPaymentController extends Controller
         }
 
         $params = collect([
-            'price' => $rentalPayment->price,
-            'payment' => $rentalPayment->price,
+            'price' => $request->price,
+            'payment' => $request->price,
             'paid' => true,
             'penalty' => $this->toDouble($request->penalty),
             'paymentdate' => Carbon::now()->format('Y-m-d'),
@@ -237,7 +241,12 @@ class RentalPaymentController extends Controller
             return $this->errorResponse();
         }
 
-
+        $rentalPayment = $this->getRentalPaymentById($rentalPayment->id);
+        if ($this->isEmpty($rentalPayment)) {
+            DB::rollBack();
+            return $this->errorResponse();
+        }
+        
         DB::commit();
         return $this->successResponse('RentalPayment', $rentalPayment, 'update');
     }

@@ -16,7 +16,7 @@ trait TenantServices
     private function getTenants($requester)
     {
 
-        $data = collect();
+        $data = collect([]);
         //Role Based Retrieve Done in Store
         $userType = $this->getUserTypeById($this->tenantType);
         $data = $data->merge($userType->users()->wherePivot('status', true)->where('users.status', true)->get());
@@ -34,39 +34,19 @@ trait TenantServices
 
         if ($params->keyword) {
             $keyword = $params->keyword;
+            $data = collect($data);
             $data = $data->filter(function ($item) use ($keyword) {
                 //check string exist inside or not
-                if (stristr($item->uid, $keyword) == TRUE || stristr($item->name, $keyword) == TRUE || stristr($item->icno, $keyword) == TRUE || stristr($item->email, $keyword) == TRUE) {
+                if ( stristr($item->name, $keyword) == TRUE || stristr($item->icno, $keyword) == TRUE ) {
                     return true;
                 } else {
                     return false;
                 }
-            });
-        }
-
-        if ($params->roomTypes) {
-            $roomTypes = collect($params->roomTypes);
-            $data = $data->filter(function ($item) use ($roomTypes) {
-                $rooms = $item->rentrooms()->wherePivot('status', true)->where('rooms.status', true)->get();
-                $roomTypeids = collect();
-
-                //Merge All Room's Type ids;
-                foreach($rooms as $room){
-                    $temp = $room->roomTypes()->wherePivot('status', true)->where('room_types.status', true)->get();
-                    $ids = $temp->pluck('id');
-                    $roomTypeids = $roomTypeids->merge($ids);
-                }
-                
-                //Check pass in ids exist or not
-                foreach($roomTypes as $roomType){
-                    if(!$roomTypeids->contains($roomType)){
-                        return false;
-                    }
-                }
-
-                return true;
             })->values();
         }
+
+        error_log('444======================');
+        error_log($data);
         $data = $data->unique('id');
 
         return $data;

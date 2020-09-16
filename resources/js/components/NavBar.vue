@@ -50,6 +50,7 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
 export default {
   props: {
     source: String
@@ -110,6 +111,12 @@ export default {
         text: "Room Contract",
         name: "roomcontracts",
         modulename: "roomcontract"
+      },
+      {
+        icon: "mdi-file-document-edit-outline",
+        text: "Rental Payment",
+        name: "rentalpayments",
+        modulename: "rentalpayment"
       }
     ]
   }),
@@ -122,8 +129,24 @@ export default {
       return this.$store.getters.userModules;
     }
   },
-  methods:{
-
+  created() {
+    this.showLoadingAction();
+    this.authenticationAction()
+      .then(data => {
+        this.endLoadingAction();
+      })
+      .catch(error => {
+        console.log("error");
+        this.endLoadingAction();
+        this.$router.push("/login");
+      });
+  },
+  methods: {
+    ...mapActions({
+      authenticationAction: "authentication",
+      showLoadingAction: "showLoadingAction",
+      endLoadingAction: "endLoadingAction"
+    }),
   }
 };
 </script>

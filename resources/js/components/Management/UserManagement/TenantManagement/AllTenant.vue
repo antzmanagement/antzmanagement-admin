@@ -156,7 +156,6 @@ export default {
   },
   created() {
     var styles = this.helpers.managementStyles();
-    console.log(styles);
   },
   mounted() {
     this.getTenants();

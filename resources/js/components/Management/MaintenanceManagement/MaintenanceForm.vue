@@ -267,8 +267,6 @@ export default {
     }
   },
   mounted() {
-    console.log("form created");
-
     this.showLoadingAction();
     this.getRoomsAction({ pageNumber: -1, pageSize: -1 }).then(data => {
       this.rooms = data.data;

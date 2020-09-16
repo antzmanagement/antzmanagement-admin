@@ -16,6 +16,7 @@ use App\Traits\UserServices;
 use App\Traits\UserTypeServices;
 use App\Traits\RentalPaymentServices;
 use App\Traits\RoomContractServices;
+use App\Traits\RoleServices;
 use App\Traits\RoomServices;
 use App\Traits\RoomTypeServices;
 use App\Traits\ServiceServices;
@@ -35,6 +36,7 @@ trait AllServices {
     RentalPaymentServices,
     RoomContractServices,
     RoomServices,
+    RoleServices,
     RoomTypeServices,
     ServiceServices,
     TenantServices,

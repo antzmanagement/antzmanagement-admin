@@ -17,7 +17,18 @@ trait RentalPaymentServices
 
         $data = collect();
 
-        $data = RentalPayment::where('status', true)->get();
+        $data = RentalPayment::where('status', true)->with(['roomcontract' => function ($q) {
+            // Query the name field in status table
+            $q->with(['tenant' => function ($q1) {
+                // Query the name field in status table
+                $q1->where('status', true);
+            }]);
+            $q->with(['room' => function ($q1) {
+                // Query the name field in status table
+                $q1->where('status', true);
+            }]);
+            $q->where('status', true);
+        }])->get();
 
         $data = $data->unique('id')->sortBy('id')->flatten(1);
 
@@ -41,17 +52,6 @@ trait RentalPaymentServices
                 }
             });
         }
-        if ($params->rooms) {
-            error_log('Filtering rentalPayments with rooms....');
-            $rooms = collect($params->rooms);
-            $data = $data->filter(function ($item) use ($rooms) {
-
-                if (!$rooms->contains($item->room->id)) {
-                    return false;
-                }
-                return true;
-            })->values();
-        }
 
         $data = $data->unique('id');
 
@@ -61,13 +61,35 @@ trait RentalPaymentServices
     private function getRentalPayment($uid)
     {
 
-        $data = RentalPayment::where('uid', $uid)->with(['roomcontract'])->where('status', true)->first();
+        $data = RentalPayment::where('uid', $uid)->with(['roomcontract' => function ($q) {
+            // Query the name field in status table
+            $q->with(['tenant' => function ($q1) {
+                // Query the name field in status table
+                $q1->where('status', true);
+            }]);
+            $q->with(['room' => function ($q1) {
+                // Query the name field in status table
+                $q1->where('status', true);
+            }]);
+            $q->where('status', true);
+        }])->where('status', true)->first();
         return $data;
     }
 
     private function getRentalPaymentById($id)
     {
-        $data = RentalPayment::where('id', $id)->with(['roomcontract'])->where('status', true)->first();
+        $data = RentalPayment::where('id', $id)->with(['roomcontract' => function ($q) {
+            // Query the name field in status table
+            $q->with(['tenant' => function ($q1) {
+                // Query the name field in status table
+                $q1->where('status', true);
+            }]);
+            $q->with(['room' => function ($q1) {
+                // Query the name field in status table
+                $q1->where('status', true);
+            }]);
+            $q->where('status', true);
+        }])->where('status', true)->first();
         return $data;
     }
 
@@ -81,7 +103,7 @@ trait RentalPaymentServices
         $data->price = $this->toDouble($params->price);
         $data->payment = 0;
         $data->penalty = 0;
-        $data->outstanding = $this->toDouble($data->price - $data->payment);
+        $data->outstanding = $this->toDouble($data->price + $data->penalty - $data->payment);
         $data->paid = false;
         $data->rentaldate = $this->toDate($params->rentaldate);
         $data->paymentdate = null;
@@ -109,7 +131,7 @@ trait RentalPaymentServices
         $data->price = $this->toDouble($params->price);
         $data->payment = $this->toDouble($params->payment);
         $data->penalty =  $this->toDouble($params->penalty);
-        $data->outstanding = $this->toDouble($data->price - $data->payment);
+        $data->outstanding = $this->toDouble($data->price + $data->penalty  - $data->payment);
         $data->paid = $params->paid;
         $data->rentaldate = $this->toDate($params->rentaldate);
         $data->paymentdate = $this->toDate($params->paymentdate);

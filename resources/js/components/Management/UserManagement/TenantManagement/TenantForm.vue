@@ -186,15 +186,15 @@
               ></v-text-field>
             </v-col>-->
 
-            <v-col cols="12" md="12">
+            <v-col cols="12" md="12" v-if="!editMode">
               <v-autocomplete
                 v-model="data.rooms"
                 :items="rooms"
                 item-text="name"
-                chips
-                deletable-chips
                 label="Room"
                 multiple
+                chips
+                deletable-chips
                 return-object
               >
                 <!-- <template v-slot:append>
@@ -224,6 +224,8 @@
                       <tr>
                         <th class="text-left">Room</th>
                         <th class="text-left">Price</th>
+                        <th class="text-left">Deposit</th>
+                        <th class="text-left">Booking Fees</th>
                         <th class="text-left">Contract</th>
                         <th class="text-left">Contract Start Date</th>
                         <th class="text-left">Services</th>
@@ -234,6 +236,12 @@
                         <td>{{ room.name }}</td>
                         <td>
                           <v-text-field v-model="room.price" prefix="RM" type="number" step="0.01"></v-text-field>
+                        </td>
+                        <td>
+                          <v-text-field v-model="room.deposit" prefix="RM" type="number" step="0.01"></v-text-field>
+                        </td>
+                        <td>
+                          <v-text-field v-model="room.booking_fees" prefix="RM" type="number" step="0.01"></v-text-field>
                         </td>
                         <td>
                           <v-autocomplete
@@ -270,7 +278,8 @@
                           <services-dialog
                             :dialogStyle="servicesDialogConfig.dialogStyle"
                             :buttonStyle="servicesDialogConfig.buttonStyle"
-                            :services="pluckUid(room.room_types[0].services)"
+                            :services="pluckUid(room.services)"
+                            :origServices="pluckUid(room.origServices)"
                             editMode
                             @submit="(e) => {roomServiceUpdated(room , e)}"
                           ></services-dialog>
@@ -399,13 +408,20 @@ export default {
         data: {
           name: { required, maxLength: maxLength(100) },
           icno: { required, maxLength: maxLength(14) },
-          tel1: {},
+          tel1: {required},
           email: { required, email },
-          password: { required, minLength: minLength(8) },
-          password_confirmation: {
-            required,
-            sameAsPassword: sameAs("password"),
-          },
+          // password: { required, minLength: minLength(8) },
+          // password_confirmation: {
+          //   required,
+          //   sameAsPassword: sameAs("password"),
+          // },
+          mother_name: {},
+          mother_tel: {},
+          father_name: {},
+          mother_tel: {},
+          emergency_name: {},
+          emergency_contact: {},
+          emergency_relationship: {},
         },
       };
     } else {
@@ -413,8 +429,15 @@ export default {
         data: {
           name: { required, maxLength: maxLength(100) },
           icno: { required, maxLength: maxLength(14) },
-          tel1: {},
+          tel1: { required},
           email: { required, email },
+          mother_name: {},
+          mother_tel: {},
+          father_name: {},
+          mother_tel: {},
+          emergency_name: {},
+          emergency_contact: {},
+          emergency_relationship: {},
         },
       };
     }
@@ -456,6 +479,11 @@ export default {
       if (!this.$v.data.tel1.$dirty) {
         return errors;
       }
+      if (!this.$v.data.tel1.required) {
+        errors.push("Contact is required");
+        return errors;
+      }
+
 
       if (
         !this.helpers.isPhoneFormat(this.$v.data.tel1.$model) &&
@@ -534,8 +562,23 @@ export default {
       pageSize: -1,
     })
       .then((data) => {
-        console.log(data.data);
-        this.rooms = data.data;
+        this.rooms = data.data.map(function (room) {
+          if (
+            room.room_types.length > 0 &&
+            room.room_types[0].services.length > 0
+          ) {
+            room.services = room.room_types[0].services;
+            room.origServices = room.room_types[0].services;
+          } else {
+            room.services = [];
+            room.origServices = [];
+          }
+          room.price = parseFloat(room.price);
+          room.origPrice = parseFloat(room.price);
+          room.deposit = parseFloat(room.price) * 2.5;
+          room.booking_fees = 200;
+          return room;
+        });
         this.getContractsAction({
           pageNumber: -1,
           pageSize: -1,
@@ -546,6 +589,7 @@ export default {
             if (this.editMode && this.uid) {
               this.getTenantAction({ uid: this.uid })
                 .then((data) => {
+                  data.data.rooms = [];
                   this.data = new Form(data.data);
                   this.endLoadingAction();
                 })
@@ -598,14 +642,11 @@ export default {
           this.helpers.isEmpty(this.data.rooms[x].contract_id) ||
           this.helpers.isEmpty(this.data.rooms[x].contractstartdate)
         ) {
-          console.log(this.data.rooms[x].contract_id);
-          console.log(this.data.rooms[x].contractstartdate);
           return false;
         }
       }
       if (
-        !this.data.tel1 &&
-        !this.helpers.isPhoneFormat(this.data.tel1) &&
+        (!this.data.tel1 &&!this.helpers.isPhoneFormat(this.data.tel1)) ||
         !this.helpers.isIcFormat(this.data.icno)
       ) {
         return false;
@@ -680,26 +721,24 @@ export default {
       }
     },
     roomServiceUpdated(room, event) {
-      let selectedServices = event.services;
-      if (selectedServices.length > 0) {
-        let insertService = [];
-        let insertPrice = 0;
+      room.services = event.services;
+      let roomServices = event.services;
+      let roomOrigServices = room.origServices;
 
-        selectedServices.forEach(function (service) {
-          let existed = room.room_types[0].services.some(function (item) {
-            return item.uid == service.uid;
-          });
-
-          if (!existed) {
-            insertService.push(service);
-            insertPrice += parseFloat(service.price);
-          }
+      let newAddedServices = roomServices.filter(function (service) {
+        let existedService = roomOrigServices.some(function (origService) {
+          return origService.uid == service.uid;
         });
-        room.room_types[0].services = room.room_types[0].services.concat(
-          insertService
-        );
-        room.price = parseFloat(room.price) + parseFloat(insertPrice);
-      }
+
+        return !existedService;
+      });
+
+      let price = room.origPrice;
+      newAddedServices.forEach((service) => {
+        price += parseFloat(service.price);
+      });
+
+      room.price = price;
     },
 
     initRoomFilter(filterGroup) {

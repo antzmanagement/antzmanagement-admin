@@ -269,7 +269,6 @@ export default {
   },
   methods: {
     uploadFile() {
-      console.log(this.file);
       axios
         .post(
           "/upload",
@@ -281,7 +280,6 @@ export default {
           }
         )
         .then(data => {
-          console.log(data);
         })
         .catch(error => {
           console.log(error.response);

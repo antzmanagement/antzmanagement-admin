@@ -32,7 +32,7 @@ class RoomTableSeeder extends Seeder
             );
             $room = new Room();
             $room->uid = Carbon::now()->timestamp . Room::count();
-            $room->name = $roomType->text . Room::count();
+            $room->name = $roomType->text . '-'.  Room::count();
             $room->price = $roomType->price;
             $room->address = $faker->address;
             $room->state = $faker->state;

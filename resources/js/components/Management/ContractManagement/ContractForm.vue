@@ -130,7 +130,6 @@ export default {
     }
   },
   mounted() {
-    console.log("form created");
 
     if (this.editMode) {
       this.showLoadingAction();

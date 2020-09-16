@@ -83,13 +83,10 @@ const helpers = {
 
         data = data.sort(function(a, b){
             if(moment(a[col]).isSame(moment(b[col]), 'year') && moment(a[col]).isSame(moment(b[col]), 'month')){
-                console.log('same');
                 return 0;
             }else if(moment(a[col]).isSameOrBefore(moment(b[col]), 'year') && moment(a[col]).isBefore(moment(b[col]), 'month')){
-                console.log('small');
                 return -1;
             }else{
-                console.log('big');
                 return 1;
             }
         })

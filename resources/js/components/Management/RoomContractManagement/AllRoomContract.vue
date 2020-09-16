@@ -54,6 +54,9 @@
                 <template v-slot:item="props">
                   <tr @click="showRoomContract(props.item)">
                     <td>{{props.item.uid}}</td>
+                    <td>{{props.item.room.name}}</td>
+                    <td>{{props.item.tenant.name}}</td>
+                    <td>{{props.item.startdate}}</td>
                   </tr>
                 </template>
               </v-data-table>
@@ -112,6 +115,15 @@ export default {
       headers: [
         {
           text: "uid",
+        },
+        {
+          text: "Room",
+        },
+        {
+          text: "Tenant",
+        },
+        {
+          text: "Start date",
         },
       ]
     };
@@ -186,7 +198,6 @@ export default {
         .then(data => {
           if (data.data) {
             this.data = data.data;
-            console.log(data.data);
           } else {
             this.data = [];
           }

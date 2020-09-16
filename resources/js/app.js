@@ -39,6 +39,8 @@ import axios from "axios";
 import VueApexCharts from 'vue-apexcharts'
 import JsonExcel from 'vue-json-excel'
 import VueHtmlToPaper from 'vue-html-to-paper';
+import VueLodash from 'vue-lodash'
+import lodash from 'lodash'
 
 const options = {
   name: '_blank',
@@ -63,6 +65,8 @@ Vue.use(VueSpinners)
 Vue.use(VueRouter)
 Vue.use(Vuelidate)
 Vue.use(VueAxios, axios);
+// Vue.use(VueLodash, { name: '_' , lodash: lodash })
+Object.defineProperty(Vue.prototype, '_', { value: lodash });
 
 /**
  * The following block of code may be used to automatically register your

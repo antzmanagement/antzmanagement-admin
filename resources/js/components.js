@@ -49,3 +49,4 @@ Vue.component('room-contract-filter-dialog', require('./components/Management/Ro
 
 Vue.component('rental-payment-form', require('./components/Management/RentalPaymentManagement/RentalPaymentForm.vue').default);
 Vue.component('rental-payment-dialog', require('./components/Management/RentalPaymentManagement/RentalPaymentFilterDialog.vue').default);
+Vue.component('rental-print', require('./components/Management/RentalPaymentManagement/RentalPrint.vue').default);

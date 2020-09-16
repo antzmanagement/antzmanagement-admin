@@ -7,7 +7,7 @@ const MaintenanceServices = {
     PassportServices.AuthenticationServices.setHeader();
 
     const clonedata = Object.assign({}, data);
-    console.log(clonedata);
+    
     return Vue.axios.get('/api/maintenance', {
       params: clonedata
     })
@@ -17,7 +17,7 @@ const MaintenanceServices = {
     PassportServices.AuthenticationServices.setHeader();
 
     const clonedata = Object.assign({}, data);
-    console.log(clonedata);
+    
     return Vue.axios.get('/api/filter/maintenance', {
       params: clonedata
     })
@@ -35,14 +35,14 @@ const MaintenanceServices = {
     //The data is pass by reference, any modified data will reflected to front end view.
     //In practice way, we must clone it to prevent any error that caused by manipulation stage.
     const clonedata = Object.assign({}, data);
-    console.log(clonedata);
+    
     return Vue.axios.post('/api/maintenance', clonedata)
   },
 
   update(data) {
     PassportServices.AuthenticationServices.setHeader();
     const clonedata = Object.assign({}, data);
-    console.log(clonedata);
+    
     return Vue.axios.put('/api/maintenance/' + clonedata.uid, clonedata);
   },
 
@@ -50,7 +50,7 @@ const MaintenanceServices = {
   delete(data) {
     PassportServices.AuthenticationServices.setHeader();
     const clonedata = Object.assign({}, data);
-    console.log(clonedata);
+    
     return Vue.axios.delete('/api/maintenance/' + data.uid);
   }
 };
