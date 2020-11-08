@@ -1,3 +1,276 @@
+
+<script>
+import { validationMixin } from "vuelidate";
+import {
+  required,
+  minLength,
+  maxLength,
+  decimal,
+} from "vuelidate/lib/validators";
+import { mapActions } from "vuex";
+export default {
+  props: {
+    editMode: {
+      type: Boolean,
+      default: false,
+    },
+    uid: {
+      type: String,
+      default: "",
+    },
+
+    roomId: {
+      type: Number,
+      default: () => null,
+    },
+    buttonStyle: {
+      type: Object,
+      default: () => ({
+        block: true,
+        color: "primary",
+        class: "ma-1",
+        text: "Add Maintenance",
+        icon: "",
+        elevation: 5,
+        isIcon: false,
+      }),
+    },
+    dialogStyle: {
+      type: Object,
+      default: () => ({
+        persistent: true,
+        maxWidth: "",
+        fullscreen: true,
+        hideOverlay: true,
+      }),
+    },
+  },
+  data() {
+    return {
+      dialog: false,
+      propertyFormDialog: false,
+      rooms: [],
+      properties: [],
+      data: new Form({
+        remark: "",
+        price: "",
+        rooms: [],
+        properties: [],
+      }),
+      roomFormDialogConfig: {
+        dialogStyle: {
+          persistent: true,
+          maxWidth: "600px",
+          fullscreen: false,
+          hideOverlay: true,
+        },
+        buttonStyle: {
+          block: false,
+          color: "primary",
+          class: "ma-4",
+          text: "Add New Room",
+          icon: "mdi-plus",
+        },
+      },
+    };
+  },
+
+  validations() {
+    return {
+      data: {
+        remark: { required, maxLength: maxLength(2500) },
+        price: { required, decimal },
+      },
+    };
+  },
+
+  computed: {
+    isLoading() {
+      return this.$store.getters.isLoading;
+    },
+    priceErrors() {
+      const errors = [];
+      if (!this.$v.data.price.$dirty) {
+        return errors;
+      }
+
+      if (!this.$v.data.price.required) {
+        errors.push("Price is required");
+        return errors;
+      }
+
+      if (!this.$v.data.price.decimal) {
+        errors.push("Price should be decimal");
+        return errors;
+      }
+    },
+    remarkErrors() {
+      const errors = [];
+      if (!this.$v.data.remark.$dirty) {
+        return errors;
+      }
+
+      if (!this.$v.data.remark.maxLength) {
+        errors.push("Remark should be less than 2500 characters");
+        return errors;
+      }
+    },
+    roomsErrors() {
+      const errors = [];
+
+      if (this.helpers.isEmpty(this.data.rooms)) {
+        errors.push("Room is required");
+      }
+      return errors;
+    },
+  },
+  watch: {
+    dialog: function (val) {
+      if (val) {
+        this.data.reset();
+        this.$v.$reset();
+
+        if (this.roomId) {
+          this.data.rooms.push(this.roomId);
+        }
+      }
+    },
+  },
+  mounted() {
+    this.showLoadingAction();
+    this.getRoomsAction({ pageNumber: -1, pageSize: -1 }).then((data) => {
+      this.rooms = data.data;
+
+      this.getPropertiesAction({ pageNumber: -1, pageSize: -1 }).then(
+        (data) => {
+          this.properties = data.data;
+
+          if (this.editMode) {
+            this.getMaintenanceAction({ uid: this.uid })
+              .then((data) => {
+                //Should assign data first before creating form because the form will reset after triggered
+                //Create the form before assigning the data, the form will not keep track the original/default value of data
+
+                Object.assign(data.data, {
+                  rooms: data.data.room.id,
+                  properties: data.data.property.id,
+                });
+                this.data = new Form(data.data);
+                this.endLoadingAction();
+              })
+              .catch((error) => {
+                this.endLoadingAction();
+                Toast.fire({
+                  icon: "warning",
+                  title: "Something went wrong...",
+                });
+              });
+          } else {
+            this.endLoadingAction();
+          }
+        }
+      );
+    });
+  },
+  methods: {
+    ...mapActions({
+      getRoomsAction: "getRooms",
+      getPropertiesAction: "getProperties",
+      getMaintenanceAction: "getMaintenance",
+      createMaintenanceAction: "createMaintenance",
+      updateMaintenanceAction: "updateMaintenance",
+      showLoadingAction: "showLoadingAction",
+      endLoadingAction: "endLoadingAction",
+    }),
+
+    customValidate() {
+      return !this.helpers.isEmpty(this.data.rooms);
+    },
+    createMaintenance() {
+      this.$v.$touch(); //it will validate all fields
+
+      if (this.$v.$invalid || !this.customValidate()) {
+        Toast.fire({
+          icon: "warning",
+          title: "Please make sure all the data is valid. ",
+        });
+      } else {
+        this.$Progress.start();
+        this.showLoadingAction();
+        this.createMaintenanceAction(this.data)
+          .then((data) => {
+            Toast.fire({
+              icon: "success",
+              title: "Successful Created. ",
+            });
+            this.$Progress.finish();
+            this.endLoadingAction();
+            this.$emit("created", data.data);
+            this.dialog = false;
+          })
+          .catch((error) => {
+            Toast.fire({
+              icon: "error",
+              title: "Something went wrong. ",
+            });
+            this.$Progress.finish();
+            this.endLoadingAction();
+          });
+      }
+    },
+
+    updateMaintenance() {
+      this.$v.$touch(); //it will validate all fields
+
+      if (this.$v.$invalid) {
+        Toast.fire({
+          icon: "warning",
+          title: "Please make sure all the data is valid. ",
+        });
+      } else {
+        this.$Progress.start();
+        this.showLoadingAction();
+        this.updateMaintenanceAction(this.data)
+          .then((data) => {
+            Toast.fire({
+              icon: "success",
+              title: "Successful Updated. ",
+            });
+            this.$Progress.finish();
+            this.endLoadingAction();
+            this.$emit("updated", data.data);
+            this.dialog = false;
+          })
+          .catch((error) => {
+            Toast.fire({
+              icon: "error",
+              title: "Something went wrong. ",
+            });
+            this.$Progress.finish();
+            this.endLoadingAction();
+          });
+      }
+    },
+    appendRoomList($data) {
+      this.rooms.push($data);
+      if (!this.editMode) {
+        this.data.rooms.push($data.id);
+      } else {
+        this.data.rooms = $data.id;
+      }
+    },
+    appendPropertyList($data) {
+      this.properties.push($data);
+      if (!this.editMode) {
+        this.data.properties.push($data.id);
+      } else {
+        this.data.properties = $data.id;
+      }
+    },
+  },
+};
+</script>
+
 <template>
   <v-dialog
     v-model="dialog"
@@ -76,12 +349,9 @@
                 :multiple="this.editMode ? false : true"
               >
                 <template v-slot:append>
-                  <property-form
-                    :editMode="false"
-                    :dialogStyle="propertyFormDialogConfig.dialogStyle"
-                    :buttonStyle="propertyFormDialogConfig.buttonStyle"
-                    @created="appendPropertyList($event)"
-                  ></property-form>
+                  <v-btn class="ma-4" color="primary" @click="propertyFormDialog = true">
+                    <v-icon>mdi-plus</v-icon>Add New Property
+                  </v-btn>
                 </template>
               </v-autocomplete>
             </v-col>
@@ -112,289 +382,14 @@
         </v-container>
       </v-card-text>
     </v-card>
+
+    <v-dialog v-model="propertyFormDialog" persistent hideOverlay max-width="600px">
+      <property-form
+        :reset="propertyFormDialog"
+        :editMode="false"
+        @created="appendPropertyList($event)"
+        @close="propertyFormDialog = false"
+      ></property-form>
+    </v-dialog>
   </v-dialog>
 </template>
-
-<script>
-import { validationMixin } from "vuelidate";
-import {
-  required,
-  minLength,
-  maxLength,
-  decimal
-} from "vuelidate/lib/validators";
-import { mapActions } from "vuex";
-export default {
-  props: {
-    editMode: {
-      type: Boolean,
-      default: false
-    },
-    uid: {
-      type: String,
-      default: ""
-    },
-
-    roomId: {
-      type: Number,
-      default: () => null
-    },
-    buttonStyle: {
-      type: Object,
-      default: () => ({
-        block: true,
-        color: "primary",
-        class: "ma-1",
-        text: "Add Maintenance",
-        icon: "",
-        elevation: 5,
-        isIcon: false
-      })
-    },
-    dialogStyle: {
-      type: Object,
-      default: () => ({
-        persistent: true,
-        maxWidth: "",
-        fullscreen: true,
-        hideOverlay: true
-      })
-    }
-  },
-  data() {
-    return {
-      dialog: false,
-      rooms: [],
-      properties: [],
-      data: new Form({
-        remark: "",
-        price: "",
-        rooms: [],
-        properties: []
-      }),
-      roomFormDialogConfig: {
-        dialogStyle: {
-          persistent: true,
-          maxWidth: "600px",
-          fullscreen: false,
-          hideOverlay: true
-        },
-        buttonStyle: {
-          block: false,
-          color: "primary",
-          class: "ma-4",
-          text: "Add New Room",
-          icon: "mdi-plus"
-        }
-      },
-      propertyFormDialogConfig: {
-        dialogStyle: {
-          persistent: true,
-          maxWidth: "600px",
-          fullscreen: false,
-          hideOverlay: true
-        },
-        buttonStyle: {
-          block: false,
-          color: "primary",
-          class: "ma-4",
-          text: "Add New Property",
-          icon: "mdi-plus"
-        }
-      }
-    };
-  },
-
-  validations() {
-    return {
-      data: {
-        remark: { required, maxLength: maxLength(2500) },
-        price: { required, decimal }
-      }
-    };
-  },
-
-  computed: {
-    isLoading() {
-      return this.$store.getters.isLoading;
-    },
-    priceErrors() {
-      const errors = [];
-      if (!this.$v.data.price.$dirty) {
-        return errors;
-      }
-
-      if (!this.$v.data.price.required) {
-        errors.push("Price is required");
-        return errors;
-      }
-
-      if (!this.$v.data.price.decimal) {
-        errors.push("Price should be decimal");
-        return errors;
-      }
-    },
-    remarkErrors() {
-      const errors = [];
-      if (!this.$v.data.remark.$dirty) {
-        return errors;
-      }
-
-      if (!this.$v.data.remark.maxLength) {
-        errors.push("Remark should be less than 2500 characters");
-        return errors;
-      }
-    },
-    roomsErrors() {
-      const errors = [];
-
-      if (this.helpers.isEmpty(this.data.rooms)) {
-        errors.push("Room is required");
-      }
-      return errors;
-    }
-  },
-  watch: {
-    dialog: function(val) {
-      if (val) {
-        this.data.reset();
-        this.$v.$reset();
-
-        if (this.roomId) {
-          this.data.rooms.push(this.roomId);
-        }
-      }
-    }
-  },
-  mounted() {
-    this.showLoadingAction();
-    this.getRoomsAction({ pageNumber: -1, pageSize: -1 }).then(data => {
-      this.rooms = data.data;
-
-      this.getPropertiesAction({ pageNumber: -1, pageSize: -1 }).then(data => {
-        this.properties = data.data;
-
-        if (this.editMode) {
-          this.getMaintenanceAction({ uid: this.uid })
-            .then(data => {
-              //Should assign data first before creating form because the form will reset after triggered
-              //Create the form before assigning the data, the form will not keep track the original/default value of data
-
-              Object.assign(data.data, {
-                rooms: data.data.room.id,
-                properties: data.data.property.id
-              });
-              this.data = new Form(data.data);
-              this.endLoadingAction();
-            })
-            .catch(error => {
-              this.endLoadingAction();
-              Toast.fire({
-                icon: "warning",
-                title: "Something went wrong..."
-              });
-            });
-        } else {
-          this.endLoadingAction();
-        }
-      });
-    });
-  },
-  methods: {
-    ...mapActions({
-      getRoomsAction: "getRooms",
-      getPropertiesAction: "getProperties",
-      getMaintenanceAction: "getMaintenance",
-      createMaintenanceAction: "createMaintenance",
-      updateMaintenanceAction: "updateMaintenance",
-      showLoadingAction: "showLoadingAction",
-      endLoadingAction: "endLoadingAction"
-    }),
-
-    customValidate() {
-      return !this.helpers.isEmpty(this.data.rooms);
-    },
-    createMaintenance() {
-      this.$v.$touch(); //it will validate all fields
-
-      if (this.$v.$invalid || !this.customValidate()) {
-        Toast.fire({
-          icon: "warning",
-          title: "Please make sure all the data is valid. "
-        });
-      } else {
-        this.$Progress.start();
-        this.showLoadingAction();
-        this.createMaintenanceAction(this.data)
-          .then(data => {
-            Toast.fire({
-              icon: "success",
-              title: "Successful Created. "
-            });
-            this.$Progress.finish();
-            this.endLoadingAction();
-            this.$emit("created", data.data);
-            this.dialog = false;
-          })
-          .catch(error => {
-            Toast.fire({
-              icon: "error",
-              title: "Something went wrong. "
-            });
-            this.$Progress.finish();
-            this.endLoadingAction();
-          });
-      }
-    },
-
-    updateMaintenance() {
-      this.$v.$touch(); //it will validate all fields
-
-      if (this.$v.$invalid) {
-        Toast.fire({
-          icon: "warning",
-          title: "Please make sure all the data is valid. "
-        });
-      } else {
-        this.$Progress.start();
-        this.showLoadingAction();
-        this.updateMaintenanceAction(this.data)
-          .then(data => {
-            Toast.fire({
-              icon: "success",
-              title: "Successful Updated. "
-            });
-            this.$Progress.finish();
-            this.endLoadingAction();
-            this.$emit("updated", data.data);
-            this.dialog = false;
-          })
-          .catch(error => {
-            Toast.fire({
-              icon: "error",
-              title: "Something went wrong. "
-            });
-            this.$Progress.finish();
-            this.endLoadingAction();
-          });
-      }
-    },
-    appendRoomList($data) {
-      this.rooms.push($data);
-      if (!this.editMode) {
-        this.data.rooms.push($data.id);
-      } else {
-        this.data.rooms = $data.id;
-      }
-    },
-    appendPropertyList($data) {
-      this.properties.push($data);
-      if (!this.editMode) {
-        this.data.properties.push($data.id);
-      } else {
-        this.data.properties = $data.id;
-      }
-    }
-  }
-};
-</script>

@@ -40,30 +40,7 @@ trait RoleServices
             });
         }
 
-        if ($params->roomTypes) {
-            error_log('Filtering roles with roomTypes....');
-            $roomTypes = collect($params->roomTypes);
-            $data = $data->filter(function ($item) use ($roomTypes) {
-                $rooms = $item->ownrooms()->wherePivot('status', true)->where('rooms.status', true)->get();
-                $roomTypeids = collect();
-
-                //Merge All Room's Type ids;
-                foreach($rooms as $room){
-                    $temp = $room->roomTypes()->wherePivot('status', true)->where('room_types.status', true)->get();
-                    $ids = $temp->pluck('id');
-                    $roomTypeids = $roomTypeids->merge($ids);
-                }
-                
-                //Check pass in ids exist or not
-                foreach($roomTypes as $roomType){
-                    if(!$roomTypeids->contains($roomType)){
-                        return false;
-                    }
-                }
-
-                return true;
-            })->values();
-        }
+      
         $data = $data->unique('id');
 
         return $data;

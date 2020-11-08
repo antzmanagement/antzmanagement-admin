@@ -1,3 +1,494 @@
+
+
+<script>
+import { validationMixin } from "vuelidate";
+import {
+  required,
+  minLength,
+  maxLength,
+  sameAs,
+  email,
+} from "vuelidate/lib/validators";
+import { mapActions } from "vuex";
+export default {
+  props: {
+    editMode: {
+      type: Boolean,
+      default: false,
+    },
+    uid: {
+      type: String,
+      default: "",
+    },
+    buttonStyle: {
+      type: Object,
+      default: () => ({
+        block: true,
+        color: "primary",
+        class: "ma-1",
+        text: "Add Tenant",
+        icon: "mdi-plus",
+        elevation: 5,
+      }),
+    },
+  },
+  data() {
+    return {
+      dialog: false,
+      menu: false,
+      roomTypes: [],
+      rooms: [],
+      contracts: [],
+      data: new Form({
+        name: "",
+        icno: "",
+        tel1: "",
+        email: "",
+        mother_name: "",
+        mother_tel: "",
+        father_name: "",
+        father_tel: "",
+        emergency_name: "",
+        emergency_contact: "",
+        emergency_relationship: "",
+        roomTypes: [],
+        rooms: [],
+      }),
+      roomFormDialogConfig: {
+        dialogStyle: {
+          persistent: true,
+          maxWidth: "600px",
+          fullscreen: false,
+          hideOverlay: true,
+        },
+        buttonStyle: {
+          block: false,
+          color: "primary",
+          class: "ma-4",
+          text: "Add New Room",
+          icon: "mdi-plus",
+        },
+      },
+      roomFilterGroup: new Form({
+        roomTypes: [],
+        pageNumber: -1,
+        pageSize: -1,
+      }),
+      roomFilterDialogConfig: {
+        buttonStyle: {
+          class: "ma-1",
+          text: "",
+          icon: "mdi-magnify",
+          isIcon: true,
+        },
+        dialogStyle: {
+          persistent: true,
+          maxWidth: "1200px",
+          fullscreen: false,
+          hideOverlay: true,
+        },
+      },
+      servicesDialogConfig: {
+        buttonStyle: {
+          class: "ma-1",
+          text: "",
+          icon: "mdi-filter-menu",
+          isIcon: true,
+        },
+        dialogStyle: {
+          persistent: true,
+          maxWidth: "1200px",
+          fullscreen: false,
+          hideOverlay: true,
+        },
+      },
+    };
+  },
+
+  validations() {
+    if (!this.editMode) {
+      return {
+        data: {
+          name: { required, maxLength: maxLength(100) },
+          icno: { required, maxLength: maxLength(14) },
+          tel1: { required },
+          email: { required, email },
+          // password: { required, minLength: minLength(8) },
+          // password_confirmation: {
+          //   required,
+          //   sameAsPassword: sameAs("password"),
+          // },
+          mother_name: {},
+          mother_tel: {},
+          father_name: {},
+          mother_tel: {},
+          emergency_name: {},
+          emergency_contact: {},
+          emergency_relationship: {},
+        },
+      };
+    } else {
+      return {
+        data: {
+          name: { required, maxLength: maxLength(100) },
+          icno: { required, maxLength: maxLength(14) },
+          tel1: { required },
+          email: { required, email },
+          mother_name: {},
+          mother_tel: {},
+          father_name: {},
+          mother_tel: {},
+          emergency_name: {},
+          emergency_contact: {},
+          emergency_relationship: {},
+        },
+      };
+    }
+  },
+
+  computed: {
+    isLoading() {
+      return this.$store.getters.isLoading;
+    },
+    nameErrors() {
+      const errors = [];
+      if (!this.$v.data.name.$dirty) {
+        return errors;
+      }
+
+      if (!this.$v.data.name.required) {
+        errors.push("Name is required");
+        return errors;
+      }
+    },
+    icnoErrors() {
+      const errors = [];
+      if (!this.$v.data.icno.$dirty) {
+        return errors;
+      }
+
+      if (!this.$v.data.icno.required) {
+        errors.push("Ic No is required");
+        return errors;
+      }
+
+      if (!this.helpers.isIcFormat(this.$v.data.icno.$model)) {
+        errors.push("IC must be in format XXXXXX-XX-XXXX");
+        return errors;
+      }
+    },
+    tel1Errors() {
+      const errors = [];
+      if (!this.$v.data.tel1.$dirty) {
+        return errors;
+      }
+      if (!this.$v.data.tel1.required) {
+        errors.push("Contact is required");
+        return errors;
+      }
+
+      if (
+        !this.helpers.isPhoneFormat(this.$v.data.tel1.$model) &&
+        this.$v.data.tel1.$model
+      ) {
+        errors.push("Phone must be in format 012-XXXXXXX");
+        return errors;
+      }
+    },
+    emailErrors() {
+      const errors = [];
+      if (!this.$v.data.email.$dirty) {
+        return errors;
+      }
+      if (!this.$v.data.email.required) {
+        errors.push("E-mail is required");
+        return errors;
+      }
+
+      if (!this.$v.data.email.email) {
+        errors.push("Must be valid e-mail");
+        return errors;
+      }
+    },
+    passwordErrors() {
+      const errors = [];
+      if (!this.$v.data.password.$dirty) {
+        return errors;
+      }
+
+      if (!this.$v.data.password.required) {
+        errors.push("Password is required");
+        return errors;
+      }
+
+      if (!this.$v.data.password.minLength) {
+        errors.push("Password is too short");
+        return errors;
+      }
+
+      if (!this.$v.data.password.minLength) {
+        errors.push("Password should be more than 6 characters");
+        return errors;
+      }
+    },
+
+    passwordConfirmErrors() {
+      const errors = [];
+      if (!this.$v.data.password_confirmation.$dirty) {
+        return errors;
+      }
+
+      if (!this.$v.data.password_confirmation.required) {
+        errors.push("Password is required");
+        return errors;
+      }
+
+      if (!this.$v.data.password_confirmation.sameAsPassword) {
+        errors.push("Password Confirmation didn't match");
+        return errors;
+      }
+    },
+  },
+  watch: {
+    dialog: function (val) {
+      if (val) {
+        this.data.reset();
+        this.$v.$reset();
+      }
+    },
+  },
+  created() {
+    this.showLoadingAction();
+    this.getRoomsAction({
+      pageNumber: -1,
+      pageSize: -1,
+    })
+      .then((data) => {
+        this.rooms = data.data.map(function (room) {
+          if (
+            room.room_types.length > 0 &&
+            room.room_types[0].services.length > 0
+          ) {
+            room.services = room.room_types[0].services;
+            room.origServices = room.room_types[0].services;
+          } else {
+            room.services = [];
+            room.origServices = [];
+          }
+          room.price = parseFloat(room.price);
+          room.origPrice = parseFloat(room.price);
+          room.deposit = parseFloat(room.price) * 2.5;
+          room.booking_fees = 200;
+          return room;
+        });
+        this.getContractsAction({
+          pageNumber: -1,
+          pageSize: -1,
+        })
+          .then((data) => {
+            this.contracts = data.data;
+
+            if (this.editMode && this.uid) {
+              this.getTenantAction({ uid: this.uid })
+                .then((data) => {
+                  data.data.rooms = [];
+                  this.data = new Form(data.data);
+                  this.endLoadingAction();
+                })
+                .catch((error) => {
+                  Toast.fire({
+                    icon: "warning",
+                    title: "Something went wrong... ",
+                  });
+                  this.endLoadingAction();
+                });
+            } else {
+              this.endLoadingAction();
+            }
+          })
+          .catch((error) => {
+            this.endLoadingAction();
+            Toast.fire({
+              icon: "warning",
+              title: "Something went wrong... ",
+            });
+          });
+      })
+      .catch((error) => {
+        this.endLoadingAction();
+        Toast.fire({
+          icon: "warning",
+          title: "Something went wrong... ",
+        });
+      });
+  },
+  methods: {
+    ...mapActions({
+      getContractsAction: "getContracts",
+      getRoomsAction: "getRooms",
+      filterRoomsAction: "filterRooms",
+      getRoomTypesAction: "getRoomTypes",
+      getTenantAction: "getTenant",
+      createTenantAction: "createTenant",
+      updateTenantAction: "updateTenant",
+      showLoadingAction: "showLoadingAction",
+      endLoadingAction: "endLoadingAction",
+    }),
+    appendRoomList($data) {
+      this.rooms.push($data);
+      this.data.rooms.push($data);
+    },
+    customValidate() {
+      for (var x = 0; x < this.data.rooms.length; x++) {
+        if (
+          this.helpers.isEmpty(this.data.rooms[x].contract_id) ||
+          this.helpers.isEmpty(this.data.rooms[x].contractstartdate)
+        ) {
+          return false;
+        }
+      }
+      if (
+        (!this.data.tel1 && !this.helpers.isPhoneFormat(this.data.tel1)) ||
+        !this.helpers.isIcFormat(this.data.icno)
+      ) {
+        return false;
+      }
+
+      return true;
+    },
+
+    createTenant() {
+      this.$v.$touch(); //it will validate all fields
+
+      if (this.$v.$invalid || !this.customValidate()) {
+        Toast.fire({
+          icon: "warning",
+          title: "Please make sure all the data is valid. ",
+        });
+      } else {
+        this.$Progress.start();
+        this.showLoadingAction();
+        this.createTenantAction(this.data)
+          .then((data) => {
+            Toast.fire({
+              icon: "success",
+              title: "Successful Created. ",
+            });
+            this.$Progress.finish();
+            this.endLoadingAction();
+            this.$emit("created", data.data);
+            this.dialog = false;
+          })
+          .catch((error) => {
+            Toast.fire({
+              icon: "error",
+              title: "Something went wrong. ",
+            });
+            this.$Progress.finish();
+            this.endLoadingAction();
+          });
+      }
+    },
+
+    updateTenant() {
+      this.$v.$touch(); //it will validate all fields
+
+      if (this.$v.$invalid || !this.customValidate()) {
+        Toast.fire({
+          icon: "warning",
+          title: "Please make sure all the data is valid. ",
+        });
+      } else {
+        this.$Progress.start();
+        this.showLoadingAction();
+        this.updateTenantAction(this.data)
+          .then((data) => {
+            Toast.fire({
+              icon: "success",
+              title: "Successful Updated. ",
+            });
+            this.$Progress.finish();
+            this.endLoadingAction();
+            this.$emit("updated", data.data);
+            this.dialog = false;
+          })
+          .catch((error) => {
+            Toast.fire({
+              icon: "error",
+              title: "Something went wrong. ",
+            });
+            this.$Progress.finish();
+            this.endLoadingAction();
+          });
+      }
+    },
+    roomServiceUpdated(room, event) {
+      room.services = event.services;
+      let roomServices = event.services;
+      let roomOrigServices = room.origServices;
+
+      let newAddedServices = roomServices.filter(function (service) {
+        let existedService = roomOrigServices.some(function (origService) {
+          return origService.uid == service.uid;
+        });
+
+        return !existedService;
+      });
+
+      let price = room.origPrice;
+      newAddedServices.forEach((service) => {
+        price += parseFloat(service.price);
+      });
+
+      room.price = price;
+    },
+
+    initRoomFilter(filterGroup) {
+      this.roomFilterGroup.reset();
+      this.data.rooms = [];
+      if (filterGroup) {
+        this.roomFilterGroup.roomTypes = filterGroup.roomTypes.map(function (
+          roomType
+        ) {
+          return roomType.id;
+        });
+      }
+      this.applyRoomFilter();
+    },
+
+    applyRoomFilter() {
+      this.showLoadingAction();
+      this.filterRoomsAction(this.roomFilterGroup)
+        .then((data) => {
+          if (data.data) {
+            this.rooms = data.data;
+          } else {
+            this.rooms = [];
+          }
+          this.endLoadingAction();
+        })
+        .catch((error) => {
+          Toast.fire({
+            icon: "error",
+            title: "Something went wrong. ",
+          });
+          this.$Progress.finish();
+          this.endLoadingAction();
+        });
+    },
+    pluckUid(data) {
+      if (data.length > 0) {
+        return data.map(function (item) {
+          return item.uid;
+        });
+      } else {
+        return [];
+      }
+    },
+  },
+};
+</script>
+
 <template>
   <v-dialog
     v-model="dialog"
@@ -16,8 +507,8 @@
         :disabled="isLoading"
         :elevation="buttonStyle.elevation"
       >
-        <v-icon left>{{buttonStyle.icon}}</v-icon>
-        {{buttonStyle.text}}
+        <v-icon left>{{ buttonStyle.icon }}</v-icon>
+        {{ buttonStyle.text }}
       </v-btn>
     </template>
     <v-card>
@@ -34,7 +525,8 @@
             text
             :disabled="isLoading"
             @click="editMode ? updateTenant() : createTenant()"
-          >Save</v-btn>
+            >Save</v-btn
+          >
         </v-toolbar-items>
       </v-toolbar>
       <v-card-text>
@@ -232,16 +724,31 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="(room) in data.rooms" :key="room.uid">
+                      <tr v-for="room in data.rooms" :key="room.uid">
                         <td>{{ room.name }}</td>
                         <td>
-                          <v-text-field v-model="room.price" prefix="RM" type="number" step="0.01"></v-text-field>
+                          <v-text-field
+                            v-model="room.price"
+                            prefix="RM"
+                            type="number"
+                            step="0.01"
+                          ></v-text-field>
                         </td>
                         <td>
-                          <v-text-field v-model="room.deposit" prefix="RM" type="number" step="0.01"></v-text-field>
+                          <v-text-field
+                            v-model="room.deposit"
+                            prefix="RM"
+                            type="number"
+                            step="0.01"
+                          ></v-text-field>
                         </td>
                         <td>
-                          <v-text-field v-model="room.booking_fees" prefix="RM" type="number" step="0.01"></v-text-field>
+                          <v-text-field
+                            v-model="room.booking_fees"
+                            prefix="RM"
+                            type="number"
+                            step="0.01"
+                          ></v-text-field>
                         </td>
                         <td>
                           <v-autocomplete
@@ -250,7 +757,11 @@
                             item-text="name"
                             item-value="id"
                             label="Contract"
-                            :error-messages="helpers.isEmpty(room.contract_id) ? 'Contract is required' : ''"
+                            :error-messages="
+                              helpers.isEmpty(room.contract_id)
+                                ? 'Contract is required'
+                                : ''
+                            "
                           ></v-autocomplete>
                         </td>
                         <td>
@@ -268,10 +779,18 @@
                                 prepend-icon="event"
                                 readonly
                                 v-on="on"
-                                :error-messages="helpers.isEmpty(room.contractstartdate) ? 'Date is required' : ''"
+                                :error-messages="
+                                  helpers.isEmpty(room.contractstartdate)
+                                    ? 'Date is required'
+                                    : ''
+                                "
                               ></v-text-field>
                             </template>
-                            <v-date-picker v-model="room.contractstartdate" no-title scrollable></v-date-picker>
+                            <v-date-picker
+                              v-model="room.contractstartdate"
+                              no-title
+                              scrollable
+                            ></v-date-picker>
                           </v-menu>
                         </td>
                         <td>
@@ -281,7 +800,11 @@
                             :services="pluckUid(room.services)"
                             :origServices="pluckUid(room.origServices)"
                             editMode
-                            @submit="(e) => {roomServiceUpdated(room , e)}"
+                            @submit="
+                              (e) => {
+                                roomServiceUpdated(room, e);
+                              }
+                            "
                           ></services-dialog>
                         </td>
                       </tr>
@@ -296,493 +819,3 @@
     </v-card>
   </v-dialog>
 </template>
-
-<script>
-import { validationMixin } from "vuelidate";
-import {
-  required,
-  minLength,
-  maxLength,
-  sameAs,
-  email,
-} from "vuelidate/lib/validators";
-import { mapActions } from "vuex";
-export default {
-  props: {
-    editMode: {
-      type: Boolean,
-      default: false,
-    },
-    uid: {
-      type: String,
-      default: "",
-    },
-    buttonStyle: {
-      type: Object,
-      default: () => ({
-        block: true,
-        color: "primary",
-        class: "ma-1",
-        text: "Add Tenant",
-        icon: "mdi-plus",
-        elevation: 5,
-      }),
-    },
-  },
-  data() {
-    return {
-      dialog: false,
-      menu: false,
-      roomTypes: [],
-      rooms: [],
-      contracts: [],
-      data: new Form({
-        name: "",
-        icno: "",
-        tel1: "",
-        email: "",
-        mother_name: "",
-        mother_tel: "",
-        father_name: "",
-        father_tel: "",
-        emergency_name: "",
-        emergency_contact: "",
-        emergency_relationship: "",
-        roomTypes: [],
-        rooms: [],
-      }),
-      roomFormDialogConfig: {
-        dialogStyle: {
-          persistent: true,
-          maxWidth: "600px",
-          fullscreen: false,
-          hideOverlay: true,
-        },
-        buttonStyle: {
-          block: false,
-          color: "primary",
-          class: "ma-4",
-          text: "Add New Room",
-          icon: "mdi-plus",
-        },
-      },
-      roomFilterGroup: new Form({
-        roomTypes: [],
-        pageNumber: -1,
-        pageSize: -1,
-      }),
-      roomFilterDialogConfig: {
-        buttonStyle: {
-          class: "ma-1",
-          text: "",
-          icon: "mdi-magnify",
-          isIcon: true,
-        },
-        dialogStyle: {
-          persistent: true,
-          maxWidth: "1200px",
-          fullscreen: false,
-          hideOverlay: true,
-        },
-      },
-      servicesDialogConfig: {
-        buttonStyle: {
-          class: "ma-1",
-          text: "",
-          icon: "mdi-filter-menu",
-          isIcon: true,
-        },
-        dialogStyle: {
-          persistent: true,
-          maxWidth: "1200px",
-          fullscreen: false,
-          hideOverlay: true,
-        },
-      },
-    };
-  },
-
-  validations() {
-    if (!this.editMode) {
-      return {
-        data: {
-          name: { required, maxLength: maxLength(100) },
-          icno: { required, maxLength: maxLength(14) },
-          tel1: {required},
-          email: { required, email },
-          // password: { required, minLength: minLength(8) },
-          // password_confirmation: {
-          //   required,
-          //   sameAsPassword: sameAs("password"),
-          // },
-          mother_name: {},
-          mother_tel: {},
-          father_name: {},
-          mother_tel: {},
-          emergency_name: {},
-          emergency_contact: {},
-          emergency_relationship: {},
-        },
-      };
-    } else {
-      return {
-        data: {
-          name: { required, maxLength: maxLength(100) },
-          icno: { required, maxLength: maxLength(14) },
-          tel1: { required},
-          email: { required, email },
-          mother_name: {},
-          mother_tel: {},
-          father_name: {},
-          mother_tel: {},
-          emergency_name: {},
-          emergency_contact: {},
-          emergency_relationship: {},
-        },
-      };
-    }
-  },
-
-  computed: {
-    isLoading() {
-      return this.$store.getters.isLoading;
-    },
-    nameErrors() {
-      const errors = [];
-      if (!this.$v.data.name.$dirty) {
-        return errors;
-      }
-
-      if (!this.$v.data.name.required) {
-        errors.push("Name is required");
-        return errors;
-      }
-    },
-    icnoErrors() {
-      const errors = [];
-      if (!this.$v.data.icno.$dirty) {
-        return errors;
-      }
-
-      if (!this.$v.data.icno.required) {
-        errors.push("Ic No is required");
-        return errors;
-      }
-
-      if (!this.helpers.isIcFormat(this.$v.data.icno.$model)) {
-        errors.push("IC must be in format XXXXXX-XX-XXXX");
-        return errors;
-      }
-    },
-    tel1Errors() {
-      const errors = [];
-      if (!this.$v.data.tel1.$dirty) {
-        return errors;
-      }
-      if (!this.$v.data.tel1.required) {
-        errors.push("Contact is required");
-        return errors;
-      }
-
-
-      if (
-        !this.helpers.isPhoneFormat(this.$v.data.tel1.$model) &&
-        this.$v.data.tel1.$model
-      ) {
-        errors.push("Phone must be in format 012-XXXXXXX");
-        return errors;
-      }
-    },
-    emailErrors() {
-      const errors = [];
-      if (!this.$v.data.email.$dirty) {
-        return errors;
-      }
-      if (!this.$v.data.email.required) {
-        errors.push("E-mail is required");
-        return errors;
-      }
-
-      if (!this.$v.data.email.email) {
-        errors.push("Must be valid e-mail");
-        return errors;
-      }
-    },
-    passwordErrors() {
-      const errors = [];
-      if (!this.$v.data.password.$dirty) {
-        return errors;
-      }
-
-      if (!this.$v.data.password.required) {
-        errors.push("Password is required");
-        return errors;
-      }
-
-      if (!this.$v.data.password.minLength) {
-        errors.push("Password is too short");
-        return errors;
-      }
-
-      if (!this.$v.data.password.minLength) {
-        errors.push("Password should be more than 6 characters");
-        return errors;
-      }
-    },
-
-    passwordConfirmErrors() {
-      const errors = [];
-      if (!this.$v.data.password_confirmation.$dirty) {
-        return errors;
-      }
-
-      if (!this.$v.data.password_confirmation.required) {
-        errors.push("Password is required");
-        return errors;
-      }
-
-      if (!this.$v.data.password_confirmation.sameAsPassword) {
-        errors.push("Password Confirmation didn't match");
-        return errors;
-      }
-    },
-  },
-  watch: {
-    dialog: function (val) {
-      if (val) {
-        this.data.reset();
-        this.$v.$reset();
-      }
-    },
-  },
-  created() {
-    this.showLoadingAction();
-    this.getRoomsAction({
-      pageNumber: -1,
-      pageSize: -1,
-    })
-      .then((data) => {
-        this.rooms = data.data.map(function (room) {
-          if (
-            room.room_types.length > 0 &&
-            room.room_types[0].services.length > 0
-          ) {
-            room.services = room.room_types[0].services;
-            room.origServices = room.room_types[0].services;
-          } else {
-            room.services = [];
-            room.origServices = [];
-          }
-          room.price = parseFloat(room.price);
-          room.origPrice = parseFloat(room.price);
-          room.deposit = parseFloat(room.price) * 2.5;
-          room.booking_fees = 200;
-          return room;
-        });
-        this.getContractsAction({
-          pageNumber: -1,
-          pageSize: -1,
-        })
-          .then((data) => {
-            this.contracts = data.data;
-
-            if (this.editMode && this.uid) {
-              this.getTenantAction({ uid: this.uid })
-                .then((data) => {
-                  data.data.rooms = [];
-                  this.data = new Form(data.data);
-                  this.endLoadingAction();
-                })
-                .catch((error) => {
-                  Toast.fire({
-                    icon: "warning",
-                    title: "Something went wrong... ",
-                  });
-                  this.endLoadingAction();
-                });
-            } else {
-              this.endLoadingAction();
-            }
-          })
-          .catch((error) => {
-            this.endLoadingAction();
-            Toast.fire({
-              icon: "warning",
-              title: "Something went wrong... ",
-            });
-          });
-      })
-      .catch((error) => {
-        this.endLoadingAction();
-        Toast.fire({
-          icon: "warning",
-          title: "Something went wrong... ",
-        });
-      });
-  },
-  methods: {
-    ...mapActions({
-      getContractsAction: "getContracts",
-      getRoomsAction: "getRooms",
-      filterRoomsAction: "filterRooms",
-      getRoomTypesAction: "getRoomTypes",
-      getTenantAction: "getTenant",
-      createTenantAction: "createTenant",
-      updateTenantAction: "updateTenant",
-      showLoadingAction: "showLoadingAction",
-      endLoadingAction: "endLoadingAction",
-    }),
-    appendRoomList($data) {
-      this.rooms.push($data);
-      this.data.rooms.push($data);
-    },
-    customValidate() {
-      for (var x = 0; x < this.data.rooms.length; x++) {
-        if (
-          this.helpers.isEmpty(this.data.rooms[x].contract_id) ||
-          this.helpers.isEmpty(this.data.rooms[x].contractstartdate)
-        ) {
-          return false;
-        }
-      }
-      if (
-        (!this.data.tel1 &&!this.helpers.isPhoneFormat(this.data.tel1)) ||
-        !this.helpers.isIcFormat(this.data.icno)
-      ) {
-        return false;
-      }
-
-      return true;
-    },
-
-    createTenant() {
-      this.$v.$touch(); //it will validate all fields
-
-      if (this.$v.$invalid || !this.customValidate()) {
-        Toast.fire({
-          icon: "warning",
-          title: "Please make sure all the data is valid. ",
-        });
-      } else {
-        this.$Progress.start();
-        this.showLoadingAction();
-        this.createTenantAction(this.data)
-          .then((data) => {
-            Toast.fire({
-              icon: "success",
-              title: "Successful Created. ",
-            });
-            this.$Progress.finish();
-            this.endLoadingAction();
-            this.$emit("created", data.data);
-            this.dialog = false;
-          })
-          .catch((error) => {
-            Toast.fire({
-              icon: "error",
-              title: "Something went wrong. ",
-            });
-            this.$Progress.finish();
-            this.endLoadingAction();
-          });
-      }
-    },
-
-    updateTenant() {
-      this.$v.$touch(); //it will validate all fields
-
-      if (this.$v.$invalid || !this.customValidate()) {
-        Toast.fire({
-          icon: "warning",
-          title: "Please make sure all the data is valid. ",
-        });
-      } else {
-        this.$Progress.start();
-        this.showLoadingAction();
-        this.updateTenantAction(this.data)
-          .then((data) => {
-            Toast.fire({
-              icon: "success",
-              title: "Successful Updated. ",
-            });
-            this.$Progress.finish();
-            this.endLoadingAction();
-            this.$emit("updated", data.data);
-            this.dialog = false;
-          })
-          .catch((error) => {
-            Toast.fire({
-              icon: "error",
-              title: "Something went wrong. ",
-            });
-            this.$Progress.finish();
-            this.endLoadingAction();
-          });
-      }
-    },
-    roomServiceUpdated(room, event) {
-      room.services = event.services;
-      let roomServices = event.services;
-      let roomOrigServices = room.origServices;
-
-      let newAddedServices = roomServices.filter(function (service) {
-        let existedService = roomOrigServices.some(function (origService) {
-          return origService.uid == service.uid;
-        });
-
-        return !existedService;
-      });
-
-      let price = room.origPrice;
-      newAddedServices.forEach((service) => {
-        price += parseFloat(service.price);
-      });
-
-      room.price = price;
-    },
-
-    initRoomFilter(filterGroup) {
-      this.roomFilterGroup.reset();
-      this.data.rooms = [];
-      if (filterGroup) {
-        this.roomFilterGroup.roomTypes = filterGroup.roomTypes.map(function (
-          roomType
-        ) {
-          return roomType.id;
-        });
-      }
-      this.applyRoomFilter();
-    },
-
-    applyRoomFilter() {
-      this.showLoadingAction();
-      this.filterRoomsAction(this.roomFilterGroup)
-        .then((data) => {
-          if (data.data) {
-            this.rooms = data.data;
-          } else {
-            this.rooms = [];
-          }
-          this.endLoadingAction();
-        })
-        .catch((error) => {
-          Toast.fire({
-            icon: "error",
-            title: "Something went wrong. ",
-          });
-          this.$Progress.finish();
-          this.endLoadingAction();
-        });
-    },
-    pluckUid(data) {
-      if (data.length > 0) {
-        return data.map(function (item) {
-          return item.uid;
-        });
-      } else {
-        return [];
-      }
-    },
-  },
-};
-</script>

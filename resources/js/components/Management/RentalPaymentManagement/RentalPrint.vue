@@ -1,3 +1,128 @@
+
+
+<script>
+import { mapActions } from "vuex";
+export default {
+  props: {
+    roomcontract: {
+      type: Object,
+      default: () => ({
+        name: null,
+        startdate: null,
+      }),
+    },
+    room: {
+      type: Object,
+      default: () => ({
+        name: null,
+        price: null,
+      }),
+    },
+    tenant: {
+      type: Object,
+      default: () => ({
+        name: null,
+      }),
+    },
+    rentalpayment: {
+      type: Object,
+      default: () => ({
+        name: null,
+      }),
+    },
+    buttonStyle: {
+      type: Object,
+      default: () => ({
+        block: true,
+        color: "primary",
+        class: "ma-1",
+        text: "Print",
+        icon: "",
+        elevation: 5,
+        isIcon: false,
+      }),
+    },
+  },
+  data: () => ({
+    paymentDialog: false,
+    payonly: false,
+    selectedTenant: "",
+    selectedPayment: {
+      uid: "",
+    },
+    tenants: [],
+    deleteButtonConfig: {
+      activatorStyle: {
+        block: false,
+        color: "error",
+        class: "",
+        text: "",
+        icon: "mdi-trash-can-outline",
+        isIcon: true,
+        smallIcon: true,
+      },
+    },
+    rentalPaymentHeaders: [
+      {
+        text: "Rental",
+        value: "rentaldate",
+      },
+      { text: "Price", value: "price" },
+      {
+        text: "Paid",
+        value: "paid",
+      },
+      {
+        text: "Payment Date",
+        value: "paymentdate",
+      },
+      { text: "Actions" },
+    ],
+  }),
+
+  computed: {
+    isLoading() {
+      return this.$store.getters.isLoading;
+    },
+    sortedRentalPayments() {
+      return this.helpers.sortByDate(this.rentalpayments, "rentaldate");
+    },
+  },
+  created() {
+    this.$Progress.start();
+    this.showLoadingAction();
+    this.getTenantsAction({ pageNumber: -1, pageSize: -1 })
+      .then((data) => {
+        this.tenants = data.data;
+        this.$Progress.finish();
+        this.endLoadingAction();
+      })
+      .catch((error) => {
+        Toast.fire({
+          icon: "warning",
+          title: "Fail to retrieve the tenants!!!!! ",
+        });
+        this.$Progress.finish();
+        this.endLoadingAction();
+      });
+  },
+
+  methods: {
+    ...mapActions({
+      getTenantsAction: "getTenants",
+      transferRoomContractAction: "transferRoomContract",
+      createRentalPaymentAction: "createRentalPayment",
+      deleteRentalPaymentAction: "deleteRentalPayment",
+      showLoadingAction: "showLoadingAction",
+      endLoadingAction: "endLoadingAction",
+    }),
+    print() {
+      this.$htmlToPaper("printMe");
+    },
+  },
+};
+</script>
+
 <template>
   <span class="d-inline-block">
     <div class="d-none" id="printMe">
@@ -147,126 +272,3 @@
     </v-btn>
   </span>
 </template>
-
-<script>
-import { mapActions } from "vuex";
-export default {
-  props: {
-    roomcontract: {
-      type: Object,
-      default: () => ({
-        name: null,
-        startdate: null,
-      }),
-    },
-    room: {
-      type: Object,
-      default: () => ({
-        name: null,
-        price: null,
-      }),
-    },
-    tenant: {
-      type: Object,
-      default: () => ({
-        name: null,
-      }),
-    },
-    rentalpayment: {
-      type: Object,
-      default: () => ({
-        name: null,
-      }),
-    },
-    buttonStyle: {
-      type: Object,
-      default: () => ({
-        block: true,
-        color: "primary",
-        class: "ma-1",
-        text: "Print",
-        icon: "",
-        elevation: 5,
-        isIcon: false,
-      }),
-    },
-  },
-  data: () => ({
-    paymentDialog: false,
-    payonly: false,
-    selectedTenant: "",
-    selectedPayment: {
-      uid: "",
-    },
-    tenants: [],
-    deleteButtonConfig: {
-      activatorStyle: {
-        block: false,
-        color: "error",
-        class: "",
-        text: "",
-        icon: "mdi-trash-can-outline",
-        isIcon: true,
-        smallIcon: true,
-      },
-    },
-    rentalPaymentHeaders: [
-      {
-        text: "Rental",
-        value: "rentaldate",
-      },
-      { text: "Price", value: "price" },
-      {
-        text: "Paid",
-        value: "paid",
-      },
-      {
-        text: "Payment Date",
-        value: "paymentdate",
-      },
-      { text: "Actions" },
-    ],
-  }),
-
-  computed: {
-    isLoading() {
-      return this.$store.getters.isLoading;
-    },
-    sortedRentalPayments() {
-      return this.helpers.sortByDate(this.rentalpayments, "rentaldate");
-    },
-  },
-  created() {
-    this.$Progress.start();
-    this.showLoadingAction();
-    this.getTenantsAction({ pageNumber: -1, pageSize: -1 })
-      .then((data) => {
-        this.tenants = data.data;
-        this.$Progress.finish();
-        this.endLoadingAction();
-      })
-      .catch((error) => {
-        Toast.fire({
-          icon: "warning",
-          title: "Fail to retrieve the tenants!!!!! ",
-        });
-        this.$Progress.finish();
-        this.endLoadingAction();
-      });
-  },
-
-  methods: {
-    ...mapActions({
-      getTenantsAction: "getTenants",
-      transferRoomContractAction: "transferRoomContract",
-      createRentalPaymentAction: "createRentalPayment",
-      deleteRentalPaymentAction: "deleteRentalPayment",
-      showLoadingAction: "showLoadingAction",
-      endLoadingAction: "endLoadingAction",
-    }),
-    print() {
-      this.$htmlToPaper("printMe");
-    },
-  },
-};
-</script>

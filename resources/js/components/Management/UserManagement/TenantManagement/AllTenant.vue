@@ -1,77 +1,4 @@
-<template>
-  <v-app>
-    <navbar></navbar>
-    <v-content :class="helpers.managementStyles().backgroundClass">
-      <v-container class="fill-height" fluid>
-        <loading></loading>
-        <v-row justify="center" align="center" class="ma-3">
-          <v-col cols="12">
-            <tenant-form :editMode="false" :buttonStyle="tenantFormDialogConfig.buttonStyle" @created="showTenant($event)"></tenant-form>
-          </v-col>
-        </v-row>
 
-        <v-row justify="center" align="center" class="mx-3">
-          <v-col cols="12">
-            <v-card raised>
-              <v-card-subtitle v-show="!keywordEmpty">
-                Keyword :
-                <v-chip class="mx-2">{{ tenantFilterGroup.keyword }}</v-chip>
-              </v-card-subtitle>
-              <v-card-subtitle v-show="!fromdateEmpty">
-                From Date :
-                <v-chip class="mx-2">{{ tenantFilterGroup.keyword }}</v-chip>
-              </v-card-subtitle>
-              <v-card-subtitle v-show="!todateEmpty">
-                To Date :
-                <v-chip class="mx-2">{{ tenantFilterGroup.todate }}</v-chip>
-              </v-card-subtitle>
-
-              <v-card-subtitle v-show="!roomTypesEmpty">
-                Room Types :
-                <v-chip
-                  class="mx-2"
-                  v-for="roomType in tenantFilterGroup.selectedRoomTypes"
-                  :key="roomType.id"
-                >{{ roomType.name | capitalizeFirstLetter }}</v-chip>
-              </v-card-subtitle>
-            </v-card>
-          </v-col>
-        </v-row>
-        <v-row justify="center" align="center" class="ma-3">
-          <v-col cols="12">
-            <v-card class="pa-8" raised>
-              <v-data-table
-                :headers="headers"
-                :items="data"
-                :options.sync="options"
-                :server-items-length="totalDataLength"
-                :loading="loading"
-              >
-                <template v-slot:top>
-                  <v-toolbar flat class="mb-5">
-                    <tenant-filter-dialog
-                      :buttonStyle="tenantFilterDialogConfig.buttonStyle"
-                      :dialogStyle="tenantFilterDialogConfig.dialogStyle"
-                      @submitFilter="initTenantFilter($event)"
-                    ></tenant-filter-dialog>
-                  </v-toolbar>
-                </template>
-                <template v-slot:item="props">
-                  <tr @click="showTenant(props.item)">
-                    <td>{{props.item.name}}</td>
-                    <td>{{props.item.icno}}</td>
-                    <td>{{props.item.tel1}}</td>
-                    <td>{{props.item.email}}</td>
-                  </tr>
-                </template>
-              </v-data-table>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-content>
-  </v-app>
-</template>
 
 
 <script>
@@ -88,7 +15,7 @@ export default {
         selectedRoomTypes: [],
         keyword: null,
         fromdate: null,
-        todate: null
+        todate: null,
       }),
       tenantFormDialogConfig: {
         buttonStyle: {
@@ -98,7 +25,7 @@ export default {
           icon: "mdi-plus",
           isIcon: false,
           color: "primary",
-          evalation : "5",
+          evalation: "5",
         },
       },
       tenantFilterDialogConfig: {
@@ -108,25 +35,25 @@ export default {
           text: "Filter",
           icon: "mdi-magnify",
           isIcon: false,
-          color: "primary"
+          color: "primary",
         },
         dialogStyle: {
           persistent: true,
           maxWidth: "1200px",
           fullscreen: false,
-          hideOverlay: true
-        }
+          hideOverlay: true,
+        },
       },
       headers: [
         {
           text: "Name",
           align: "start",
-          value: "name"
+          value: "name",
         },
         { text: "Ic No", value: "icno" },
         { text: "Phone", value: "tel1" },
-        { text: "Email", value: "email" }
-      ]
+        { text: "Email", value: "email" },
+      ],
     };
   },
   watch: {
@@ -134,8 +61,8 @@ export default {
       handler() {
         this.getTenants();
       },
-      deep: true
-    }
+      deep: true,
+    },
   },
   computed: {
     isLoading() {
@@ -152,7 +79,7 @@ export default {
     },
     roomTypesEmpty() {
       return this.helpers.isEmpty(this.tenantFilterGroup.selectedRoomTypes);
-    }
+    },
   },
   created() {
     var styles = this.helpers.managementStyles();
@@ -165,13 +92,13 @@ export default {
       getTenantsAction: "getTenants",
       filterTenantsAction: "filterTenants",
       showLoadingAction: "showLoadingAction",
-      endLoadingAction: "endLoadingAction"
+      endLoadingAction: "endLoadingAction",
     }),
     initTenantFilter(filterGroup) {
       this.tenantFilterGroup.reset();
       if (filterGroup) {
         this.tenantFilterGroup.selectedRoomTypes = filterGroup.roomTypes;
-        this.tenantFilterGroup.roomTypes = filterGroup.roomTypes.map(function(
+        this.tenantFilterGroup.roomTypes = filterGroup.roomTypes.map(function (
           roomType
         ) {
           return roomType.id;
@@ -198,7 +125,7 @@ export default {
       }
 
       this.filterTenantsAction(this.tenantFilterGroup)
-        .then(data => {
+        .then((data) => {
           if (data.data) {
             this.data = data.data;
           } else {
@@ -207,14 +134,93 @@ export default {
           this.totalDataLength = data.totalResult;
           this.loading = false;
         })
-        .catch(error => {
+        .catch((error) => {
           this.loading = false;
           Toast.fire({
             icon: "warning",
-            title: "Something went wrong... "
+            title: "Something went wrong... ",
           });
         });
-    }
-  }
+    },
+  },
 };
 </script>
+<template>
+  <v-app>
+    <navbar></navbar>
+    <v-content :class="helpers.managementStyles().backgroundClass">
+      <v-container class="fill-height" fluid>
+        <loading></loading>
+        <v-row justify="center" align="center" class="ma-3">
+          <v-col cols="12">
+            <tenant-form
+              :editMode="false"
+              :buttonStyle="tenantFormDialogConfig.buttonStyle"
+              @created="showTenant($event)"
+            ></tenant-form>
+          </v-col>
+        </v-row>
+
+        <v-row justify="center" align="center" class="mx-3">
+          <v-col cols="12">
+            <v-card raised>
+              <v-card-subtitle v-show="!keywordEmpty">
+                Keyword :
+                <v-chip class="mx-2">{{ tenantFilterGroup.keyword }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="!fromdateEmpty">
+                From Date :
+                <v-chip class="mx-2">{{ tenantFilterGroup.keyword }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="!todateEmpty">
+                To Date :
+                <v-chip class="mx-2">{{ tenantFilterGroup.todate }}</v-chip>
+              </v-card-subtitle>
+
+              <v-card-subtitle v-show="!roomTypesEmpty">
+                Room Types :
+                <v-chip
+                  class="mx-2"
+                  v-for="roomType in tenantFilterGroup.selectedRoomTypes"
+                  :key="roomType.id"
+                  >{{ roomType.name | capitalizeFirstLetter }}</v-chip
+                >
+              </v-card-subtitle>
+            </v-card>
+          </v-col>
+        </v-row>
+        <v-row justify="center" align="center" class="ma-3">
+          <v-col cols="12">
+            <v-card class="pa-8" raised>
+              <v-data-table
+                :headers="headers"
+                :items="data"
+                :options.sync="options"
+                :server-items-length="totalDataLength"
+                :loading="loading"
+              >
+                <template v-slot:top>
+                  <v-toolbar flat class="mb-5">
+                    <tenant-filter-dialog
+                      :buttonStyle="tenantFilterDialogConfig.buttonStyle"
+                      :dialogStyle="tenantFilterDialogConfig.dialogStyle"
+                      @submitFilter="initTenantFilter($event)"
+                    ></tenant-filter-dialog>
+                  </v-toolbar>
+                </template>
+                <template v-slot:item="props">
+                  <tr @click="showTenant(props.item)">
+                    <td>{{ props.item.name }}</td>
+                    <td>{{ props.item.icno }}</td>
+                    <td>{{ props.item.tel1 }}</td>
+                    <td>{{ props.item.email }}</td>
+                  </tr>
+                </template>
+              </v-data-table>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-content>
+  </v-app>
+</template>

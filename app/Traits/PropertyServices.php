@@ -35,7 +35,7 @@ trait PropertyServices
             $keyword = $params->keyword;
             $data = $data->filter(function ($item) use ($keyword) {
                 //check string exist inside or not
-                if (stristr($item->uid, $keyword) == TRUE || stristr($item->name, $keyword) == TRUE  ) {
+                if (stristr($item->name, $keyword) == TRUE   ) {
                     return true;
                 } else {
                     return false;
@@ -71,7 +71,7 @@ trait PropertyServices
         $data->name  = $params->name;
         $data->text = $params->text;
         $data->desc = $params->desc;
-        $data->icon = $params->icon;
+        $data->price = $this->toDouble($params->price);
 
         if (!$this->saveModel($data)) {
             return null;
@@ -88,7 +88,7 @@ trait PropertyServices
         $data->name  = $params->name;
         $data->text = $params->text;
         $data->desc = $params->desc;
-        $data->icon = $params->icon;
+        $data->price = $this->toDouble($params->price);
 
         if (!$this->saveModel($data)) {
             return null;

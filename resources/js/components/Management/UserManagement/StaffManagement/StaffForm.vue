@@ -1,130 +1,3 @@
-<template>
-  <v-dialog v-model="dialog" fullscreen hide-overlay transition="dialog-bottom-transition">
-    <template v-slot:activator="{ on }">
-      <v-btn
-        :class="buttonStyle.class"
-        tile
-        :color="buttonStyle.color"
-        :block="buttonStyle.block"
-        v-on="on"
-        :disabled="isLoading"
-        :elevation="buttonStyle.elevation"
-      >
-        <v-icon left>{{buttonStyle.icon}}</v-icon>
-        {{buttonStyle.text}}
-      </v-btn>
-    </template>
-    <v-card>
-      <v-toolbar dark color="primary">
-        <v-btn icon dark @click="dialog = false">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
-        <v-toolbar-title v-if="!editMode">Add Staff</v-toolbar-title>
-        <v-toolbar-title v-else>Edit Staff</v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-toolbar-items>
-          <v-btn
-            dark
-            text
-            :disabled="isLoading"
-            @click="editMode ? updateStaff() : createStaff()"
-          >Save</v-btn>
-        </v-toolbar-items>
-      </v-toolbar>
-      <v-card-text>
-        <v-container>
-          <v-row>
-            <v-col cols="12" md="6">
-              <v-text-field
-                label="Name*"
-                required
-                :maxlength="100"
-                v-model="data.name"
-                @input="$v.data.name.$touch()"
-                @blur="$v.data.name.$touch()"
-                :error-messages="nameErrors"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="6">
-              <v-text-field
-                label="IC-No*"
-                hint="Example of IC-No : 1234-56-7890 (With Dash)"
-                persistent-hint
-                required
-                :maxlength="14"
-                v-model="data.icno"
-                @input="$v.data.icno.$touch()"
-                @blur="$v.data.icno.$touch()"
-                :error-messages="icnoErrors"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="6">
-              <v-text-field
-                label="Phone No"
-                hint="Example of Phone No : 014-12019231 (With Dash)"
-                persistent-hint
-                v-model="data.tel1"
-                :maxlength="20"
-                @input="$v.data.tel1.$touch()"
-                @blur="$v.data.tel1.$touch()"
-                :error-messages="tel1Errors"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12">
-              <v-text-field
-                label="Email*"
-                hint="Email that used to login the website"
-                persistent-hint
-                required
-                :maxlength="255"
-                v-model="data.email"
-                @input="$v.data.email.$touch()"
-                @blur="$v.data.email.$touch()"
-                :error-messages="emailErrors"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" v-if="!editMode">
-              <v-text-field
-                label="Password*"
-                hint="Password should be more than 8 characters."
-                persistent-hint
-                type="password"
-                required
-                :maxlength="255"
-                v-model="data.password"
-                @input="$v.data.password.$touch()"
-                @blur="$v.data.password.$touch()"
-                :error-messages="passwordErrors"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" v-if="!editMode">
-              <v-text-field
-                label="Password Confirmation*"
-                type="password"
-                required
-                :maxlength="255"
-                v-model="data.password_confirmation"
-                @input="$v.data.password_confirmation.$touch()"
-                @blur="$v.data.password_confirmation.$touch()"
-                :error-messages="passwordConfirmErrors"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12">
-              <v-autocomplete
-                v-model="data.role_id"
-                :items="roles"
-                item-value="id"
-                item-text="name"
-                label="Role"
-                :error-messages="helpers.isEmpty(data.role_id) ? 'Role is required' : ''"
-              ></v-autocomplete>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-card-text>
-    </v-card>
-  </v-dialog>
-</template>
 
 <script>
 import { validationMixin } from "vuelidate";
@@ -310,6 +183,23 @@ export default {
   },
   created() {
     this.showLoadingAction();
+    this.getRolesAction({
+      pageNumber: -1,
+      pageSize: -1,
+    })
+      .then((res) => {
+        this.endLoadingAction();
+        this.roles = res.data.filter(function(role) { 
+          return role.name != 'tenant' && role.name != 'owner';
+        });
+      })
+      .catch((err) => {
+        this.endLoadingAction();
+        Toast.fire({
+          icon: "warning",
+          title: "Something went wrong... ",
+        });
+      });
     if (this.editMode) {
       this.getStaffAction({ uid: this.uid })
         .then((data) => {
@@ -332,6 +222,7 @@ export default {
       getStaffAction: "getStaff",
       createStaffAction: "createStaff",
       updateStaffAction: "updateStaff",
+      getRolesAction: "getRoles",
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction",
     }),
@@ -411,3 +302,131 @@ export default {
   },
 };
 </script>
+
+<template>
+  <v-dialog v-model="dialog" fullscreen hide-overlay transition="dialog-bottom-transition">
+    <template v-slot:activator="{ on }">
+      <v-btn
+        :class="buttonStyle.class"
+        tile
+        :color="buttonStyle.color"
+        :block="buttonStyle.block"
+        v-on="on"
+        :disabled="isLoading"
+        :elevation="buttonStyle.elevation"
+      >
+        <v-icon left>{{buttonStyle.icon}}</v-icon>
+        {{buttonStyle.text}}
+      </v-btn>
+    </template>
+    <v-card>
+      <v-toolbar dark color="primary">
+        <v-btn icon dark @click="dialog = false">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+        <v-toolbar-title v-if="!editMode">Add Staff</v-toolbar-title>
+        <v-toolbar-title v-else>Edit Staff</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-toolbar-items>
+          <v-btn
+            dark
+            text
+            :disabled="isLoading"
+            @click="editMode ? updateStaff() : createStaff()"
+          >Save</v-btn>
+        </v-toolbar-items>
+      </v-toolbar>
+      <v-card-text>
+        <v-container>
+          <v-row>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="Name*"
+                required
+                :maxlength="100"
+                v-model="data.name"
+                @input="$v.data.name.$touch()"
+                @blur="$v.data.name.$touch()"
+                :error-messages="nameErrors"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="IC-No*"
+                hint="Example of IC-No : 1234-56-7890 (With Dash)"
+                persistent-hint
+                required
+                :maxlength="14"
+                v-model="data.icno"
+                @input="$v.data.icno.$touch()"
+                @blur="$v.data.icno.$touch()"
+                :error-messages="icnoErrors"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="Phone No"
+                hint="Example of Phone No : 014-12019231 (With Dash)"
+                persistent-hint
+                v-model="data.tel1"
+                :maxlength="20"
+                @input="$v.data.tel1.$touch()"
+                @blur="$v.data.tel1.$touch()"
+                :error-messages="tel1Errors"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="Email*"
+                hint="Email that used to login the website"
+                persistent-hint
+                required
+                :maxlength="255"
+                v-model="data.email"
+                @input="$v.data.email.$touch()"
+                @blur="$v.data.email.$touch()"
+                :error-messages="emailErrors"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" v-if="!editMode">
+              <v-text-field
+                label="Password*"
+                hint="Password should be more than 8 characters."
+                persistent-hint
+                type="password"
+                required
+                :maxlength="255"
+                v-model="data.password"
+                @input="$v.data.password.$touch()"
+                @blur="$v.data.password.$touch()"
+                :error-messages="passwordErrors"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" v-if="!editMode">
+              <v-text-field
+                label="Password Confirmation*"
+                type="password"
+                required
+                :maxlength="255"
+                v-model="data.password_confirmation"
+                @input="$v.data.password_confirmation.$touch()"
+                @blur="$v.data.password_confirmation.$touch()"
+                :error-messages="passwordConfirmErrors"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-autocomplete
+                v-model="data.role_id"
+                :items="roles"
+                item-value="id"
+                item-text="name"
+                label="Role"
+                :error-messages="helpers.isEmpty(data.role_id) ? 'Role is required' : ''"
+              ></v-autocomplete>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
+</template>

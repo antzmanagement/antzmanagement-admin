@@ -1,225 +1,4 @@
-<template>
-  <v-dialog
-    v-model="dialog"
-    :fullscreen="dialogStyle.fullscreen"
-    :hide-overlay="dialogStyle.hideOverlay"
-    :persistent="dialogStyle.persistent"
-    :max-width="dialogStyle.maxWidth"
-    transition="dialog-bottom-transition"
-  >
-    <template v-slot:activator="{ on }">
-      <v-btn
-        :class="buttonStyle.class"
-        tile
-        :color="buttonStyle.color"
-        :block="buttonStyle.block"
-        :elevation="buttonStyle.elevation"
-        v-on="on"
-        :icon="buttonStyle.isIcon"
-        :disabled="isLoading"
-      >
-        <v-icon>{{buttonStyle.icon}}</v-icon>
-        {{buttonStyle.text}}
-      </v-btn>
-    </template>
-    <v-card>
-      <v-toolbar dark color="primary">
-        <v-btn icon dark @click="dialog = false">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
-        <v-toolbar-title v-if="!editMode">Add RoomContract</v-toolbar-title>
-        <v-toolbar-title v-else>Edit RoomContract</v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-toolbar-items>
-          <v-btn
-            dark
-            text
-            :disabled="isLoading"
-            @click="editMode ? updateRoomContract() : createRoomContract()"
-          >Save</v-btn>
-        </v-toolbar-items>
-      </v-toolbar>
-      <v-card-text>
-        <v-container>
-          <v-row>
-            <v-col cols="12" md="12">
-              <v-autocomplete
-                v-model="data.tenant"
-                :items="tenants"
-                item-value="id"
-                item-text="name"
-                label="Tenant"
-                :error-messages="helpers.isEmpty(data.tenant) ? 'Tenant is required' : ''"
-              >
-                <!-- <template v-slot:append>
-                  <room-form
-                    :editMode="false"
-                    :dialogStyle="roomFormDialogConfig.dialogStyle"
-                    :buttonStyle="roomFormDialogConfig.buttonStyle"
-                    @created="appendRoomList($event)"
-                  ></room-form>
-                </template>-->
-                <template v-slot:append-outer>
-                  <tenant-filter-dialog
-                    :buttonStyle="roomFilterDialogConfig.buttonStyle"
-                    :dialogStyle="roomFilterDialogConfig.dialogStyle"
-                    @submitFilter="initTenantFilter($event)"
-                  ></tenant-filter-dialog>
-                </template>
-              </v-autocomplete>
-            </v-col>
-            <v-col cols="12" md="12">
-              <v-autocomplete
-                v-model="data.room"
-                :items="rooms"
-                item-text="name"
-                label="Room"
-                :error-messages="isEmpty(data.room) ? 'Room is required' : ''"
-                return-object
-              >
-                <!-- <template v-slot:append>
-                  <room-form
-                    :editMode="false"
-                    :dialogStyle="roomFormDialogConfig.dialogStyle"
-                    :buttonStyle="roomFormDialogConfig.buttonStyle"
-                    @created="appendRoomList($event)"
-                  ></room-form>
-                </template>-->
-                <template v-slot:append-outer>
-                  <room-filter-dialog
-                    :buttonStyle="roomFilterDialogConfig.buttonStyle"
-                    :dialogStyle="roomFilterDialogConfig.dialogStyle"
-                    @submitFilter="initRoomFilter($event)"
-                  ></room-filter-dialog>
-                </template>
-              </v-autocomplete>
-            </v-col>
-            <v-col cols="12">
-              <v-card>
-                <v-simple-table fixed-header height="300px">
-                  <template v-slot:default>
-                    <thead>
-                      <tr>
-                        <th class="text-left">Room</th>
-                        <th class="text-left">Rental</th>
-                        <th class="text-left">Deposit</th>
-                        <th class="text-left">Booking Fees</th>
-                        <th class="text-left" v-if="editMode">Outstanding Deposit</th>
-                        <th class="text-left">Contract</th>
-                        <th class="text-left">Contract Start Date</th>
-                        <th class="text-left">Services</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-if="!isEmpty(data.room)">
-                        <td>{{ data.room.name }}</td>
-                        <td>
-                          <v-text-field
-                            v-model="data.room.price"
-                            prefix="RM"
-                            type="number"
-                            step="0.01"
-                            :error-messages="helpers.isEmpty(data.room.price) ? 'Rental is required' : ''"
-                          ></v-text-field>
-                        </td>
-                        <td>
-                          <v-text-field
-                            v-model="data.room.deposit"
-                            prefix="RM"
-                            type="number"
-                            step="0.01"
-                            :error-messages="helpers.isEmpty(data.room.deposit) ? 'Deposit is required' : ''"
-                          ></v-text-field>
-                        </td>
-                        <td>
-                          <v-text-field
-                            v-model="data.room.booking_fees"
-                            prefix="RM"
-                            type="number"
-                            step="0.01"
-                            :error-messages="helpers.isEmpty(data.room.booking_fees) ? 'Booking fees is required' : ''"
-                          ></v-text-field>
-                        </td>
-                        <td v-if="editMode">
-                          <v-text-field
-                            v-model="data.room.outstanding_deposit"
-                            prefix="RM"
-                            type="number"
-                            step="0.01"
-                            :error-messages="helpers.isEmpty(data.room.outstanding_deposit) ? 'Outstanding deposit is required' : ''"
-                          ></v-text-field>
-                        </td>
-                        <td>
-                          <v-autocomplete
-                            v-model="data.room.contract_id"
-                            :items="contracts"
-                            item-text="name"
-                            item-value="id"
-                            label="Contract"
-                            :error-messages="helpers.isEmpty(data.room.contract_id) ? 'Contract is required' : ''"
-                          ></v-autocomplete>
-                        </td>
-                        <td>
-                          <v-menu
-                            ref="menu"
-                            v-model="data.room.menu"
-                            :close-on-content-click="true"
-                            transition="scale-transition"
-                            :disabled="editMode"
-                            offset-y
-                          >
-                            <template v-slot:activator="{ on }">
-                              <v-text-field
-                                v-model="data.room.contractstartdate"
-                                label="Start Date"
-                                prepend-icon="event"
-                                readonly
-                                v-on="on"
-                                :error-messages="helpers.isEmpty(data.room.contractstartdate) ? 'Date is required' : ''"
-                              ></v-text-field>
-                            </template>
-                            <v-date-picker
-                              v-model="data.room.contractstartdate"
-                              no-title
-                              scrollable
-                            ></v-date-picker>
-                          </v-menu>
-                        </td>
-                        <td>
-                          <services-dialog
-                            :dialogStyle="servicesDialogConfig.dialogStyle"
-                            :buttonStyle="servicesDialogConfig.buttonStyle"
-                            :services="pluckUid(!isEmpty(data.room.services) ? data.room.services : [])"
-                            :origServices="pluckUid(!isEmpty(data.room.origServices) ? data.room.origServices : [])"
-                            editMode
-                            @submit="(e) => {roomServiceUpdated(data.room , e)}"
-                          ></services-dialog>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </template>
-                </v-simple-table>
-              </v-card>
-            </v-col>
-          </v-row>
 
-          <v-row>
-            <v-col cols="12" md="12">
-              <v-textarea
-                label="Remark"
-                :maxlength="2500"
-                v-model="data.remark"
-                @input="$v.data.remark.$touch()"
-                @blur="$v.data.remark.$touch()"
-                :error-messages="remarkErrors"
-              ></v-textarea>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-card-text>
-    </v-card>
-  </v-dialog>
-</template>
 
 <script>
 import { validationMixin } from "vuelidate";
@@ -430,13 +209,18 @@ export default {
             .then((data) => {
               data.data.tenant = data.data.tenant.id;
               data.data.room.origServices = data.data.origservices;
-              data.data.room.services = this._.concat(data.data.origservices , data.data.addonservices);
+              data.data.room.services = this._.concat(
+                data.data.origservices,
+                data.data.addonservices
+              );
               data.data.room.contract_id = data.data.contract.id;
               data.data.contractstartdate = data.data.startdate;
               data.data.room.deposit = parseFloat(data.data.deposit);
               data.data.room.booking_fees = parseFloat(data.data.booking_fees);
-              data.data.room.outstanding_deposit = parseFloat(data.data.outstanding_deposit);
-              data.data.room.origPrice = parseFloat(data.data.room.price)
+              data.data.room.outstanding_deposit = parseFloat(
+                data.data.outstanding_deposit
+              );
+              data.data.room.origPrice = parseFloat(data.data.room.price);
               data.data.room.price = parseFloat(data.data.rental);
               data.data.room.contractstartdate = data.data.startdate;
               this.data = new Form(data.data);
@@ -680,3 +464,271 @@ export default {
   },
 };
 </script>
+
+<template>
+  <v-dialog
+    v-model="dialog"
+    :fullscreen="dialogStyle.fullscreen"
+    :hide-overlay="dialogStyle.hideOverlay"
+    :persistent="dialogStyle.persistent"
+    :max-width="dialogStyle.maxWidth"
+    transition="dialog-bottom-transition"
+  >
+    <template v-slot:activator="{ on }">
+      <v-btn
+        :class="buttonStyle.class"
+        tile
+        :color="buttonStyle.color"
+        :block="buttonStyle.block"
+        :elevation="buttonStyle.elevation"
+        v-on="on"
+        :icon="buttonStyle.isIcon"
+        :disabled="isLoading"
+      >
+        <v-icon>{{ buttonStyle.icon }}</v-icon>
+        {{ buttonStyle.text }}
+      </v-btn>
+    </template>
+    <v-card>
+      <v-toolbar dark color="primary">
+        <v-btn icon dark @click="dialog = false">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+        <v-toolbar-title v-if="!editMode">Add RoomContract</v-toolbar-title>
+        <v-toolbar-title v-else>Edit RoomContract</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-toolbar-items>
+          <v-btn
+            dark
+            text
+            :disabled="isLoading"
+            @click="editMode ? updateRoomContract() : createRoomContract()"
+            >Save</v-btn
+          >
+        </v-toolbar-items>
+      </v-toolbar>
+      <v-card-text>
+        <v-container>
+          <v-row>
+            <v-col cols="12" md="12">
+              <v-autocomplete
+                v-model="data.tenant"
+                :items="tenants"
+                item-value="id"
+                item-text="name"
+                label="Tenant"
+                :error-messages="
+                  helpers.isEmpty(data.tenant) ? 'Tenant is required' : ''
+                "
+              >
+                <!-- <template v-slot:append>
+                  <room-form
+                    :editMode="false"
+                    :dialogStyle="roomFormDialogConfig.dialogStyle"
+                    :buttonStyle="roomFormDialogConfig.buttonStyle"
+                    @created="appendRoomList($event)"
+                  ></room-form>
+                </template>-->
+                <template v-slot:append-outer>
+                  <tenant-filter-dialog
+                    :buttonStyle="roomFilterDialogConfig.buttonStyle"
+                    :dialogStyle="roomFilterDialogConfig.dialogStyle"
+                    @submitFilter="initTenantFilter($event)"
+                  ></tenant-filter-dialog>
+                </template>
+              </v-autocomplete>
+            </v-col>
+            <v-col cols="12" md="12">
+              <v-autocomplete
+                v-model="data.room"
+                :items="rooms"
+                item-text="name"
+                label="Room"
+                :error-messages="isEmpty(data.room) ? 'Room is required' : ''"
+                return-object
+              >
+                <!-- <template v-slot:append>
+                  <room-form
+                    :editMode="false"
+                    :dialogStyle="roomFormDialogConfig.dialogStyle"
+                    :buttonStyle="roomFormDialogConfig.buttonStyle"
+                    @created="appendRoomList($event)"
+                  ></room-form>
+                </template>-->
+                <template v-slot:append-outer>
+                  <room-filter-dialog
+                    :buttonStyle="roomFilterDialogConfig.buttonStyle"
+                    :dialogStyle="roomFilterDialogConfig.dialogStyle"
+                    @submitFilter="initRoomFilter($event)"
+                  ></room-filter-dialog>
+                </template>
+              </v-autocomplete>
+            </v-col>
+            <v-col cols="12">
+              <v-card>
+                <v-simple-table fixed-header height="300px">
+                  <template v-slot:default>
+                    <thead>
+                      <tr>
+                        <th class="text-left">Room</th>
+                        <th class="text-left">Rental</th>
+                        <th class="text-left">Deposit</th>
+                        <th class="text-left">Booking Fees</th>
+                        <th class="text-left" v-if="editMode">
+                          Outstanding Deposit
+                        </th>
+                        <th class="text-left">Contract</th>
+                        <th class="text-left">Contract Start Date</th>
+                        <th class="text-left">Services</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-if="!isEmpty(data.room)">
+                        <td>{{ data.room.name }}</td>
+                        <td>
+                          <v-text-field
+                            v-model="data.room.price"
+                            prefix="RM"
+                            type="number"
+                            step="0.01"
+                            :error-messages="
+                              helpers.isEmpty(data.room.price)
+                                ? 'Rental is required'
+                                : ''
+                            "
+                          ></v-text-field>
+                        </td>
+                        <td>
+                          <v-text-field
+                            v-model="data.room.deposit"
+                            prefix="RM"
+                            type="number"
+                            step="0.01"
+                            :error-messages="
+                              helpers.isEmpty(data.room.deposit)
+                                ? 'Deposit is required'
+                                : ''
+                            "
+                          ></v-text-field>
+                        </td>
+                        <td>
+                          <v-text-field
+                            v-model="data.room.booking_fees"
+                            prefix="RM"
+                            type="number"
+                            step="0.01"
+                            :error-messages="
+                              helpers.isEmpty(data.room.booking_fees)
+                                ? 'Booking fees is required'
+                                : ''
+                            "
+                          ></v-text-field>
+                        </td>
+                        <td v-if="editMode">
+                          <v-text-field
+                            v-model="data.room.outstanding_deposit"
+                            prefix="RM"
+                            type="number"
+                            step="0.01"
+                            :error-messages="
+                              helpers.isEmpty(data.room.outstanding_deposit)
+                                ? 'Outstanding deposit is required'
+                                : ''
+                            "
+                          ></v-text-field>
+                        </td>
+                        <td>
+                          <v-autocomplete
+                            v-model="data.room.contract_id"
+                            :items="contracts"
+                            item-text="name"
+                            item-value="id"
+                            label="Contract"
+                            :error-messages="
+                              helpers.isEmpty(data.room.contract_id)
+                                ? 'Contract is required'
+                                : ''
+                            "
+                          ></v-autocomplete>
+                        </td>
+                        <td>
+                          <v-menu
+                            ref="menu"
+                            v-model="data.room.menu"
+                            :close-on-content-click="true"
+                            transition="scale-transition"
+                            :disabled="editMode"
+                            offset-y
+                          >
+                            <template v-slot:activator="{ on }">
+                              <v-text-field
+                                v-model="data.room.contractstartdate"
+                                label="Start Date"
+                                prepend-icon="event"
+                                readonly
+                                v-on="on"
+                                :error-messages="
+                                  helpers.isEmpty(data.room.contractstartdate)
+                                    ? 'Date is required'
+                                    : ''
+                                "
+                              ></v-text-field>
+                            </template>
+                            <v-date-picker
+                              v-model="data.room.contractstartdate"
+                              no-title
+                              scrollable
+                            ></v-date-picker>
+                          </v-menu>
+                        </td>
+                        <td>
+                          <services-dialog
+                            :dialogStyle="servicesDialogConfig.dialogStyle"
+                            :buttonStyle="servicesDialogConfig.buttonStyle"
+                            :services="
+                              pluckUid(
+                                !isEmpty(data.room.services)
+                                  ? data.room.services
+                                  : []
+                              )
+                            "
+                            :origServices="
+                              pluckUid(
+                                !isEmpty(data.room.origServices)
+                                  ? data.room.origServices
+                                  : []
+                              )
+                            "
+                            editMode
+                            @submit="
+                              (e) => {
+                                roomServiceUpdated(data.room, e);
+                              }
+                            "
+                          ></services-dialog>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </template>
+                </v-simple-table>
+              </v-card>
+            </v-col>
+          </v-row>
+
+          <v-row>
+            <v-col cols="12" md="12">
+              <v-textarea
+                label="Remark"
+                :maxlength="2500"
+                v-model="data.remark"
+                @input="$v.data.remark.$touch()"
+                @blur="$v.data.remark.$touch()"
+                :error-messages="remarkErrors"
+              ></v-textarea>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
+</template>

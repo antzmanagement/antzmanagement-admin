@@ -53,14 +53,36 @@ trait StaffServices
     {
 
         $userType = $this->getUserTypeById($this->staffType);
-        $data = $userType->users()->where('uid', $uid)->wherePivot('status', 1)->where('users.status', true)->first();
+        $data = $userType->users()->with(['usertypes' => function ($q) {
+            $q->wherePivot('status', true);
+        }, 'role' => function ($q) {
+            $q->where('status', true);
+            $q->with(['modules' => function($q1){
+                $q1->wherePivot('status', true);
+                $q1->with(['actions' => function($q2){
+                    $q2->where('status', true);
+                }]);
+
+            }]);
+        }])->where('uid', $uid)->wherePivot('status', 1)->where('users.status', true)->first();
         return $data;
     }
 
     private function getStaffById($id)
     {
         $userType = $this->getUserTypeById($this->staffType);
-        $data = $userType->users()->where('id', $id)->wherePivot('status', 1)->first();
+        $data = $userType->users()->with(['usertypes' => function ($q) {
+            $q->wherePivot('status', true);
+        }, 'role' => function ($q) {
+            $q->where('status', true);
+            $q->with(['modules' => function($q1){
+                $q1->wherePivot('status', true);
+                $q1->with(['actions' => function($q2){
+                    $q2->where('status', true);
+                }]);
+
+            }]);
+        }])->where('id', $id)->wherePivot('status', 1)->first();
         return $data;
     }
 

@@ -1,74 +1,4 @@
-<template>
-  <v-dialog
-    v-model="dialog"
-    :fullscreen="dialogStyle.fullscreen"
-    :hide-overlay="dialogStyle.hideOverlay"
-    :persistent="dialogStyle.persistent"
-    :max-width="dialogStyle.maxWidth"
-    transition="dialog-bottom-transition"
-  >
-    <template v-slot:activator="{ on }">
-      <v-btn
-        :class="buttonStyle.class"
-        tile
-        :color="buttonStyle.color"
-        :block="buttonStyle.block"
-        v-on="on"
-        :disabled="isLoading"
-      >
-        <v-icon>{{buttonStyle.icon}}</v-icon>
-        {{buttonStyle.text}}
-      </v-btn>
-    </template>
-    <v-card>
-      <v-toolbar dark color="primary">
-        <v-btn icon dark @click="dialog = false">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
-        <v-toolbar-title v-if="!editMode">Add RoomType</v-toolbar-title>
-        <v-toolbar-title v-else>Edit RoomType</v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-toolbar-items>
-          <v-btn
-            dark
-            text
-            :disabled="isLoading"
-            @click="editMode ? updateRoomType() : createRoomType()"
-          >Save</v-btn>
-        </v-toolbar-items>
-      </v-toolbar>
-      <v-card-text>
-        <v-container>
-          <v-row>
-            <v-col cols="6">
-              <v-text-field
-                label="Name*"
-                required
-                :maxlength="300"
-                v-model="data.name"
-                @input="$v.data.name.$touch()"
-                @blur="$v.data.name.$touch()"
-                :error-messages="nameErrors"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="6">
-              <v-text-field
-                label="Price"
-                type="number"
-                required
-                :maxlength="100"
-                v-model="data.price"
-                @input="$v.data.price.$touch()"
-                @blur="$v.data.price.$touch()"
-                :error-messages="priceErrors"
-              ></v-text-field>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-card-text>
-    </v-card>
-  </v-dialog>
-</template>
+
 
 <script>
 import { validationMixin } from "vuelidate";
@@ -76,18 +6,18 @@ import {
   required,
   minLength,
   maxLength,
-  numeric
+  numeric,
 } from "vuelidate/lib/validators";
 import { mapActions } from "vuex";
 export default {
   props: {
     editMode: {
       type: Boolean,
-      default: false
+      default: false,
     },
     uid: {
       type: String,
-      default: ""
+      default: "",
     },
     buttonStyle: {
       type: Object,
@@ -96,8 +26,8 @@ export default {
         color: "primary",
         class: "ma-1",
         text: "Add RoomType",
-        icon: ""
-      })
+        icon: "",
+      }),
     },
     dialogStyle: {
       type: Object,
@@ -105,17 +35,17 @@ export default {
         persistent: true,
         maxWidth: "",
         fullscreen: true,
-        hideOverlay : true,
-      })
-    }
+        hideOverlay: true,
+      }),
+    },
   },
   data() {
     return {
       dialog: false,
       data: new Form({
         name: "",
-        price: ""
-      })
+        price: "",
+      }),
     };
   },
 
@@ -123,8 +53,8 @@ export default {
     return {
       data: {
         name: { required, maxLength: maxLength(100) },
-        price: { required, numeric }
-      }
+        price: { required, numeric },
+      },
     };
   },
 
@@ -163,12 +93,12 @@ export default {
         errors.push("Please key in number only.");
         return errors;
       }
-    }
+    },
   },
 
   watch: {
-    dialog: function(val) {
-      if(val){
+    dialog: function (val) {
+      if (val) {
         this.data.reset();
         this.$v.$reset();
       }
@@ -178,14 +108,14 @@ export default {
     if (this.editMode) {
       this.showLoadingAction();
       this.getRoomTypeAction({ uid: this.uid })
-        .then(data => {
+        .then((data) => {
           this.data = data.data;
           this.endLoadingAction();
         })
-        .catch(error => {
+        .catch((error) => {
           Toast.fire({
             icon: "warning",
-            title: "Something went wrong... "
+            title: "Something went wrong... ",
           });
           this.endLoadingAction();
         });
@@ -198,7 +128,7 @@ export default {
       createRoomTypeAction: "createRoomType",
       updateRoomTypeAction: "updateRoomType",
       showLoadingAction: "showLoadingAction",
-      endLoadingAction: "endLoadingAction"
+      endLoadingAction: "endLoadingAction",
     }),
 
     createRoomType() {
@@ -207,26 +137,26 @@ export default {
       if (this.$v.$invalid) {
         Toast.fire({
           icon: "warning",
-          title: "Please make sure all the data is valid. "
+          title: "Please make sure all the data is valid. ",
         });
       } else {
         this.$Progress.start();
         this.showLoadingAction();
         this.createRoomTypeAction(this.data)
-          .then(data => {
+          .then((data) => {
             Toast.fire({
               icon: "success",
-              title: "Successful Created. "
+              title: "Successful Created. ",
             });
             this.$Progress.finish();
             this.endLoadingAction();
             this.$emit("created", data.data);
             this.dialog = false;
           })
-          .catch(error => {
+          .catch((error) => {
             Toast.fire({
               icon: "error",
-              title: "Something went wrong. "
+              title: "Something went wrong. ",
             });
             this.$Progress.finish();
             this.endLoadingAction();
@@ -240,32 +170,105 @@ export default {
       if (this.$v.$invalid) {
         Toast.fire({
           icon: "warning",
-          title: "Please make sure all the data is valid. "
+          title: "Please make sure all the data is valid. ",
         });
       } else {
         this.$Progress.start();
         this.showLoadingAction();
         this.updateRoomTypeAction(this.data)
-          .then(data => {
+          .then((data) => {
             Toast.fire({
               icon: "success",
-              title: "Successful Updated. "
+              title: "Successful Updated. ",
             });
             this.$Progress.finish();
             this.endLoadingAction();
             this.$emit("updated", data.data);
             this.dialog = false;
           })
-          .catch(error => {
+          .catch((error) => {
             Toast.fire({
               icon: "error",
-              title: "Something went wrong. "
+              title: "Something went wrong. ",
             });
             this.$Progress.finish();
             this.endLoadingAction();
           });
       }
-    }
-  }
+    },
+  },
 };
 </script>
+
+<template>
+  <v-dialog
+    v-model="dialog"
+    :fullscreen="dialogStyle.fullscreen"
+    :hide-overlay="dialogStyle.hideOverlay"
+    :persistent="dialogStyle.persistent"
+    :max-width="dialogStyle.maxWidth"
+    transition="dialog-bottom-transition"
+  >
+    <template v-slot:activator="{ on }">
+      <v-btn
+        :class="buttonStyle.class"
+        tile
+        :color="buttonStyle.color"
+        :block="buttonStyle.block"
+        v-on="on"
+        :disabled="isLoading"
+      >
+        <v-icon>{{ buttonStyle.icon }}</v-icon>
+        {{ buttonStyle.text }}
+      </v-btn>
+    </template>
+    <v-card>
+      <v-toolbar dark color="primary">
+        <v-btn icon dark @click="dialog = false">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+        <v-toolbar-title v-if="!editMode">Add RoomType</v-toolbar-title>
+        <v-toolbar-title v-else>Edit RoomType</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-toolbar-items>
+          <v-btn
+            dark
+            text
+            :disabled="isLoading"
+            @click="editMode ? updateRoomType() : createRoomType()"
+            >Save</v-btn
+          >
+        </v-toolbar-items>
+      </v-toolbar>
+      <v-card-text>
+        <v-container>
+          <v-row>
+            <v-col cols="6">
+              <v-text-field
+                label="Name*"
+                required
+                :maxlength="300"
+                v-model="data.name"
+                @input="$v.data.name.$touch()"
+                @blur="$v.data.name.$touch()"
+                :error-messages="nameErrors"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                label="Price"
+                type="number"
+                required
+                :maxlength="100"
+                v-model="data.price"
+                @input="$v.data.price.$touch()"
+                @blur="$v.data.price.$touch()"
+                :error-messages="priceErrors"
+              ></v-text-field>
+            </v-col>
+          </v-row>
+        </v-container>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
+</template>

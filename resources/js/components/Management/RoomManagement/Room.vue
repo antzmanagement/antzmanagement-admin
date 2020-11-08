@@ -1,36 +1,183 @@
+
+<script>
+import { mapActions } from "vuex";
+export default {
+  data: () => ({
+    editButtonStyle: {
+      block: false,
+      color: "success",
+      class: "m-3",
+      text: "Edit",
+      icon: "mdi-pencil",
+    },
+    deleteButtonConfig: {
+      buttonStyle: {
+        block: false,
+        color: "error",
+        class: "m-3",
+        text: "Delete",
+        icon: "mdi-trash-can-outline",
+      },
+    },
+
+    maintenanceFormDialogConfig: {
+      buttonStyle: {
+        block: false,
+        class: "",
+        text: "Add New",
+        icon: "mdi-plus",
+        color: "primary",
+        evalation: "5",
+        isIcon: false,
+      },
+      dialogStyle: {
+        persistent: true,
+        maxWidth: "50%",
+        fullscreen: false,
+        hideOverlay: true,
+      },
+    },
+    data: new Form({
+      name: "",
+      price: "",
+      address: "",
+      postcode: "",
+      state: "",
+      city: "",
+      country: "",
+      //Original is roomTypes but Laravel auto convert carmelCase to snake_case
+      room_types: [],
+      maintenances: [],
+    }),
+    maintenanceHeaders: [
+      {
+        text: "ID",
+        value: "uid",
+      },
+      {
+        text: "Property",
+        value: "property.name",
+      },
+      { text: "Price (RM)", value: "price" },
+    ],
+  }),
+
+  computed: {
+    isLoading() {
+      return this.$store.getters.isLoading;
+    },
+  },
+  created() {
+    this.$Progress.start();
+    this.showLoadingAction();
+    this.getRoomAction({ uid: this.$route.params.uid })
+      .then((data) => {
+        this.data = data.data;
+        this.$Progress.finish();
+        this.endLoadingAction();
+      })
+      .catch((error) => {
+        Toast.fire({
+          icon: "warning",
+          title: "Fail to retrieve the room!!!!! ",
+        });
+        this.$Progress.finish();
+        this.endLoadingAction();
+      });
+  },
+
+  methods: {
+    ...mapActions({
+      getRoomAction: "getRoom",
+      deleteRoomAction: "deleteRoom",
+      showLoadingAction: "showLoadingAction",
+      endLoadingAction: "endLoadingAction",
+    }),
+
+    showMaintenance($data) {
+      this.$router.push("/maintenance/" + $data.uid);
+    },
+    deleteRoom($isConfirmed, $uid) {
+      if ($isConfirmed) {
+        this.$Progress.start();
+        this.showLoadingAction();
+        this.deleteRoomAction({ uid: $uid })
+          .then((data) => {
+            Toast.fire({
+              icon: "success",
+              title: "Successful Deleted. ",
+            });
+            this.$Progress.finish();
+            this.endLoadingAction();
+            this.$router.push("/rooms");
+          })
+          .catch((error) => {
+            Toast.fire({
+              icon: "warning",
+              title: "Fail to delete the room!!!!! ",
+            });
+            this.$Progress.finish();
+            this.endLoadingAction();
+          });
+      }
+    },
+    refreshPage() {
+      location.reload();
+    },
+  },
+};
+</script>
+
 <template>
   <v-app>
     <navbar></navbar>
     <v-content :class="helpers.managementStyles().backgroundClass">
       <v-container>
         <loading></loading>
-        <v-card class="ma-2" :color="helpers.managementStyles().formCardColor" raised>
+        <v-card
+          class="ma-2"
+          :color="helpers.managementStyles().formCardColor"
+          raised
+        >
           <v-card-title
             class="ma-2"
             :class="helpers.managementStyles().titleClass"
-          >Room - {{data.uid}}</v-card-title>
-          <v-divider class="mx-3" :color="helpers.managementStyles().dividerColor"></v-divider>
+            >Room - {{ data.uid }}</v-card-title
+          >
+          <v-divider
+            class="mx-3"
+            :color="helpers.managementStyles().dividerColor"
+          ></v-divider>
           <v-container>
             <v-row justify="start" align="center" class="pa-2">
               <v-col cols="12">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">RoomType</label>
                   <div class="form-control-plaintext">
-                    <v-chip class="ma-2" v-for="roomType in data.room_types" :key="roomType.uid">
-                      <h4 class="text-center ma-2">{{roomType.name | capitalizeFirstLetter }}</h4>
+                    <v-chip
+                      class="ma-2"
+                      v-for="roomType in data.room_types"
+                      :key="roomType.uid"
+                    >
+                      <h4 class="text-center ma-2">
+                        {{ roomType.name | capitalizeFirstLetter }}
+                      </h4>
                     </v-chip>
                   </div>
                 </div>
               </v-col>
             </v-row>
 
-            <v-divider class="mx-3" :color="helpers.managementStyles().dividerColor"></v-divider>
+            <v-divider
+              class="mx-3"
+              :color="helpers.managementStyles().dividerColor"
+            ></v-divider>
             <v-row justify="start" align="center" class="pa-2">
               <v-col cols="12" md="6">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Name</label>
                   <div class="form-control-plaintext">
-                    <h4>{{data.name}}</h4>
+                    <h4>{{ data.name }}</h4>
                   </div>
                 </div>
               </v-col>
@@ -38,7 +185,7 @@
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Price</label>
                   <div class="form-control-plaintext">
-                    <h4>RM {{data.price}}</h4>
+                    <h4>RM {{ data.price }}</h4>
                   </div>
                 </div>
               </v-col>
@@ -47,7 +194,7 @@
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Address</label>
                   <div class="form-control-plaintext">
-                    <h4>{{data.address}}</h4>
+                    <h4>{{ data.address }}</h4>
                   </div>
                 </div>
               </v-col>
@@ -56,7 +203,7 @@
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Postcode</label>
                   <div class="form-control-plaintext">
-                    <h4>{{data.postcode}}</h4>
+                    <h4>{{ data.postcode }}</h4>
                   </div>
                 </div>
               </v-col>
@@ -64,7 +211,7 @@
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">State</label>
                   <div class="form-control-plaintext">
-                    <h4>{{data.state}}</h4>
+                    <h4>{{ data.state }}</h4>
                   </div>
                 </div>
               </v-col>
@@ -72,7 +219,7 @@
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">City</label>
                   <div class="form-control-plaintext">
-                    <h4>{{data.city}}</h4>
+                    <h4>{{ data.city }}</h4>
                   </div>
                 </div>
               </v-col>
@@ -80,13 +227,16 @@
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Country</label>
                   <div class="form-control-plaintext">
-                    <h4>{{data.country}}</h4>
+                    <h4>{{ data.country }}</h4>
                   </div>
                 </div>
               </v-col>
             </v-row>
 
-            <v-divider class="mx-3" :color="helpers.managementStyles().dividerColor"></v-divider>
+            <v-divider
+              class="mx-3"
+              :color="helpers.managementStyles().dividerColor"
+            ></v-divider>
             <!-- <v-row class="pa-2" justify="end" align="center">
               <v-col cols="12">
                 <div class="headline font-weight-bold">Maintenance Records</div>
@@ -107,14 +257,20 @@
                           <v-col cols="auto">
                             <div
                               class="headline font-weight-bold text-left mb-5 d-inline-block"
-                            >Maintenance Records</div>
+                            >
+                              Maintenance Records
+                            </div>
                           </v-col>
                           <v-spacer></v-spacer>
                           <v-col cols="auto">
                             <maintenance-form
                               :editMode="false"
-                              :buttonStyle="maintenanceFormDialogConfig.buttonStyle"
-                              :dialogStyle="maintenanceFormDialogConfig.dialogStyle"
+                              :buttonStyle="
+                                maintenanceFormDialogConfig.buttonStyle
+                              "
+                              :dialogStyle="
+                                maintenanceFormDialogConfig.dialogStyle
+                              "
                               :roomId="data.id"
                               @created="refreshPage()"
                             ></maintenance-form>
@@ -124,16 +280,19 @@
                     </template>
                     <template v-slot:item="props">
                       <tr @click="showMaintenance(props.item)">
-                        <td>{{props.item.uid}}</td>
-                        <td>{{props.item.property.name}}</td>
-                        <td>{{props.item.price}}</td>
+                        <td>{{ props.item.uid }}</td>
+                        <td>{{ props.item.property.name }}</td>
+                        <td>{{ props.item.price }}</td>
                       </tr>
                     </template>
                   </v-data-table>
                 </v-card>
               </v-col>
             </v-row>
-            <v-divider class="mx-3" :color="helpers.managementStyles().dividerColor"></v-divider>
+            <v-divider
+              class="mx-3"
+              :color="helpers.managementStyles().dividerColor"
+            ></v-divider>
             <v-row class="pa-2" justify="end" align="center">
               <v-col cols="auto">
                 <room-form
@@ -146,7 +305,7 @@
               <v-col cols="auto">
                 <confirm-dialog
                   :activatorStyle="deleteButtonConfig.buttonStyle"
-                  @confirmed="deleteRoom($event,data.uid)"
+                  @confirmed="deleteRoom($event, data.uid)"
                 ></confirm-dialog>
               </v-col>
             </v-row>
@@ -156,132 +315,3 @@
     </v-content>
   </v-app>
 </template>
-
-<script>
-import { mapActions } from "vuex";
-export default {
-  data: () => ({
-    editButtonStyle: {
-      block: false,
-      color: "success",
-      class: "m-3",
-      text: "Edit",
-      icon: "mdi-pencil"
-    },
-    deleteButtonConfig: {
-      buttonStyle: {
-        block: false,
-        color: "error",
-        class: "m-3",
-        text: "Delete",
-        icon: "mdi-trash-can-outline"
-      }
-    },
-
-    maintenanceFormDialogConfig: {
-      buttonStyle: {
-        block: false,
-        class: "",
-        text: "Add New",
-        icon: "mdi-plus",
-        color: "primary",
-        evalation: "5",
-        isIcon: false
-      },
-      dialogStyle: {
-          persistent: true,
-          maxWidth: "50%",
-          fullscreen: false,
-          hideOverlay: true
-      }
-    },
-    data: new Form({
-      name: "",
-      price: "",
-      address: "",
-      postcode: "",
-      state: "",
-      city: "",
-      country: "",
-      //Original is roomTypes but Laravel auto convert carmelCase to snake_case
-      room_types: [],
-      maintenances: []
-    }),
-    maintenanceHeaders: [
-      {
-        text: "ID",
-        value: "uid"
-      },
-      {
-        text: "Property",
-        value: "property.name"
-      },
-      { text: "Price (RM)", value: "price" }
-    ]
-  }),
-
-  computed: {
-    isLoading() {
-      return this.$store.getters.isLoading;
-    }
-  },
-  created() {
-    this.$Progress.start();
-    this.showLoadingAction();
-    this.getRoomAction({ uid: this.$route.params.uid })
-      .then(data => {
-        this.data = data.data;
-        this.$Progress.finish();
-        this.endLoadingAction();
-      })
-      .catch(error => {
-        Toast.fire({
-          icon: "warning",
-          title: "Fail to retrieve the room!!!!! "
-        });
-        this.$Progress.finish();
-        this.endLoadingAction();
-      });
-  },
-
-  methods: {
-    ...mapActions({
-      getRoomAction: "getRoom",
-      deleteRoomAction: "deleteRoom",
-      showLoadingAction: "showLoadingAction",
-      endLoadingAction: "endLoadingAction"
-    }),
-
-    showMaintenance($data) {
-      this.$router.push("/maintenance/" + $data.uid);
-    },
-    deleteRoom($isConfirmed, $uid) {
-      if ($isConfirmed) {
-        this.$Progress.start();
-        this.showLoadingAction();
-        this.deleteRoomAction({ uid: $uid })
-          .then(data => {
-            Toast.fire({
-              icon: "success",
-              title: "Successful Deleted. "
-            });
-            this.$Progress.finish();
-            this.endLoadingAction();
-            this.$router.push("/rooms");
-          })
-          .catch(error => {
-            Toast.fire({
-              icon: "warning",
-              title: "Fail to delete the room!!!!! "
-            });
-            this.$Progress.finish();
-            this.endLoadingAction();
-          });
-      }
-    },
-    refreshPage() {
-      location.reload();
-    }
-  }
-};
-</script>

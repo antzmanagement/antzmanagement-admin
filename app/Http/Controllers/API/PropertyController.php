@@ -69,14 +69,13 @@ class PropertyController extends Controller
             'name' => 'required|string|max:300',
             'text' => 'nullable|string|max:300',
             'desc' => 'nullable|string|max:2500',
-            'icon' => 'nullable|string|max:300',
         ]);
         error_log($this->controllerName . 'Creating property.');
         $params = collect([
             'name' => $request->name,
             'text' => $request->text,
             'desc' => $request->desc,
-            'icon' => $request->icon,
+            'price' => $request->price,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
@@ -100,7 +99,6 @@ class PropertyController extends Controller
             'name' => 'required|string|max:300',
             'text' => 'nullable|string|max:300',
             'desc' => 'nullable|string|max:2500',
-            'icon' => 'nullable|string|max:300',
         ]);
 
         $property = $this->getProperty($uid);
@@ -112,7 +110,7 @@ class PropertyController extends Controller
             'name' => $request->name,
             'text' => $request->text,
             'desc' => $request->desc,
-            'icon' => $request->icon,
+            'price' => $request->price,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

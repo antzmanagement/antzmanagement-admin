@@ -1,88 +1,3 @@
-<template>
-  <v-app>
-    <navbar></navbar>
-    <v-content :class="helpers.managementStyles().backgroundClass">
-      <v-container class="fill-height" fluid>
-        <loading></loading>
-        <v-row justify="center" align="center" class="ma-3">
-          <v-col cols="12">
-            <v-btn
-              block
-              color="primary"
-              class="ma-1"
-              elevation="5"
-              :disabled="isLoading"
-              @click="contractFormDialog = true"
-            >Add Contract</v-btn>
-          </v-col>
-        </v-row>
-
-        <v-row justify="center" align="center" class="mx-3">
-          <v-col cols="12">
-            <v-card raised>
-              <v-card-subtitle v-show="!keywordEmpty">
-                Keyword :
-                <v-chip class="mx-2">{{ contractFilterGroup.keyword }}</v-chip>
-              </v-card-subtitle>
-              <v-card-subtitle v-show="!fromdateEmpty">
-                From Date :
-                <v-chip class="mx-2">{{ contractFilterGroup.keyword }}</v-chip>
-              </v-card-subtitle>
-              <v-card-subtitle v-show="!todateEmpty">
-                To Date :
-                <v-chip class="mx-2">{{ contractFilterGroup.todate }}</v-chip>
-              </v-card-subtitle>
-            </v-card>
-          </v-col>
-        </v-row>
-        <v-row justify="center" align="center" class="ma-3">
-          <v-col cols="12">
-            <v-card class="pa-8" raised>
-              <v-data-table
-                :headers="headers"
-                :items="data"
-                :options.sync="options"
-                :server-items-length="totalDataLength"
-                :loading="loading"
-              >
-                <template v-slot:top>
-                  <v-toolbar flat class="mb-5">
-                    <v-btn color="primary" block class="ma-2" :disabled="isLoading" @click="contractFilterDialog = true">
-                      <v-icon left>mdi-magnify</v-icon>Filter Contract
-                    </v-btn>
-                  </v-toolbar>
-                </template>
-                <template v-slot:item="props">
-                  <tr @click="showContract(props.item)">
-                    <td>{{props.item.uid}}</td>
-                    <td>{{props.item.name}}</td>
-                  </tr>
-                </template>
-              </v-data-table>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-container>
-
-      <v-dialog v-model="contractFormDialog" persistent fullscreen hideOverlay>
-        <contract-form
-          :reset="contractFormDialog"
-          :editmode="false"
-          @created="showContract($event)"
-          @close="contractFormDialog = false"
-        ></contract-form>
-      </v-dialog>
-
-      <v-dialog v-model="contractFilterDialog" persistent maxWidth="1200px" hideOverlay>
-        <contract-filter-form
-          @submitFilter="initContractFilter($event)"
-          @close="contractFilterDialog = false"
-          :reset="contractFilterDialog"
-        ></contract-filter-form>
-      </v-dialog>
-    </v-content>
-  </v-app>
-</template>
 
 <script>
 import { mapActions } from "vuex";
@@ -195,3 +110,89 @@ export default {
   }
 };
 </script>
+
+<template>
+  <v-app>
+    <navbar></navbar>
+    <v-content :class="helpers.managementStyles().backgroundClass">
+      <v-container class="fill-height" fluid>
+        <loading></loading>
+        <v-row justify="center" align="center" class="ma-3">
+          <v-col cols="12">
+            <v-btn
+              block
+              color="primary"
+              class="ma-1"
+              elevation="5"
+              :disabled="isLoading"
+              @click="contractFormDialog = true"
+            >Add Contract</v-btn>
+          </v-col>
+        </v-row>
+
+        <v-row justify="center" align="center" class="mx-3">
+          <v-col cols="12">
+            <v-card raised>
+              <v-card-subtitle v-show="!keywordEmpty">
+                Keyword :
+                <v-chip class="mx-2">{{ contractFilterGroup.keyword }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="!fromdateEmpty">
+                From Date :
+                <v-chip class="mx-2">{{ contractFilterGroup.keyword }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="!todateEmpty">
+                To Date :
+                <v-chip class="mx-2">{{ contractFilterGroup.todate }}</v-chip>
+              </v-card-subtitle>
+            </v-card>
+          </v-col>
+        </v-row>
+        <v-row justify="center" align="center" class="ma-3">
+          <v-col cols="12">
+            <v-card class="pa-8" raised>
+              <v-data-table
+                :headers="headers"
+                :items="data"
+                :options.sync="options"
+                :server-items-length="totalDataLength"
+                :loading="loading"
+              >
+                <template v-slot:top>
+                  <v-toolbar flat class="mb-5">
+                    <v-btn color="primary" block class="ma-2" :disabled="isLoading" @click="contractFilterDialog = true">
+                      <v-icon left>mdi-magnify</v-icon>Filter Contract
+                    </v-btn>
+                  </v-toolbar>
+                </template>
+                <template v-slot:item="props">
+                  <tr @click="showContract(props.item)">
+                    <td>{{props.item.uid}}</td>
+                    <td>{{props.item.name}}</td>
+                  </tr>
+                </template>
+              </v-data-table>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+
+      <v-dialog v-model="contractFormDialog" persistent fullscreen hideOverlay>
+        <contract-form
+          :reset="contractFormDialog"
+          :editmode="false"
+          @created="showContract($event)"
+          @close="contractFormDialog = false"
+        ></contract-form>
+      </v-dialog>
+
+      <v-dialog v-model="contractFilterDialog" persistent maxWidth="1200px" hideOverlay>
+        <contract-filter-form
+          @submitFilter="initContractFilter($event)"
+          @close="contractFilterDialog = false"
+          :reset="contractFilterDialog"
+        ></contract-filter-form>
+      </v-dialog>
+    </v-content>
+  </v-app>
+</template>

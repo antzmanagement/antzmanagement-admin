@@ -1,77 +1,3 @@
-<template>
-  <v-app>
-    <navbar></navbar>
-    <v-content :class="helpers.managementStyles().backgroundClass">
-      <v-container class="fill-height" fluid>
-        <loading></loading>
-        <v-row justify="center" align="center" class="ma-3">
-          <v-col cols="12">
-            <owner-form :editMode="false" :buttonStyle="ownerFormDialogConfig.buttonStyle" @created="showOwner($event)"></owner-form>
-          </v-col>
-        </v-row>
-
-        <v-row justify="center" align="center" class="mx-3">
-          <v-col cols="12">
-            <v-card raised>
-              <v-card-subtitle v-show="!keywordEmpty">
-                Keyword :
-                <v-chip class="mx-2">{{ ownerFilterGroup.keyword }}</v-chip>
-              </v-card-subtitle>
-              <v-card-subtitle v-show="!fromdateEmpty">
-                From Date :
-                <v-chip class="mx-2">{{ ownerFilterGroup.keyword }}</v-chip>
-              </v-card-subtitle>
-              <v-card-subtitle v-show="!todateEmpty">
-                To Date :
-                <v-chip class="mx-2">{{ ownerFilterGroup.todate }}</v-chip>
-              </v-card-subtitle>
-
-              <v-card-subtitle v-show="!roomTypesEmpty">
-                Room Types :
-                <v-chip
-                  class="mx-2"
-                  v-for="roomType in ownerFilterGroup.selectedRoomTypes"
-                  :key="roomType.id"
-                >{{ roomType.name | capitalizeFirstLetter }}</v-chip>
-              </v-card-subtitle>
-            </v-card>
-          </v-col>
-        </v-row>
-        <v-row justify="center" align="center" class="ma-3">
-          <v-col cols="12">
-            <v-card class="pa-8" raised>
-              <v-data-table
-                :headers="headers"
-                :items="data"
-                :options.sync="options"
-                :server-items-length="totalDataLength"
-                :loading="loading"
-              >
-                <template v-slot:top>
-                  <v-toolbar flat class="mb-5">
-                    <owner-filter-dialog
-                      :buttonStyle="ownerFilterDialogConfig.buttonStyle"
-                      :dialogStyle="ownerFilterDialogConfig.dialogStyle"
-                      @submitFilter="initOwnerFilter($event)"
-                    ></owner-filter-dialog>
-                  </v-toolbar>
-                </template>
-                <template v-slot:item="props">
-                  <tr @click="showOwner(props.item)">
-                    <td>{{props.item.name}}</td>
-                    <td>{{props.item.icno}}</td>
-                    <td>{{props.item.tel1}}</td>
-                    <td>{{props.item.email}}</td>
-                  </tr>
-                </template>
-              </v-data-table>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-content>
-  </v-app>
-</template>
 
 
 <script>
@@ -88,7 +14,7 @@ export default {
         selectedRoomTypes: [],
         keyword: null,
         fromdate: null,
-        todate: null
+        todate: null,
       }),
       ownerFormDialogConfig: {
         buttonStyle: {
@@ -98,7 +24,7 @@ export default {
           icon: "mdi-plus",
           isIcon: false,
           color: "primary",
-          evalation : "5",
+          evalation: "5",
         },
       },
       ownerFilterDialogConfig: {
@@ -108,25 +34,25 @@ export default {
           text: "Filter",
           icon: "mdi-magnify",
           isIcon: false,
-          color: "primary"
+          color: "primary",
         },
         dialogStyle: {
           persistent: true,
           maxWidth: "1200px",
           fullscreen: false,
-          hideOverlay: true
-        }
+          hideOverlay: true,
+        },
       },
       headers: [
         {
           text: "Name",
           align: "start",
-          value: "name"
+          value: "name",
         },
         { text: "Ic No", value: "icno" },
         { text: "Phone", value: "tel1" },
-        { text: "Email", value: "email" }
-      ]
+        { text: "Email", value: "email" },
+      ],
     };
   },
   watch: {
@@ -134,8 +60,8 @@ export default {
       handler() {
         this.getOwners();
       },
-      deep: true
-    }
+      deep: true,
+    },
   },
   computed: {
     isLoading() {
@@ -152,7 +78,7 @@ export default {
     },
     roomTypesEmpty() {
       return this.helpers.isEmpty(this.ownerFilterGroup.selectedRoomTypes);
-    }
+    },
   },
   created() {
     var styles = this.helpers.managementStyles();
@@ -165,13 +91,13 @@ export default {
       getOwnersAction: "getOwners",
       filterOwnersAction: "filterOwners",
       showLoadingAction: "showLoadingAction",
-      endLoadingAction: "endLoadingAction"
+      endLoadingAction: "endLoadingAction",
     }),
     initOwnerFilter(filterGroup) {
       this.ownerFilterGroup.reset();
       if (filterGroup) {
         this.ownerFilterGroup.selectedRoomTypes = filterGroup.roomTypes;
-        this.ownerFilterGroup.roomTypes = filterGroup.roomTypes.map(function(
+        this.ownerFilterGroup.roomTypes = filterGroup.roomTypes.map(function (
           roomType
         ) {
           return roomType.id;
@@ -198,7 +124,7 @@ export default {
       }
 
       this.filterOwnersAction(this.ownerFilterGroup)
-        .then(data => {
+        .then((data) => {
           if (data.data) {
             this.data = data.data;
           } else {
@@ -207,14 +133,94 @@ export default {
           this.totalDataLength = data.totalResult;
           this.loading = false;
         })
-        .catch(error => {
+        .catch((error) => {
           this.loading = false;
           Toast.fire({
             icon: "warning",
-            title: "Something went wrong... "
+            title: "Something went wrong... ",
           });
         });
-    }
-  }
+    },
+  },
 };
 </script>
+
+<template>
+  <v-app>
+    <navbar></navbar>
+    <v-content :class="helpers.managementStyles().backgroundClass">
+      <v-container class="fill-height" fluid>
+        <loading></loading>
+        <v-row justify="center" align="center" class="ma-3">
+          <v-col cols="12">
+            <owner-form
+              :editMode="false"
+              :buttonStyle="ownerFormDialogConfig.buttonStyle"
+              @created="showOwner($event)"
+            ></owner-form>
+          </v-col>
+        </v-row>
+
+        <v-row justify="center" align="center" class="mx-3">
+          <v-col cols="12">
+            <v-card raised>
+              <v-card-subtitle v-show="!keywordEmpty">
+                Keyword :
+                <v-chip class="mx-2">{{ ownerFilterGroup.keyword }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="!fromdateEmpty">
+                From Date :
+                <v-chip class="mx-2">{{ ownerFilterGroup.keyword }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="!todateEmpty">
+                To Date :
+                <v-chip class="mx-2">{{ ownerFilterGroup.todate }}</v-chip>
+              </v-card-subtitle>
+
+              <v-card-subtitle v-show="!roomTypesEmpty">
+                Room Types :
+                <v-chip
+                  class="mx-2"
+                  v-for="roomType in ownerFilterGroup.selectedRoomTypes"
+                  :key="roomType.id"
+                  >{{ roomType.name | capitalizeFirstLetter }}</v-chip
+                >
+              </v-card-subtitle>
+            </v-card>
+          </v-col>
+        </v-row>
+        <v-row justify="center" align="center" class="ma-3">
+          <v-col cols="12">
+            <v-card class="pa-8" raised>
+              <v-data-table
+                :headers="headers"
+                :items="data"
+                :options.sync="options"
+                :server-items-length="totalDataLength"
+                :loading="loading"
+              >
+                <template v-slot:top>
+                  <v-toolbar flat class="mb-5">
+                    <owner-filter-dialog
+                      :buttonStyle="ownerFilterDialogConfig.buttonStyle"
+                      :dialogStyle="ownerFilterDialogConfig.dialogStyle"
+                      @submitFilter="initOwnerFilter($event)"
+                    ></owner-filter-dialog>
+                  </v-toolbar>
+                </template>
+                <template v-slot:item="props">
+                  <tr @click="showOwner(props.item)">
+                    <td>{{ props.item.name }}</td>
+                    <td>{{ props.item.icno }}</td>
+                    <td>{{ props.item.tel1 }}</td>
+                    <td>{{ props.item.email }}</td>
+                  </tr>
+                </template>
+              </v-data-table>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-content>
+  </v-app>
+</template>

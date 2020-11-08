@@ -1,3 +1,153 @@
+
+<script>
+import { mapActions } from "vuex";
+export default {
+  data() {
+    return {
+      totalDataLength: 0,
+      data: [],
+      loading: true,
+      options: {},
+      roomFilterGroup: new Form({
+        roomTypes: [],
+        selectedRoomTypes: [],
+        keyword: null,
+        fromdate: null,
+        todate: null,
+      }),
+      roomFilterDialogConfig: {
+        buttonStyle: {
+          block: true,
+          class: "ma-2",
+          text: "Filter",
+          icon: "mdi-magnify",
+          isIcon: false,
+          color: "primary",
+        },
+        dialogStyle: {
+          persistent: true,
+          maxWidth: "1200px",
+          fullscreen: false,
+          hideOverlay: true,
+        },
+      },
+
+      roomFormDialogConfig: {
+        buttonStyle: {
+          block: true,
+          class: "title font-weight-bold ma-2",
+          text: "Add Room",
+          icon: "mdi-plus",
+          isIcon: false,
+          color: "primary",
+          evalation: "5",
+        },
+      },
+      headers: [
+        {
+          text: "Room Types",
+          align: "start",
+          sortable: true,
+        },
+        {
+          text: "Unit No",
+          align: "start",
+          sortable: true,
+          value: "name",
+        },
+        { text: "Price (RM)", value: "price", sortable: true },
+      ],
+    };
+  },
+  watch: {
+    options: {
+      handler() {
+        this.getRooms();
+      },
+      deep: true,
+    },
+  },
+  computed: {
+    isLoading() {
+      return this.$store.getters.isLoading;
+    },
+    keywordEmpty() {
+      return this.helpers.isEmpty(this.roomFilterGroup.keyword);
+    },
+    fromdateEmpty() {
+      return this.helpers.isEmpty(this.roomFilterGroup.fromdate);
+    },
+    todateEmpty() {
+      return this.helpers.isEmpty(this.roomFilterGroup.todate);
+    },
+    roomTypesEmpty() {
+      return this.helpers.isEmpty(this.roomFilterGroup.selectedRoomTypes);
+    },
+  },
+  created() {},
+  mounted() {
+    this.getRooms();
+  },
+  methods: {
+    ...mapActions({
+      getRoomsAction: "getRooms",
+      filterRoomsAction: "filterRooms",
+      showLoadingAction: "showLoadingAction",
+      endLoadingAction: "endLoadingAction",
+    }),
+    initRoomFilter(filterGroup) {
+      this.roomFilterGroup.reset();
+      if (filterGroup) {
+        this.roomFilterGroup.selectedRoomTypes = filterGroup.roomTypes;
+        this.roomFilterGroup.roomTypes = filterGroup.roomTypes.map(function (
+          roomType
+        ) {
+          return roomType.id;
+        });
+        this.roomFilterGroup.keyword = filterGroup.keyword;
+      }
+      this.options.page = 1;
+      this.getRooms();
+    },
+    showRoom($data) {
+      this.$router.push("/room/" + $data.uid);
+    },
+    getRooms() {
+      this.loading = true;
+      const { sortBy, sortDesc, page, itemsPerPage } = this.options;
+
+      var totalResult = itemsPerPage;
+      //Show All Items
+      if (totalResult == -1) {
+        this.roomFilterGroup.pageNumber = -1;
+        this.roomFilterGroup.pageSize = -1;
+      } else {
+        this.roomFilterGroup.pageNumber = page;
+        this.roomFilterGroup.pageSize = itemsPerPage;
+      }
+
+      this.filterRoomsAction(this.roomFilterGroup)
+        .then((data) => {
+          if (data.data) {
+            this.data = data.data;
+          } else {
+            this.data = [];
+          }
+          this.totalDataLength = data.totalResult;
+          this.loading = false;
+        })
+        .catch((error) => {
+          this.loading = false;
+          Toast.fire({
+            icon: "warning",
+            title: "Something went wrong... ",
+          });
+        });
+    },
+  },
+};
+</script>
+
 <template>
   <v-app>
     <navbar></navbar>
@@ -36,7 +186,8 @@
                   class="mx-2"
                   v-for="roomType in roomFilterGroup.selectedRoomTypes"
                   :key="roomType.id"
-                >{{ roomType.name | capitalizeFirstLetter }}</v-chip>
+                  >{{ roomType.name | capitalizeFirstLetter }}</v-chip
+                >
               </v-card-subtitle>
             </v-card>
           </v-col>
@@ -62,8 +213,9 @@
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showRoom(props.item)">
-                    <td>{{props.item.name}}</td>
-                    <td>{{props.item.price}}</td>
+                    <td>{{ props.item.room_types[0].name }}</td>
+                    <td>{{ props.item.name }}</td>
+                    <td>{{ props.item.price }}</td>
                   </tr>
                 </template>
               </v-data-table>
@@ -74,146 +226,3 @@
     </v-content>
   </v-app>
 </template>
-
-<script>
-import { mapActions } from "vuex";
-export default {
-  data() {
-    return {
-      totalDataLength: 0,
-      data: [],
-      loading: true,
-      options: {},
-      roomFilterGroup: new Form({
-        roomTypes: [],
-        selectedRoomTypes: [],
-        keyword: null,
-        fromdate: null,
-        todate: null
-      }),
-      roomFilterDialogConfig: {
-        buttonStyle: {
-          block: true,
-          class: "ma-2",
-          text: "Filter",
-          icon: "mdi-magnify",
-          isIcon: false,
-          color: "primary"
-        },
-        dialogStyle: {
-          persistent: true,
-          maxWidth: "1200px",
-          fullscreen: false,
-          hideOverlay: true
-        }
-      },
-      
-      roomFormDialogConfig: {
-        buttonStyle: {
-          block: true,
-          class: "title font-weight-bold ma-2",
-          text: "Add Room",
-          icon: "mdi-plus",
-          isIcon: false,
-          color: "primary",
-          evalation : "5",
-        },
-      },
-      headers: [
-        {
-          text: "Unit No",
-          align: "start",
-          sortable: true,
-          value: "name"
-        },
-        { text: "Price (RM)", value: "price", sortable: true }
-      ]
-    };
-  },
-  watch: {
-    options: {
-      handler() {
-        this.getRooms();
-      },
-      deep: true
-    }
-  },
-  computed: {
-    isLoading() {
-      return this.$store.getters.isLoading;
-    },
-    keywordEmpty() {
-      return this.helpers.isEmpty(this.roomFilterGroup.keyword);
-    },
-    fromdateEmpty() {
-      return this.helpers.isEmpty(this.roomFilterGroup.fromdate);
-    },
-    todateEmpty() {
-      return this.helpers.isEmpty(this.roomFilterGroup.todate);
-    },
-    roomTypesEmpty() {
-      return this.helpers.isEmpty(this.roomFilterGroup.selectedRoomTypes);
-    }
-  },
-  created() {},
-  mounted() {
-    this.getRooms();
-  },
-  methods: {
-    ...mapActions({
-      getRoomsAction: "getRooms",
-      filterRoomsAction: "filterRooms",
-      showLoadingAction: "showLoadingAction",
-      endLoadingAction: "endLoadingAction"
-    }),
-    initRoomFilter(filterGroup) {
-      this.roomFilterGroup.reset();
-      if (filterGroup) {
-        this.roomFilterGroup.selectedRoomTypes = filterGroup.roomTypes;
-        this.roomFilterGroup.roomTypes = filterGroup.roomTypes.map(function(
-          roomType
-        ) {
-          return roomType.id;
-        });
-        this.roomFilterGroup.keyword = filterGroup.keyword;
-      }
-      this.getRooms();
-    },
-    showRoom($data) {
-      this.$router.push("/room/" + $data.uid);
-    },
-    getRooms() {
-      this.loading = true;
-      const { sortBy, sortDesc, page, itemsPerPage } = this.options;
-
-      var totalResult = itemsPerPage;
-      //Show All Items
-      if (totalResult == -1) {
-        this.roomFilterGroup.pageNumber = -1;
-        this.roomFilterGroup.pageSize = -1;
-      } else {
-        this.roomFilterGroup.pageNumber = page;
-        this.roomFilterGroup.pageSize = itemsPerPage;
-      }
-
-      this.filterRoomsAction(this.roomFilterGroup)
-        .then(data => {
-          if (data.data) {
-            this.data = data.data;
-          } else {
-            this.data = [];
-          }
-          this.totalDataLength = data.totalResult;
-          this.loading = false;
-        })
-        .catch(error => {
-          this.loading = false;
-          Toast.fire({
-            icon: "warning",
-            title: "Something went wrong... "
-          });
-        });
-    }
-  }
-};
-</script>

@@ -18,7 +18,29 @@ trait RoomContractServices
 
         $data = collect();
 
-        $data = RoomContract::where('status', true)->with(['room', 'tenant', 'contract'])->get();
+        $data = RoomContract::where('status', true)->with(['room' => function ($q) {
+            // Query the name field in status table
+            $q->with(['roomtypes' => function ($q1) {
+                // Query the name field in status table
+                $q1->wherePivot('status', true);
+            }]);
+            $q->where('status', true);
+        }, 'contract' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        }, 'tenant' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        }, 'addonservices' => function ($q) {
+            // Query the name field in status table
+            $q->wherePivot('status', true);
+        }, 'origservices' => function ($q) {
+            // Query the name field in status table
+            $q->wherePivot('status', true);
+        }, 'rentalpayments' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        }])->get();
 
         $data = $data->unique('id')->sortBy('id')->flatten(1);
 
@@ -35,7 +57,7 @@ trait RoomContractServices
             $keyword = $params->keyword;
             $data = $data->filter(function ($item) use ($keyword) {
                 //check string exist inside or not
-                if (stristr($item->uid, $keyword) == TRUE) {
+                if (stristr($item->room->name, $keyword) == TRUE || stristr($item->tenant->name, $keyword) == TRUE) {
                     return true;
                 } else {
                     return false;

@@ -1,3 +1,142 @@
+
+<script>
+import { mapActions } from "vuex";
+export default {
+  data() {
+    return {
+      propertyFormDialog: false,
+      propertyFilterDialog: false,
+      totalDataLength: 0,
+      data: [],
+      loading: true,
+      options: {},
+      propertyFilterGroup: new Form({
+        rooms: [],
+        selectedRooms: [],
+        keyword: null,
+        fromdate: null,
+        todate: null,
+      }),
+      propertyFilterDialogConfig: {
+        buttonStyle: {
+          block: true,
+          class: "ma-2",
+          text: "Filter",
+          icon: "mdi-magnify",
+          isIcon: false,
+          color: "primary",
+        },
+        dialogStyle: {
+          persistent: true,
+          maxWidth: "1200px",
+          fullscreen: false,
+          hideOverlay: true,
+        },
+      },
+
+      propertyFormDialogConfig: {
+        buttonStyle: {
+          block: true,
+          class: "title font-weight-bold ma-2",
+          text: "Add Property",
+          icon: "mdi-plus",
+          isIcon: false,
+          color: "primary",
+          evalation: "5",
+        },
+      },
+      headers: [
+        {
+          text: "uid",
+        },
+        {
+          text: "Name",
+        },
+        {
+          text: "Price",
+        },
+      ],
+    };
+  },
+  watch: {
+    options: {
+      handler() {
+        this.getProperties();
+      },
+      deep: true,
+    },
+  },
+  computed: {
+    isLoading() {
+      return this.$store.getters.isLoading;
+    },
+    keywordEmpty() {
+      return this.helpers.isEmpty(this.propertyFilterGroup.keyword);
+    },
+    fromdateEmpty() {
+      return this.helpers.isEmpty(this.propertyFilterGroup.fromdate);
+    },
+    todateEmpty() {
+      return this.helpers.isEmpty(this.propertyFilterGroup.todate);
+    },
+  },
+  created() {},
+  mounted() {
+    this.getProperties();
+  },
+  methods: {
+    ...mapActions({
+      filterPropertiesAction: "filterProperties",
+      showLoadingAction: "showLoadingAction",
+      endLoadingAction: "endLoadingAction",
+    }),
+    initPropertyFilter(filterGroup) {
+      this.propertyFilterGroup.reset();
+      if (filterGroup) {
+        this.propertyFilterGroup.keyword = filterGroup.keyword;
+      }
+      this.options.page = 1;
+      this.getProperties();
+    },
+    showProperty($data) {
+      this.$router.push("/property/" + $data.uid);
+    },
+    getProperties() {
+      this.loading = true;
+      const { sortBy, sortDesc, page, itemsPerPage } = this.options;
+
+      var totalResult = itemsPerPage;
+      //Show All Items
+      if (totalResult == -1) {
+        this.propertyFilterGroup.pageNumber = -1;
+        this.propertyFilterGroup.pageSize = -1;
+      } else {
+        this.propertyFilterGroup.pageNumber = page;
+        this.propertyFilterGroup.pageSize = itemsPerPage;
+      }
+
+      this.filterPropertiesAction(this.propertyFilterGroup)
+        .then((data) => {
+          if (data.data) {
+            this.data = data.data;
+          } else {
+            this.data = [];
+          }
+          this.totalDataLength = data.totalResult;
+          this.loading = false;
+        })
+        .catch((error) => {
+          this.loading = false;
+          Toast.fire({
+            icon: "warning",
+            title: "Something went wrong... ",
+          });
+        });
+    },
+  },
+};
+</script>
+
 <template>
   <v-app>
     <navbar></navbar>
@@ -47,7 +186,13 @@
               >
                 <template v-slot:top>
                   <v-toolbar flat class="mb-5">
-                    <v-btn color="primary" block class="ma-2" :disabled="isLoading" @click="propertyFilterDialog = true">
+                    <v-btn
+                      color="primary"
+                      block
+                      class="ma-2"
+                      :disabled="isLoading"
+                      @click="propertyFilterDialog = true"
+                    >
                       <v-icon left>mdi-magnify</v-icon>Filter Property
                     </v-btn>
                   </v-toolbar>
@@ -56,6 +201,7 @@
                   <tr @click="showProperty(props.item)">
                     <td>{{props.item.uid}}</td>
                     <td>{{props.item.name}}</td>
+                    <td>{{props.item.price}}</td>
                   </tr>
                 </template>
               </v-data-table>
@@ -83,143 +229,3 @@
     </v-content>
   </v-app>
 </template>
-
-<script>
-import { mapActions } from "vuex";
-export default {
-  data() {
-    return {
-      propertyFormDialog: false,
-      propertyFilterDialog : false,
-      totalDataLength: 0,
-      data: [],
-      loading: true,
-      options: {},
-      propertyFilterGroup: new Form({
-        rooms: [],
-        selectedRooms: [],
-        keyword: null,
-        fromdate: null,
-        todate: null
-      }),
-      propertyFilterDialogConfig: {
-        buttonStyle: {
-          block: true,
-          class: "ma-2",
-          text: "Filter",
-          icon: "mdi-magnify",
-          isIcon: false,
-          color: "primary"
-        },
-        dialogStyle: {
-          persistent: true,
-          maxWidth: "1200px",
-          fullscreen: false,
-          hideOverlay: true
-        }
-      },
-
-      propertyFormDialogConfig: {
-        buttonStyle: {
-          block: true,
-          class: "title font-weight-bold ma-2",
-          text: "Add Property",
-          icon: "mdi-plus",
-          isIcon: false,
-          color: "primary",
-          evalation: "5"
-        }
-      },
-      headers: [
-        {
-          text: "uid"
-        },
-        {
-          text: "Name"
-        }
-      ]
-    };
-  },
-  watch: {
-    options: {
-      handler() {
-        this.getProperties();
-      },
-      deep: true
-    }
-  },
-  computed: {
-    isLoading() {
-      return this.$store.getters.isLoading;
-    },
-    keywordEmpty() {
-      return this.helpers.isEmpty(this.propertyFilterGroup.keyword);
-    },
-    fromdateEmpty() {
-      return this.helpers.isEmpty(this.propertyFilterGroup.fromdate);
-    },
-    todateEmpty() {
-      return this.helpers.isEmpty(this.propertyFilterGroup.todate);
-    }
-  },
-  created() {},
-  mounted() {
-    this.getProperties();
-  },
-  methods: {
-    ...mapActions({
-      filterPropertiesAction: "filterProperties",
-      showLoadingAction: "showLoadingAction",
-      endLoadingAction: "endLoadingAction"
-    }),
-    initPropertyFilter(filterGroup) {
-      this.propertyFilterGroup.reset();
-      if (filterGroup) {
-        this.propertyFilterGroup.selectedRooms = filterGroup.rooms;
-        this.propertyFilterGroup.rooms = filterGroup.rooms.map(function(
-          propertyType
-        ) {
-          return propertyType.id;
-        });
-        this.propertyFilterGroup.keyword = filterGroup.keyword;
-      }
-      this.getProperties();
-    },
-    showProperty($data) {
-      this.$router.push("/property/" + $data.uid);
-    },
-    getProperties() {
-      this.loading = true;
-      const { sortBy, sortDesc, page, itemsPerPage } = this.options;
-
-      var totalResult = itemsPerPage;
-      //Show All Items
-      if (totalResult == -1) {
-        this.propertyFilterGroup.pageNumber = -1;
-        this.propertyFilterGroup.pageSize = -1;
-      } else {
-        this.propertyFilterGroup.pageNumber = page;
-        this.propertyFilterGroup.pageSize = itemsPerPage;
-      }
-
-      this.filterPropertiesAction(this.propertyFilterGroup)
-        .then(data => {
-          if (data.data) {
-            this.data = data.data;
-          } else {
-            this.data = [];
-          }
-          this.totalDataLength = data.totalResult;
-          this.loading = false;
-        })
-        .catch(error => {
-          this.loading = false;
-          Toast.fire({
-            icon: "warning",
-            title: "Something went wrong... "
-          });
-        });
-    }
-  }
-};
-</script>

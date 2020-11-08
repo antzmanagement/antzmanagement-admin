@@ -36,7 +36,7 @@ trait ServiceServices
             $keyword = $params->keyword;
             $data = $data->filter(function ($item) use ($keyword) {
                 //check string exist inside or not
-                if (stristr($item->uid, $keyword) == TRUE || stristr($item->name, $keyword) == TRUE) {
+                if (stristr($item->name, $keyword) == TRUE) {
                     return true;
                 } else {
                     return false;

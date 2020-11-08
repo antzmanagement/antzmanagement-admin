@@ -45,13 +45,21 @@ trait RentalPaymentServices
             $keyword = $params->keyword;
             $data = $data->filter(function ($item) use ($keyword) {
                 //check string exist inside or not
-                if (stristr($item->uid, $keyword) == TRUE) {
+                if (stristr($item->roomcontract->tenant->name, $keyword) == TRUE || stristr($item->roomcontract->room->name, $keyword) == TRUE) {
                     return true;
                 } else {
                     return false;
                 }
-            });
+            })->values();
         }
+
+        if (property_exists($params, 'paid') && $params->paid != 'all') {
+            $paid = $params->paid;
+            $data = $data->filter(function ($item) use ($paid) {
+                return $item->paid == $paid;
+            })->values();
+        }
+
 
         $data = $data->unique('id');
 

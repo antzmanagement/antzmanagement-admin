@@ -1,50 +1,3 @@
-<template>
-  <v-card>
-    <v-toolbar dark color="primary">
-      <v-btn icon dark @click="close()">
-        <v-icon>mdi-close</v-icon>
-      </v-btn>
-      <v-toolbar-title v-if="!editMode">Add Service</v-toolbar-title>
-      <v-toolbar-title v-else>Edit Service</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-toolbar-items>
-        <v-btn
-          dark
-          text
-          :disabled="isLoading"
-          @click="editMode ? updateService() : createService()"
-        >Save</v-btn>
-      </v-toolbar-items>
-    </v-toolbar>
-    <v-card-text>
-      <v-container>
-        <v-row>
-          <v-col cols="12" md="6">
-            <v-text-field
-              label="Name"
-              required
-              :maxlength="300"
-              v-model="data.name"
-              @input="$v.data.name.$touch()"
-              @blur="$v.data.name.$touch()"
-              :error-messages="nameErrors"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="12" md="12">
-            <v-textarea
-              label="Description"
-              :maxlength="2500"
-              v-model="data.desc"
-              @input="$v.data.desc.$touch()"
-              @blur="$v.data.desc.$touch()"
-              :error-messages="descErrors"
-            ></v-textarea>
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-card-text>
-  </v-card>
-</template>
 
 <script>
 import { validationMixin } from "vuelidate";
@@ -52,30 +5,30 @@ import {
   required,
   minLength,
   maxLength,
-  decimal
+  decimal,
 } from "vuelidate/lib/validators";
 import { mapActions } from "vuex";
 export default {
   props: {
     editMode: {
       type: Boolean,
-      default: false
+      default: false,
     },
     uid: {
       type: String,
-      default: ""
+      default: "",
     },
     reset: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data() {
     return {
       data: new Form({
         name: "",
-        desc: ""
-      })
+        desc: "",
+      }),
     };
   },
 
@@ -83,8 +36,8 @@ export default {
     return {
       data: {
         name: { required, maxLength: maxLength(300) },
-        desc: { maxLength: maxLength(2500) }
-      }
+        desc: { maxLength: maxLength(2500) },
+      },
     };
   },
 
@@ -119,30 +72,29 @@ export default {
         errors.push("Name should be less than 300 characters");
         return errors;
       }
-    }
+    },
   },
   watch: {
-    reset: function(val) {
+    reset: function (val) {
       if (val) {
         this.data.reset();
         this.$v.$reset();
       }
-    }
+    },
   },
   mounted() {
-
     if (this.editMode) {
       this.showLoadingAction();
       this.getServiceAction({ uid: this.uid })
-        .then(data => {
+        .then((data) => {
           this.data = new Form(data.data);
           this.endLoadingAction();
         })
-        .catch(error => {
+        .catch((error) => {
           this.endLoadingAction();
           Toast.fire({
             icon: "warning",
-            title: "Something went wrong..."
+            title: "Something went wrong...",
           });
         });
     }
@@ -153,7 +105,7 @@ export default {
       createServiceAction: "createService",
       updateServiceAction: "updateService",
       showLoadingAction: "showLoadingAction",
-      endLoadingAction: "endLoadingAction"
+      endLoadingAction: "endLoadingAction",
     }),
     close() {
       this.$emit("close");
@@ -164,26 +116,26 @@ export default {
       if (this.$v.$invalid) {
         Toast.fire({
           icon: "warning",
-          title: "Please make sure all the data is valid. "
+          title: "Please make sure all the data is valid. ",
         });
       } else {
         this.$Progress.start();
         this.showLoadingAction();
         this.createServiceAction(this.data)
-          .then(data => {
+          .then((data) => {
             Toast.fire({
               icon: "success",
-              title: "Successful Created. "
+              title: "Successful Created. ",
             });
             this.$Progress.finish();
             this.endLoadingAction();
             this.$emit("created", data.data);
             this.close();
           })
-          .catch(error => {
+          .catch((error) => {
             Toast.fire({
               icon: "error",
-              title: "Something went wrong. "
+              title: "Something went wrong. ",
             });
             this.$Progress.finish();
             this.endLoadingAction();
@@ -197,32 +149,81 @@ export default {
       if (this.$v.$invalid) {
         Toast.fire({
           icon: "warning",
-          title: "Please make sure all the data is valid. "
+          title: "Please make sure all the data is valid. ",
         });
       } else {
         this.$Progress.start();
         this.showLoadingAction();
         this.updateServiceAction(this.data)
-          .then(data => {
+          .then((data) => {
             Toast.fire({
               icon: "success",
-              title: "Successful Updated. "
+              title: "Successful Updated. ",
             });
             this.$Progress.finish();
             this.endLoadingAction();
             this.$emit("updated", data.data);
             this.close();
           })
-          .catch(error => {
+          .catch((error) => {
             Toast.fire({
               icon: "error",
-              title: "Something went wrong. "
+              title: "Something went wrong. ",
             });
             this.$Progress.finish();
             this.endLoadingAction();
           });
       }
     },
-  }
+  },
 };
 </script>
+
+<template>
+  <v-card>
+    <v-toolbar dark color="primary">
+      <v-btn icon dark @click="close()">
+        <v-icon>mdi-close</v-icon>
+      </v-btn>
+      <v-toolbar-title v-if="!editMode">Add Service</v-toolbar-title>
+      <v-toolbar-title v-else>Edit Service</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-toolbar-items>
+        <v-btn
+          dark
+          text
+          :disabled="isLoading"
+          @click="editMode ? updateService() : createService()"
+          >Save</v-btn
+        >
+      </v-toolbar-items>
+    </v-toolbar>
+    <v-card-text>
+      <v-container>
+        <v-row>
+          <v-col cols="12" md="6">
+            <v-text-field
+              label="Name"
+              required
+              :maxlength="300"
+              v-model="data.name"
+              @input="$v.data.name.$touch()"
+              @blur="$v.data.name.$touch()"
+              :error-messages="nameErrors"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" md="12">
+            <v-textarea
+              label="Description"
+              :maxlength="2500"
+              v-model="data.desc"
+              @input="$v.data.desc.$touch()"
+              @blur="$v.data.desc.$touch()"
+              :error-messages="descErrors"
+            ></v-textarea>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-card-text>
+  </v-card>
+</template>

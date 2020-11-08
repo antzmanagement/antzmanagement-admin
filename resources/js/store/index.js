@@ -11,6 +11,8 @@ import property from "./property.module";
 import rentalpayment from "./rentalpayment.module";
 import staff from "./staff.module";
 import user from "./user.module";
+import report from "./report.module";
+import role from "./role.module";
 import room from "./room.module";
 import roomContract from "./roomContract.module";
 import roomType from "./roomType.module";
@@ -24,6 +26,8 @@ export default new Vuex.Store({
     owner,
     staff,
     room, 
+    role,
+    report,
     roomContract,
     roomType,
     maintenance,

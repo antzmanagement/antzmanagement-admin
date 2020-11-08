@@ -1,63 +1,3 @@
-<template>
-  <v-dialog
-    v-model="dialog"
-    :fullscreen="dialogStyle.fullscreen"
-    :hide-overlay="dialogStyle.hideOverlay"
-    :persistent="dialogStyle.persistent"
-    :max-width="dialogStyle.maxWidth"
-    transition="dialog-bottom-transition"
-  >
-    <template v-slot:activator="{ on }">
-      <v-btn
-        :class="buttonStyle.class"
-        tile
-        :color="buttonStyle.color"
-        :block="buttonStyle.block"
-        :icon="buttonStyle.isIcon"
-        v-on="on"
-        :disabled="isLoading"
-      >
-        <v-icon left>{{buttonStyle.icon}}</v-icon>
-        {{buttonStyle.text}}
-      </v-btn>
-    </template>
-    <v-card>
-      <v-toolbar dark color="primary">
-        <v-btn icon dark @click="dialog = false">
-          <v-icon>mdi-close</v-icon>
-        </v-btn>
-        <v-toolbar-title v->Maintenance Filter</v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-toolbar-items>
-          <v-btn dark text :disabled="isLoading" @click="submitFilter()">Apply</v-btn>
-        </v-toolbar-items>
-      </v-toolbar>
-      <v-card-text>
-        <v-container>
-          <v-row>
-            <v-col cols="12">
-              <v-text-field label="Keyword" :maxlength="300" v-model="data.keyword"></v-text-field>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col cols="12">
-              <v-autocomplete
-                v-model="data.rooms"
-                :item-text="item => helpers.capitalizeFirstLetter(item.name)"
-                :items="rooms"
-                label="Room"
-                chips
-                deletable-chips
-                multiple
-                :return-object="true"
-              ></v-autocomplete>
-            </v-col>
-          </v-row>
-        </v-container>
-      </v-card-text>
-    </v-card>
-  </v-dialog>
-</template>
 
 <script>
 import { validationMixin } from "vuelidate";
@@ -152,3 +92,64 @@ export default {
   }
 };
 </script>
+
+<template>
+  <v-dialog
+    v-model="dialog"
+    :fullscreen="dialogStyle.fullscreen"
+    :hide-overlay="dialogStyle.hideOverlay"
+    :persistent="dialogStyle.persistent"
+    :max-width="dialogStyle.maxWidth"
+    transition="dialog-bottom-transition"
+  >
+    <template v-slot:activator="{ on }">
+      <v-btn
+        :class="buttonStyle.class"
+        tile
+        :color="buttonStyle.color"
+        :block="buttonStyle.block"
+        :icon="buttonStyle.isIcon"
+        v-on="on"
+        :disabled="isLoading"
+      >
+        <v-icon left>{{buttonStyle.icon}}</v-icon>
+        {{buttonStyle.text}}
+      </v-btn>
+    </template>
+    <v-card>
+      <v-toolbar dark color="primary">
+        <v-btn icon dark @click="dialog = false">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+        <v-toolbar-title v->Maintenance Filter</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-toolbar-items>
+          <v-btn dark text :disabled="isLoading" @click="submitFilter()">Apply</v-btn>
+        </v-toolbar-items>
+      </v-toolbar>
+      <v-card-text>
+        <v-container>
+          <v-row>
+            <v-col cols="12">
+              <v-text-field label="Keyword" :maxlength="300" v-model="data.keyword"></v-text-field>
+            </v-col>
+          </v-row>
+          <!-- <v-row>
+            <v-col cols="12">
+              <v-autocomplete
+                v-model="data.rooms"
+                :item-text="item => helpers.capitalizeFirstLetter(item.name)"
+                :items="rooms"
+                label="Room"
+                chips
+                deletable-chips
+                multiple
+                :return-object="true"
+              ></v-autocomplete>
+            </v-col>
+          </v-row> -->
+        </v-container>
+      </v-card-text>
+    </v-card>
+  </v-dialog>
+</template>

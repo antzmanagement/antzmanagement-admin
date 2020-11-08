@@ -50,6 +50,7 @@ export const saveToken = token => {
 
 export const destroyToken = () => {
   window.localStorage.removeItem(ID_TOKEN_KEY);
+  return true;
 };
 
 export default { getToken, saveToken, destroyToken, AuthenticationServices };

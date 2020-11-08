@@ -18,7 +18,17 @@ trait MaintenanceServices
 
         $data = collect();
 
-        $data = Maintenance::where('status', true)->with(['room', 'property'])->get();
+        $data = Maintenance::where('status', true)->with(['room' => function ($q) {
+            // Query the name field in status table
+            $q->with(['roomtypes' => function ($q1) {
+                // Query the name field in status table
+                $q1->wherePivot('status', true);
+            }]);
+            $q->where('status', true);
+        }, 'property' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        }])->get();
 
         $data = $data->unique('id')->sortBy('id')->flatten(1);
 
@@ -35,25 +45,13 @@ trait MaintenanceServices
             $keyword = $params->keyword;
             $data = $data->filter(function ($item) use ($keyword) {
                 //check string exist inside or not
-                if (stristr($item->uid, $keyword) == TRUE) {
+                if (stristr($item->room->name, $keyword) == TRUE || stristr($item->property->name, $keyword) == TRUE ) {
                     return true;
                 } else {
                     return false;
                 }
             });
         }
-        if ($params->rooms) {
-            error_log('Filtering maintenances with rooms....');
-            $rooms = collect($params->rooms);
-            $data = $data->filter(function ($item) use ($rooms) {
-
-                if (!$rooms->contains($item->room->id)) {
-                    return false;
-                }
-                return true;
-            })->values();
-        }
-
         $data = $data->unique('id');
 
         return $data;
@@ -62,13 +60,33 @@ trait MaintenanceServices
     private function getMaintenance($uid)
     {
 
-        $data = Maintenance::where('uid', $uid)->with(['room', 'property'])->where('status', true)->first();
+        $data = Maintenance::where('uid', $uid)->with(['room' => function ($q) {
+            // Query the name field in status table
+            $q->with(['roomtypes' => function ($q1) {
+                // Query the name field in status table
+                $q1->wherePivot('status', true);
+            }]);
+            $q->where('status', true);
+        }, 'property' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        }])->where('status', true)->first();
         return $data;
     }
 
     private function getMaintenanceById($id)
     {
-        $data = Maintenance::where('id', $id)->with(['room', 'property'])->where('status', true)->first();
+        $data = Maintenance::where('id', $id)->with(['room' => function ($q) {
+            // Query the name field in status table
+            $q->with(['roomtypes' => function ($q1) {
+                // Query the name field in status table
+                $q1->wherePivot('status', true);
+            }]);
+            $q->where('status', true);
+        }, 'property' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        }])->where('status', true)->first();
         return $data;
     }
 

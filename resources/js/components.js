@@ -48,5 +48,5 @@ Vue.component('room-contract-form', require('./components/Management/RoomContrac
 Vue.component('room-contract-filter-dialog', require('./components/Management/RoomContractManagement/RoomContractFilterDialog.vue').default);
 
 Vue.component('rental-payment-form', require('./components/Management/RentalPaymentManagement/RentalPaymentForm.vue').default);
-Vue.component('rental-payment-dialog', require('./components/Management/RentalPaymentManagement/RentalPaymentFilterDialog.vue').default);
+Vue.component('rental-payment-filter-dialog', require('./components/Management/RentalPaymentManagement/RentalPaymentFilterDialog.vue').default);
 Vue.component('rental-print', require('./components/Management/RentalPaymentManagement/RentalPrint.vue').default);

@@ -79,6 +79,10 @@ export const actions = {
         return resp;
     },
     
+    logout(context) {
+        const resp = LaravelPassportServices.destroyToken();
+        return resp;
+    },
 
 };
 

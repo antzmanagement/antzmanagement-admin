@@ -1,3 +1,261 @@
+
+<script>
+import { mapActions } from "vuex";
+export default {
+  data() {
+    return {
+      editMode: false,
+      paymentDialog: false,
+      selectedPayment: {
+        uid: "",
+      },
+      selectedRental: {
+        roomcontract: {
+          room: {},
+          tenant: {},
+        },
+        price: 0,
+        penalty: 0,
+        rentaldate: "",
+        paymentdate: "",
+        uid: "",
+      },
+      totalDataLength: 0,
+      data: [],
+      loading: true,
+      options: {},
+      rentalPaymentFilterGroup: new Form({
+        rooms: [],
+        selectedRooms: [],
+        keyword: null,
+        fromdate: null,
+        todate: null,
+        paid: "all",
+      }),
+      rentalPaymentFilterDialogConfig: {
+        buttonStyle: {
+          block: true,
+          class: "ma-2",
+          text: "Filter",
+          icon: "mdi-magnify",
+          isIcon: false,
+          color: "primary",
+        },
+        dialogStyle: {
+          persistent: true,
+          maxWidth: "1200px",
+          fullscreen: false,
+          hideOverlay: true,
+        },
+      },
+
+      deleteRentalButtonConfig: {
+        activatorStyle: {
+          block: false,
+          color: "error",
+          class: "",
+          text: "",
+          icon: "mdi-trash-can-outline",
+          isIcon: true,
+          smallIcon: true,
+        },
+      },
+      rentalPrintButtonConfig: {
+        buttonStyle: {
+          block: false,
+          color: "success",
+          class: "",
+          text: "",
+          icon: "mdi-printer",
+          isIcon: true,
+          smallIcon: true,
+        },
+      },
+      rentalPaymentFormDialogConfig: {
+        buttonStyle: {
+          block: true,
+          class: "title font-weight-bold ma-2",
+          text: "Add RentalPayment",
+          icon: "mdi-plus",
+          isIcon: false,
+          color: "primary",
+          evalation: "5",
+        },
+      },
+      headers: [
+        {
+          text: "Tenant",
+        },
+        {
+          text: "Room Contract",
+        },
+        {
+          text: "Room",
+        },
+        {
+          text: "Rental Date",
+        },
+        {
+          text: "Rental Price",
+        },
+        {
+          text: "Penalty",
+        },
+        {
+          text: "Paid",
+        },
+        {
+          text: "Payment Date",
+        },
+        {
+          text: "Action",
+        },
+      ],
+    };
+  },
+  watch: {
+    options: {
+      handler() {
+        this.getRentalPayments();
+      },
+      deep: true,
+    },
+  },
+  computed: {
+    isLoading() {
+      return this.$store.getters.isLoading;
+    },
+    keywordEmpty() {
+      return this.helpers.isEmpty(this.rentalPaymentFilterGroup.keyword);
+    },
+    fromdateEmpty() {
+      return this.helpers.isEmpty(this.rentalPaymentFilterGroup.fromdate);
+    },
+    todateEmpty() {
+      return this.helpers.isEmpty(this.rentalPaymentFilterGroup.todate);
+    },
+    roomsEmpty() {
+      return this.helpers.isEmpty(this.rentalPaymentFilterGroup.selectedRooms);
+    },
+  },
+  created() {},
+  mounted() {
+    this.getRentalPayments();
+  },
+  methods: {
+    ...mapActions({
+      getRentalPaymentsAction: "getRentalPayments",
+      filterRentalPaymentsAction: "filterRentalPayments",
+      deleteRentalPaymentAction: "deleteRentalPayment",
+      showLoadingAction: "showLoadingAction",
+      endLoadingAction: "endLoadingAction",
+    }),
+    openPaymentDialog(uid, mode) {
+      this.paymentDialog = true;
+      this.editMode = mode;
+      this.selectedPayment.uid = uid;
+    },
+    initRentalPaymentFilter(filterGroup) {
+      this.rentalPaymentFilterGroup.reset();
+      if (filterGroup) {
+        this.rentalPaymentFilterGroup.keyword = filterGroup.keyword;
+        this.rentalPaymentFilterGroup.paid = filterGroup.paid;
+
+      }
+      this.getRentalPayments();
+    },
+    showRentalPayment($data) {
+      this.$router.push("/rentalpayment/" + $data.uid);
+    },
+    updateRentalPaymentDetails(data) {
+      var id = data.id;
+      var rentalpayment = data;
+      console.log("rentalpayment");
+      console.log(rentalpayment);
+      this.data = this.data.map(function (item) {
+        if (item.id == id) {
+          console.log("Found");
+          return rentalpayment;
+        } else {
+          return item;
+        }
+      });
+    },
+    deleteRentalPaymentDetails(data) {
+      var id = data.id;
+      this.data = this.data.filter(function (item) {
+        return item.id != id;
+      });
+    },
+    deleteRentalPayment($uid) {
+      this.$Progress.start();
+      this.showLoadingAction();
+      this.deleteRentalPaymentAction({ uid: $uid })
+        .then((data) => {
+          Toast.fire({
+            icon: "success",
+            title: "Successful Deleted. ",
+          });
+          this.deleteRentalPaymentDetails(data.data);
+          this.$Progress.finish();
+          this.endLoadingAction();
+        })
+        .catch((error) => {
+          Toast.fire({
+            icon: "warning",
+            title: "Fail to delete the tenant!!!!! ",
+          });
+          this.$Progress.finish();
+          this.endLoadingAction();
+        });
+    },
+    getRentalPayments() {
+      this.loading = true;
+      const { sortBy, sortDesc, page, itemsPerPage } = this.options;
+
+      var totalResult = itemsPerPage;
+      //Show All Items
+      if (totalResult == -1) {
+        this.rentalPaymentFilterGroup.pageNumber = -1;
+        this.rentalPaymentFilterGroup.pageSize = -1;
+      } else {
+        this.rentalPaymentFilterGroup.pageNumber = page;
+        this.rentalPaymentFilterGroup.pageSize = itemsPerPage;
+      }
+
+      console.log(this.rentalPaymentFilterGroup);
+      this.filterRentalPaymentsAction(this.rentalPaymentFilterGroup)
+        .then((data) => {
+          if (data.data) {
+            this.data = data.data;
+          } else {
+            this.data = [];
+          }
+          this.totalDataLength = data.totalResult;
+          this.loading = false;
+        })
+        .catch((error) => {
+          this.loading = false;
+          Toast.fire({
+            icon: "warning",
+            title: "Something went wrong... ",
+          });
+        });
+    },
+    print(data) {
+      this.selectedRental = data;
+      console.log(this.selectedRental);
+      this.showLoadingAction();
+      setTimeout(() => {
+        this.endLoadingAction();
+        this.$htmlToPaper("printMe");
+      }, 2000);
+    },
+  },
+};
+</script>
+
+
 <template>
   <v-app>
     <navbar></navbar>
@@ -45,6 +303,7 @@
                   <tr>
                     <td>{{props.item.roomcontract.tenant.name}}</td>
                     <td>{{props.item.roomcontract.name}}</td>
+                    <td>{{props.item.roomcontract.room.name}}</td>
                     <td>{{props.item.rentaldate | formatDate}}</td>
                     <td>{{props.item.price | toDouble}}</td>
                     <td>{{props.item.penalty | toDouble}}</td>
@@ -72,7 +331,7 @@
                         :roomcontract="selectedRental.roomcontract"
                         :tenant="selectedRental.roomcontract.tenant"
                         :rentalpayment="selectedRental"
-                      >mdi-pencil</rental-print> -->
+                      >mdi-pencil</rental-print>-->
                       <v-icon
                         small
                         class="mr-2"
@@ -118,7 +377,9 @@
                 <div :class="helpers.managementStyles().subtitleClass">:</div>
               </v-col>
               <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">{{selectedRental.roomcontract.tenant.name}}</div>
+                <div
+                  :class="helpers.managementStyles().lightSubtitleClass"
+                >{{selectedRental.roomcontract.tenant.name}}</div>
               </v-col>
             </v-row>
             <v-row>
@@ -129,7 +390,9 @@
                 <div :class="helpers.managementStyles().subtitleClass">:</div>
               </v-col>
               <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">{{selectedRental.roomcontract.room.name}}</div>
+                <div
+                  :class="helpers.managementStyles().lightSubtitleClass"
+                >{{selectedRental.roomcontract.room.name}}</div>
               </v-col>
             </v-row>
             <v-row>
@@ -140,7 +403,9 @@
                 <div :class="helpers.managementStyles().subtitleClass">:</div>
               </v-col>
               <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">{{selectedRental.roomcontract.name}}</div>
+                <div
+                  :class="helpers.managementStyles().lightSubtitleClass"
+                >{{selectedRental.roomcontract.name}}</div>
               </v-col>
             </v-row>
             <v-row>
@@ -242,252 +507,3 @@
     </v-content>
   </v-app>
 </template>
-
-<script>
-import { mapActions } from "vuex";
-export default {
-  data() {
-    return {
-      editMode: false,
-      paymentDialog: false,
-      selectedPayment: {
-        uid: "",
-      },
-      selectedRental: {
-        roomcontract: {
-          room: {},
-          tenant: {},
-        },
-        price : 0,
-        penalty : 0,
-        rentaldate : "",
-        paymentdate : "",
-        uid : "",
-      },
-      totalDataLength: 0,
-      data: [],
-      loading: true,
-      options: {},
-      rentalPaymentFilterGroup: new Form({
-        rooms: [],
-        selectedRooms: [],
-        keyword: null,
-        fromdate: null,
-        todate: null,
-      }),
-      rentalPaymentFilterDialogConfig: {
-        buttonStyle: {
-          block: true,
-          class: "ma-2",
-          text: "Filter",
-          icon: "mdi-magnify",
-          isIcon: false,
-          color: "primary",
-        },
-        dialogStyle: {
-          persistent: true,
-          maxWidth: "1200px",
-          fullscreen: false,
-          hideOverlay: true,
-        },
-      },
-
-      deleteRentalButtonConfig: {
-        activatorStyle: {
-          block: false,
-          color: "error",
-          class: "",
-          text: "",
-          icon: "mdi-trash-can-outline",
-          isIcon: true,
-          smallIcon: true,
-        },
-      },
-      rentalPrintButtonConfig: {
-        buttonStyle: {
-          block: false,
-          color: "success",
-          class: "",
-          text: "",
-          icon: "mdi-printer",
-          isIcon: true,
-          smallIcon: true,
-        },
-      },
-      rentalPaymentFormDialogConfig: {
-        buttonStyle: {
-          block: true,
-          class: "title font-weight-bold ma-2",
-          text: "Add RentalPayment",
-          icon: "mdi-plus",
-          isIcon: false,
-          color: "primary",
-          evalation: "5",
-        },
-      },
-      headers: [
-        {
-          text: "Tenant",
-        },
-        {
-          text: "Room Contract",
-        },
-        {
-          text: "Rental Date",
-        },
-        {
-          text: "Rental Price",
-        },
-        {
-          text: "Penalty",
-        },
-        {
-          text: "Paid",
-        },
-        {
-          text: "Payment Date",
-        },
-        {
-          text: "Action",
-        },
-      ],
-    };
-  },
-  watch: {
-    options: {
-      handler() {
-        this.getRentalPayments();
-      },
-      deep: true,
-    },
-  },
-  computed: {
-    isLoading() {
-      return this.$store.getters.isLoading;
-    },
-    keywordEmpty() {
-      return this.helpers.isEmpty(this.rentalPaymentFilterGroup.keyword);
-    },
-    fromdateEmpty() {
-      return this.helpers.isEmpty(this.rentalPaymentFilterGroup.fromdate);
-    },
-    todateEmpty() {
-      return this.helpers.isEmpty(this.rentalPaymentFilterGroup.todate);
-    },
-    roomsEmpty() {
-      return this.helpers.isEmpty(this.rentalPaymentFilterGroup.selectedRooms);
-    },
-  },
-  created() {},
-  mounted() {
-    this.getRentalPayments();
-  },
-  methods: {
-    ...mapActions({
-      getRentalPaymentsAction: "getRentalPayments",
-      filterRentalPaymentsAction: "filterRentalPayments",
-      deleteRentalPaymentAction: "deleteRentalPayment",
-      showLoadingAction: "showLoadingAction",
-      endLoadingAction: "endLoadingAction",
-    }),
-    openPaymentDialog(uid, mode) {
-      this.paymentDialog = true;
-      this.editMode = mode;
-      this.selectedPayment.uid = uid;
-    },
-    initRentalPaymentFilter(filterGroup) {
-      this.rentalPaymentFilterGroup.reset();
-      if (filterGroup) {
-        this.rentalPaymentFilterGroup.keyword = filterGroup.keyword;
-      }
-      this.getRentalPayments();
-    },
-    showRentalPayment($data) {
-      this.$router.push("/rentalpayment/" + $data.uid);
-    },
-    updateRentalPaymentDetails(data) {
-      var id = data.id;
-      var rentalpayment = data;
-      console.log("rentalpayment");
-      console.log(rentalpayment);
-      this.data = this.data.map(function (item) {
-        if (item.id == id) {
-          console.log("Found");
-          return rentalpayment;
-        } else {
-          return item;
-        }
-      });
-    },
-    deleteRentalPaymentDetails(data) {
-      var id = data.id;
-      this.data = this.data.filter(function (item) {
-        return item.id != id;
-      });
-    },
-    deleteRentalPayment($uid) {
-      this.$Progress.start();
-      this.showLoadingAction();
-      this.deleteRentalPaymentAction({ uid: $uid })
-        .then((data) => {
-          Toast.fire({
-            icon: "success",
-            title: "Successful Deleted. ",
-          });
-          this.deleteRentalPaymentDetails(data.data);
-          this.$Progress.finish();
-          this.endLoadingAction();
-        })
-        .catch((error) => {
-          Toast.fire({
-            icon: "warning",
-            title: "Fail to delete the tenant!!!!! ",
-          });
-          this.$Progress.finish();
-          this.endLoadingAction();
-        });
-    },
-    getRentalPayments() {
-      this.loading = true;
-      const { sortBy, sortDesc, page, itemsPerPage } = this.options;
-
-      var totalResult = itemsPerPage;
-      //Show All Items
-      if (totalResult == -1) {
-        this.rentalPaymentFilterGroup.pageNumber = -1;
-        this.rentalPaymentFilterGroup.pageSize = -1;
-      } else {
-        this.rentalPaymentFilterGroup.pageNumber = page;
-        this.rentalPaymentFilterGroup.pageSize = itemsPerPage;
-      }
-
-      this.filterRentalPaymentsAction(this.rentalPaymentFilterGroup)
-        .then((data) => {
-          if (data.data) {
-            this.data = data.data;
-          } else {
-            this.data = [];
-          }
-          this.totalDataLength = data.totalResult;
-          this.loading = false;
-        })
-        .catch((error) => {
-          this.loading = false;
-          Toast.fire({
-            icon: "warning",
-            title: "Something went wrong... ",
-          });
-        });
-    },
-    print(data) {
-      this.selectedRental = data;
-      console.log(this.selectedRental);
-      this.showLoadingAction();
-      setTimeout(() => {
-        this.endLoadingAction();
-      this.$htmlToPaper("printMe");
-      }, 2000);
-    },
-  },
-};
-</script>

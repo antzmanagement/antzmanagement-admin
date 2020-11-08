@@ -1,3 +1,145 @@
+
+<script>
+import { mapActions } from "vuex";
+export default {
+  data() {
+    return {
+      totalDataLength: 0,
+      data: [],
+      loading: true,
+      options: {},
+      maintenanceFilterGroup: new Form({
+        rooms: [],
+        selectedRooms: [],
+        keyword: null,
+        fromdate: null,
+        todate: null,
+      }),
+      maintenanceFilterDialogConfig: {
+        buttonStyle: {
+          block: true,
+          class: "ma-2",
+          text: "Filter",
+          icon: "mdi-magnify",
+          isIcon: false,
+          color: "primary",
+        },
+        dialogStyle: {
+          persistent: true,
+          maxWidth: "1200px",
+          fullscreen: false,
+          hideOverlay: true,
+        },
+      },
+
+      maintenanceFormDialogConfig: {
+        buttonStyle: {
+          block: true,
+          class: "title font-weight-bold ma-2",
+          text: "Add Maintenance",
+          icon: "mdi-plus",
+          isIcon: false,
+          color: "primary",
+          evalation: "5",
+        },
+      },
+      headers: [
+        {
+          text: "uid",
+        },
+        {
+          text: "Unit No",
+        },
+        {
+          text: "Property",
+        },
+        { text: "Price (RM)" },
+      ],
+    };
+  },
+  watch: {
+    options: {
+      handler() {
+        this.getMaintenances();
+      },
+      deep: true,
+    },
+  },
+  computed: {
+    isLoading() {
+      return this.$store.getters.isLoading;
+    },
+    keywordEmpty() {
+      return this.helpers.isEmpty(this.maintenanceFilterGroup.keyword);
+    },
+    fromdateEmpty() {
+      return this.helpers.isEmpty(this.maintenanceFilterGroup.fromdate);
+    },
+    todateEmpty() {
+      return this.helpers.isEmpty(this.maintenanceFilterGroup.todate);
+    },
+    roomsEmpty() {
+      return this.helpers.isEmpty(this.maintenanceFilterGroup.selectedRooms);
+    },
+  },
+  created() {},
+  mounted() {
+    this.getMaintenances();
+  },
+  methods: {
+    ...mapActions({
+      getMaintenancesAction: "getMaintenances",
+      filterMaintenancesAction: "filterMaintenances",
+      showLoadingAction: "showLoadingAction",
+      endLoadingAction: "endLoadingAction",
+    }),
+    initMaintenanceFilter(filterGroup) {
+      this.maintenanceFilterGroup.reset();
+      if (filterGroup) {
+        this.maintenanceFilterGroup.keyword = filterGroup.keyword;
+      }
+      this.options.page = 1;
+      this.getMaintenances();
+    },
+    showMaintenance($data) {
+      this.$router.push("/maintenance/" + $data.uid);
+    },
+    getMaintenances() {
+      this.loading = true;
+      const { sortBy, sortDesc, page, itemsPerPage } = this.options;
+
+      var totalResult = itemsPerPage;
+      //Show All Items
+      if (totalResult == -1) {
+        this.maintenanceFilterGroup.pageNumber = -1;
+        this.maintenanceFilterGroup.pageSize = -1;
+      } else {
+        this.maintenanceFilterGroup.pageNumber = page;
+        this.maintenanceFilterGroup.pageSize = itemsPerPage;
+      }
+
+      this.filterMaintenancesAction(this.maintenanceFilterGroup)
+        .then((data) => {
+          if (data.data) {
+            this.data = data.data;
+          } else {
+            this.data = [];
+          }
+          this.totalDataLength = data.totalResult;
+          this.loading = false;
+        })
+        .catch((error) => {
+          this.loading = false;
+          Toast.fire({
+            icon: "warning",
+            title: "Something went wrong... ",
+          });
+        });
+    },
+  },
+};
+</script>
+
 <template>
   <v-app>
     <navbar></navbar>
@@ -76,149 +218,3 @@
     </v-content>
   </v-app>
 </template>
-
-<script>
-import { mapActions } from "vuex";
-export default {
-  data() {
-    return {
-      totalDataLength: 0,
-      data: [],
-      loading: true,
-      options: {},
-      maintenanceFilterGroup: new Form({
-        rooms: [],
-        selectedRooms: [],
-        keyword: null,
-        fromdate: null,
-        todate: null
-      }),
-      maintenanceFilterDialogConfig: {
-        buttonStyle: {
-          block: true,
-          class: "ma-2",
-          text: "Filter",
-          icon: "mdi-magnify",
-          isIcon: false,
-          color: "primary"
-        },
-        dialogStyle: {
-          persistent: true,
-          maxWidth: "1200px",
-          fullscreen: false,
-          hideOverlay: true
-        }
-      },
-      
-      maintenanceFormDialogConfig: {
-        buttonStyle: {
-          block: true,
-          class: "title font-weight-bold ma-2",
-          text: "Add Maintenance",
-          icon: "mdi-plus",
-          isIcon: false,
-          color: "primary",
-          evalation : "5",
-        },
-      },
-      headers: [
-        {
-          text: "uid",
-        },
-        {
-          text: "Unit No",
-        },
-        {
-          text: "Property",
-        },
-        { text: "Price (RM)" }
-      ]
-    };
-  },
-  watch: {
-    options: {
-      handler() {
-        this.getMaintenances();
-      },
-      deep: true
-    }
-  },
-  computed: {
-    isLoading() {
-      return this.$store.getters.isLoading;
-    },
-    keywordEmpty() {
-      return this.helpers.isEmpty(this.maintenanceFilterGroup.keyword);
-    },
-    fromdateEmpty() {
-      return this.helpers.isEmpty(this.maintenanceFilterGroup.fromdate);
-    },
-    todateEmpty() {
-      return this.helpers.isEmpty(this.maintenanceFilterGroup.todate);
-    },
-    roomsEmpty() {
-      return this.helpers.isEmpty(this.maintenanceFilterGroup.selectedRooms);
-    }
-  },
-  created() {},
-  mounted() {
-    this.getMaintenances();
-  },
-  methods: {
-    ...mapActions({
-      getMaintenancesAction: "getMaintenances",
-      filterMaintenancesAction: "filterMaintenances",
-      showLoadingAction: "showLoadingAction",
-      endLoadingAction: "endLoadingAction"
-    }),
-    initMaintenanceFilter(filterGroup) {
-      this.maintenanceFilterGroup.reset();
-      if (filterGroup) {
-        this.maintenanceFilterGroup.selectedRooms = filterGroup.rooms;
-        this.maintenanceFilterGroup.rooms = filterGroup.rooms.map(function(
-          maintenanceType
-        ) {
-          return maintenanceType.id;
-        });
-        this.maintenanceFilterGroup.keyword = filterGroup.keyword;
-      }
-      this.getMaintenances();
-    },
-    showMaintenance($data) {
-      this.$router.push("/maintenance/" + $data.uid);
-    },
-    getMaintenances() {
-      this.loading = true;
-      const { sortBy, sortDesc, page, itemsPerPage } = this.options;
-
-      var totalResult = itemsPerPage;
-      //Show All Items
-      if (totalResult == -1) {
-        this.maintenanceFilterGroup.pageNumber = -1;
-        this.maintenanceFilterGroup.pageSize = -1;
-      } else {
-        this.maintenanceFilterGroup.pageNumber = page;
-        this.maintenanceFilterGroup.pageSize = itemsPerPage;
-      }
-
-      this.filterMaintenancesAction(this.maintenanceFilterGroup)
-        .then(data => {
-          if (data.data) {
-            this.data = data.data;
-          } else {
-            this.data = [];
-          }
-          this.totalDataLength = data.totalResult;
-          this.loading = false;
-        })
-        .catch(error => {
-          this.loading = false;
-          Toast.fire({
-            icon: "warning",
-            title: "Something went wrong... "
-          });
-        });
-    }
-  }
-};
-</script>

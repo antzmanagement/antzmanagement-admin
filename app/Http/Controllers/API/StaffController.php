@@ -203,6 +203,7 @@ class StaffController extends Controller
                 }),
             ],
             'password' => 'required|string|min:6|confirmed',
+            'role_id' => 'required',
         ]);
         error_log($this->controllerName . 'Creating staff.');
         $params = collect([
@@ -211,6 +212,7 @@ class StaffController extends Controller
             'tel1' => $request->tel1,
             'email' => $request->email,
             'password' => $request->password,
+            'role_id' => $request->role_id,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
@@ -343,6 +345,7 @@ class StaffController extends Controller
                 }),
             ],
             'name' => 'required|string|max:191',
+            'role_id' => 'required',
         ]);
         if ($this->isEmpty($staff)) {
             DB::rollBack();
@@ -353,6 +356,7 @@ class StaffController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'tel1' => $request->tel1,
+            'role_id' => $request->role_id,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

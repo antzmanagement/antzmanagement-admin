@@ -87,6 +87,7 @@ class UserController extends Controller
             'city' => $request->city,
             'country' => $request->country,
             'password' => $request->password,
+            'role_id' => $request->role_id,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
@@ -127,6 +128,7 @@ class UserController extends Controller
             'state' => $request->state,
             'city' => $request->city,
             'country' => $request->country,
+            'role_id' => $request->role_id,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

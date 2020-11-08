@@ -38,6 +38,7 @@ class RentalPaymentController extends Controller
             'fromdate' => $request->fromdate,
             'todate' => $request->todate,
             'status' => $request->status,
+            'paid' => $request->paid,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

@@ -1,24 +1,4 @@
-<template>
-  <v-card>
-    <v-card-text>
-      <v-container>
-        <v-row>
-          <v-col cols="12">
-            <v-text-field label="Rental" type="number" step="0.01" v-model="data.price"></v-text-field>
-          </v-col>
-          <v-col cols="12">
-            <v-text-field label="Penalty" type="number" step="0.01" v-model="data.penalty"></v-text-field>
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-card-text>
-    <v-card-actions>
-      <v-spacer></v-spacer>
-      <v-btn color="blue darken-1" text @click="close()">Close</v-btn>
-      <v-btn color="blue darken-1" text @click="makePayment()">Save</v-btn>
-    </v-card-actions>
-  </v-card>
-</template>
+
 
 <script>
 import { validationMixin } from "vuelidate";
@@ -138,3 +118,25 @@ export default {
   },
 };
 </script>
+
+<template>
+  <v-card>
+    <v-card-text>
+      <v-container>
+        <v-row>
+          <v-col cols="12">
+            <v-text-field label="Rental" type="number" step="0.01" v-model="data.price"></v-text-field>
+          </v-col>
+          <v-col cols="12">
+            <v-text-field label="Penalty" type="number" step="0.01" v-model="data.penalty"></v-text-field>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-card-text>
+    <v-card-actions>
+      <v-spacer></v-spacer>
+      <v-btn color="blue darken-1" text @click="close()">Close</v-btn>
+      <v-btn color="blue darken-1" text @click="makePayment()">Save</v-btn>
+    </v-card-actions>
+  </v-card>
+</template>
