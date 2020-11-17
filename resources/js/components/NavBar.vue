@@ -64,6 +64,12 @@ export default {
         name: "services",
         modulename: "service",
       },
+      {
+        icon: "mdi-washing-machine",
+        text: "Room Type",
+        name: "roomtypes",
+        modulename: "roomtype",
+      },
       // {
       //   icon: "mdi-file-document-edit-outline",
       //   text: "Contract",

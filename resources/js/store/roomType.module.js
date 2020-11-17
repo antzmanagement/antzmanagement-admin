@@ -11,6 +11,10 @@ export const actions = {
         const { data } = await RoomTypeServices.index(payload);
         return data;
     },
+    async filterRoomTypes(context, payload) {
+        const { data } = await RoomTypeServices.filter(payload);
+        return data;
+    },
     async getRoomType(context, payload) {
         const { data } = await RoomTypeServices.show(payload);
         return data;

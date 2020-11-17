@@ -41,7 +41,8 @@ class RoomTypeController extends Controller
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
-        $roomTypes = $this->filterRoomTypes($request->roomType(), $params);
+        $roomTypes = $this->getRooms($request->user());
+        $roomTypes = $this->filterRoomTypes($roomTypes, $params);
 
         if ($this->isEmpty($roomTypes)) {
             return $this->errorPaginateResponse('RoomTypes');

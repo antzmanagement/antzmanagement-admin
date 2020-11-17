@@ -189,8 +189,8 @@ export default {
     })
       .then((res) => {
         this.endLoadingAction();
-        this.roles = res.data.filter(function(role) { 
-          return role.name != 'tenant' && role.name != 'owner';
+        this.roles = res.data.filter(function (role) {
+          return role.name != "tenant" && role.name != "owner";
         });
       })
       .catch((err) => {
@@ -304,7 +304,12 @@ export default {
 </script>
 
 <template>
-  <v-dialog v-model="dialog" fullscreen hide-overlay transition="dialog-bottom-transition">
+  <v-dialog
+    v-model="dialog"
+    fullscreen
+    hide-overlay
+    transition="dialog-bottom-transition"
+  >
     <template v-slot:activator="{ on }">
       <v-btn
         :class="buttonStyle.class"
@@ -315,8 +320,8 @@ export default {
         :disabled="isLoading"
         :elevation="buttonStyle.elevation"
       >
-        <v-icon left>{{buttonStyle.icon}}</v-icon>
-        {{buttonStyle.text}}
+        <v-icon left>{{ buttonStyle.icon }}</v-icon>
+        {{ buttonStyle.text }}
       </v-btn>
     </template>
     <v-card>
@@ -333,7 +338,8 @@ export default {
             text
             :disabled="isLoading"
             @click="editMode ? updateStaff() : createStaff()"
-          >Save</v-btn>
+            >Save</v-btn
+          >
         </v-toolbar-items>
       </v-toolbar>
       <v-card-text>
@@ -421,7 +427,9 @@ export default {
                 item-value="id"
                 item-text="name"
                 label="Role"
-                :error-messages="helpers.isEmpty(data.role_id) ? 'Role is required' : ''"
+                :error-messages="
+                  helpers.isEmpty(data.role_id) ? 'Role is required' : ''
+                "
               ></v-autocomplete>
             </v-col>
           </v-row>

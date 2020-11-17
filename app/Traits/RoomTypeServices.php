@@ -38,7 +38,7 @@ trait RoomTypeServices
     private function filterRoomTypes($data, $params)
     {
         $data = $this->globalFilter($data, $params);
-        $params = $this->checkUndefinedProperty($params, $this->roo, FilterCols());
+        $params = $this->checkUndefinedProperty($params, $this->roomTypeFilterCols());
 
         if ($params->keyword) {
             $keyword = $params->keyword;

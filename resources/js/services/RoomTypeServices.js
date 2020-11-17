@@ -7,12 +7,21 @@ const RoomTypeServices = {
     PassportServices.AuthenticationServices.setHeader();
 
     const clonedata = Object.assign({}, data);
-    
+
     return Vue.axios.get('/api/roomtype', {
       params: clonedata
     })
   },
 
+  filter(data) {
+    PassportServices.AuthenticationServices.setHeader();
+
+    const clonedata = Object.assign({}, data);
+
+    return Vue.axios.get('/api/filter/roomtype', {
+      params: clonedata
+    })
+  },
   show(data) {
     PassportServices.AuthenticationServices.setHeader();
     return Vue.axios.get('/api/roomtype/' + data.uid);
@@ -25,14 +34,14 @@ const RoomTypeServices = {
     //The data is pass by reference, any modified data will reflected to front end view.
     //In practice way, we must clone it to prevent any error that caused by manipulation stage.
     const clonedata = Object.assign({}, data);
-    
+
     return Vue.axios.post('/api/roomtype', clonedata)
   },
 
   update(data) {
     PassportServices.AuthenticationServices.setHeader();
     const clonedata = Object.assign({}, data);
-    
+
     return Vue.axios.put('/api/roomtype/' + clonedata.uid, clonedata);
   },
 
@@ -40,16 +49,16 @@ const RoomTypeServices = {
   delete(data) {
     PassportServices.AuthenticationServices.setHeader();
     const clonedata = Object.assign({}, data);
-    
+
     return Vue.axios.delete('/api/roomtype/' + data.uid);
   },
 
-  
+
   getPublicRoomTypes(data) {
     PassportServices.AuthenticationServices.setHeader();
 
     const clonedata = Object.assign({}, data);
-    
+
     return Vue.axios.get('/api/public/roomtype', {
       params: clonedata
     })

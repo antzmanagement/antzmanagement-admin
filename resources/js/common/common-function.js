@@ -1048,3 +1048,5 @@ export function convertParameterToProductListUrl(data, config) {
         return `/cars-on-sale/malaysia?page=${config.page}&view=${config.view}${config.sorting ? `&sorting=${config.sorting}` : ''}`;
     }
 }
+
+export const _;
