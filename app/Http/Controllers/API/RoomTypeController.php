@@ -41,7 +41,7 @@ class RoomTypeController extends Controller
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
-        $roomTypes = $this->getRooms($request->user());
+        $roomTypes = $this->getRoomTypes($request->user());
         $roomTypes = $this->filterRoomTypes($roomTypes, $params);
 
         if ($this->isEmpty($roomTypes)) {
@@ -72,6 +72,7 @@ class RoomTypeController extends Controller
         $this->validate($request, [
             'name' => 'required|string|max:300',
             'price' => 'nullable|numeric',
+            'services' => 'array',
         ]);
         error_log($this->controllerName . 'Creating roomType.');
         $params = collect([
@@ -86,6 +87,15 @@ class RoomTypeController extends Controller
             return $this->errorResponse();
         }
 
+        $services = collect(json_decode(json_encode($request->services)));
+        foreach ($services as $service) {
+            $service = $this->getService($service->uid);
+            if (!$this->isEmpty($service)) {
+                $roomType->services()->syncWithoutDetaching([$service->id => ['status' => true]]);
+            }
+        }
+        
+
         DB::commit();
         return $this->successResponse('RoomType', $roomType, 'create');
     }
@@ -97,29 +107,39 @@ class RoomTypeController extends Controller
         error_log($this->controllerName . 'Updating roomType of uid: ' . $uid);
         $roomType = $this->getRoomType($uid);
         $this->validate($request, [
-            'email' => 'required|string|max:191|unique:users,email,' . $roomType->id,
-            'name' => 'required|string|max:191',
+            'name' => 'required|string|max:300',
+            'price' => 'nullable|numeric',
+            'services' => 'array',
         ]);
         if ($this->isEmpty($roomType)) {
             DB::rollBack();
             return $this->notFoundResponse('RoomType');
         }
         $params = collect([
-            'icno' => $request->icno,
             'name' => $request->name,
-            'email' => $request->email,
-            'tel1' => $request->tel1,
+            'price' => $request->price,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
-        $roomType = $this->updateRoom($roomType, $params);
+        $roomType = $this->updateRoomType($roomType, $params);
         if ($this->isEmpty($roomType)) {
             DB::rollBack();
             return $this->errorResponse();
-        } else {
-            DB::commit();
-            return $this->successResponse('RoomType', $roomType, 'update');
+        } 
+        
+        $services = collect(json_decode(json_encode($request->services)));
+        error_log($services);
+        foreach ($services as $service) {
+            $service = $this->getService($service->uid);
+            $service_id_array[$service->id] = ['status' => true];  
         }
+        if (!$this->isEmpty($services)) {
+            $roomType->services()->sync($service_id_array);
+        }else{
+            $roomType->services()->sync([]);
+        }
+        DB::commit();
+        return $this->successResponse('RoomType', $roomType, 'update');
     }
 
     public function destroy(Request $request, $uid)
@@ -133,24 +153,11 @@ class RoomTypeController extends Controller
             DB::rollBack();
             return $this->notFoundResponse('RoomType');
         }
-        $roomType = $this->deleteRoom($roomType);
+        $roomType = $this->deleteRoomType($roomType);
         if ($this->isEmpty($roomType)) {
             DB::rollBack();
             return $this->errorResponse();
         }
-
-        $userType = RoomType::where('name', 'roomType')->first();
-        if ($this->isEmpty($userType)) {
-            $data['data'] = null;
-            return $this->notFoundResponse('RoomType');
-        }
-        try {
-            $userType->users()->updateExistingPivot($roomType->id, ['status' => false]);
-        } catch (Exception $e) {
-            DB::rollBack();
-            return $this->errorResponse();
-        }
-
 
         DB::commit();
         return $this->successResponse('RoomType', $roomType, 'delete');

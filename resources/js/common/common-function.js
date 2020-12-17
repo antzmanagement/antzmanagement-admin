@@ -1,5 +1,5 @@
 import { isInteger } from "lodash";
-import _ from 'lodash';
+import lodash from 'lodash';
 
 var moment = require('moment');
 
@@ -1049,4 +1049,4 @@ export function convertParameterToProductListUrl(data, config) {
     }
 }
 
-export const _;
+export const _ = lodash;

@@ -41,6 +41,7 @@ import JsonExcel from 'vue-json-excel'
 import VueHtmlToPaper from 'vue-html-to-paper';
 import VueLodash from 'vue-lodash'
 import lodash from 'lodash'
+import Cloudinary,{ CldImage, CldTransformation } from "cloudinary-vue";
 
 const options = {
   name: '_blank',
@@ -60,6 +61,13 @@ Vue.use(VueHtmlToPaper, options);
 Vue.component('download-excel', JsonExcel)
 Vue.use(VueApexCharts)
 Vue.component('apexchart', VueApexCharts)
+Vue.use(Cloudinary, {
+  configuration: { cloudName: "dwslzbgaa" },
+  components: {
+    CldImage,
+    CldTransformation
+  }
+});
 
 Vue.use(VueSpinners)
 Vue.use(VueRouter)

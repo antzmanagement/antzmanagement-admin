@@ -74,15 +74,19 @@ trait RoomTypeServices
     private function getRoomType($uid)
     {
 
-        $userType = $this->getUserTypeById($this->type);
-        $data = $userType->users()->where('uid', $uid)->wherePivot('status', 1)->first();
+        $data = RoomType::where('uid', $uid)->with(['services' => function ($q) {
+            // Query the name field in status table
+            $q->wherePivot('status', true);
+        }])->where('status', true)->first();
         return $data;
     }
 
     private function getRoomTypeById($id)
     {
-        $userType = $this->getUserTypeById($this->type);
-        $data = $userType->users()->where('id', $id)->wherePivot('status', 1)->first();
+        $data = RoomType::where('id', $id)->with(['services' => function ($q) {
+            // Query the name field in status table
+            $q->wherePivot('status', true);
+        }])->where('status', true)->first();
         return $data;
     }
 
@@ -109,48 +113,8 @@ trait RoomTypeServices
 
         $params = $this->checkUndefinedProperty($params, $this->roomTypeAllCols());
 
-        $data->title  = $params->title;
-        $data->desc = $params->desc;
-        $data->roomTypepath = $params->roomTypepath;
-        $data->roomTypepublicid = $params->roomTypepublicid;
-        $data->totallength = $params->totallength;
-        $data->agerestrict = false;
-
-        if ($params->scope == 'private') {
-            $data->scope = $params->scope;
-        } else {
-            $data->scope = 'public';
-        }
-
-        if ($this->isEmpty($params->free)) {
-            return null;
-        } else {
-            $data->free = $params->free;
-            if ($data->free) {
-                $data->price = 0;
-                $data->disc = 0;
-                $data->discpctg = 0;
-            } else {
-                $data->price = $this->toDouble($params->price);
-                if ($this->isEmpty($params->discbyprice)) {
-                    return null;
-                } else {
-                    if ($data->discbyprice) {
-                        $data->disc = $this->toDouble($params->disc);
-                        $data->discpctg = $this->toInt($this->toDouble($data->disc / $data->price) * 100);
-                    } else {
-                        $data->discpctg = $this->toInt($params->discpctg);
-                        $data->disc = $this->toDouble($data->price * ($data->discpctg / 100));
-                    }
-                }
-            }
-        }
-
-        $channel = $this->getChannelById($params->channel_id);
-        if ($this->isEmpty($channel)) {
-            return null;
-        }
-        $data->channel()->associate($channel);
+        $data->name  = $params->name;
+        $data->price = $this->toDouble($params->price);
 
         if (!$this->saveModel($data)) {
             return null;
@@ -159,22 +123,32 @@ trait RoomTypeServices
         return $data->refresh();
     }
 
+
     private function deleteRoomType($data)
     {
 
-        $comments = $data->comments;
-        foreach ($comments as $comment) {
-            if (!$this->deleteComment($comment)) {
-                return null;
-            }
+        $data->status = false;
+        try {
+            $ids = $data->rooms()->wherePivot('status', true)->get();
+            $ids = $ids->pluck('id');
+            $data->rooms()->updateExistingPivot($ids, ['status' => false]);
+
+            $ids = $data->properties()->wherePivot('status', true)->get();
+            $ids = $ids->pluck('id');
+            $data->properties()->updateExistingPivot($ids, ['status' => false]);
+
+            $ids = $data->services()->wherePivot('status', true)->get();
+            $ids = $ids->pluck('id');
+            $data->services()->updateExistingPivot($ids, ['status' => false]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->errorResponse();
         }
 
-        $data->status = false;
-        if ($this->saveModel($data)) {
-            return $data->refresh();
-        } else {
+        if (!$this->saveModel($data)) {
             return null;
         }
+
 
         return $data->refresh();
     }

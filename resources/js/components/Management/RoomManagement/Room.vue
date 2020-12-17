@@ -1,8 +1,9 @@
-
 <script>
 import { mapActions } from "vuex";
+import { _ } from "../../../common/common-function";
 export default {
   data: () => ({
+    _: _,
     editButtonStyle: {
       block: false,
       color: "success",
@@ -73,6 +74,8 @@ export default {
     this.getRoomAction({ uid: this.$route.params.uid })
       .then((data) => {
         this.data = data.data;
+        console.log("room");
+        console.log(this.data);
         this.$Progress.finish();
         this.endLoadingAction();
       })
@@ -124,6 +127,13 @@ export default {
     refreshPage() {
       location.reload();
     },
+    goToOwner(uid) {
+      if (uid) {
+        console.log("uid");
+        console.log(uid);
+        this.$router.push("/owner/" + $data.uid);
+      }
+    },
   },
 };
 </script>
@@ -158,9 +168,109 @@ export default {
                       class="ma-2"
                       v-for="roomType in data.room_types"
                       :key="roomType.uid"
+                      :to="{name : 'roomtype', params : {uid : roomType.uid}}"
                     >
                       <h4 class="text-center ma-2">
                         {{ roomType.name | capitalizeFirstLetter }}
+                      </h4>
+                    </v-chip>
+                  </div>
+                </div>
+              </v-col>
+            </v-row>
+
+            <v-row
+              justify="start"
+              align="center"
+              class="pa-2"
+              v-if="
+                _.isArray(_.get(data, ['properties'])) &&
+                !_.isEmpty(_.get(data, ['properties']))
+              "
+            >
+              <v-divider
+                :color="helpers.managementStyles().dividerColor"
+              ></v-divider>
+              <v-col cols="12">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Properties</label>
+                  <div class="form-control-plaintext">
+                    <v-chip
+                      class="ma-2"
+                      v-for="property in data.properties"
+                      :key="property.uid"
+                    >
+                      <h4 class="text-center ma-2">
+                        {{
+                          _.get(property, ["name"]) ||
+                          "" | capitalizeFirstLetter
+                        }}
+                      </h4>
+                    </v-chip>
+                  </div>
+                </div>
+              </v-col>
+            </v-row>
+            <v-row
+              justify="start"
+              align="center"
+              class="pa-2"
+              v-if="
+                _.isArray(_.get(data, ['roomcontracts'])) &&
+                !_.isEmpty(_.get(data, ['roomcontracts']))
+              "
+            >
+              <v-divider
+                :color="helpers.managementStyles().dividerColor"
+              ></v-divider>
+              <v-col cols="12">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Room Contracts</label>
+                  <div class="form-control-plaintext">
+                    <v-chip
+                      class="ma-2"
+                      v-for="roomcontract in data.roomcontracts"
+                      :key="roomcontract.uid"
+                      :to="{name : 'roomcontract', params : {uid : roomcontract.uid}}"
+                    >
+                      <h4 class="text-center ma-2">
+                        {{
+                          _.get(roomcontract, ["name"]) ||
+                          "" | capitalizeFirstLetter
+                        }}
+                      </h4>
+                    </v-chip>
+                  </div>
+                </div>
+              </v-col>
+            </v-row>
+
+            <v-row
+              justify="start"
+              align="center"
+              class="pa-2"
+              v-if="
+                _.isArray(_.get(data, ['owners'])) &&
+                !_.isEmpty(_.get(data, ['owners']))
+              "
+            >
+              <v-divider
+                :color="helpers.managementStyles().dividerColor"
+              ></v-divider>
+              <v-col cols="12">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Owners</label>
+                  <div class="form-control-plaintext">
+                    <v-chip
+                      class="ma-2"
+                      v-for="owner in data.owners"
+                      :key="owner.uid"
+                      :to="{name : 'owner', params : {uid : owner.uid}}"
+                    >
+                      <h4 class="text-center ma-2" type="button">
+                        {{
+                          _.get(owner, ["name"]) || "" | capitalizeFirstLetter
+                        }}
                       </h4>
                     </v-chip>
                   </div>
@@ -175,21 +285,45 @@ export default {
             <v-row justify="start" align="center" class="pa-2">
               <v-col cols="12" md="6">
                 <div class="form-group mb-0">
-                  <label class="form-label mb-0">Name</label>
+                  <label class="form-label mb-0">Room Status</label>
                   <div class="form-control-plaintext">
-                    <h4>{{ data.name }}</h4>
+                    <h4>{{ data.room_status }}</h4>
                   </div>
                 </div>
               </v-col>
               <v-col cols="12" md="6">
                 <div class="form-group mb-0">
-                  <label class="form-label mb-0">Price</label>
+                  <label class="form-label mb-0">Area Size</label>
                   <div class="form-control-plaintext">
-                    <h4>RM {{ data.price }}</h4>
+                    <h4>RM {{ data.size }}</h4>
                   </div>
                 </div>
               </v-col>
 
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Block</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.block }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Floor</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.floor }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Unit</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.name }}</h4>
+                  </div>
+                </div>
+              </v-col>
               <v-col cols="12">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Address</label>
@@ -199,6 +333,14 @@ export default {
                 </div>
               </v-col>
 
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Jalan</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.jalan }}</h4>
+                  </div>
+                </div>
+              </v-col>
               <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Postcode</label>
@@ -228,6 +370,37 @@ export default {
                   <label class="form-label mb-0">Country</label>
                   <div class="form-control-plaintext">
                     <h4>{{ data.country }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Is Sublet</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.sublet ? 'yes' : 'no' }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4" >
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0" v-if="data.sublet ? true : false">Sublet Claim</label>
+                  <label class="form-label mb-0" v-else>Owner Claim</label>
+                  <div class="form-control-plaintext">
+                    <h4>RM {{ data.sublet ? data.sublet_claim : data.owner_claim }}</h4>
+                  </div>
+                </div>
+              </v-col>
+            </v-row>
+            <v-divider
+              class="mx-3"
+              :color="helpers.managementStyles().dividerColor"
+            ></v-divider>
+            <v-row justify="start" align="center" class="pa-2">
+              <v-col cols="12" md="6">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Remark</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.remark }}</h4>
                   </div>
                 </div>
               </v-col>

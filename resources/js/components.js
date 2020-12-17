@@ -24,7 +24,6 @@ Vue.component('staff-filter-dialog', require('./components/Management/UserManage
 
 
 Vue.component('room-form', require('./components/Management/RoomManagement/RoomForm.vue').default);
-Vue.component('room-type-form', require('./components/Management/RoomTypeManagement/RoomTypeForm.vue').default);
 Vue.component('room-filter-dialog', require('./components/Management/RoomManagement/RoomFilterDialog.vue').default);
 
 Vue.component('room-type-sliders', require('./components/RoomPages/RoomTypeSliders.vue').default);
@@ -50,3 +49,6 @@ Vue.component('room-contract-filter-dialog', require('./components/Management/Ro
 Vue.component('rental-payment-form', require('./components/Management/RentalPaymentManagement/RentalPaymentForm.vue').default);
 Vue.component('rental-payment-filter-dialog', require('./components/Management/RentalPaymentManagement/RentalPaymentFilterDialog.vue').default);
 Vue.component('rental-print', require('./components/Management/RentalPaymentManagement/RentalPrint.vue').default);
+
+Vue.component('room-type-form', require('./components/Management/RoomTypeManagement/RoomTypeForm.vue').default);
+Vue.component('room-type-filter-dialog', require('./components/Management/RoomTypeManagement/RoomTypeForm.vue').default);

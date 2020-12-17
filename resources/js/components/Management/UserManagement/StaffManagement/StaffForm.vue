@@ -1,5 +1,6 @@
 
 <script>
+import Axios from "axios";
 import { validationMixin } from "vuelidate";
 import {
   required,
@@ -9,6 +10,9 @@ import {
   email,
 } from "vuelidate/lib/validators";
 import { mapActions } from "vuex";
+
+import { commonConfig } from "../../../../common/config";
+
 export default {
   props: {
     editMode: {
@@ -43,7 +47,16 @@ export default {
         password: "",
         password_confirmation: "",
         role_id: "",
+        img: null,
       }),
+      imgpreview: null,
+      origImgPreview: null,
+      rules: [
+        (value) =>
+          !value ||
+          value.size < 2000000 ||
+          "Picture size should be less than 2 MB!",
+      ],
     };
   },
 
@@ -177,6 +190,7 @@ export default {
     dialog: function (val) {
       if (val) {
         this.data.reset();
+        this.imgpreview = this.origImgPreview;
         this.$v.$reset();
       }
     },
@@ -204,6 +218,8 @@ export default {
       this.getStaffAction({ uid: this.uid })
         .then((data) => {
           this.data = new Form(data.data);
+          this.imgpreview = _.get(data.data, ["profile_img"]) || null;
+          this.origImgPreview = _.get(data.data, ["profile_img"]) || null;
           this.endLoadingAction();
         })
         .catch((error) => {
@@ -245,7 +261,20 @@ export default {
       } else {
         this.$Progress.start();
         this.showLoadingAction();
-        this.createStaffAction(this.data)
+
+        let formData = new FormData();
+        formData.append("name", this.data.name);
+        formData.append("icno", this.data.icno);
+        formData.append("tel1", this.data.tel1);
+        formData.append("email", this.data.email);
+        formData.append("password", this.data.password);
+        formData.append(
+          "password_confirmation",
+          this.data.password_confirmation
+        );
+        formData.append("role_id", this.data.role_id);
+        formData.append("img", this.data.img);
+        this.createStaffAction(formData)
           .then((data) => {
             Toast.fire({
               icon: "success",
@@ -278,6 +307,7 @@ export default {
       } else {
         this.$Progress.start();
         this.showLoadingAction();
+
         this.updateStaffAction(this.data)
           .then((data) => {
             Toast.fire({
@@ -298,6 +328,23 @@ export default {
             this.endLoadingAction();
           });
       }
+    },
+
+    uploadPhoto(file) {
+      let reader = new FileReader();
+
+      if (file && file.name) {
+        reader.readAsDataURL(file);
+      } else {
+        this.imgpreview = this.origImgPreview;
+      }
+
+      let self = this;
+      reader.addEventListener("load", function () {
+        self.imgpreview = reader.result;
+      });
+
+      this.data.img = file;
     },
   },
 };
@@ -344,95 +391,114 @@ export default {
       </v-toolbar>
       <v-card-text>
         <v-container>
-          <v-row>
-            <v-col cols="12" md="6">
-              <v-text-field
-                label="Name*"
-                required
-                :maxlength="100"
-                v-model="data.name"
-                @input="$v.data.name.$touch()"
-                @blur="$v.data.name.$touch()"
-                :error-messages="nameErrors"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="6">
-              <v-text-field
-                label="IC-No*"
-                hint="Example of IC-No : 1234-56-7890 (With Dash)"
-                persistent-hint
-                required
-                :maxlength="14"
-                v-model="data.icno"
-                @input="$v.data.icno.$touch()"
-                @blur="$v.data.icno.$touch()"
-                :error-messages="icnoErrors"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="6">
-              <v-text-field
-                label="Phone No"
-                hint="Example of Phone No : 014-12019231 (With Dash)"
-                persistent-hint
-                v-model="data.tel1"
-                :maxlength="20"
-                @input="$v.data.tel1.$touch()"
-                @blur="$v.data.tel1.$touch()"
-                :error-messages="tel1Errors"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12">
-              <v-text-field
-                label="Email*"
-                hint="Email that used to login the website"
-                persistent-hint
-                required
-                :maxlength="255"
-                v-model="data.email"
-                @input="$v.data.email.$touch()"
-                @blur="$v.data.email.$touch()"
-                :error-messages="emailErrors"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" v-if="!editMode">
-              <v-text-field
-                label="Password*"
-                hint="Password should be more than 8 characters."
-                persistent-hint
-                type="password"
-                required
-                :maxlength="255"
-                v-model="data.password"
-                @input="$v.data.password.$touch()"
-                @blur="$v.data.password.$touch()"
-                :error-messages="passwordErrors"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" v-if="!editMode">
-              <v-text-field
-                label="Password Confirmation*"
-                type="password"
-                required
-                :maxlength="255"
-                v-model="data.password_confirmation"
-                @input="$v.data.password_confirmation.$touch()"
-                @blur="$v.data.password_confirmation.$touch()"
-                :error-messages="passwordConfirmErrors"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12">
-              <v-autocomplete
-                v-model="data.role_id"
-                :items="roles"
-                item-value="id"
-                item-text="name"
-                label="Role"
-                :error-messages="
-                  helpers.isEmpty(data.role_id) ? 'Role is required' : ''
-                "
-              ></v-autocomplete>
-            </v-col>
-          </v-row>
+          <form
+            @submit="editMode ? updateStaff : createStaff"
+            enctype="multipart/form-data"
+          >
+            <v-row>
+              <v-col cols="12" v-if="imgpreview">
+                <v-img :src="imgpreview" :height="200" :width="200" contain ></v-img>
+              </v-col>
+              <v-col cols="12">
+                <v-file-input
+                  :rules="rules"
+                  v-model="data.img"
+                  accept="image/png, image/jpeg, image/bmp"
+                  placeholder="Pick a picture"
+                  prepend-icon="mdi-camera"
+                  label="Profile Picture"
+                  @change="uploadPhoto"
+                ></v-file-input>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  label="Name*"
+                  required
+                  :maxlength="100"
+                  v-model="data.name"
+                  @input="$v.data.name.$touch()"
+                  @blur="$v.data.name.$touch()"
+                  :error-messages="nameErrors"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  label="IC-No*"
+                  hint="Example of IC-No : 1234-56-7890 (With Dash)"
+                  persistent-hint
+                  required
+                  :maxlength="14"
+                  v-model="data.icno"
+                  @input="$v.data.icno.$touch()"
+                  @blur="$v.data.icno.$touch()"
+                  :error-messages="icnoErrors"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" md="6">
+                <v-text-field
+                  label="Phone No"
+                  hint="Example of Phone No : 014-12019231 (With Dash)"
+                  persistent-hint
+                  v-model="data.tel1"
+                  :maxlength="20"
+                  @input="$v.data.tel1.$touch()"
+                  @blur="$v.data.tel1.$touch()"
+                  :error-messages="tel1Errors"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-text-field
+                  label="Email*"
+                  hint="Email that used to login the website"
+                  persistent-hint
+                  required
+                  :maxlength="255"
+                  v-model="data.email"
+                  @input="$v.data.email.$touch()"
+                  @blur="$v.data.email.$touch()"
+                  :error-messages="emailErrors"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" v-if="!editMode">
+                <v-text-field
+                  label="Password*"
+                  hint="Password should be more than 8 characters."
+                  persistent-hint
+                  type="password"
+                  required
+                  :maxlength="255"
+                  v-model="data.password"
+                  @input="$v.data.password.$touch()"
+                  @blur="$v.data.password.$touch()"
+                  :error-messages="passwordErrors"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12" v-if="!editMode">
+                <v-text-field
+                  label="Password Confirmation*"
+                  type="password"
+                  required
+                  :maxlength="255"
+                  v-model="data.password_confirmation"
+                  @input="$v.data.password_confirmation.$touch()"
+                  @blur="$v.data.password_confirmation.$touch()"
+                  :error-messages="passwordConfirmErrors"
+                ></v-text-field>
+              </v-col>
+              <v-col cols="12">
+                <v-autocomplete
+                  v-model="data.role_id"
+                  :items="roles"
+                  item-value="id"
+                  item-text="name"
+                  label="Role"
+                  :error-messages="
+                    helpers.isEmpty(data.role_id) ? 'Role is required' : ''
+                  "
+                ></v-autocomplete>
+              </v-col>
+            </v-row>
+          </form>
         </v-container>
       </v-card-text>
     </v-card>

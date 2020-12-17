@@ -7,9 +7,13 @@ import {
   minLength,
   maxLength,
   numeric,
+  decimal,
 } from "vuelidate/lib/validators";
 import { mapActions } from "vuex";
+import { notEmptyLength, _ } from "../../../common/common-function";
+import ServicesDialog from "../ServiceManagement/ServicesDialog.vue";
 export default {
+  components: { ServicesDialog },
   props: {
     editMode: {
       type: Boolean,
@@ -42,9 +46,11 @@ export default {
   data() {
     return {
       dialog: false,
+      _: _,
       data: new Form({
         name: "",
         price: "",
+        services: [],
       }),
     };
   },
@@ -53,7 +59,7 @@ export default {
     return {
       data: {
         name: { required, maxLength: maxLength(100) },
-        price: { required, numeric },
+        price: { required },
       },
     };
   },
@@ -89,10 +95,6 @@ export default {
         return errors;
       }
 
-      if (!this.$v.data.price.numeric) {
-        errors.push("Please key in number only.");
-        return errors;
-      }
     },
   },
 
@@ -196,6 +198,17 @@ export default {
           });
       }
     },
+    setRoomTypeServices(e) {
+      try {
+        if (_.isArray(e.services) && notEmptyLength(e.services)) {
+          this.data.services = e.services;
+        } else {
+          this.data.services = [];
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
   },
 };
 </script>
@@ -210,17 +223,18 @@ export default {
     transition="dialog-bottom-transition"
   >
     <template v-slot:activator="{ on }">
-      <v-btn
-        :class="buttonStyle.class"
-        tile
-        :color="buttonStyle.color"
-        :block="buttonStyle.block"
-        v-on="on"
-        :disabled="isLoading"
-      >
-        <v-icon>{{ buttonStyle.icon }}</v-icon>
-        {{ buttonStyle.text }}
-      </v-btn>
+      <a v-on="on" >
+        <slot  >
+          <v-btn tile isIcon :disabled="isLoading" v-if="editMode">
+            <v-icon left>mdi-plus</v-icon>
+            Edit New Room Type
+          </v-btn>
+          <v-btn tile isIcon :disabled="isLoading" v-else>
+            <v-icon left>mdi-plus</v-icon>
+            Add New Room Type
+          </v-btn>
+        </slot>
+      </a>
     </template>
     <v-card>
       <v-toolbar dark color="primary">
@@ -260,11 +274,31 @@ export default {
                 type="number"
                 required
                 :maxlength="100"
+                step="0.01"
                 v-model="data.price"
                 @input="$v.data.price.$touch()"
                 @blur="$v.data.price.$touch()"
                 :error-messages="priceErrors"
               ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <services-dialog
+                @submit="(e) => setRoomTypeServices(e)"
+                editMode
+                :services="
+                  _.isArray(data.services) && !_.isEmpty(data.services)
+                    ? _.compact(
+                        _.map(data.services, function (service) {
+                          return _.isPlainObject(service)
+                            ? service.uid || null
+                            : service || null;
+                        })
+                      )
+                    : []
+                "
+              >
+                <v-btn> Modify Room Services </v-btn>
+              </services-dialog>
             </v-col>
           </v-row>
         </v-container>

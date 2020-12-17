@@ -15,4 +15,8 @@ class Property extends Model
     {
         return $this->hasMany('App\Maintenance');
     }
+    public function rooms()
+    {
+        return $this->belongsToMany('App\Room','rooms_properties','property_id', 'room_id')->withPivot('remark','status','qty','created_at','updated_at');
+    }
 }

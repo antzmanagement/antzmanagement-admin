@@ -5,6 +5,7 @@ namespace App\Traits;
 //Functionality Services
 use App\Traits\GlobalFunctions;
 use App\Traits\NotificationFunctions;
+use App\Traits\ImageHostingServices;
 
 //Model Services
 use App\Traits\ContractServices;
@@ -29,6 +30,7 @@ trait AllServices {
     use 
     GlobalFunctions,
     NotificationFunctions, 
+    ImageHostingServices,
 
     ContractServices,
     MaintenanceServices,

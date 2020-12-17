@@ -105,13 +105,25 @@ export default {
           ></v-divider>
           <v-container>
             <v-row justify="start" align="center" class="pa-2">
-              <v-col cols="12">
+              <v-col cols="6">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Name</label>
                   <div class="form-control-plaintext">
                     <v-chip class="ma-2">
                       <h4 class="text-center ma-2">
                         {{ data.name | capitalizeFirstLetter }}
+                      </h4>
+                    </v-chip>
+                  </div>
+                </div>
+              </v-col>  
+              <v-col cols="6">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Price</label>
+                  <div class="form-control-plaintext">
+                    <v-chip class="ma-2">
+                      <h4 class="text-center ma-2">
+                        RM {{ data.price | toDouble }}
                       </h4>
                     </v-chip>
                   </div>

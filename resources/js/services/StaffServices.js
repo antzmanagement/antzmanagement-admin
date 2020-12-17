@@ -7,7 +7,7 @@ const StaffServices = {
     PassportServices.AuthenticationServices.setHeader();
 
     const clonedata = Object.assign({}, data);
-    
+
     return Vue.axios.get('/api/staff', {
       params: clonedata
     })
@@ -17,7 +17,7 @@ const StaffServices = {
     PassportServices.AuthenticationServices.setHeader();
 
     const clonedata = Object.assign({}, data);
-    
+
     return Vue.axios.get('/api/filter/staff', {
       params: clonedata
     })
@@ -34,23 +34,35 @@ const StaffServices = {
     PassportServices.AuthenticationServices.setHeader();
     //The data is pass by reference, any modified data will reflected to front end view.
     //In practice way, we must clone it to prevent any error that caused by manipulation stage.
-    const clonedata = Object.assign({}, data);
-    
-    return Vue.axios.post('/api/staff', clonedata)
+    const config = {
+      headers: { 'content-type': 'multipart/form-data' }
+    }
+    console.log(data);
+    return Vue.axios.post('/api/staff', data, config)
   },
 
   update(data) {
     PassportServices.AuthenticationServices.setHeader();
-    const clonedata = Object.assign({}, data);
-    
-    return Vue.axios.put('/api/staff/' + clonedata.uid, clonedata);
+    const config = {
+      headers: { 'content-type': 'multipart/form-data' }
+    }
+    let formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("icno", data.icno);
+    formData.append("tel1", data.tel1);
+    formData.append("email", data.email);
+    formData.append("role_id", data.role_id);
+    formData.append("img", data.img);
+    formData.append("_method", 'put');
+    console.log(formData);
+    return Vue.axios.post('/api/staff/' + data.uid, formData);
   },
 
 
   delete(data) {
     PassportServices.AuthenticationServices.setHeader();
     const clonedata = Object.assign({}, data);
-    
+
     return Vue.axios.delete('/api/staff/' + data.uid);
   }
 };

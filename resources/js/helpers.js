@@ -3,7 +3,7 @@ import moment from "moment"; //Import Moment
 
 const helpers = {
     toDouble(data) {
-        var double = parseFloat(data).toFixed(2);
+        var double = parseFloat(parseFloat(data).toFixed(2));
         if (double == "NaN") {
             double = 0;
         }

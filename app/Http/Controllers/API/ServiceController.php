@@ -68,6 +68,7 @@ class ServiceController extends Controller
         // api/service (POST)
         $this->validate($request, [
             'name' => 'required|string|max:300',
+            'price' => 'required|max:300',
             'text' => 'nullable|string|max:300',
             'desc' => 'nullable|string|max:2500',
             'icon' => 'nullable|string|max:300',
@@ -79,6 +80,7 @@ class ServiceController extends Controller
             'text' => $request->text,
             'desc' => $request->desc,
             'icon' => $request->icon,
+            'price' => $request->price,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
@@ -105,6 +107,7 @@ class ServiceController extends Controller
 
         $this->validate($request, [
             'name' => 'required|string|max:300',
+            'price' => 'required|max:300',
             'text' => 'nullable|string|max:300',
             'desc' => 'nullable|string|max:2500',
             'icon' => 'nullable|string|max:300',
@@ -114,6 +117,7 @@ class ServiceController extends Controller
             'text' => $request->text,
             'desc' => $request->desc,
             'icon' => $request->icon,
+            'price' => $request->price,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

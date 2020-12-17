@@ -22,8 +22,18 @@ class CreateRoomsTable extends Migration
             $table->string('state')->nullable();
             $table->string('city')->nullable();
             $table->string('country')->nullable();
+            $table->string('floor')->nullable();
+            $table->string('jalan')->nullable();
+            $table->string('unit')->nullable();
+            $table->string('block')->nullable();
+            $table->string('room_status')->default('empty');
             $table->decimal('price',8,2)->default(0.00);
+            $table->decimal('size',8,2)->default(0.00);
+            $table->boolean('sublet')->default(0);
+            $table->decimal('sublet_claim',8,2)->default(0.00);
+            $table->decimal('owner_claim',8,2)->default(0.00);
             $table->boolean('status')->default(1);
+            $table->longText('remark')->nullable();
             $table->timestamps();
         });
     }

@@ -9,6 +9,7 @@ import {
   decimal,
 } from "vuelidate/lib/validators";
 import { mapActions } from "vuex";
+import { notEmptyLength } from "../../../common/common-function";
 export default {
   props: {
     editMode: {
@@ -44,6 +45,9 @@ export default {
     return {
       dialog: false,
       roomTypes: [],
+      owners: [],
+      properties: [],
+      roomStatusOptions: ["empty", "maintaining", "occupied"],
       data: new Form({
         name: "",
         price: "",
@@ -52,7 +56,19 @@ export default {
         state: "",
         city: "",
         country: "",
-        roomType: [],
+        jalan: "",
+        block: "",
+        floor: "",
+        unit: "",
+        size: 0,
+        remark: "",
+        sublet: false,
+        sublet_claim: 0,
+        owner_claim: 0,
+        roomType: "",
+        owner: "",
+        room_status: "empty",
+        properties: [],
       }),
       roomFormDialogConfig: {
         dialogStyle: {
@@ -189,42 +205,96 @@ export default {
   },
   mounted() {
     this.showLoadingAction();
-    this.getRoomTypesAction({ pageNumber: -1, pageSize: -1 })
-      .then((data) => {
-        this.roomTypes = data.data;
+
+    let promises = [];
+
+    promises.push(this.getRoomTypesAction({ pageNumber: -1, pageSize: -1 }));
+    promises.push(this.getRoomAction({ uid: this.uid }));
+    promises.push(this.getOwnersAction({ pageNumber: -1, pageSize: -1 }));
+    promises.push(this.getPropertiesAction({ pageNumber: -1, pageSize: -1 }));
+
+    Promise.all(promises)
+      .then(([roomTypesRes, roomRes, ownersRes, propertyRes]) => {
+        //room types
+        this.roomTypes =
+          _.isArray(_.get(roomTypesRes, ["data"])) &&
+          !_.isEmpty(_.get(roomTypesRes, ["data"]))
+            ? roomTypesRes.data
+            : [];
+
+        //Property
+        this.properties =
+          _.isArray(_.get(propertyRes, ["data"])) &&
+          !_.isEmpty(_.get(propertyRes, ["data"]))
+            ? propertyRes.data
+            : [];
+
+        //owners
+        this.owners =
+          _.isArray(_.get(ownersRes, ["data"])) &&
+          !_.isEmpty(_.get(ownersRes, ["data"]))
+            ? ownersRes.data
+            : [];
+
+        //room
         if (this.editMode) {
-          this.getRoomAction({ uid: this.uid })
-            .then((data) => {
-              var ids = data.data.room_types.map(function (roomType) {
-                return roomType.id;
-              });
-              //Should assign data first before creating form because the form will reset after triggered
-              //Create the form before assigning the data, the form will not keep track the original/default value of data
-              Object.assign(data.data, { roomTypes: ids });
-              this.data = new Form(data.data);
-              this.endLoadingAction();
-            })
-            .catch((error) => {
-              Toast.fire({
-                icon: "warning",
-                title: "Something went wrong... ",
-              });
-              this.endLoadingAction();
-            });
-        } else {
-          this.endLoadingAction();
+          var roomTypeIds = (_.get(roomRes, ["data", "room_types"]) || []).map(
+            function (roomType) {
+              return roomType.id;
+            }
+          );
+
+          roomTypeIds =
+            _.isArray(roomTypeIds) && !_.isEmpty(roomTypeIds)
+              ? roomTypeIds[0]
+              : [];
+
+          var ownerIds = (_.get(roomRes, ["data", "owners"]) || []).map(
+            function (item) {
+              return item.id;
+            }
+          );
+
+          ownerIds =
+            _.isArray(ownerIds) && !_.isEmpty(ownerIds) ? ownerIds[0] : "";
+
+          var propertyIds = (_.get(roomRes, ["data", "properties"]) || []).map(
+            function (item) {
+              return item.id;
+            }
+          );
+
+          propertyIds =
+            _.isArray(propertyIds) && !_.isEmpty(propertyIds)
+              ? propertyIds
+              : [];
+
+          roomRes.data = {
+            ...roomRes.data,
+            roomType: roomTypeIds,
+            owner: ownerIds,
+            properties: propertyIds,
+          };
+          this.data = new Form({
+            ...(_.get(roomRes, ["data"]) || {}),
+          });
         }
+
+        this.endLoadingAction();
       })
-      .catch((error) => {
+      .catch((err) => {
+        console.log(err);
         Toast.fire({
           icon: "warning",
-          title: "Something went wrong... ",
+          title: "Something went wrong...",
         });
         this.endLoadingAction();
       });
   },
   methods: {
     ...mapActions({
+      getOwnersAction: "getOwners",
+      getPropertiesAction: "getProperties",
       getRoomTypesAction: "getRoomTypes",
       getRoomAction: "getRoom",
       createRoomAction: "createRoom",
@@ -242,6 +312,8 @@ export default {
           title: "Please make sure all the data is valid. ",
         });
       } else {
+        console.log("creating");
+        console.log(this.data);
         this.$Progress.start();
         this.showLoadingAction();
         this.createRoomAction(this.data)
@@ -269,6 +341,8 @@ export default {
     updateRoom() {
       this.$v.$touch(); //it will validate all fields
 
+      console.log("updating");
+      console.log(this.data);
       if (this.$v.$invalid) {
         Toast.fire({
           icon: "warning",
@@ -306,12 +380,26 @@ export default {
       var roomType;
       var id = this.data.roomType;
 
-      roomType = this.roomTypes.find(function (roomType) {
-        return roomType.id == id;
-      });
-      this.data.price = this.helpers.toDouble(
-        roomType ? (roomType.price ? roomType.price : 0) : 0
-      );
+      if (id) {
+        roomType = this.roomTypes.find(function (roomType) {
+          return roomType.id == id;
+        });
+        this.data.price = this.helpers.toDouble(
+          roomType ? (roomType.price ? roomType.price : 0) : 0
+        );
+      }
+
+      if (!_.isNaN(parseFloat(this.data.price))) {
+        if (!this.data.sublet) {
+          this.data.owner_claim = parseFloat(
+            (parseFloat(this.data.price) * 0.9).toFixed(2)
+          );
+        }
+      } else {
+        if (!this.data.sublet) {
+          this.data.owner_claim = 0;
+        }
+      }
     },
   },
 };
@@ -371,6 +459,47 @@ export default {
                 chips
                 deletable-chips
                 @change="updateFormDetails()"
+              >
+                <!-- <template v-slot:append>
+                  <room-type-form
+                    :editMode="false"
+                    :dialogStyle="roomFormDialogConfig.dialogStyle"
+                    :buttonStyle="roomFormDialogConfig.buttonStyle"
+                    @created="appendRoomTypeList($event)"
+                  ></room-type-form>
+                </template>-->
+              </v-autocomplete>
+            </v-col>
+            <v-col cols="12">
+              <v-autocomplete
+                v-model="data.owner"
+                :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
+                item-value="id"
+                :items="owners"
+                label="Owner"
+                chips
+                deletable-chips
+              >
+                <!-- <template v-slot:append>
+                  <room-type-form
+                    :editMode="false"
+                    :dialogStyle="roomFormDialogConfig.dialogStyle"
+                    :buttonStyle="roomFormDialogConfig.buttonStyle"
+                    @created="appendRoomTypeList($event)"
+                  ></room-type-form>
+                </template>-->
+              </v-autocomplete>
+            </v-col>
+            <v-col cols="12">
+              <v-autocomplete
+                v-model="data.properties"
+                :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
+                item-value="id"
+                :items="properties"
+                label="Property"
+                chips
+                multiple
+                deletable-chips
               >
                 <!-- <template v-slot:append>
                   <room-type-form
@@ -459,6 +588,78 @@ export default {
                 @blur="$v.data.country.$touch()"
                 :error-messages="countryErrors"
               ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="Jalan"
+                required
+                :maxlength="300"
+                v-model="data.jalan"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="Block"
+                required
+                :maxlength="300"
+                v-model="data.block"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="Floor"
+                required
+                :maxlength="300"
+                v-model="data.floor"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="Area Size"
+                required
+                type="number"
+                step="0.01"
+                :maxlength="300"
+                v-model="data.size"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-select
+                :items="roomStatusOptions"
+                v-model="data.room_status"
+                label="Room Status"
+              ></v-select>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-switch v-model="data.sublet" :label="`Is Sublet`"></v-switch>
+            </v-col>
+            <v-col cols="12" md="6" v-if="data.sublet == true">
+              <v-text-field
+                label="Sublet Claim"
+                required
+                type="number"
+                step="0.01"
+                :maxlength="300"
+                v-model="data.sublet_claim"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6" v-else>
+              <v-text-field
+                label="Owner Claim"
+                required
+                type="number"
+                step="0.01"
+                :maxlength="300"
+                v-model="data.owner_claim"
+              ></v-text-field>
+              <span>(By default based on 10% of rental)</span>
+            </v-col>
+            <v-col cols="12">
+              <v-textarea
+                name="input-7-1"
+                label="Remark"
+                v-model="data.remark"
+              ></v-textarea>
             </v-col>
           </v-row>
         </v-container>

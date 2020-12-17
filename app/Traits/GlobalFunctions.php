@@ -279,7 +279,7 @@ trait GlobalFunctions
         $data = (object) $data;
         foreach ($properties as $property) {
             if (!isset($data->{$property})) {
-                $data->{$property} = null;
+                $data->{$property} = '';
             }
         }
         return $data;

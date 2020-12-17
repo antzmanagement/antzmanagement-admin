@@ -99,12 +99,6 @@ export default {
         },
       },
       servicesDialogConfig: {
-        buttonStyle: {
-          class: "ma-1",
-          text: "",
-          icon: "mdi-filter-menu",
-          isIcon: true,
-        },
         dialogStyle: {
           persistent: true,
           maxWidth: "1200px",
@@ -684,7 +678,6 @@ export default {
                         <td>
                           <services-dialog
                             :dialogStyle="servicesDialogConfig.dialogStyle"
-                            :buttonStyle="servicesDialogConfig.buttonStyle"
                             :services="
                               pluckUid(
                                 !isEmpty(data.room.services)

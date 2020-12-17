@@ -7,6 +7,7 @@ use App\ServiceType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use App\Traits\AllServices;
+use Illuminate\Support\Str;
 
 trait ServiceServices
 {
@@ -71,9 +72,9 @@ trait ServiceServices
         $data = new Service();
         $data->uid = Carbon::now()->timestamp . Service::count();
         $data->name  = $params->name;
-        $data->text = $params->text;
+        $data->text =  Str::ucfirst($params->name);
         $data->desc = $params->desc;
-        $data->icon = $params->icon;
+        $data->price = $this->toDouble($params->price);
 
         if (!$this->saveModel($data)) {
             return null;
@@ -88,9 +89,10 @@ trait ServiceServices
 
         $params = $this->checkUndefinedProperty($params, $this->serviceAllCols());
         $data->name  = $params->name;
-        $data->text = $params->text;
+        $data->text =  Str::ucfirst($params->name);
         $data->desc = $params->desc;
-        $data->icon = $params->icon;
+        $data->price = $this->toDouble($params->price);
+
 
         if (!$this->saveModel($data)) {
             return null;
@@ -101,9 +103,24 @@ trait ServiceServices
 
     private function deleteService($data)
     {
-
-        $data->serviceTypes()->detach();
         $data->status = false;
+        try {
+            $ids = $data->room_types()->wherePivot('status', true)->get();
+            $ids = $ids->pluck('id');
+            $data->room_types()->updateExistingPivot($ids, ['status' => false]);
+
+            $ids = $data->room_contracts_with_orig()->wherePivot('status', true)->get();
+            $ids = $ids->pluck('id');
+            $data->room_contracts_with_orig()->updateExistingPivot($ids, ['status' => false]);
+
+            $ids = $data->room_contracts_with_add_on()->wherePivot('status', true)->get();
+            $ids = $ids->pluck('id');
+            $data->room_contracts_with_add_on()->updateExistingPivot($ids, ['status' => false]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->errorResponse();
+        }
+
         if ($this->saveModel($data)) {
             return $data->refresh();
         } else {
@@ -127,7 +144,7 @@ trait ServiceServices
 
         return [
             'id', 'channel_id', 'playlist_id', 'uid',
-            'title', 'desc', 'servicepath', 'servicepublicid', 'imgpublicid', 'imgpath', 'totallength', 'view',
+            'title', 'desc', 'icon', 'servicepublicid', 'imgpublicid', 'imgpath', 'totallength', 'view',
             'like', 'dislike', 'price', 'discpctg', 'disc', 'discbyprice', 'free', 'salesqty', 'scope',
             'agerestrict', 'status'
         ];

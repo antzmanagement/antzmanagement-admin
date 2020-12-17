@@ -186,6 +186,7 @@ class StaffController extends Controller
     public function store(Request $request)
     {
         DB::beginTransaction();
+        $proccessingimgids = collect();
         // Can only be used by Authorized personnel
         // api/staff (POST)
         $this->validate($request, [
@@ -221,6 +222,26 @@ class StaffController extends Controller
             DB::rollBack();
             return $this->errorResponse();
         }
+
+        //Uploading image
+        if($request->file('img') != null){
+            $img = $this->uploadImage($request->file('img') , "/Staff/". $staff->uid);
+            if(!$this->isEmpty($img)){
+                $staff->profile_img = $img->imgurl;
+                $staff->profile_img_publicid = $img->publicid;
+                $proccessingimgids->push($img->publicid);
+                if(!$this->saveModel($staff)){
+                    DB::rollBack();
+                    $this->deleteImages($proccessingimgids);
+                    return $this->errorResponse();
+                }
+            }else{
+                DB::rollBack();
+                $this->deleteImages($proccessingimgids);
+                return $this->errorResponse();
+            }
+        }
+
 
         $userType = UserType::where('name', 'staff')->first();
         if ($this->isEmpty($userType)) {
@@ -328,6 +349,7 @@ class StaffController extends Controller
      */
     public function update(Request $request, $uid)
     {
+        $proccessingimgids = collect();
         DB::beginTransaction();
         // api/staff/{staffid} (PUT)
         error_log($this->controllerName . 'Updating staff of uid: ' . $uid);
@@ -365,6 +387,35 @@ class StaffController extends Controller
             DB::rollBack();
             return $this->errorResponse();
         }
+
+        //Associating Image Relationship
+        if($request->file('img') != null){
+          $img = $this->uploadImage($request->file('img') , "/Staff/". $staff->uid);
+          if(!$this->isEmpty($img)){
+              error_log('inside edi');
+              //Delete Previous Image
+              if($staff->profile_img_publicid){
+                  if(!$this->deleteImage($staff->profile_img_publicid)){
+                      error_log('wrong 7 edi');
+                      DB::rollBack();
+                      return $this->errorResponse();
+                  }
+              }
+
+              $staff->profile_img = $img->imgurl;
+              $staff->profile_img_publicid = $img->publicid;
+              $proccessingimgids->push($img->publicid);
+              if(!$this->saveModel($staff)){
+                  DB::rollBack();
+                  $this->deleteImages($proccessingimgids);
+                  return $this->errorResponse();
+              }
+          }else{
+              DB::rollBack();
+              $this->deleteImages($proccessingimgids);
+              return $this->errorResponse();
+          }
+      }
 
         DB::commit();
         return $this->successResponse('Staff', $staff, 'update');

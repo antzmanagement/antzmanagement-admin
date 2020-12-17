@@ -1,7 +1,7 @@
 
 <script>
 import { mapActions } from "vuex";
-import { notEmptyLength } from '../../../common/common-function';
+import { notEmptyLength, _ } from "../../../common/common-function";
 export default {
   data() {
     return {
@@ -105,7 +105,7 @@ export default {
     getRoomTypes() {
       this.loading = true;
       const { sortBy, sortDesc, page, itemsPerPage } = this.options;
-
+      _.isEmpty({});
       var totalResult = itemsPerPage;
       //Show All Items
       if (totalResult == -1) {
@@ -148,9 +148,10 @@ export default {
           <v-col cols="12">
             <room-type-form
               :editMode="false"
-              :buttonStyle="roomTypeFormDialogConfig.buttonStyle"
               @created="showRoomType($event)"
-            ></room-type-form>
+            >
+            <v-btn block color="primary" class="ma-2" ><v-icon left>mdi-plus</v-icon> Add Room Type</v-btn>
+            </room-type-form>
           </v-col>
         </v-row>
 
@@ -159,21 +160,15 @@ export default {
             <v-card raised>
               <v-card-subtitle v-show="!keywordEmpty">
                 Keyword :
-                <v-chip class="mx-2">{{
-                  roomTypeFilterGroup.keyword
-                }}</v-chip>
+                <v-chip class="mx-2">{{ roomTypeFilterGroup.keyword }}</v-chip>
               </v-card-subtitle>
               <v-card-subtitle v-show="!fromdateEmpty">
                 From Date :
-                <v-chip class="mx-2">{{
-                  roomTypeFilterGroup.keyword
-                }}</v-chip>
+                <v-chip class="mx-2">{{ roomTypeFilterGroup.keyword }}</v-chip>
               </v-card-subtitle>
               <v-card-subtitle v-show="!todateEmpty">
                 To Date :
-                <v-chip class="mx-2">{{
-                  roomTypeFilterGroup.todate
-                }}</v-chip>
+                <v-chip class="mx-2">{{ roomTypeFilterGroup.todate }}</v-chip>
               </v-card-subtitle>
             </v-card>
           </v-col>

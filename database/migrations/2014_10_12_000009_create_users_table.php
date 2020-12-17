@@ -28,6 +28,8 @@ class CreateUsersTable extends Migration
             $table->string('emergency_name')->nullable();
             $table->string('emergency_contact')->nullable();
             $table->string('emergency_relationship')->nullable();
+            $table->string('profile_img')->nullable();
+            $table->string('profile_img_publicid')->nullable();
             $table->string('password');
             $table->boolean('status')->default(1);
             $table->dateTime('last_login')->nullable();

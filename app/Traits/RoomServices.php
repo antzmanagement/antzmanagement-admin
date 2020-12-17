@@ -81,6 +81,14 @@ trait RoomServices
             // Query the name field in status table
             $q->with('services');
             $q->wherePivot('status', true);
+        }, 'properties' => function ($q) {
+            // Query the name field in status table
+            $q->wherePivot('status', true);
+        }, 'owners' => function ($q) {
+            // Query the name field in status table
+            $q->wherePivot('status', true);
+        }, 'roomcontracts' => function ($q) {
+            // Query the name field in status table
         }])->where('status', true)->first();
         return $data;
     }
@@ -95,6 +103,14 @@ trait RoomServices
             // Query the name field in status table
             $q->with('services');
             $q->wherePivot('status', true);
+        }, 'properties' => function ($q) {
+            // Query the name field in status table
+            $q->wherePivot('status', true);
+        }, 'owners' => function ($q) {
+            // Query the name field in status table
+            $q->wherePivot('status', true);
+        }, 'roomcontracts' => function ($q) {
+            // Query the name field in status table
         }])->where('status', true)->first();
         return $data;
     }
@@ -103,7 +119,6 @@ trait RoomServices
     {
 
         $params = $this->checkUndefinedProperty($params, $this->roomAllCols());
-
         $data = new Room();
         $data->uid = Carbon::now()->timestamp . Room::count();
         $data->name  = $params->name;
@@ -113,6 +128,16 @@ trait RoomServices
         $data->city = $params->city;
         $data->country =  $params->country;
         $data->price = $this->toDouble($params->price);
+        $data->jalan =  $params->jalan;
+        $data->block =  $params->block;
+        $data->floor =  $params->floor;
+        $data->unit =  $params->unit;
+        $data->size =  $this->toDouble($params->size);
+        $data->remark =  $params->remark;
+        $data->sublet =  $params->sublet;
+        $data->sublet_claim = $this->toDouble($params->sublet_claim);
+        $data->owner_claim = $this->toDouble($params->owner_claim);
+        $data->room_status =  $params->room_status;
 
         if (!$this->saveModel($data)) {
             return null;
@@ -133,6 +158,16 @@ trait RoomServices
         $data->city = $params->city;
         $data->country =  $params->country;
         $data->price = $this->toDouble($params->price);
+        $data->jalan =  $params->jalan;
+        $data->block =  $params->block;
+        $data->floor =  $params->floor;
+        $data->unit =  $params->unit;
+        $data->size =  $this->toDouble($params->size);
+        $data->remark =  $params->remark;
+        $data->sublet =  $params->sublet;
+        $data->sublet_claim = $this->toDouble($params->sublet_claim);
+        $data->owner_claim = $this->toDouble($params->owner_claim);
+        $data->room_status =  $params->room_status;
 
         if (!$this->saveModel($data)) {
             return null;
@@ -144,13 +179,32 @@ trait RoomServices
     private function deleteRoom($data)
     {
 
-        $data->roomTypes()->detach();
         $data->status = false;
-        if ($this->saveModel($data)) {
-            return $data->refresh();
-        } else {
+        try {
+            $data->roomTypes()->sync([]);
+            $data->tenants()->sync([]);
+            $data->owners()->sync([]);
+            $data->properties()->sync([]);
+
+            $maintenances = $data->maintenances()->where('status', true)->get();
+            foreach ($maintenances as $maintenance) {
+                $this->deleteMaintenance($maintenance);
+            }
+
+            $roomcontracts = $data->roomcontracts()->where('status', true)->get();
+            foreach ($roomcontracts as $roomcontract) {
+                $this->deleteMaintenance($maintenance);
+            }
+
+        } catch (Exception $e) {
+            DB::rollBack();
+            return $this->errorResponse();
+        }
+
+        if (!$this->saveModel($data)) {
             return null;
         }
+
 
         return $data->refresh();
     }

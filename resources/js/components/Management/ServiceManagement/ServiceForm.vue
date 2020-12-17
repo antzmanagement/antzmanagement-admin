@@ -28,6 +28,7 @@ export default {
       data: new Form({
         name: "",
         desc: "",
+        price: 0,
       }),
     };
   },
@@ -36,6 +37,7 @@ export default {
     return {
       data: {
         name: { required, maxLength: maxLength(300) },
+        price: { required, maxLength: maxLength(300) },
         desc: { maxLength: maxLength(2500) },
       },
     };
@@ -58,6 +60,22 @@ export default {
 
       if (!this.$v.data.name.maxLength) {
         errors.push("Name should be less than 300 characters");
+        return errors;
+      }
+    },
+    priceErrors() {
+      const errors = [];
+      if (!this.$v.data.price.$dirty) {
+        return errors;
+      }
+
+      if (!this.$v.data.price.required) {
+        errors.push("Price is required");
+        return errors;
+      }
+
+      if (!this.$v.data.price.maxLength) {
+        errors.push("Price should be less than 300 characters");
         return errors;
       }
     },
@@ -210,6 +228,19 @@ export default {
               @input="$v.data.name.$touch()"
               @blur="$v.data.name.$touch()"
               :error-messages="nameErrors"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" md="6">
+            <v-text-field
+              label="Price"
+              required
+              type="number"
+              step="0.01"
+              :maxlength="300"
+              v-model="data.price"
+              @input="$v.data.price.$touch()"
+              @blur="$v.data.price.$touch()"
+              :error-messages="priceErrors"
             ></v-text-field>
           </v-col>
           <v-col cols="12" md="12">

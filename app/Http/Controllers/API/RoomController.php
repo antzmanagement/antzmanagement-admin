@@ -8,6 +8,7 @@ use DB;
 use Carbon\Carbon;
 use App\Room;
 use App\RoomType;
+use App\User;
 use Illuminate\Support\Facades\Hash;
 use App\Traits\AllServices;
 
@@ -79,6 +80,9 @@ class RoomController extends Controller
             'country' => 'nullable|string|max:300',
             'price' => 'required|numeric',
             'roomType' => 'required',
+            'properties' => 'array',
+            'sublet' => 'required|boolean',
+            'room_status' => 'required|string',
         ]);
         error_log($this->controllerName . 'Creating room.');
         $params = collect([
@@ -89,6 +93,19 @@ class RoomController extends Controller
             'city' => $request->city,
             'country' => $request->country,
             'price' => $request->price,
+            'jalan' =>  $request->jalan,
+            'block' =>  $request->block,
+            'floor' =>  $request->floor,
+            'unit' => $request->unit,
+            'size' => $request->size,
+            'remark' => $request->remark,
+            'sublet' => $request->sublet,
+            'sublet_claim' => $request->sublet_claim,
+            'owner_claim' => $request->owner_claim,
+            'roomType' => $request->roomType,
+            'owner' => $request->owner,
+            'room_status' => $request->room_status,
+            'properties' => $request->properties,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
@@ -104,17 +121,38 @@ class RoomController extends Controller
             DB::rollBack();
             return $this->notFoundResponse('RoomType');
         }
-
-        error_log($roomType);
-        error_log($request->roomType);
-        error_log($roomType->pluck('id'));
-
         try {
             $room->roomTypes()->sync($roomType->id);
         } catch (Exception $e) {
             DB::rollBack();
             return $this->errorResponse();
         }
+
+        if($request->owner){
+            $owner = User::find($request->owner);
+            if ($this->isEmpty($owner)) {
+                DB::rollBack();
+                return $this->notFoundResponse('Owner');
+            }
+            try {
+                $room->owners()->syncWithoutDetaching([$owner->id  => ['status' => true]]);
+            } catch (Exception $e) {
+                DB::rollBack();
+                return $this->errorResponse();
+            }
+    
+        }
+
+        if($request->properties){
+            $properties = collect(json_decode(json_encode($request->properties)));
+            foreach ($properties as $property) {
+                $property = $this->getPropertyById($property);
+                if (!$this->isEmpty($property)) {
+                    $room->properties()->syncWithoutDetaching([$property->id => ['status' => true]]);
+                }
+            }
+        }
+        
 
         DB::commit();
         return $this->successResponse('Room', $room, 'create');
@@ -135,6 +173,9 @@ class RoomController extends Controller
             'country' => 'nullable|string|max:300',
             'price' => 'required|numeric',
             'roomType' => 'required',
+            'properties' => 'array',
+            'sublet' => 'required|boolean',
+            'room_status' => 'required|string',
         ]);
         if ($this->isEmpty($room)) {
             DB::rollBack();
@@ -148,6 +189,19 @@ class RoomController extends Controller
             'city' => $request->city,
             'country' => $request->country,
             'price' => $request->price,
+            'jalan' =>  $request->jalan,
+            'block' =>  $request->block,
+            'floor' =>  $request->floor,
+            'unit' => $request->unit,
+            'size' => $request->size,
+            'remark' => $request->remark,
+            'sublet' => $request->sublet,
+            'sublet_claim' => $request->sublet_claim,
+            'owner_claim' => $request->owner_claim,
+            'roomType' => $request->roomType,
+            'owner' => $request->owner,
+            'room_status' => $request->room_status,
+            'properties' => $request->properties,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
@@ -163,13 +217,45 @@ class RoomController extends Controller
             DB::rollBack();
             return $this->notFoundResponse('RoomType');
         }
-
         try {
-            $room->roomTypes()->sync($roomType->pluck('id'));
+            $room->roomTypes()->sync([$roomType->id  => ['status' => true]]);
         } catch (Exception $e) {
             DB::rollBack();
             return $this->errorResponse();
         }
+
+        if($request->owner){
+            $owner = User::find($request->owner);
+            if ($this->isEmpty($owner)) {
+                DB::rollBack();
+                return $this->notFoundResponse('Owner');
+            }
+            try {
+                $room->owners()->sync([$owner->id  => ['status' => true]]);
+            } catch (Exception $e) {
+                DB::rollBack();
+                return $this->errorResponse();
+            }
+        }else{
+            $room->owners()->sync([]);
+        }
+
+        if($request->properties){
+            $properties = collect(json_decode(json_encode($request->properties)));
+            $syncArray = collect();
+            foreach ($properties as $property) {
+                $property = $this->getPropertyById($property);
+                if (!$this->isEmpty($property)) {
+                    $syncArray->push($property->id);
+                }
+            }
+            $room->properties()->sync($syncArray);
+        }else{
+            $room->properties()->sync([]);
+        }
+        
+
+
         DB::commit();
         return $this->successResponse('Room', $room, 'update');
     }

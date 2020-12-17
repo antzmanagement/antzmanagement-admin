@@ -9,6 +9,7 @@ import {
   decimal,
 } from "vuelidate/lib/validators";
 import { mapActions } from "vuex";
+import { notEmptyLength, _ } from "../../../common/common-function";
 export default {
   props: {
     editMode: {
@@ -68,6 +69,13 @@ export default {
         });
       }
     },
+    services: function (val) {
+      if (_.isArray(val) && notEmptyLength(val)) {
+        this.data.services = val;
+      } else {
+        this.data.services = [];
+      }
+    },
   },
   mounted() {
     this.showLoadingAction();
@@ -86,6 +94,10 @@ export default {
 
     this.data.services = this.services;
     this.fixedServices = this.origServices;
+  },
+  updated(){
+    console.log('data');
+    console.log(this.data.services);
   },
   methods: {
     ...mapActions({
@@ -111,6 +123,12 @@ export default {
 };
 </script>
 
+
+
+
+
+
+
 <template>
   <v-dialog
     v-model="dialog"
@@ -121,18 +139,13 @@ export default {
     transition="dialog-bottom-transition"
   >
     <template v-slot:activator="{ on }">
-      <v-btn
-        :class="buttonStyle.class"
-        tile
-        :color="buttonStyle.color"
-        :block="buttonStyle.block"
-        :icon="buttonStyle.isIcon"
-        v-on="on"
-        :disabled="isLoading"
-      >
-        <v-icon left>{{ buttonStyle.icon }}</v-icon>
-        {{ buttonStyle.text }}
-      </v-btn>
+      <span class="d-inline-block" v-on="on">
+        <slot>
+          <v-btn tile isIcon :disabled="isLoading">
+            <v-icon>mdi-filter-menu</v-icon>
+          </v-btn>
+        </slot>
+      </span>
     </template>
     <v-card>
       <v-toolbar dark color="primary">
