@@ -104,6 +104,17 @@ trait UserServices
         $data->emergency_name = $params->emergency_name;
         $data->emergency_contact = $params->emergency_contact;
         $data->emergency_relationship = $params->emergency_relationship;
+        $data->age = $this->toInt($params->age);
+        $data->birthday = $this->toDate($params->birthday);
+        $data->gender = $params->gender;
+        $data->religion = $params->religion;
+        $data->approach_method = $params->approach_method;
+        $data->occupation = $params->occupation;
+        $data->address = $params->address;
+        $data->postcode = $params->postcode;
+        $data->address = $params->address;
+        $data->state = $params->state;
+        $data->city = $params->city;
 
         $data->password = Hash::make($params->password);
 
@@ -136,6 +147,17 @@ trait UserServices
         $data->emergency_name = $params->emergency_name;
         $data->emergency_contact = $params->emergency_contact;
         $data->emergency_relationship = $params->emergency_relationship;
+        $data->age = $this->toInt($params->age);
+        $data->birthday = $this->toDate($params->birthday);
+        $data->gender = $params->gender;
+        $data->religion = $params->religion;
+        $data->approach_method = $params->approach_method;
+        $data->occupation = $params->occupation;
+        $data->address = $params->address;
+        $data->postcode = $params->postcode;
+        $data->address = $params->address;
+        $data->state = $params->state;
+        $data->city = $params->city;
 
         $role = $this->getRoleById($params->role_id);
         if ($this->isEmpty($role)) {

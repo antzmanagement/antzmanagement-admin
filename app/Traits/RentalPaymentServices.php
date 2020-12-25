@@ -139,6 +139,8 @@ trait RentalPaymentServices
         $data->price = $this->toDouble($params->price);
         $data->payment = $this->toDouble($params->payment);
         $data->penalty =  $this->toDouble($params->penalty);
+        $data->processing_fees =  $this->toDouble($params->processing_fees);
+        $data->service_fees =  $this->toDouble($params->service_fees);
         $data->outstanding = $this->toDouble($data->price + $data->penalty  - $data->payment);
         $data->paid = $params->paid;
         $data->rentaldate = $this->toDate($params->rentaldate);

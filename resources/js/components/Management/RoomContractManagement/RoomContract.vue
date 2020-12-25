@@ -1,9 +1,14 @@
 
 <script>
 import { mapActions } from "vuex";
+import { _ } from "../../../common/common-function";
+import RoomContractCheckOutForm from "./RoomContractCheckOutForm.vue";
 export default {
+  components: { RoomContractCheckOutForm },
   data: () => ({
+    _: _,
     editMode: false,
+    checkoutDialog: false,
     paymentDialog: false,
     selectedPayment: {
       uid: "",
@@ -26,6 +31,8 @@ export default {
       },
       { text: "Price", value: "price" },
       { text: "Penalty", value: "penalty" },
+      { text: "Processing Fees", value: "processing_fees" },
+      { text: "Service Fees", value: "service_fees" },
       {
         text: "Paid",
         value: "paid",
@@ -111,13 +118,14 @@ export default {
     openPaymentDialog(uid, mode) {
       this.paymentDialog = true;
       this.editMode = mode;
-      console.log("mode");
-      console.log(this.editMode);
       this.selectedPayment.uid = uid;
     },
 
     showRoom($data) {
       this.$router.push("/room/" + $data.uid);
+    },
+    showRoomContract($data) {
+      this.$router.push("/roomcontract/" + $data.uid);
     },
     showTenant($data) {
       this.$router.push("/tenant/" + $data.uid);
@@ -215,12 +223,15 @@ export default {
     refreshPage() {
       location.reload();
     },
+    checkoutRoomContract(isConfirmed, value) {
+      if (isConfirmed) {
+      }
+    },
     print(data) {
       this.selectedRental = data;
       this.selectedRental.roomcontract = this.data;
       this.selectedRental.roomcontract.tenant = this.data.tenant;
       this.selectedRental.roomcontract.room = this.data.room;
-      console.log(this.selectedRental);
       this.showLoadingAction();
       setTimeout(() => {
         this.endLoadingAction();
@@ -247,11 +258,60 @@ export default {
             :class="helpers.managementStyles().titleClass"
             >RoomContract - {{ data.uid }}</v-card-title
           >
-          <v-divider
-            class="mx-3"
-            :color="helpers.managementStyles().dividerColor"
-          ></v-divider>
           <v-container>
+            <v-divider
+              class="mx-3"
+              :color="helpers.managementStyles().dividerColor"
+              v-if="
+                _.isPlainObject(data.parentroomcontract) &&
+                !_.isEmpty(data.parentroomcontract)
+              "
+            ></v-divider>
+            <v-row
+              justify="start"
+              align="center"
+              class="pa-2"
+              v-if="
+                _.isPlainObject(data.parentroomcontract) &&
+                !_.isEmpty(data.parentroomcontract)
+              "
+            >
+              <v-col cols="12">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Main Room Contract</label>
+                  <div class="form-control-plaintext">
+                    <v-chip
+                      class="ma-2"
+                      @click="showRoomContract(data.parentroomcontract)"
+                    >
+                      <h4 class="text-center ma-2">
+                        {{ data.parentroomcontract.name }}
+                      </h4>
+                    </v-chip>
+                  </div>
+                </div>
+              </v-col>
+            </v-row>
+            <v-divider
+              class="mx-3"
+              :color="helpers.managementStyles().dividerColor"
+            ></v-divider>
+            <v-row justify="start" align="center" class="pa-2">
+              <v-col cols="12">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Name</label>
+                  <div class="form-control-plaintext">
+                    <v-chip class="ma-2">
+                      <h4 class="text-center ma-2">{{ data.name }}</h4>
+                    </v-chip>
+                  </div>
+                </div>
+              </v-col>
+            </v-row>
+            <v-divider
+              class="mx-3"
+              :color="helpers.managementStyles().dividerColor"
+            ></v-divider>
             <v-row justify="start" align="center" class="pa-2">
               <v-col cols="12">
                 <div class="form-group mb-0">
@@ -299,6 +359,39 @@ export default {
             <v-divider
               class="mx-3"
               :color="helpers.managementStyles().dividerColor"
+              v-if="
+                _.isArray(data.childrenroomcontracts) &&
+                !_.isEmpty(data.childrenroomcontracts)
+              "
+            ></v-divider>
+            <v-row
+              justify="start"
+              align="center"
+              class="pa-2"
+              v-if="
+                _.isArray(data.childrenroomcontracts) &&
+                !_.isEmpty(data.childrenroomcontracts)
+              "
+            >
+              <v-col cols="12">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Sub Contracts</label>
+                  <div class="form-control-plaintext">
+                    <v-chip
+                      class="ma-2"
+                      v-for="subcontract in data.childrenroomcontracts"
+                      :key="subcontract.uid"
+                      @click="showRoomContract(subcontract)"
+                    >
+                      <h4 class="text-center ma-2">{{ subcontract.name }}</h4>
+                    </v-chip>
+                  </div>
+                </div>
+              </v-col>
+            </v-row>
+            <v-divider
+              class="mx-3"
+              :color="helpers.managementStyles().dividerColor"
             ></v-divider>
             <v-row justify="start" align="center" class="pa-2">
               <v-col cols="12" md="4">
@@ -311,9 +404,17 @@ export default {
               </v-col>
               <v-col cols="12" md="4">
                 <div class="form-group mb-0">
+                  <label class="form-label mb-0">Contract End Date</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.enddate }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
                   <label class="form-label mb-0">Duration</label>
                   <div class="form-control-plaintext">
-                    <h4>{{ data.duration }} Month</h4>
+                    <h4>{{ data.duration }} {{ data.rental_type }}</h4>
                   </div>
                 </div>
               </v-col>
@@ -321,7 +422,7 @@ export default {
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Left Month</label>
                   <div class="form-control-plaintext">
-                    <h4>{{ data.leftmonth }} month</h4>
+                    <h4>{{ data.left }} {{ data.rental_type }}</h4>
                   </div>
                 </div>
               </v-col>
@@ -343,9 +444,9 @@ export default {
               </v-col>
               <v-col cols="12" md="4">
                 <div class="form-group mb-0">
-                  <label class="form-label mb-0">Outstanding Deposit</label>
+                  <label class="form-label mb-0">Agreement Fees</label>
                   <div class="form-control-plaintext">
-                    <h4>RM {{ data.outstanding_deposit }}</h4>
+                    <h4>RM {{ data.agreement_fees }}</h4>
                   </div>
                 </div>
               </v-col>
@@ -357,16 +458,100 @@ export default {
                   </div>
                 </div>
               </v-col>
-              <v-col cols="12">
+              <!-- <v-col cols="12">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Terms</label>
                   <div class="form-control-plaintext">
                     <h4>{{ data.terms }}</h4>
                   </div>
                 </div>
+              </v-col> -->
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Auto Renew</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.autorenew ? "Yes" : "No" }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Checked Out</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.checkedout ? "Yes" : "No" }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Expired</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.expired ? "Yes" : "No" }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Remark</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.remark }}</h4>
+                  </div>
+                </div>
               </v-col>
             </v-row>
 
+            <v-divider
+              class="mx-3"
+              :color="helpers.managementStyles().dividerColor"
+              v-if="data.checkedout"
+            ></v-divider>
+            <v-row
+              justify="start"
+              align="center"
+              class="pa-2"
+              v-if="data.checkedout"
+            >
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Checkout Date</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.checkout_date }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Checkout Charge</label>
+                  <div class="form-control-plaintext">
+                    <h4>RM {{ data.checkout_charges }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Return Deposit</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.return_deposit }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Commission</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.commission }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Checkout Remark</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.checkout_remark }}</h4>
+                  </div>
+                </div>
+              </v-col>
+            </v-row>
             <v-divider
               class="mx-3"
               :color="helpers.managementStyles().dividerColor"
@@ -421,7 +606,6 @@ export default {
                 </div>
               </v-col>
             </v-row>
-
             <v-divider
               class="mx-3"
               :color="helpers.managementStyles().dividerColor"
@@ -447,6 +631,7 @@ export default {
                         >
                         <v-spacer></v-spacer>
                         <v-btn
+                        v-if="!data.checkedout"
                           color="primary"
                           dark
                           class="mb-2"
@@ -460,6 +645,8 @@ export default {
                         <td>{{ props.item.rentaldate | formatDate }}</td>
                         <td>{{ props.item.price | toDouble }}</td>
                         <td>{{ props.item.penalty | toDouble }}</td>
+                        <td>{{ props.item.processing_fees | toDouble }}</td>
+                        <td>{{ props.item.service_fees | toDouble }}</td>
                         <td v-if="props.item.paid">
                           <v-icon small color="success">mdi-check</v-icon>
                         </td>
@@ -515,7 +702,18 @@ export default {
               :color="helpers.managementStyles().dividerColor"
             ></v-divider>
             <v-row class="pa-2" justify="end" align="center">
-              <v-col cols="auto">
+              <v-col cols="auto" v-if="!data.checkedout">
+                <v-btn
+                  class="m-2"
+                  color="primary"
+                  :disabled="isLoading"
+                  @click="checkoutDialog = true"
+                >
+                  <v-icon left>mdi-exit-run</v-icon>
+                  Checkout
+                </v-btn>
+              </v-col>
+              <v-col cols="auto" v-if="!data.checkedout">
                 <room-contract-form
                   :editMode="true"
                   :buttonStyle="editButtonStyle"
@@ -547,6 +745,20 @@ export default {
             :editMode="this.editMode"
             @makePayment="updateRentalPaymentDetails($event)"
           ></rental-payment-form>
+        </v-dialog>
+
+        <v-dialog
+          persistent
+          :maxWidth="'30%'"
+          :fullscreen="false"
+          hideOverlay
+          v-model="checkoutDialog"
+          transition="dialog-bottom-transition"
+        >
+          <room-contract-check-out-form
+            :uid="data.uid"
+            @close="checkoutDialog = false"
+          ></room-contract-check-out-form>
         </v-dialog>
 
         <div class="d-none" id="printMe">
@@ -754,6 +966,48 @@ export default {
                 :class="helpers.managementStyles().centerWrapperClass"
               >
                 <div :class="helpers.managementStyles().subtitleClass">
+                  Processing Fees
+                </div>
+              </v-col>
+              <v-col
+                cols="1"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
+                <div :class="helpers.managementStyles().subtitleClass">:</div>
+              </v-col>
+              <v-col cols="8">
+                <div :class="helpers.managementStyles().lightSubtitleClass">
+                  RM {{ selectedRental.processing_fees | toDouble }}
+                </div>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col
+                cols="3"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
+                <div :class="helpers.managementStyles().subtitleClass">
+                  Service Fees
+                </div>
+              </v-col>
+              <v-col
+                cols="1"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
+                <div :class="helpers.managementStyles().subtitleClass">:</div>
+              </v-col>
+              <v-col cols="8">
+                <div :class="helpers.managementStyles().lightSubtitleClass">
+                  RM {{ selectedRental.service_fees | toDouble }}
+                </div>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col
+                cols="3"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
+                <div :class="helpers.managementStyles().subtitleClass">
                   Total Paid
                 </div>
               </v-col>
@@ -768,7 +1022,9 @@ export default {
                   RM
                   {{
                     (parseFloat(selectedRental.penalty) +
-                      parseFloat(selectedRental.price))
+                      parseFloat(selectedRental.price)+
+                      parseFloat(selectedRental.processing_fees)+
+                      parseFloat(selectedRental.service_fees))
                       | toDouble
                   }}
                 </div>

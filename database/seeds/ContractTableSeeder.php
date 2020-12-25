@@ -20,37 +20,23 @@ class ContractTableSeeder extends Seeder
         $faker = Faker::create();
         $contract = new Contract();
         $contract->uid = Carbon::now()->timestamp . Contract::count();
-        $contract->name = "1 Year Contract";
+        $contract->name = "T&C Contract";
         $contract->duration = 12;
-        $contract->terms = $faker->paragraph(10);
         $contract->autorenew = true;
+        $contract->rental_type = 'month';
+        $contract->penalty_day = 10;
+        $contract->penalty = 3;
         $contract->save();
 
         $faker = Faker::create();
         $contract = new Contract();
         $contract->uid = Carbon::now()->timestamp . Contract::count();
-        $contract->name = "2 Year Contract";
-        $contract->duration = 24;
-        $contract->terms = $faker->paragraph(10);
-        $contract->autorenew = true;
-        $contract->save();
-        
-        $faker = Faker::create();
-        $contract = new Contract();
-        $contract->uid = Carbon::now()->timestamp . Contract::count();
-        $contract->name = "3 Year Contract";
-        $contract->duration = 36;
-        $contract->terms = $faker->paragraph(10);
-        $contract->autorenew = true;
-        $contract->save();
-        
-        $faker = Faker::create();
-        $contract = new Contract();
-        $contract->uid = Carbon::now()->timestamp . Contract::count();
-        $contract->name = "4 Year Contract";
-        $contract->duration = 48;
-        $contract->terms = $faker->paragraph(10);
-        $contract->autorenew = true;
+        $contract->name = "Homestay";
+        $contract->duration = 1;
+        $contract->autorenew = false;
+        $contract->rental_type = 'day';
+        $contract->penalty_day = 0;
+        $contract->penalty = 0;
         $contract->save();
     }
 }

@@ -21,6 +21,9 @@ class CreateContractsTable extends Migration
             $table->integer('duration')->default(0);
             $table->longText('terms')->nullable();
             $table->boolean('autorenew')->default(true);
+            $table->string('rental_type')->default('month');
+            $table->decimal('penalty')->default(0);
+            $table->integer('penalty_day')->default(0);
             $table->boolean('status')->default(true);
             $table->timestamps();
         });

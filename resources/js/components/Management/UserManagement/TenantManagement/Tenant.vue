@@ -143,6 +143,30 @@ export default {
               </v-col>
               <v-col cols="12" md="4">
                 <div class="form-group mb-0">
+                  <label class="form-label mb-0">Age</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.age }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Birthday</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.birthday | formatDate }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Gender</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.gender }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
                   <label class="form-label mb-0">Phone</label>
                   <div class="form-control-plaintext">
                     <h4>{{ data.tel1 }}</h4>
@@ -154,6 +178,118 @@ export default {
                   <label class="form-label mb-0">Email</label>
                   <div class="form-control-plaintext">
                     <h4>{{ data.email }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Religion</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.religion }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Occupation</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.occupation }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="12">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Address</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.address }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Postcode</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.postcode }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">City</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.city }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">State</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.state }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Mother Name</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.mother_name }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Mother Contact</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.mother_tel }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Father Name</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.father_name }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Father Contact</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.father_tel }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Emergency Contact Person</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.emergency_name }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Emergency Contact</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.emergency_contact }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Emergency Relationship</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.emergency_relationship }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">How you know Us?</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.approach_method }}</h4>
                   </div>
                 </div>
               </v-col>

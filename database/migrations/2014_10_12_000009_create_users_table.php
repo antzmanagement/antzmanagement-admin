@@ -14,6 +14,7 @@ class CreateUsersTable extends Migration
     public function up()
     {
         Schema::create('users', function (Blueprint $table) {
+
             $table->increments('id')->unique();
             $table->unsignedInteger('role_id')->unsigned();
             $table->string('uid')->unique();
@@ -30,8 +31,18 @@ class CreateUsersTable extends Migration
             $table->string('emergency_relationship')->nullable();
             $table->string('profile_img')->nullable();
             $table->string('profile_img_publicid')->nullable();
-            $table->string('password');
+            $table->unsignedInteger('age')->nullable();
+            $table->string('password')->nullable();
+            $table->string('occupation')->nullable();
+            $table->string('gender')->nullable()->default('male');
+            $table->string('religion')->nullable();
+            $table->string('approach_method')->nullable();
+            $table->string('address')->nullable();
+            $table->string('postcode')->nullable();
+            $table->string('state')->nullable();
+            $table->string('city')->nullable();
             $table->boolean('status')->default(1);
+            $table->dateTime('birthday')->nullable();
             $table->dateTime('last_login')->nullable();
             $table->dateTime('last_active')->nullable();
             $table->rememberToken();

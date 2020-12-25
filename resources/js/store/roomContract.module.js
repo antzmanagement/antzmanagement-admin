@@ -34,6 +34,10 @@ export const actions = {
         const { data } = await RoomContractServices.transferRoomContract(payload);
         return data;
     },
+    async checkoutRoomContract(context, payload) {
+        const { data } = await RoomContractServices.checkoutRoomContract(payload);
+        return data;
+    },
 
 };
 

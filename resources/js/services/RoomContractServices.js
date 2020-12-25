@@ -61,6 +61,13 @@ const RoomContractServices = {
     return Vue.axios.post('/api/transfer/roomcontract', clonedata);
   },
 
+  checkoutRoomContract(data) {
+    PassportServices.AuthenticationServices.setHeader();
+    const clonedata = Object.assign({}, data);
+    
+    return Vue.axios.post('/api/checkout/roomcontract', clonedata);
+  },
+
   
 };
 

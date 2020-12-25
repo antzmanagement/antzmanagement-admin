@@ -92,7 +92,15 @@ class RoomContractController extends Controller
             return $this->notFoundResponse('Contract');
         }
 
-        $startdate = Carbon::parse($request->room->contractstartdate)->format('Y-m-d');
+        $startdate = Carbon::parse($request->room->startdate)->format('Y-m-d');
+        $enddate = Carbon::parse($request->room->enddate)->format('Y-m-d');
+
+        $duration = $contract->duration;
+        if($contract->rental_type == 'day'){
+            $duration = Carbon::parse($startdate)->diffInDays(Carbon::parse($enddate)) + 1;
+        }else{
+            $duration = Carbon::parse($startdate)->diffInMonths(Carbon::parse($enddate)) + 1;
+        }
 
         $servicesIds = collect($request->room->services)->pluck('id');
         $origServiceIds = collect($request->room->origServices)->pluck('id');
@@ -103,15 +111,19 @@ class RoomContractController extends Controller
             'contract_id' => $contract->id,
             'orig_service_ids' => $origServiceIds,
             'add_on_service_ids' => $addOnServicesIds,
-            'name' => $room->name . $startdate . $contract->name,
-            'duration' => $contract->duration,
+            'name' => $room->unit . '_' . $startdate. '_' . $contract->name,
+            'duration' => $duration,
+            'penalty' => $contract->penalty,
+            'penalty_day' => $contract->penalty_day,
+            'rental_type' => $contract->rental_type,
             'terms' => $contract->terms,
-            'autorenew' => $contract->autorenew,
+            'autorenew' => $request->room->autorenew,
             'startdate' => $startdate,
+            'enddate' => $enddate,
             'rental' => $request->room->price,
             'deposit' => $request->room->deposit,
+            'agreement_fees' => $request->room->agreement_fees,
             'booking_fees' => $request->room->booking_fees,
-
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
@@ -157,27 +169,19 @@ class RoomContractController extends Controller
             return $this->notFoundResponse('Contract');
         }
 
-      
-        $startdate = Carbon::parse($request->room->contractstartdate)->format('Y-m-d');
-
         $servicesIds = collect($request->room->services)->pluck('id');
         $origServiceIds = collect($request->room->origServices)->pluck('id');
         $addOnServicesIds = $servicesIds->diff($origServiceIds);
         $params = collect([
             'tenant_id' => $tenant->id,
             'room_id' => $room->id,
-            'contract_id' => $contract->id,
             'orig_service_ids' => $origServiceIds,
             'add_on_service_ids' => $addOnServicesIds,
-            'name' => $room->name . $startdate . $contract->name,
-            'duration' => $contract->duration,
-            'terms' => $contract->terms,
-            'autorenew' => $contract->autorenew,
-            'startdate' => $startdate,
+            'autorenew' => $request->room->autorenew,
             'rental' => $request->room->price,
             'deposit' => $request->room->deposit,
+            'agreement_fees' => $request->room->agreement_fees,
             'booking_fees' => $request->room->booking_fees,
-            'outstanding_deposit' => $request->room->outstanding_deposit,
 
         ]);
         //Convert To Json Object
@@ -224,6 +228,43 @@ class RoomContractController extends Controller
         ]);
 
         $roomContract = $this->transferRoomContract($request->room_contract_id, $request->tenant_id);
+        if ($this->isEmpty($roomContract)) {
+            DB::rollBack();
+            return $this->errorResponse();
+        }
+
+        DB::commit();
+        return $this->successResponse('RoomContract', $roomContract, 'update');
+    }
+
+    public function checkout(Request $request)
+    {
+        DB::beginTransaction();
+        // api/roomContract (GET)
+        $this->validate($request, [
+            'checkout_date' => 'required',
+            'return_deposit' => 'required',
+            'checkout_charges' => 'required',
+            'uid' => 'required',
+            'checkout_remark' => 'nullable',
+        ]);
+
+        error_log('uid');
+        error_log($request->uid);
+        $roomContract = $this->getRoomContract($request->uid);
+        if ($this->isEmpty($roomContract)) {
+            DB::rollBack();
+            return $this->notFoundResponse('RoomContract');
+        }
+        $params = collect([
+            'checkout_date' => $request->checkout_date,
+            'return_deposit' => $request->return_deposit,
+            'checkout_charges' => $request->checkout_charges,
+            'checkout_remark' => $request->checkout_remark,
+
+        ]);
+        $params = json_decode(json_encode($params));
+        $roomContract = $this->checkoutRoomContract($roomContract, $params);
         if ($this->isEmpty($roomContract)) {
             DB::rollBack();
             return $this->errorResponse();

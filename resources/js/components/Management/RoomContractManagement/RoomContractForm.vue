@@ -1,6 +1,7 @@
 
 
 <script>
+import moment from "moment";
 import { validationMixin } from "vuelidate";
 import {
   required,
@@ -9,6 +10,7 @@ import {
   decimal,
 } from "vuelidate/lib/validators";
 import { mapActions } from "vuex";
+import { _ } from "../../../common/common-function";
 export default {
   props: {
     editMode: {
@@ -53,6 +55,7 @@ export default {
       tenants: [],
       contracts: [],
       properties: [],
+      isSubContract: false,
       data: new Form({
         tenant: "",
         remark: "",
@@ -188,8 +191,10 @@ export default {
           }
           room.origPrice = parseFloat(room.price);
           room.price = parseFloat(room.price);
-          room.deposit = parseFloat(room.price) * 2.5;
+          room.deposit = 700;
           room.booking_fees = 200;
+          room.agreement_fees = 50;
+          room.autorenew = false;
           return room;
         });
 
@@ -201,6 +206,9 @@ export default {
           this.showLoadingAction();
           this.getRoomContractAction({ uid: this.uid })
             .then((data) => {
+              if(_.isPlainObject(data.data.parentroomcontract) && !_.isEmpty(data.data.parentroomcontract)){
+                this.isSubContract = true;
+              }
               data.data.tenant = data.data.tenant.id;
               data.data.room.origServices = data.data.origservices;
               data.data.room.services = this._.concat(
@@ -208,16 +216,25 @@ export default {
                 data.data.addonservices
               );
               data.data.room.contract_id = data.data.contract.id;
-              data.data.contractstartdate = data.data.startdate;
+              data.data.startdate = data.data.startdate;
+              data.data.enddate = data.data.enddate;
+              data.data.autorenew = data.data.autorenew;
+
               data.data.room.deposit = parseFloat(data.data.deposit);
+              data.data.room.agreement_fees = parseFloat(
+                data.data.agreement_fees
+              );
               data.data.room.booking_fees = parseFloat(data.data.booking_fees);
               data.data.room.outstanding_deposit = parseFloat(
                 data.data.outstanding_deposit
               );
               data.data.room.origPrice = parseFloat(data.data.room.price);
               data.data.room.price = parseFloat(data.data.rental);
-              data.data.room.contractstartdate = data.data.startdate;
+              data.data.room.startdate = data.data.startdate;
+              data.data.room.enddate = data.data.enddate;
+              data.data.room.autorenew = data.data.autorenew;
               this.data = new Form(data.data);
+
               this.endLoadingAction();
             })
             .catch((error) => {
@@ -257,8 +274,10 @@ export default {
       return (
         !this._.isEmpty(this.data.room) ||
         !this._.isEmpty(this.data.room.contract_id) ||
-        !this.data.room.contractstartdate ||
+        !this.data.room.startdate ||
+        !this.data.room.enddate ||
         !this.data.room.deposit ||
+        !this.data.room.agreement_fees ||
         !this.data.room.booking_fees
       );
     },
@@ -455,6 +474,31 @@ export default {
         return [];
       }
     },
+    updateContractInfo() {
+      let self = this;
+      let contract = _.find(this.contracts, function (contract) {
+        return contract.id == self.data.room.contract_id;
+      });
+
+      if (_.isPlainObject(contract) && !_.isEmpty(contract)) {
+        if (
+          _.get(this.data, ["room", "startdate"]) &&
+          _.get(this.data, ["room", "contract_id"])
+        ) {
+          let duration = contract.duration || 1;
+          this.data.room.enddate = moment(this.data.room.startdate)
+            .add(
+              duration - 1,
+              contract.rental_type == "month" ? "months" : "days"
+            )
+            .format("YYYY-MM-DD");
+        }
+
+        if (_.get(this.data, ["room", "autorenew"])) {
+          this.data.room.autorenew = contract.autorenew;
+        }
+      }
+    },
   },
 };
 </script>
@@ -566,13 +610,20 @@ export default {
                       <tr>
                         <th class="text-left">Room</th>
                         <th class="text-left">Rental</th>
-                        <th class="text-left">Deposit</th>
-                        <th class="text-left">Booking Fees</th>
-                        <th class="text-left" v-if="editMode">
-                          Outstanding Deposit
+                        <th class="text-left" v-if="!isSubContract">Deposit</th>
+                        <th class="text-left" v-if="!isSubContract">
+                          Agreement Fees
                         </th>
+                        <th class="text-left" v-if="!isSubContract">
+                          Booking Fees
+                        </th>
+                        <!-- <th class="text-left" v-if="editMode">
+                          Outstanding Deposit
+                        </th> -->
                         <th class="text-left">Contract</th>
                         <th class="text-left">Contract Start Date</th>
+                        <th class="text-left">Contract End Date</th>
+                        <th class="text-left">Auto Renew</th>
                         <th class="text-left">Services</th>
                       </tr>
                     </thead>
@@ -592,7 +643,7 @@ export default {
                             "
                           ></v-text-field>
                         </td>
-                        <td>
+                        <td v-if="!isSubContract">
                           <v-text-field
                             v-model="data.room.deposit"
                             prefix="RM"
@@ -605,7 +656,20 @@ export default {
                             "
                           ></v-text-field>
                         </td>
-                        <td>
+                        <td v-if="!isSubContract">
+                          <v-text-field
+                            v-model="data.room.agreement_fees"
+                            prefix="RM"
+                            type="number"
+                            step="0.01"
+                            :error-messages="
+                              helpers.isEmpty(data.room.agreement_fees)
+                                ? 'Agreement is required'
+                                : ''
+                            "
+                          ></v-text-field>
+                        </td>
+                        <td v-if="!isSubContract">
                           <v-text-field
                             v-model="data.room.booking_fees"
                             prefix="RM"
@@ -618,7 +682,7 @@ export default {
                             "
                           ></v-text-field>
                         </td>
-                        <td v-if="editMode">
+                        <!-- <td v-if="editMode">
                           <v-text-field
                             v-model="data.room.outstanding_deposit"
                             prefix="RM"
@@ -630,7 +694,7 @@ export default {
                                 : ''
                             "
                           ></v-text-field>
-                        </td>
+                        </td> -->
                         <td>
                           <v-autocomplete
                             v-model="data.room.contract_id"
@@ -643,6 +707,8 @@ export default {
                                 ? 'Contract is required'
                                 : ''
                             "
+                            @change="updateContractInfo"
+                            :disabled="editMode"
                           ></v-autocomplete>
                         </td>
                         <td>
@@ -656,24 +722,60 @@ export default {
                           >
                             <template v-slot:activator="{ on }">
                               <v-text-field
-                                v-model="data.room.contractstartdate"
+                                v-model="data.room.startdate"
                                 label="Start Date"
                                 prepend-icon="event"
                                 readonly
+                                :disabled="editMode"
                                 v-on="on"
                                 :error-messages="
-                                  helpers.isEmpty(data.room.contractstartdate)
+                                  helpers.isEmpty(data.room.startdate)
                                     ? 'Date is required'
                                     : ''
                                 "
                               ></v-text-field>
                             </template>
                             <v-date-picker
-                              v-model="data.room.contractstartdate"
+                              v-model="data.room.startdate"
                               no-title
                               scrollable
                             ></v-date-picker>
                           </v-menu>
+                        </td>
+                        <td>
+                          <v-menu
+                            ref="menu"
+                            v-model="data.room.enddatemenu"
+                            :close-on-content-click="true"
+                            transition="scale-transition"
+                            :disabled="editMode"
+                            offset-y
+                          >
+                            <template v-slot:activator="{ on }">
+                              <v-text-field
+                                v-model="data.room.enddate"
+                                label="End Date"
+                                prepend-icon="event"
+                                readonly
+                                v-on="on"
+                                :disabled="editMode"
+                                :error-messages="
+                                  helpers.isEmpty(data.room.enddate)
+                                    ? 'Date is required'
+                                    : ''
+                                "
+                              ></v-text-field>
+                            </template>
+                            <v-date-picker
+                              v-model="data.room.enddate"
+                              no-title
+                              scrollable
+                            ></v-date-picker>
+                          </v-menu>
+                        </td>
+
+                        <td>
+                          <v-switch v-model="data.room.autorenew"></v-switch>
                         </td>
                         <td>
                           <services-dialog

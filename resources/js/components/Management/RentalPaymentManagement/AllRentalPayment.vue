@@ -102,6 +102,12 @@ export default {
           text: "Penalty",
         },
         {
+          text: "Processing Fees",
+        },
+        {
+          text: "Service Fees",
+        },
+        {
           text: "Paid",
         },
         {
@@ -160,7 +166,6 @@ export default {
       if (filterGroup) {
         this.rentalPaymentFilterGroup.keyword = filterGroup.keyword;
         this.rentalPaymentFilterGroup.paid = filterGroup.paid;
-
       }
       this.getRentalPayments();
     },
@@ -267,15 +272,21 @@ export default {
             <v-card raised>
               <v-card-subtitle v-show="!keywordEmpty">
                 Keyword :
-                <v-chip class="mx-2">{{ rentalPaymentFilterGroup.keyword }}</v-chip>
+                <v-chip class="mx-2">{{
+                  rentalPaymentFilterGroup.keyword
+                }}</v-chip>
               </v-card-subtitle>
               <v-card-subtitle v-show="!fromdateEmpty">
                 From Date :
-                <v-chip class="mx-2">{{ rentalPaymentFilterGroup.keyword }}</v-chip>
+                <v-chip class="mx-2">{{
+                  rentalPaymentFilterGroup.keyword
+                }}</v-chip>
               </v-card-subtitle>
               <v-card-subtitle v-show="!todateEmpty">
                 To Date :
-                <v-chip class="mx-2">{{ rentalPaymentFilterGroup.todate }}</v-chip>
+                <v-chip class="mx-2">{{
+                  rentalPaymentFilterGroup.todate
+                }}</v-chip>
               </v-card-subtitle>
             </v-card>
           </v-col>
@@ -301,19 +312,21 @@ export default {
                 </template>
                 <template v-slot:item="props">
                   <tr>
-                    <td>{{props.item.roomcontract.tenant.name}}</td>
-                    <td>{{props.item.roomcontract.name}}</td>
-                    <td>{{props.item.roomcontract.room.name}}</td>
-                    <td>{{props.item.rentaldate | formatDate}}</td>
-                    <td>{{props.item.price | toDouble}}</td>
-                    <td>{{props.item.penalty | toDouble}}</td>
+                    <td>{{ props.item.roomcontract.tenant.name }}</td>
+                    <td>{{ props.item.roomcontract.name }}</td>
+                    <td>{{ props.item.roomcontract.room.name }}</td>
+                    <td>{{ props.item.rentaldate | formatDate }}</td>
+                    <td>{{ props.item.price | toDouble }}</td>
+                    <td>{{ props.item.penalty | toDouble }}</td>
+                    <td>{{ props.item.processing_fees | toDouble }}</td>
+                    <td>{{ props.item.service_fees | toDouble }}</td>
                     <td v-if="props.item.paid">
                       <v-icon small color="success">mdi-check</v-icon>
                     </td>
                     <td v-else>
                       <v-icon small color="danger">mdi-close</v-icon>
                     </td>
-                    <td>{{props.item.paymentdate | formatDate}}</td>
+                    <td>{{ props.item.paymentdate | formatDate }}</td>
                     <td>
                       <v-icon
                         small
@@ -321,7 +334,8 @@ export default {
                         @click="print(props.item)"
                         v-if="props.item.paid"
                         color="success"
-                      >mdi-printer</v-icon>
+                        >mdi-printer</v-icon
+                      >
                       <!-- <rental-print
                         @click="selectedRental = props.item"
                         class="mr-2"
@@ -338,11 +352,16 @@ export default {
                         @click="openPaymentDialog(props.item.uid, false)"
                         color="warning"
                         v-else
-                      >mdi-currency-usd</v-icon>
+                        >mdi-currency-usd</v-icon
+                      >
 
                       <confirm-dialog
-                        :activatorStyle="deleteRentalButtonConfig.activatorStyle"
-                        @confirmed="$event ? deleteRentalPayment(props.item.uid) : null"
+                        :activatorStyle="
+                          deleteRentalButtonConfig.activatorStyle
+                        "
+                        @confirmed="
+                          $event ? deleteRentalPayment(props.item.uid) : null
+                        "
                       ></confirm-dialog>
                     </td>
                   </tr>
@@ -354,136 +373,270 @@ export default {
         <div class="d-none" id="printMe">
           <v-container>
             <v-row>
-              <v-col cols="12" :class="helpers.managementStyles().centerWrapperClass ">
+              <v-col
+                cols="12"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
                 <div class="h5 my-5 font-weight-bold">Payment Receipt</div>
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="3" :class="helpers.managementStyles().centerWrapperClass ">
-                <div :class="helpers.managementStyles().subtitleClass">Payment Id</div>
+              <v-col
+                cols="3"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
+                <div :class="helpers.managementStyles().subtitleClass">
+                  Payment Id
+                </div>
               </v-col>
-              <v-col cols="1" :class="helpers.managementStyles().centerWrapperClass ">
+              <v-col
+                cols="1"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
                 <div :class="helpers.managementStyles().subtitleClass">:</div>
               </v-col>
               <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">{{selectedRental.uid}}</div>
+                <div :class="helpers.managementStyles().lightSubtitleClass">
+                  {{ selectedRental.uid }}
+                </div>
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="3" :class="helpers.managementStyles().centerWrapperClass ">
-                <div :class="helpers.managementStyles().subtitleClass">Tenant</div>
+              <v-col
+                cols="3"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
+                <div :class="helpers.managementStyles().subtitleClass">
+                  Tenant
+                </div>
               </v-col>
-              <v-col cols="1" :class="helpers.managementStyles().centerWrapperClass ">
+              <v-col
+                cols="1"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
                 <div :class="helpers.managementStyles().subtitleClass">:</div>
               </v-col>
               <v-col cols="8">
-                <div
-                  :class="helpers.managementStyles().lightSubtitleClass"
-                >{{selectedRental.roomcontract.tenant.name}}</div>
+                <div :class="helpers.managementStyles().lightSubtitleClass">
+                  {{ selectedRental.roomcontract.tenant.name }}
+                </div>
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="3" :class="helpers.managementStyles().centerWrapperClass ">
-                <div :class="helpers.managementStyles().subtitleClass">Room</div>
+              <v-col
+                cols="3"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
+                <div :class="helpers.managementStyles().subtitleClass">
+                  Room
+                </div>
               </v-col>
-              <v-col cols="1" :class="helpers.managementStyles().centerWrapperClass ">
+              <v-col
+                cols="1"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
                 <div :class="helpers.managementStyles().subtitleClass">:</div>
               </v-col>
               <v-col cols="8">
-                <div
-                  :class="helpers.managementStyles().lightSubtitleClass"
-                >{{selectedRental.roomcontract.room.name}}</div>
+                <div :class="helpers.managementStyles().lightSubtitleClass">
+                  {{ selectedRental.roomcontract.room.name }}
+                </div>
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="3" :class="helpers.managementStyles().centerWrapperClass ">
-                <div :class="helpers.managementStyles().subtitleClass">Contract</div>
+              <v-col
+                cols="3"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
+                <div :class="helpers.managementStyles().subtitleClass">
+                  Contract
+                </div>
               </v-col>
-              <v-col cols="1" :class="helpers.managementStyles().centerWrapperClass ">
+              <v-col
+                cols="1"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
                 <div :class="helpers.managementStyles().subtitleClass">:</div>
               </v-col>
               <v-col cols="8">
-                <div
-                  :class="helpers.managementStyles().lightSubtitleClass"
-                >{{selectedRental.roomcontract.name}}</div>
+                <div :class="helpers.managementStyles().lightSubtitleClass">
+                  {{ selectedRental.roomcontract.name }}
+                </div>
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="3" :class="helpers.managementStyles().centerWrapperClass ">
-                <div :class="helpers.managementStyles().subtitleClass">Contract Start Date</div>
+              <v-col
+                cols="3"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
+                <div :class="helpers.managementStyles().subtitleClass">
+                  Contract Start Date
+                </div>
               </v-col>
-              <v-col cols="1" :class="helpers.managementStyles().centerWrapperClass ">
+              <v-col
+                cols="1"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
                 <div :class="helpers.managementStyles().subtitleClass">:</div>
               </v-col>
               <v-col cols="8">
-                <div
-                  :class="helpers.managementStyles().lightSubtitleClass"
-                >{{selectedRental.roomcontract.startdate | formatDate}}</div>
+                <div :class="helpers.managementStyles().lightSubtitleClass">
+                  {{ selectedRental.roomcontract.startdate | formatDate }}
+                </div>
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="3" :class="helpers.managementStyles().centerWrapperClass ">
-                <div :class="helpers.managementStyles().subtitleClass">Rental</div>
+              <v-col
+                cols="3"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
+                <div :class="helpers.managementStyles().subtitleClass">
+                  Rental
+                </div>
               </v-col>
-              <v-col cols="1" :class="helpers.managementStyles().centerWrapperClass ">
+              <v-col
+                cols="1"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
                 <div :class="helpers.managementStyles().subtitleClass">:</div>
               </v-col>
               <v-col cols="8">
-                <div
-                  :class="helpers.managementStyles().lightSubtitleClass"
-                >{{ selectedRental.rentaldate | formatDate }}</div>
+                <div :class="helpers.managementStyles().lightSubtitleClass">
+                  {{ selectedRental.rentaldate | formatDate }}
+                </div>
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="3" :class="helpers.managementStyles().centerWrapperClass ">
-                <div :class="helpers.managementStyles().subtitleClass">Payment Date</div>
+              <v-col
+                cols="3"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
+                <div :class="helpers.managementStyles().subtitleClass">
+                  Payment Date
+                </div>
               </v-col>
-              <v-col cols="1" :class="helpers.managementStyles().centerWrapperClass ">
+              <v-col
+                cols="1"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
                 <div :class="helpers.managementStyles().subtitleClass">:</div>
               </v-col>
               <v-col cols="8">
-                <div
-                  :class="helpers.managementStyles().lightSubtitleClass"
-                >{{ selectedRental.paymentdate | formatDate }}</div>
+                <div :class="helpers.managementStyles().lightSubtitleClass">
+                  {{ selectedRental.paymentdate | formatDate }}
+                </div>
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="3" :class="helpers.managementStyles().centerWrapperClass ">
-                <div :class="helpers.managementStyles().subtitleClass">Price</div>
+              <v-col
+                cols="3"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
+                <div :class="helpers.managementStyles().subtitleClass">
+                  Price
+                </div>
               </v-col>
-              <v-col cols="1" :class="helpers.managementStyles().centerWrapperClass ">
+              <v-col
+                cols="1"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
                 <div :class="helpers.managementStyles().subtitleClass">:</div>
               </v-col>
               <v-col cols="8">
-                <div
-                  :class="helpers.managementStyles().lightSubtitleClass"
-                >RM {{ selectedRental.price | toDouble}}</div>
+                <div :class="helpers.managementStyles().lightSubtitleClass">
+                  RM {{ selectedRental.price | toDouble }}
+                </div>
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="3" :class="helpers.managementStyles().centerWrapperClass ">
-                <div :class="helpers.managementStyles().subtitleClass">Penalty</div>
+              <v-col
+                cols="3"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
+                <div :class="helpers.managementStyles().subtitleClass">
+                  Penalty
+                </div>
               </v-col>
-              <v-col cols="1" :class="helpers.managementStyles().centerWrapperClass ">
+              <v-col
+                cols="1"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
                 <div :class="helpers.managementStyles().subtitleClass">:</div>
               </v-col>
               <v-col cols="8">
-                <div
-                  :class="helpers.managementStyles().lightSubtitleClass"
-                >RM {{ selectedRental.penalty | toDouble }}</div>
+                <div :class="helpers.managementStyles().lightSubtitleClass">
+                  RM {{ selectedRental.penalty | toDouble }}
+                </div>
               </v-col>
             </v-row>
             <v-row>
-              <v-col cols="3" :class="helpers.managementStyles().centerWrapperClass ">
-                <div :class="helpers.managementStyles().subtitleClass">Total Paid</div>
+              <v-col
+                cols="3"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
+                <div :class="helpers.managementStyles().subtitleClass">
+                  Processing Fees
+                </div>
               </v-col>
-              <v-col cols="1" :class="helpers.managementStyles().centerWrapperClass ">
+              <v-col
+                cols="1"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
                 <div :class="helpers.managementStyles().subtitleClass">:</div>
               </v-col>
               <v-col cols="8">
-                <div
-                  :class="helpers.managementStyles().lightSubtitleClass"
-                >RM {{ parseFloat(selectedRental.penalty) + parseFloat(selectedRental.price) | toDouble }}</div>
+                <div :class="helpers.managementStyles().lightSubtitleClass">
+                  RM {{ selectedRental.processing_fees | toDouble }}
+                </div>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col
+                cols="3"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
+                <div :class="helpers.managementStyles().subtitleClass">
+                  Service Fees
+                </div>
+              </v-col>
+              <v-col
+                cols="1"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
+                <div :class="helpers.managementStyles().subtitleClass">:</div>
+              </v-col>
+              <v-col cols="8">
+                <div :class="helpers.managementStyles().lightSubtitleClass">
+                  RM {{ selectedRental.service_fees | toDouble }}
+                </div>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col
+                cols="3"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
+                <div :class="helpers.managementStyles().subtitleClass">
+                  Total Paid
+                </div>
+              </v-col>
+              <v-col
+                cols="1"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
+                <div :class="helpers.managementStyles().subtitleClass">:</div>
+              </v-col>
+              <v-col cols="8">
+                <div :class="helpers.managementStyles().lightSubtitleClass">
+                  RM
+                  {{
+                    (parseFloat(selectedRental.penalty) +
+                      parseFloat(selectedRental.price)+
+                      parseFloat(selectedRental.processing_fees)+
+                      parseFloat(selectedRental.service_fees))
+                      | toDouble
+                  }}
+                </div>
               </v-col>
             </v-row>
           </v-container>

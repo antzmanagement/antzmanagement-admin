@@ -81,14 +81,14 @@ class RoleController extends Controller
             return $this->errorResponse();
         }
 
-        if ($roomContract->leftmonth > 0 && !$roomContract->expired ) {
+        if ($roomContract->left > 0 && !$roomContract->expired ) {
 
             $room = $roomContract->room;
             if ($this->isEmpty($room)) {
                 DB::rollBack();
                 return $this->errorResponse();
             }
-            $rentalDate = $this->toDate(Carbon::parse($roomContract->startdate)->addMonth($roomContract->latestmonth)->startOfMonth());
+            $rentalDate = $this->toDate(Carbon::parse($roomContract->startdate)->addMonth($roomContract->latest)->startOfMonth());
             $role = new Role();
             $role->uid = Carbon::now()->timestamp . Role::count();
             $params = collect([

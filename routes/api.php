@@ -68,6 +68,7 @@ Route::group(['middleware' => ['auth:api']], function (){
     Route::resource('roomcontract', 'API\RoomContractController');
     Route::get('/filter/roomcontract', 'API\RoomContractController@filter');
     Route::post('/transfer/roomcontract', 'API\RoomContractController@transfer');
+    Route::post('/checkout/roomcontract', 'API\RoomContractController@checkout');
 
 });
 

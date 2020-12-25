@@ -36,9 +36,13 @@ export default {
     return {
       dialog: false,
       menu: false,
+      birthdayMenu: false,
       roomTypes: [],
       rooms: [],
       contracts: [],
+      approachmethods: ["fb", "friend", "banner", "others"],
+      genders: ["male", "female"],
+      religions: ["islam", "buddhism", 'christianity','hinduism', 'taoism', 'no-region','others'],
       data: new Form({
         name: "",
         icno: "",
@@ -53,6 +57,16 @@ export default {
         emergency_relationship: "",
         roomTypes: [],
         rooms: [],
+        age: 0,
+        birthday: "",
+        gender: "male",
+        religion: "no-region",
+        approach_method: "others",
+        occupation: "",
+        address: "",
+        postcode: "",
+        state: "",
+        city: "",
       }),
       roomFormDialogConfig: {
         dialogStyle: {
@@ -342,7 +356,7 @@ export default {
       for (var x = 0; x < this.data.rooms.length; x++) {
         if (
           this.helpers.isEmpty(this.data.rooms[x].contract_id) ||
-          this.helpers.isEmpty(this.data.rooms[x].contractstartdate)
+          this.helpers.isEmpty(this.data.rooms[x].startdate)
         ) {
           return false;
         }
@@ -558,6 +572,44 @@ export default {
             </v-col>
             <v-col cols="12" md="6">
               <v-text-field
+                label="Age"
+                v-model="data.age"
+                type="number"
+                step="1"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-menu
+                ref="birthdayMenu"
+                v-model="birthdayMenu"
+                :close-on-content-click="true"
+                transition="scale-transition"
+                offset-y
+                min-width="290px"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    v-model="data.birthday"
+                    label="Picker in menu"
+                    prepend-icon="mdi-calendar"
+                    readonly
+                    v-bind="attrs"
+                    v-on="on"
+                  ></v-text-field>
+                </template>
+                <v-date-picker v-model="data.birthday" no-title scrollable>
+                </v-date-picker>
+              </v-menu>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-autocomplete
+                v-model="data.gender"
+                :items="genders"
+                label="Gender"
+              ></v-autocomplete>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
                 label="Phone No"
                 hint="Example of Phone No : 014-12019231 (With Dash)"
                 persistent-hint
@@ -579,6 +631,48 @@ export default {
                 @input="$v.data.email.$touch()"
                 @blur="$v.data.email.$touch()"
                 :error-messages="emailErrors"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-autocomplete
+                v-model="data.religion"
+                :items="religions"
+                label="Religion"
+              ></v-autocomplete>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="Occupation"
+                v-model="data.occupation"
+                :maxlength="300"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="Address"
+                v-model="data.address"
+                :maxlength="300"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="Postcode"
+                v-model="data.postcode"
+                :maxlength="300"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="City"
+                v-model="data.city"
+                :maxlength="300"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="State"
+                v-model="data.state"
+                :maxlength="300"
               ></v-text-field>
             </v-col>
             <v-col cols="6">
@@ -650,6 +744,13 @@ export default {
                 @input="$v.data.emergency_relationship.$touch()"
                 @blur="$v.data.emergency_relationship.$touch()"
               ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-autocomplete
+                v-model="data.approach_method"
+                :items="approachmethods"
+                label="How you know us?"
+              ></v-autocomplete>
             </v-col>
             <!-- <v-col cols="12" v-if="!editMode">
               <v-text-field
@@ -774,20 +875,20 @@ export default {
                           >
                             <template v-slot:activator="{ on }">
                               <v-text-field
-                                v-model="room.contractstartdate"
+                                v-model="room.startdate"
                                 label="Start Date"
                                 prepend-icon="event"
                                 readonly
                                 v-on="on"
                                 :error-messages="
-                                  helpers.isEmpty(room.contractstartdate)
+                                  helpers.isEmpty(room.startdate)
                                     ? 'Date is required'
                                     : ''
                                 "
                               ></v-text-field>
                             </template>
                             <v-date-picker
-                              v-model="room.contractstartdate"
+                              v-model="room.startdate"
                               no-title
                               scrollable
                             ></v-date-picker>
