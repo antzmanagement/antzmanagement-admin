@@ -183,7 +183,7 @@ export default {
                 :server-items-length="totalDataLength"
                 :loading="loading"
               >
-                <template v-slot:top>
+                <!-- <template v-slot:top>
                   <v-toolbar flat class="mb-5">
                     <room-type-filter-dialog
                       :buttonStyle="roomTypeFilterDialogConfig.buttonStyle"
@@ -191,7 +191,7 @@ export default {
                       @submitFilter="initRoomTypeFilter($event)"
                     ></room-type-filter-dialog>
                   </v-toolbar>
-                </template>
+                </template> -->
                 <template v-slot:item="props">
                   <tr @click="showRoomType(props.item)">
                     <td>{{ props.item.uid }}</td>

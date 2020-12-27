@@ -29,6 +29,7 @@ class MaintenanceTableSeeder extends Seeder
 
                 $maintenance = new Maintenance();
                 $maintenance->uid = Carbon::now()->timestamp . Maintenance::count();
+                $maintenance->name = $room->unit. '-'. Carbon::now()->format('Y-m-d');
                 $maintenance->remark = $faker->ean13;
                 $maintenance->price = $faker->randomNumber(3);
                 $maintenance->remark = $faker->paragraph();

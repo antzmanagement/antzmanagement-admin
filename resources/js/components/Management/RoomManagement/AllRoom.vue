@@ -214,7 +214,7 @@ export default {
                 <template v-slot:item="props">
                   <tr @click="showRoom(props.item)">
                     <td>{{ props.item.room_types[0].name }}</td>
-                    <td>{{ props.item.name }}</td>
+                    <td>{{ props.item.unit }}</td>
                     <td>{{ props.item.price }}</td>
                   </tr>
                 </template>

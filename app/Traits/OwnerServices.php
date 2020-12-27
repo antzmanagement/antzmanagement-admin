@@ -78,7 +78,7 @@ trait OwnerServices
     {
 
         $userType = $this->getUserTypeById($this->ownerType);
-        $data = $userType->users()->where('uid', $uid)->wherePivot('status', 1)->with(['ownrooms' => function ($q) {
+        $data = $userType->users()->where('users.uid', $uid)->wherePivot('status', 1)->with(['ownrooms' => function ($q) {
             // Query the name field in status table
             $q->wherePivot('status', true);
             $q->where('rooms.status', true);
@@ -93,7 +93,15 @@ trait OwnerServices
     private function getOwnerById($id)
     {
         $userType = $this->getUserTypeById($this->ownerType);
-        $data = $userType->users()->where('id', $id)->wherePivot('status', 1)->first();
+        $data = $userType->users()->where('users.id', $id)->wherePivot('status', 1)->with(['ownrooms' => function ($q) {
+            // Query the name field in status table
+            $q->wherePivot('status', true);
+            $q->where('rooms.status', true);
+            $q->with(['roomTypes' => function($q1){
+                $q1->wherePivot('status', true);
+                $q1->where('room_types.status', true);
+            }]);
+        }])->where('users.status', true)->first();
         return $data;
     }
 
@@ -115,6 +123,38 @@ trait OwnerServices
        return $this->deleteUser($data);
     }
 
+    private function getOwnerUnclaimRentalPayments($data)
+    {
+        $rentalPayments = collect();
+        $rooms = $data->ownrooms()->where('rooms.status', true)->get();
+
+        foreach ($rooms as $room) {
+            $roomcontracts = $room->roomcontracts()->where('status', true)->get();
+            foreach ($roomcontracts as $roomcontract) {
+                $paidrentals = $roomcontract->rentalpayments()->where('status', true)->where('paid', true)->where('isClaimed', false)->with('roomcontract.room')->get();
+                if($paidrentals->count() > 0){
+                    $rentalPayments = $rentalPayments->concat($paidrentals);
+                }
+            }
+        }
+
+        return $rentalPayments;
+    }
+
+    private function getOwnerUnclaimMaintenances($data)
+    {
+        $maintenances = collect();
+        $rooms = $data->ownrooms()->where('rooms.status', true)->get();
+
+        foreach ($rooms as $room) {
+            $unclaimmaintenances = $room->maintenances()->where('status', true)->where('isClaimed',false)->get();
+            if($unclaimmaintenances->count() > 0){
+                $maintenances = $maintenances->concat($unclaimmaintenances);
+            }
+        }
+
+        return $maintenances;
+    }
     // Modifying Display Data
     // -----------------------------------------------------------------------------------------------------------------------------------------
     public function ownerAllCols()

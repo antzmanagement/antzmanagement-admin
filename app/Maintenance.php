@@ -16,4 +16,14 @@ class Maintenance extends Model
     {
         return $this->belongsTo('App\Property');
     }
+
+    public function owner()
+    {
+        return $this->belongsTo('App\User');
+    }
+
+    public function claim()
+    {
+        return $this->belongsTo('App\Claim');
+    }
 }

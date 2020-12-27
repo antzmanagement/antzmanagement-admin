@@ -387,6 +387,8 @@ export default {
         this.data.price = this.helpers.toDouble(
           roomType ? (roomType.price ? roomType.price : 0) : 0
         );
+
+        this.data.size = roomType.area || 0;
       }
 
       if (!_.isNaN(parseFloat(this.data.price))) {

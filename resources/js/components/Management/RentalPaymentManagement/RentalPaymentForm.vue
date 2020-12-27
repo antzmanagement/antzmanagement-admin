@@ -26,7 +26,7 @@ export default {
     return {
       _: _,
       penaltyRate: 3,
-      expiredDays: 10,
+      expiredDays: 9,
       origPrice: 0,
       data: new Form({
         penalty: 0,

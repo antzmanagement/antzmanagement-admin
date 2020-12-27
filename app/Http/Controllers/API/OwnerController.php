@@ -438,4 +438,35 @@ class OwnerController extends Controller
         DB::commit();
         return $this->successResponse('Owner', $owner, 'delete');
     }
+
+    public function getUnclaimRentalPayments(Request $request, $uid)
+    {
+        // api/owner/{ownerid} (GET)
+        error_log($this->controllerName . 'Retrieving owner of uid:' . $uid);
+        $owner = $this->getOwner($uid);
+        
+        if ($this->isEmpty($owner)) {
+            $data['data'] = null;
+            return $this->notFoundResponse('Owner');
+        } 
+
+        $data = $this->getOwnerUnclaimRentalPayments($owner);
+        return $this->successResponse('Rental Payments', $data, 'retrieve');
+        
+    }
+    
+    public function getUnclaimMaintenances(Request $request, $uid)
+    {
+        // api/owner/{ownerid} (GET)
+        error_log($this->controllerName . 'Retrieving owner of uid:' . $uid);
+        $owner = $this->getOwner($uid);
+        
+        if ($this->isEmpty($owner)) {
+            $data['data'] = null;
+            return $this->notFoundResponse('Owner');
+        } 
+
+        $data = $this->getOwnerUnclaimMaintenances($owner);
+        return $this->successResponse('Maintenances', $data, 'retrieve');
+    }
 }

@@ -78,6 +78,7 @@ class RoomTypeController extends Controller
         $params = collect([
             'name' => $request->name,
             'price' => $request->price,
+            'area' => $request->area,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
@@ -118,6 +119,7 @@ class RoomTypeController extends Controller
         $params = collect([
             'name' => $request->name,
             'price' => $request->price,
+            'area' => $request->area,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

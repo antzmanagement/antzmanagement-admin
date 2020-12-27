@@ -43,6 +43,9 @@ Vue.component('service-filter-form', require('./components/Management/ServiceMan
 Vue.component('contract-form', require('./components/Management/ContractManagement/ContractForm.vue').default);
 Vue.component('contract-filter-form', require('./components/Management/ContractManagement/ContractFilterForm.vue').default);
 
+Vue.component('claim-form', require('./components/Management/ClaimManagement/ClaimForm.vue').default);
+Vue.component('claim-filter-form', require('./components/Management/ClaimManagement/ClaimFilterForm.vue').default);
+
 Vue.component('room-contract-form', require('./components/Management/RoomContractManagement/RoomContractForm.vue').default);
 Vue.component('room-contract-filter-dialog', require('./components/Management/RoomContractManagement/RoomContractFilterDialog.vue').default);
 Vue.component('room-contract-checkout-form', require('./components/Management/RoomContractManagement/RoomContractCheckOutForm.vue').default);

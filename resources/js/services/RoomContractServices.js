@@ -49,7 +49,6 @@ const RoomContractServices = {
   delete(data) {
     PassportServices.AuthenticationServices.setHeader();
     const clonedata = Object.assign({}, data);
-    
     return Vue.axios.delete('/api/roomcontract/' + data.uid);
   },
 

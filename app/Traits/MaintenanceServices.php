@@ -70,6 +70,9 @@ trait MaintenanceServices
         }, 'property' => function ($q) {
             // Query the name field in status table
             $q->where('status', true);
+        }, 'owner' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
         }])->where('status', true)->first();
         return $data;
     }
@@ -86,6 +89,9 @@ trait MaintenanceServices
         }, 'property' => function ($q) {
             // Query the name field in status table
             $q->where('status', true);
+        }, 'owner' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
         }])->where('status', true)->first();
         return $data;
     }
@@ -99,19 +105,28 @@ trait MaintenanceServices
         $data->uid = Carbon::now()->timestamp . Maintenance::count();
         $data->price  = $this->toDouble($params->price);
         $data->remark = $params->remark;
+        $data->maintenance_type = $params->maintenance_type;
+        $data->maintenance_status = $params->maintenance_status;
 
         $room = $this->getRoomById($params->room_id);
         if ($this->isEmpty($room)) {
-            return false;
+            return null;
         }
         $data->room()->associate($room);
 
-        if ($params->property_id) {
-            $property = $this->getPropertyById($params->property_id);
-            if ($this->isEmpty($property)) {
-                return false;
+        $property = $this->getPropertyById($params->property_id);
+        if ($this->isEmpty($property)) {
+            return null;
+        }
+        $data->property()->associate($property);
+
+        $data->name = $room->name. '-'. $property->name. '-' .Carbon::now()->format('Y-m-d');
+        if ($params->owner_id) {
+            $owner = $this->getOwnerById($params->owner_id);
+            if ($this->isEmpty($owner)) {
+                return null;
             }
-            $data->property()->associate($property);
+            $data->owner()->associate($owner);
         }
 
         if (!$this->saveModel($data)) {
@@ -128,19 +143,28 @@ trait MaintenanceServices
         $params = $this->checkUndefinedProperty($params, $this->maintenanceAllCols());
         $data->price  = $this->toDouble($params->price);
         $data->remark = $params->remark;
+        $data->maintenance_type = $params->maintenance_type;
+        $data->maintenance_status = $params->maintenance_status;
 
         $room = $this->getRoomById($params->room_id);
         if ($this->isEmpty($room)) {
-            return false;
+            return null;
         }
         $data->room()->associate($room);
 
-        if ($params->property_id) {
-            $property = $this->getPropertyById($params->property_id);
-            if ($this->isEmpty($property)) {
-                return false;
+        $property = $this->getPropertyById($params->property_id);
+        if ($this->isEmpty($property)) {
+            return null;
+        }
+        $data->property()->associate($property);
+
+
+        if ($params->owner_id) {
+            $owner = $this->getOwnerById($params->owner_id);
+            if ($this->isEmpty($owner)) {
+                return null;
             }
-            $data->property()->associate($property);
+            $data->owner()->associate($owner);
         }
 
         if (!$this->saveModel($data)) {

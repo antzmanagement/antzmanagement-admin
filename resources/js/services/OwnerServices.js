@@ -52,6 +52,17 @@ const OwnerServices = {
     const clonedata = Object.assign({}, data);
     
     return Vue.axios.delete('/api/owner/' + data.uid);
+  },
+
+  getUnclaimRentalPayments(data) {
+    PassportServices.AuthenticationServices.setHeader();
+    
+    return Vue.axios.get('/api/owner/'+ data.uid + '/getUnclaimRentalPayments');
+  },
+  getUnclaimMaintenances(data) {
+    PassportServices.AuthenticationServices.setHeader();
+    console.log(data);
+    return Vue.axios.get('/api/owner/'+ data.uid + '/getUnclaimMaintenances');
   }
 };
 

@@ -281,6 +281,16 @@ export default {
                 :error-messages="priceErrors"
               ></v-text-field>
             </v-col>
+            <v-col cols="6">
+              <v-text-field
+                label="Area"
+                type="number"
+                required
+                :maxlength="100"
+                step="0.01"
+                v-model="data.area"
+              ></v-text-field>
+            </v-col>
             <v-col cols="12">
               <services-dialog
                 @submit="(e) => setRoomTypeServices(e)"

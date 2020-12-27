@@ -69,29 +69,31 @@ class MaintenanceController extends Controller
         $this->validate($request, [
             'remark' => 'nullable|string',
             'price' => 'required|numeric|min:0',
-            'rooms' => 'required|array',
-            'properties' => 'nullable|array',
+            'room' => 'required',
+            'property' => 'required',
+            'maintenance_status' => 'required',
+            'maintenance_type' => 'required',
         ]);
         error_log($this->controllerName . 'Creating maintenance.');
 
-        foreach ($request->rooms as $roomid) {
-            foreach ($request->properties as $propertyid) {
-
-                $params = collect([
-                    'remark' => $request->remark,
-                    'price' => $request->price,
-                    'room_id' => $roomid,
-                    'property_id' => $propertyid,
-                ]);
-                //Convert To Json Object
-                $params = json_decode(json_encode($params));
-                $maintenance = $this->createMaintenance($params);
-                if ($this->isEmpty($maintenance)) {
-                    DB::rollBack();
-                    return $this->errorResponse();
-                }
-            }
+        $params = collect([
+            'remark' => $request->remark,
+            'price' => $request->price,
+            'room_id' => $request->room,
+            'property_id' => $request->property,
+            'owner_id' => $request->owner,
+            'maintenance_status' => $request->maintenance_status,
+            'maintenance_type' => $request->maintenance_type,
+        ]);
+        //Convert To Json Object
+        $params = json_decode(json_encode($params));
+        $maintenance = $this->createMaintenance($params);
+        if ($this->isEmpty($maintenance)) {
+            DB::rollBack();
+            return $this->errorResponse();
         }
+
+        error_log($maintenance);
 
         DB::commit();
         return $this->successResponse('Maintenance', $maintenance, 'create');
@@ -106,8 +108,10 @@ class MaintenanceController extends Controller
         $this->validate($request, [
             'remark' => 'nullable|string',
             'price' => 'required|numeric|min:0',
-            'rooms' => 'required|numeric',
-            'properties' => 'nullable|numeric',
+            'room' => 'required',
+            'property' => 'required',
+            'maintenance_status' => 'required',
+            'maintenance_type' => 'required',
         ]);
         $maintenance = $this->getMaintenance($uid);
         if ($this->isEmpty($maintenance)) {
@@ -117,8 +121,11 @@ class MaintenanceController extends Controller
         $params = collect([
             'remark' => $request->remark,
             'price' => $request->price,
-            'room_id' => $request->rooms,
-            'property_id' => $request->properties,
+            'room_id' => $request->room,
+            'property_id' => $request->property,
+            'owner_id' => $request->owner,
+            'maintenance_status' => $request->maintenance_status,
+            'maintenance_type' => $request->maintenance_type,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

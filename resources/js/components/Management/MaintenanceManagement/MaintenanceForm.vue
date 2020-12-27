@@ -51,11 +51,17 @@ export default {
       propertyFormDialog: false,
       rooms: [],
       properties: [],
+      owners: [],
+      maintenanceTypes: ["repair", "renew"],
+      maintenanceStatus: ["pending", "inprogress", "reject", "done"],
       data: new Form({
         remark: "",
         price: "",
-        rooms: [],
-        properties: [],
+        room: '',
+        property: '',
+        owner: "",
+        maintenance_type: "repair",
+        maintenance_status: "pending",
       }),
       roomFormDialogConfig: {
         dialogStyle: {
@@ -78,7 +84,7 @@ export default {
   validations() {
     return {
       data: {
-        remark: { required, maxLength: maxLength(2500) },
+        remark: {  maxLength: maxLength(2500) },
         price: { required, decimal },
       },
     };
@@ -115,24 +121,12 @@ export default {
         return errors;
       }
     },
-    roomsErrors() {
-      const errors = [];
-
-      if (this.helpers.isEmpty(this.data.rooms)) {
-        errors.push("Room is required");
-      }
-      return errors;
-    },
   },
   watch: {
     dialog: function (val) {
       if (val) {
         this.data.reset();
         this.$v.$reset();
-
-        if (this.roomId) {
-          this.data.rooms.push(this.roomId);
-        }
       }
     },
   },
@@ -144,30 +138,34 @@ export default {
       this.getPropertiesAction({ pageNumber: -1, pageSize: -1 }).then(
         (data) => {
           this.properties = data.data;
+          this.getOwnersAction({ pageNumber: -1, pageSize: -1 }).then(
+            (data) => {
+              this.owners = data.data;
 
-          if (this.editMode) {
-            this.getMaintenanceAction({ uid: this.uid })
-              .then((data) => {
-                //Should assign data first before creating form because the form will reset after triggered
-                //Create the form before assigning the data, the form will not keep track the original/default value of data
-
-                Object.assign(data.data, {
-                  rooms: data.data.room.id,
-                  properties: data.data.property.id,
-                });
-                this.data = new Form(data.data);
+              if (this.editMode) {
+                this.getMaintenanceAction({ uid: this.uid })
+                  .then((data) => {
+                    //Should assign data first before creating form because the form will reset after triggered
+                    //Create the form before assigning the data, the form will not keep track the original/default value of data
+                    console.log(data);
+                    data.data.room = data.data.room.id;
+                    data.data.property = data.data.property.id;
+                    data.data.owner = data.data.owner.id;
+                    this.data = new Form(data.data);
+                    this.endLoadingAction();
+                  })
+                  .catch((error) => {
+                    this.endLoadingAction();
+                    Toast.fire({
+                      icon: "warning",
+                      title: "Something went wrong...",
+                    });
+                  });
+              } else {
                 this.endLoadingAction();
-              })
-              .catch((error) => {
-                this.endLoadingAction();
-                Toast.fire({
-                  icon: "warning",
-                  title: "Something went wrong...",
-                });
-              });
-          } else {
-            this.endLoadingAction();
-          }
+              }
+            }
+          );
         }
       );
     });
@@ -175,6 +173,7 @@ export default {
   methods: {
     ...mapActions({
       getRoomsAction: "getRooms",
+      getOwnersAction: "getOwners",
       getPropertiesAction: "getProperties",
       getMaintenanceAction: "getMaintenance",
       createMaintenanceAction: "createMaintenance",
@@ -183,13 +182,10 @@ export default {
       endLoadingAction: "endLoadingAction",
     }),
 
-    customValidate() {
-      return !this.helpers.isEmpty(this.data.rooms);
-    },
     createMaintenance() {
       this.$v.$touch(); //it will validate all fields
 
-      if (this.$v.$invalid || !this.customValidate()) {
+      if (this.$v.$invalid ) {
         Toast.fire({
           icon: "warning",
           title: "Please make sure all the data is valid. ",
@@ -251,22 +247,6 @@ export default {
           });
       }
     },
-    appendRoomList($data) {
-      this.rooms.push($data);
-      if (!this.editMode) {
-        this.data.rooms.push($data.id);
-      } else {
-        this.data.rooms = $data.id;
-      }
-    },
-    appendPropertyList($data) {
-      this.properties.push($data);
-      if (!this.editMode) {
-        this.data.properties.push($data.id);
-      } else {
-        this.data.properties = $data.id;
-      }
-    },
   },
 };
 </script>
@@ -291,8 +271,8 @@ export default {
         :icon="buttonStyle.isIcon"
         :disabled="isLoading"
       >
-        <v-icon>{{buttonStyle.icon}}</v-icon>
-        {{buttonStyle.text}}
+        <v-icon>{{ buttonStyle.icon }}</v-icon>
+        {{ buttonStyle.text }}
       </v-btn>
     </template>
     <v-card>
@@ -309,7 +289,8 @@ export default {
             text
             :disabled="isLoading"
             @click="editMode ? updateMaintenance() : createMaintenance()"
-          >Save</v-btn>
+            >Save</v-btn
+          >
         </v-toolbar-items>
       </v-toolbar>
       <v-card-text>
@@ -317,42 +298,34 @@ export default {
           <v-row>
             <v-col cols="12" v-show="!roomId">
               <v-autocomplete
-                v-model="data.rooms"
+                v-model="data.room"
                 item-text="name"
                 item-value="id"
                 :items="rooms"
                 label="Room"
                 chips
-                :deletable-chips="this.editMode ? false : true"
-                :multiple="this.editMode ? false : true"
-                :error-messages="roomsErrors"
               >
-                <template v-slot:append>
-                  <room-form
-                    :editMode="false"
-                    :dialogStyle="roomFormDialogConfig.dialogStyle"
-                    :buttonStyle="roomFormDialogConfig.buttonStyle"
-                    @created="appendRoomList($event)"
-                  ></room-form>
-                </template>
               </v-autocomplete>
             </v-col>
             <v-col cols="12">
               <v-autocomplete
-                v-model="data.properties"
-                :item-text="item => helpers.capitalizeFirstLetter(item.name)"
+                v-model="data.property"
+                :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
                 item-value="id"
                 :items="properties"
                 label="Property"
                 chips
-                :deletable-chips="this.editMode ? false : true"
-                :multiple="this.editMode ? false : true"
               >
-                <template v-slot:append>
-                  <v-btn class="ma-4" color="primary" @click="propertyFormDialog = true">
-                    <v-icon>mdi-plus</v-icon>Add New Property
-                  </v-btn>
-                </template>
+              </v-autocomplete>
+            </v-col>
+            <v-col cols="12">
+              <v-autocomplete
+                v-model="data.owner"
+                :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
+                item-value="id"
+                :items="owners"
+                label="Claim By Owner"
+              >
               </v-autocomplete>
             </v-col>
             <v-col cols="12" md="12">
@@ -368,7 +341,21 @@ export default {
                 :error-messages="priceErrors"
               ></v-text-field>
             </v-col>
-            <v-col cols="12" md="12">
+            <v-col cols="12" md="6">
+              <v-select
+                :items="maintenanceTypes"
+                v-model="data.maintenance_type"
+                label="Maintenance Type"
+              ></v-select>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-select
+                :items="maintenanceStatus"
+                v-model="data.maintenance_status"
+                label="Maintenance status"
+              ></v-select>
+            </v-col>
+            <v-col cols="12" >
               <v-textarea
                 label="Remark"
                 :maxlength="2500"
@@ -383,7 +370,12 @@ export default {
       </v-card-text>
     </v-card>
 
-    <v-dialog v-model="propertyFormDialog" persistent hideOverlay max-width="600px">
+    <v-dialog
+      v-model="propertyFormDialog"
+      persistent
+      hideOverlay
+      max-width="600px"
+    >
       <property-form
         :reset="propertyFormDialog"
         :editMode="false"

@@ -16,6 +16,7 @@ class CreateRentalPaymentsTable extends Migration
         Schema::create('rental_payments', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('room_contract_id')->unsigned();
+            $table->unsignedInteger('claim_id')->unsigned()->nullable();
             $table->string('uid');
             $table->decimal('price',8,2)->default(0.00);
             $table->decimal('payment',8,2)->default(0.00);
@@ -28,11 +29,18 @@ class CreateRentalPaymentsTable extends Migration
             $table->date('rentaldate');
             $table->longText('remark')->nullable();
             $table->boolean('status')->default(true);
+            $table->boolean('isClaimed')->default(false);
             $table->timestamps();
 
             $table->foreign('room_contract_id')
             ->references('id')
             ->on('room_contracts')
+            ->onUpdate('cascade')
+            ->onDelete('restrict');
+
+            $table->foreign('claim_id')
+            ->references('id')
+            ->on('claims')
             ->onUpdate('cascade')
             ->onDelete('restrict');
         });

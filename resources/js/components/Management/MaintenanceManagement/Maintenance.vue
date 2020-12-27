@@ -1,8 +1,10 @@
 
 <script>
 import { mapActions } from "vuex";
+import { _ } from "../../../common/common-function";
 export default {
   data: () => ({
+    _: _,
     editButtonStyle: {
       block: false,
       color: "success",
@@ -149,13 +151,54 @@ export default {
             <v-divider
               class="mx-3"
               :color="helpers.managementStyles().dividerColor"
+              v-if="_.isPlainObject(data.owner) && !_.isEmpty(data.owner)"
+            ></v-divider>
+
+            <v-row
+              justify="start"
+              align="center"
+              class="pa-2"
+              v-if="_.isPlainObject(data.owner) && !_.isEmpty(data.owner)"
+            >
+              <v-col cols="12">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Claim By</label>
+                  <div class="form-control-plaintext">
+                    <v-chip class="ma-2">
+                      <h4 class="text-center ma-2">
+                        {{ data.owner.name | capitalizeFirstLetter }}
+                      </h4>
+                    </v-chip>
+                  </div>
+                </div>
+              </v-col>
+            </v-row>
+            <v-divider
+              class="mx-3"
+              :color="helpers.managementStyles().dividerColor"
             ></v-divider>
             <v-row justify="start" align="center" class="pa-2">
-              <v-col cols="12" md="12">
+              <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Price</label>
                   <div class="form-control-plaintext">
                     <h4>RM {{ data.price | toDouble }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Maintenance Type</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.maintenance_type }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Maintenance Status</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.maintenance_status }}</h4>
                   </div>
                 </div>
               </v-col>

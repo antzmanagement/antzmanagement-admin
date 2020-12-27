@@ -10,4 +10,9 @@ class RentalPayment extends Model
     {
         return $this->belongsTo('App\RoomContract', 'room_contract_id');
     }
+
+    public function claim()
+    {
+        return $this->belongsTo('App\Claim');
+    }
 }

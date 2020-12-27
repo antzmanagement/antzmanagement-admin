@@ -99,6 +99,7 @@ trait RoomTypeServices
         $data->uid = Carbon::now()->timestamp . RoomType::count();
         $data->name  = $params->name;
         $data->price = $this->toDouble($params->price);
+        $data->area = $this->toDouble($params->area);
 
         if (!$this->saveModel($data)) {
             return null;
@@ -115,6 +116,7 @@ trait RoomTypeServices
 
         $data->name  = $params->name;
         $data->price = $this->toDouble($params->price);
+        $data->area = $this->toDouble($params->area);
 
         if (!$this->saveModel($data)) {
             return null;

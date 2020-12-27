@@ -31,6 +31,14 @@ export const actions = {
         const { data } = await OwnerServices.delete(payload);
         return data;
     },
+    async getUnclaimRentalPayments(context, payload) {
+        const { data } = await OwnerServices.getUnclaimRentalPayments(payload);
+        return data;
+    },
+    async getUnclaimMaintenances(context, payload) {
+        const { data } = await OwnerServices.getUnclaimMaintenances(payload);
+        return data;
+    },
 };
 
 // export const mutations = {

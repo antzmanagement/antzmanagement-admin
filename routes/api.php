@@ -40,6 +40,8 @@ Route::group(['middleware' => ['auth:api']], function (){
     Route::get('/filter/staff', 'API\StaffController@filter');
 
     Route::resource('owner', 'API\OwnerController');
+    Route::get('/owner/{uid}/getUnclaimRentalPayments', 'API\OwnerController@getUnclaimRentalPayments');
+    Route::get('/owner/{uid}/getUnclaimMaintenances', 'API\OwnerController@getUnclaimMaintenances');
     Route::get('/filter/owner', 'API\OwnerController@filter');
 
     Route::resource('room', 'API\RoomController');
@@ -64,6 +66,10 @@ Route::group(['middleware' => ['auth:api']], function (){
     Route::resource('rentalpayment', 'API\RentalPaymentController');
     Route::get('/filter/rentalpayment', 'API\RentalPaymentController@filter');
     Route::post('/rentalpayment/{uid}/makepayment', 'API\RentalPaymentController@makePayment');
+
+
+    Route::resource('claim', 'API\ClaimController');
+    Route::get('/filter/claim', 'API\ClaimController@filter');
 
     Route::resource('roomcontract', 'API\RoomContractController');
     Route::get('/filter/roomcontract', 'API\RoomContractController@filter');

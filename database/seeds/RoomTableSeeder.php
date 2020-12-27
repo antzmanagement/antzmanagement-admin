@@ -63,6 +63,7 @@ class RoomTableSeeder extends Seeder
             }
             $roomcontract->enddate = $enddate;
             $roomcontract->rental_type = $contract->rental_type;
+            $roomcontract->rental = $room->price;
             $roomcontract->penalty = $contract->penalty;
             $roomcontract->penalty_day = $contract->penalty_day;
             $roomcontract->room()->associate($room);

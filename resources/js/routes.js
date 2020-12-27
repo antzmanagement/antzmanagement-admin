@@ -39,6 +39,9 @@ import RoomContract from './components/Management/RoomContractManagement/RoomCon
 import AllRentalPayment from './components/Management/RentalPaymentManagement/AllRentalPayment.vue';
 import RentalPayment from './components/Management/RentalPaymentManagement/RentalPayment.vue';
 
+import AllClaim from './components/Management/ClaimManagement/AllClaim.vue';
+import Claim from './components/Management/ClaimManagement/Claim.vue';
+
 
 import Home from './components/Home/Home.vue'
 import RoomPage from './components/Home/RoomPage.vue';
@@ -231,6 +234,17 @@ export const routes = [
         path:'/rentalpayment/:uid',
         component: RentalPayment,
         name : 'rentalpayment',
+    },
+    //Claim
+    { 
+        path:'/claims',
+        component:AllClaim,
+        name : 'claims',
+    },
+    { 
+        path:'/claim/:uid',
+        component: Claim,
+        name : 'cliam',
     },
  
 ];

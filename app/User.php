@@ -105,4 +105,15 @@ class User extends Authenticatable
     {
         return $this->hasMany('App\RoomContract', 'tenant_id');
     }
+
+    public function maintenances()
+    {
+        return $this->hasMany('App\Maintenance', 'owner_id');
+    }
+
+    public function claims()
+    {
+        return $this->hasMany('App\Claim', 'owner_id');
+    }
+    
 }

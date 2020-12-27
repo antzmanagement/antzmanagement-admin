@@ -21,6 +21,7 @@ class CreateRoomTypesTable extends Migration
             $table->string('text')->nullable();
             $table->longText('desc')->nullable();
             $table->decimal('price',8,2)->default(0.00);
+            $table->decimal('area',8,2)->default(0.00);
             $table->boolean('status')->default(1);
             $table->timestamps();
         });

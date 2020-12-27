@@ -130,6 +130,14 @@ export default {
                   </div>
                 </div>
               </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Area</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.area | toDouble }}</h4>
+                  </div>
+                </div>
+              </v-col>
             </v-row>
 
             <v-divider
