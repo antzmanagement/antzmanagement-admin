@@ -6,10 +6,12 @@ use App\RoomType;
 use App\RoomTypeType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
+use App\Traits\AllServices;
 
 trait RoomTypeServices
 {
 
+    use AllServices;
 
 
     private function getRoomTypes($requester)

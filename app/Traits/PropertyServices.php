@@ -1,14 +1,16 @@
 <?php
 
-namespace App\Traits;
+namespace app\Traits;
 
 use App\Property;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
+use App\Traits\AllServices;
 
 trait PropertyServices
 {
 
+    use AllServices;
 
 
     private function getProperties($requester)

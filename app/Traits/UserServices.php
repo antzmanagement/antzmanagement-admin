@@ -5,10 +5,12 @@ namespace App\Traits;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
+use App\Traits\AllServices;
 
 trait UserServices
 {
 
+    use AllServices;
 
     private function getUsers($requester)
     { }

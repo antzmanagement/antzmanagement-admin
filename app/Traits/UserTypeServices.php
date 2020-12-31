@@ -4,9 +4,11 @@ namespace App\Traits;
 use App\UserType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
+use App\Traits\AllServices;
 
 trait UserTypeServices {
 
+    use AllServices;
 
     private function getUserTypes($requester) {
 

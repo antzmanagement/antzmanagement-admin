@@ -4,10 +4,12 @@ namespace App\Traits;
 
 use App\RentalPayment;
 use Carbon\Carbon;
+use App\Traits\AllServices;
 
 trait RentalPaymentServices
 {
 
+    use AllServices;
 
 
     private function getRentalPayments($requester)
