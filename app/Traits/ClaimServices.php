@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Traits;
+namespace \App\Traits;
 
 use App\Claim;
 use Carbon\Carbon;
