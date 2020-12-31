@@ -247,4 +247,9 @@ export const routes = [
         name : 'cliam',
     },
  
+   
+    { 
+        path:'*',
+        component:ManagementHome
+    },
 ];
