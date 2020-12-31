@@ -8,8 +8,6 @@ use Carbon\Carbon;
 trait RentalPaymentServices
 {
 
-    use AllServices;
-
 
     private function getRentalPayments($requester)
     {

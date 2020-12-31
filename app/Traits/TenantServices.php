@@ -10,8 +10,6 @@ use Illuminate\Support\Facades\Hash;
 trait TenantServices
 {
 
-    use AllServices;
-
     private function getTenants($requester)
     {
 

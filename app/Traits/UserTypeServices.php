@@ -7,8 +7,10 @@ use Illuminate\Support\Facades\Hash;
 
 trait UserTypeServices {
 
-    use AllServices;
-
+    private $staffType = "1";
+    private $tenantType = "2";
+    private $ownerType = "3";
+    
     private function getUserTypes($requester) {
 
         $data = collect();

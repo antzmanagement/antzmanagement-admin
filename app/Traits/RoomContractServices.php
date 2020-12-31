@@ -9,7 +9,6 @@ use OpenApi\Annotations\Property;
 trait RoomContractServices
 {
 
-    use AllServices;
 
 
     private function getRoomContracts($requester)

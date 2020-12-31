@@ -9,8 +9,6 @@ use Illuminate\Support\Facades\Hash;
 trait UserServices
 {
 
-    use AllServices;
-
     private function getUsers($requester)
     { }
 

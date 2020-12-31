@@ -9,8 +9,6 @@ use Illuminate\Support\Facades\Hash;
 trait PropertyServices
 {
 
-    use AllServices;
-
 
     private function getProperties($requester)
     {

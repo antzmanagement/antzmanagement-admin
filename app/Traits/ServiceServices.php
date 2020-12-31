@@ -11,8 +11,6 @@ use Illuminate\Support\Str;
 trait ServiceServices
 {
 
-    use AllServices;
-
 
     private function getServices($requester)
     {

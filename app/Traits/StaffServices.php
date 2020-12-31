@@ -10,8 +10,6 @@ use Illuminate\Support\Facades\Hash;
 trait StaffServices
 {
 
-    use AllServices;
-
     private function getStaffs($requester)
     {
 

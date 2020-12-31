@@ -10,8 +10,6 @@ use Illuminate\Support\Facades\Hash;
 trait RoleServices
 {
 
-    use AllServices;
-
 
     private function getRoles($requester)
     {

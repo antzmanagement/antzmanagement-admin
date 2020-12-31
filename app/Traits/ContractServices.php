@@ -9,8 +9,6 @@ use OpenApi\Annotations\Property;
 trait ContractServices
 {
 
-    use AllServices;
-
 
     private function getContracts($requester)
     {

@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\Hash;
 trait ReportServices
 {
 
-    use AllServices;
 
 
     private function getReports($requester)

@@ -10,8 +10,6 @@ use Illuminate\Support\Facades\Hash;
 trait OwnerServices
 {
 
-    use AllServices;
-
 
     private function getOwners($requester)
     {

@@ -10,8 +10,6 @@ use Illuminate\Support\Facades\Hash;
 trait RoomServices
 {
 
-    use AllServices;
-
 
     private function getRooms($requester)
     {
