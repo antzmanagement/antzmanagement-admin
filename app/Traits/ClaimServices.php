@@ -9,7 +9,7 @@ use App\Traits\AllServices;
 trait ClaimServices
 {
 
-    use App\Traits\AllServices;
+    use AllServices;
 
 
     private function getClaims($requester)
