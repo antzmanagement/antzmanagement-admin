@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Traits;
+namespace app\Traits;
 
 use App\Service;
 use App\ServiceType;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Traits;
+namespace app\Traits;
 
 use App\RentalPayment;
 use Carbon\Carbon;
