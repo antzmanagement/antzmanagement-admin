@@ -9,7 +9,7 @@ use App\Traits\ImageHostingServices;
 
 //Model Services
 use App\Traits\ContractServices;
-use App\Traits\ClaimServices;
+use App\Traits\OwnerClaimServices;
 use App\Traits\MaintenanceServices;
 use App\Traits\OwnerServices;
 use App\Traits\PropertyServices;
@@ -33,7 +33,7 @@ trait AllServices {
     NotificationFunctions, 
     ImageHostingServices,
 
-    ClaimServices,
+    OwnerClaimServices,
     ContractServices,
     MaintenanceServices,
     OwnerServices,

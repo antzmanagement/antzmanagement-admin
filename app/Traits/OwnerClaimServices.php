@@ -4,9 +4,8 @@ namespace App\Traits;
 
 use App\Claim;
 use Carbon\Carbon;
-use AllServices;
 
-trait ClaimServices
+trait OwnerClaimServices
 {
 
     use AllServices;
