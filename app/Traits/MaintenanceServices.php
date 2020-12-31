@@ -4,13 +4,11 @@ namespace App\Traits;
 
 use App\Maintenance;
 use Carbon\Carbon;
-use App\Traits\AllServices;
 use OpenApi\Annotations\Property;
 
 trait MaintenanceServices
 {
 
-    use AllServices;
 
 
     private function getMaintenances($requester)

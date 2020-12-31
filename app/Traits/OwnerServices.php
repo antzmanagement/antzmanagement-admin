@@ -6,12 +6,10 @@ use App\User;
 use App\UserType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
-use App\Traits\AllServices;
 
 trait OwnerServices
 {
 
-    use AllServices;
 
 
     private function getOwners($requester)

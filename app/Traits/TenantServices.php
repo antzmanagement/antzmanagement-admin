@@ -6,12 +6,10 @@ use App\User;
 use App\UserType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
-use App\Traits\AllServices;
 
 trait TenantServices
 {
 
-    use AllServices;
 
     private function getTenants($requester)
     {
