@@ -8,7 +8,6 @@ use Carbon\Carbon;
 trait OwnerClaimServices
 {
 
-    use AllServices;
 
 
     private function getClaims($requester)
