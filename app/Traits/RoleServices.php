@@ -6,7 +6,6 @@ use App\Role;
 use App\UserType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
-use App\Traits\AllServices;
 
 trait RoleServices
 {

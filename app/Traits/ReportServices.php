@@ -6,7 +6,6 @@ use App\UserType;
 use App\RoomType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
-use App\Traits\AllServices;
 
 trait ReportServices
 {

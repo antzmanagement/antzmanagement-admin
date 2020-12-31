@@ -4,7 +4,6 @@ namespace App\Traits;
 
 use App\RoomContract;
 use Carbon\Carbon;
-use App\Traits\AllServices;
 use OpenApi\Annotations\Property;
 
 trait RoomContractServices

@@ -5,7 +5,6 @@ namespace App\Traits;
 use App\Property;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
-use App\Traits\AllServices;
 
 trait PropertyServices
 {

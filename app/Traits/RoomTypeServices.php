@@ -3,10 +3,8 @@
 namespace App\Traits;
 
 use App\RoomType;
-use App\RoomTypeType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
-use App\Traits\AllServices;
 
 trait RoomTypeServices
 {

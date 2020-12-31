@@ -6,7 +6,6 @@ use App\Service;
 use App\ServiceType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
-use App\Traits\AllServices;
 use Illuminate\Support\Str;
 
 trait ServiceServices

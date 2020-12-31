@@ -4,7 +4,6 @@ namespace App\Traits;
 
 use App\Contract;
 use Carbon\Carbon;
-use App\Traits\AllServices;
 use OpenApi\Annotations\Property;
 
 trait ContractServices

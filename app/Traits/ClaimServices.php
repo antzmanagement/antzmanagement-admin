@@ -4,7 +4,6 @@ namespace App\Traits;
 
 use App\Claim;
 use Carbon\Carbon;
-use App\Traits\AllServices;
 
 trait ClaimServices
 {

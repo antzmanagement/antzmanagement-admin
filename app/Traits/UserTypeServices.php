@@ -4,7 +4,6 @@ namespace App\Traits;
 use App\UserType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
-use App\Traits\AllServices;
 
 trait UserTypeServices {
 
