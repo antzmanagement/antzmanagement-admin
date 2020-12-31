@@ -4,12 +4,11 @@ namespace App\Traits;
 
 use App\Claim;
 use Carbon\Carbon;
-use \App\Traits\AllServices;
+use App\Traits\AllServices;
 
 trait ClaimServices
 {
 
-    use AllServices;
 
 
     private function getClaims($requester)
