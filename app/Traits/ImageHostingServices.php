@@ -1,6 +1,6 @@
 <?php
 
-namespace app\Traits;
+namespace App\Traits;
 use Carbon\Carbon;
 use JD\Cloudder\Facades\Cloudder;
 use Illuminate\Http\Request;

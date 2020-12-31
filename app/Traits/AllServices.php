@@ -1,6 +1,6 @@
 <?php
 
-namespace app\Traits;
+namespace App\Traits;
 
 //Functionality Services
 use App\Traits\GlobalFunctions;
