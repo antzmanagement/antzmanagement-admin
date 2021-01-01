@@ -7,7 +7,7 @@ const ID_TOKEN_KEY = "access_token";
 const AuthenticationServices = {
   init(){
 
-    Vue.axios.defaults.baseURL = commonConfig.API_URL;
+    Vue.axios.defaults.baseURL = commonConfig.API_URL.replace('/api', '');
   },
   setHeader() {
     Vue.axios.defaults.headers.common.Authorization = `Bearer ${PassportServices.getToken()}`;
