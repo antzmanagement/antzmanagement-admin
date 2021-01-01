@@ -16,7 +16,7 @@
     <body>
         <div id="app">
         
-        
+        <p>testtttt</p>
             <router-view :key="$route.fullPath">
             </router-view>
             <vue-progress-bar></vue-progress-bar>
