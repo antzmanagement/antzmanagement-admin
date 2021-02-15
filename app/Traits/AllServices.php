@@ -24,6 +24,7 @@ use App\Traits\RoomServices;
 use App\Traits\RoomTypeServices;
 use App\Traits\ServiceServices;
 use App\Traits\StaffServices;
+use App\Traits\PaymentServices;
 
 
 trait AllServices {
@@ -48,10 +49,9 @@ trait AllServices {
     TenantServices,
     UserServices,
     UserTypeServices,
-    StaffServices;
+    StaffServices,
+    PaymentServices;
 
-
-    
     private $staffType = "1";
     private $tenantType = "2";
     private $ownerType = "3";

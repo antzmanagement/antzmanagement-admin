@@ -41,13 +41,18 @@ export default {
   },
   data() {
     return {
+      roomStatusOptions: ["empty", "maintaining", "occupied"],
       dialog: false,
       roomTypes: [],
+      owners: [],
       data: new Form({
-        keyword: "",
-        fromdate: null,
-        todate: null,
-        roomTypes: [],
+        unit: "",
+        jalan: "",
+        block: "",
+        floor: "",
+        room_status: "",
+        roomType: "",
+        owner: "",
       }),
     };
   },
@@ -69,7 +74,18 @@ export default {
     this.getRoomTypesAction({ pageNumber: -1, pageSize: -1 })
       .then((data) => {
         this.roomTypes = data.data;
-        this.endLoadingAction();
+        this.getOwnersAction({ pageNumber: -1, pageSize: -1 })
+          .then((data) => {
+            this.owners = data.data;
+            this.endLoadingAction();
+          })
+          .catch((error) => {
+            Toast.fire({
+              icon: "warning",
+              title: "Something went wrong... ",
+            });
+            this.endLoadingAction();
+          });
       })
       .catch((error) => {
         Toast.fire({
@@ -82,6 +98,7 @@ export default {
   methods: {
     ...mapActions({
       getRoomTypesAction: "getRoomTypes",
+      getOwnersAction: "getOwners",
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction",
     }),
@@ -132,28 +149,66 @@ export default {
       <v-card-text>
         <v-container>
           <v-row>
-            <v-col cols="12">
+            <v-col cols="6">
               <v-text-field
-                label="Keyword"
+                label="Unit"
                 :maxlength="300"
-                v-model="data.keyword"
+                v-model="data.unit"
               ></v-text-field>
             </v-col>
-          </v-row>
-          <v-row>
+            <v-col cols="6">
+              <v-text-field
+                label="Jalan"
+                :maxlength="300"
+                v-model="data.jalan"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                label="Block"
+                :maxlength="300"
+                v-model="data.block"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                label="Floor"
+                :maxlength="300"
+                v-model="data.floor"
+              ></v-text-field>
+            </v-col>
             <v-col cols="12">
               <v-autocomplete
-                v-model="data.roomTypes"
+                v-model="data.owner"
+                :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
+                :items="owners"
+                label="Owner"
+                chips
+                return-object
+                deletable-chips
+              >
+              </v-autocomplete>
+            </v-col>
+            <v-col cols="12">
+              <v-autocomplete
+                v-model="data.roomType"
                 :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
                 :items="roomTypes"
                 label="Room Type"
                 chips
                 deletable-chips
-                multiple
                 :return-object="true"
               ></v-autocomplete>
             </v-col>
+            <v-col cols="12" md="12">
+              <v-select
+                :items="roomStatusOptions"
+                v-model="data.room_status"
+                label="Room Status"
+              ></v-select>
+            </v-col>
           </v-row>
+          <v-row> </v-row>
         </v-container>
       </v-card-text>
     </v-card>

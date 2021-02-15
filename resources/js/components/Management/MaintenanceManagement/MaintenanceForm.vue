@@ -8,6 +8,7 @@ import {
   decimal,
 } from "vuelidate/lib/validators";
 import { mapActions } from "vuex";
+import { _ } from "../../../common/common-function";
 export default {
   props: {
     editMode: {
@@ -57,8 +58,8 @@ export default {
       data: new Form({
         remark: "",
         price: "",
-        room: '',
-        property: '',
+        room: "",
+        property: "",
         owner: "",
         maintenance_type: "repair",
         maintenance_status: "pending",
@@ -84,7 +85,7 @@ export default {
   validations() {
     return {
       data: {
-        remark: {  maxLength: maxLength(2500) },
+        remark: { maxLength: maxLength(2500) },
         price: { required, decimal },
       },
     };
@@ -131,44 +132,57 @@ export default {
     },
   },
   mounted() {
+    console.log("call");
     this.showLoadingAction();
-    this.getRoomsAction({ pageNumber: -1, pageSize: -1 }).then((data) => {
-      this.rooms = data.data;
+    let promises = [];
+    promises.push(this.getRoomsAction({ pageNumber: -1, pageSize: -1 }));
+    promises.push(this.getPropertiesAction({ pageNumber: -1, pageSize: -1 }));
+    promises.push(this.getOwnersAction({ pageNumber: -1, pageSize: -1 }));
 
-      this.getPropertiesAction({ pageNumber: -1, pageSize: -1 }).then(
-        (data) => {
-          this.properties = data.data;
-          this.getOwnersAction({ pageNumber: -1, pageSize: -1 }).then(
-            (data) => {
-              this.owners = data.data;
+    if (this.editMode) {
+      console.log(this.uid);
+      promises.push(this.getMaintenanceAction({ uid: this.uid }));
+    }
 
-              if (this.editMode) {
-                this.getMaintenanceAction({ uid: this.uid })
-                  .then((data) => {
-                    //Should assign data first before creating form because the form will reset after triggered
-                    //Create the form before assigning the data, the form will not keep track the original/default value of data
-                    console.log(data);
-                    data.data.room = data.data.room.id;
-                    data.data.property = data.data.property.id;
-                    data.data.owner = data.data.owner.id;
-                    this.data = new Form(data.data);
-                    this.endLoadingAction();
-                  })
-                  .catch((error) => {
-                    this.endLoadingAction();
-                    Toast.fire({
-                      icon: "warning",
-                      title: "Something went wrong...",
-                    });
-                  });
-              } else {
-                this.endLoadingAction();
-              }
-            }
-          );
+    Promise.all(promises)
+      .then(([roomRes, propertyRes, ownerRes, maintenanceRes]) => {
+        this.rooms = roomRes.data || [];
+        this.owners = ownerRes.data || [];
+        this.properties = propertyRes.data || [];
+
+        if (maintenanceRes) {
+          console.log(maintenanceRes);
+          maintenanceRes.data.room = _.get(maintenanceRes, [
+            "data",
+            "room",
+            "id",
+          ]);
+          maintenanceRes.data.property = _.get(maintenanceRes, [
+            "data",
+            "property",
+            "id",
+          ]);
+          maintenanceRes.data.owner = _.get(maintenanceRes, [
+            "data",
+            "owner",
+            "id",
+          ]);
+
+          console.log(maintenanceRes);
+          this.data = new Form(maintenanceRes.data);
+          console.log("this");
+          console.log(this.data);
         }
-      );
-    });
+        this.endLoadingAction();
+      })
+      .catch((error) => {
+        this.endLoadingAction();
+        console.log(error);
+        Toast.fire({
+          icon: "warning",
+          title: "Something went wrong...",
+        });
+      });
   },
   methods: {
     ...mapActions({
@@ -185,7 +199,7 @@ export default {
     createMaintenance() {
       this.$v.$touch(); //it will validate all fields
 
-      if (this.$v.$invalid ) {
+      if (this.$v.$invalid) {
         Toast.fire({
           icon: "warning",
           title: "Please make sure all the data is valid. ",
@@ -325,6 +339,7 @@ export default {
                 item-value="id"
                 :items="owners"
                 label="Claim By Owner"
+                clearable
               >
               </v-autocomplete>
             </v-col>
@@ -355,7 +370,7 @@ export default {
                 label="Maintenance status"
               ></v-select>
             </v-col>
-            <v-col cols="12" >
+            <v-col cols="12">
               <v-textarea
                 label="Remark"
                 :maxlength="2500"

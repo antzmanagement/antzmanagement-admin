@@ -33,7 +33,6 @@ trait RoomTypeServices
 
     private function filterRoomTypes($data, $params)
     {
-        $data = $this->globalFilter($data, $params);
         $params = $this->checkUndefinedProperty($params, $this->roomTypeFilterCols());
 
         if ($params->keyword) {
@@ -96,6 +95,7 @@ trait RoomTypeServices
         $data->name  = $params->name;
         $data->price = $this->toDouble($params->price);
         $data->area = $this->toDouble($params->area);
+        $data->remark  = $params->remark;
 
         if (!$this->saveModel($data)) {
             return null;
@@ -113,6 +113,7 @@ trait RoomTypeServices
         $data->name  = $params->name;
         $data->price = $this->toDouble($params->price);
         $data->area = $this->toDouble($params->area);
+        $data->remark  = $params->remark;
 
         if (!$this->saveModel($data)) {
             return null;

@@ -2,14 +2,16 @@
 <script>
 import { mapActions } from "vuex";
 import { _ } from "../../../common/common-function";
+import PrintPaymentButton from "../PaymentManagement/PrintPaymentButton.vue";
 import RoomContractCheckOutForm from "./RoomContractCheckOutForm.vue";
 export default {
-  components: { RoomContractCheckOutForm },
+  components: { RoomContractCheckOutForm, PrintPaymentButton },
   data: () => ({
     _: _,
     editMode: false,
     checkoutDialog: false,
     paymentDialog: false,
+    addOnPaymentDialog: false,
     selectedPayment: {
       uid: "",
     },
@@ -41,6 +43,21 @@ export default {
         text: "Payment Date",
         value: "paymentdate",
       },
+      { text: "Actions" },
+    ],
+    paymentHeaders: [
+      {
+        text: "Sequence No",
+        value: "sequence",
+      },
+      { text: "Payment Date", value: "paymentdate" },
+      { text: "Price", value: "price" },
+      { text: "Other Charges", value: "other_charges" },
+      {
+        text: "Services",
+        value: "services",
+      },
+      { text: "Remark", value: "remark" },
       { text: "Actions" },
     ],
     editButtonStyle: {
@@ -83,6 +100,9 @@ export default {
     sortedRentalPayments() {
       return this.helpers.sortByDate(this.data.rentalpayments, "rentaldate");
     },
+    sortedPayments() {
+      return this.helpers.sortByDate(this.data.payments, "paymentdate");
+    },
   },
   created() {
     this.$Progress.start();
@@ -90,6 +110,7 @@ export default {
     this.getRoomContractAction({ uid: this.$route.params.uid })
       .then((data) => {
         this.data = data.data;
+        console.log(this.data.id);
         this.$Progress.finish();
         this.endLoadingAction();
       })
@@ -109,6 +130,7 @@ export default {
       createRentalPaymentAction: "createRentalPayment",
       deleteRoomContractAction: "deleteRoomContract",
       deleteRentalPaymentAction: "deleteRentalPayment",
+      deletePaymentAction: "deletePayment",
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction",
     }),
@@ -166,6 +188,24 @@ export default {
         }
       });
     },
+    updatePaymentDetails(data) {
+      var id = data.id;
+      var payment = data;
+      console.log("payment");
+      console.log(payment);
+      if (
+        _.isArray(_.get(payment, ["services"])) &&
+        !_.isEmpty(_.get(payment, ["services"]))
+      ) {
+        payment.services = _.map(payment.services, function (service) {
+          service.pivot = {
+            price: service.price,
+          };
+          return service;
+        });
+      }
+      this.data.payments = this.data.payments.concat([data]);
+    },
     deleteRoomContract($isConfirmed, $uid) {
       if ($isConfirmed) {
         this.$Progress.start();
@@ -198,6 +238,12 @@ export default {
         return item.id != id;
       });
     },
+    deletePaymentDetails(data) {
+      var id = data.id;
+      this.data.payments = this.data.payments.filter(function (item) {
+        return item.id != id;
+      });
+    },
     deleteRentalPayment($uid) {
       this.$Progress.start();
       this.showLoadingAction();
@@ -214,7 +260,29 @@ export default {
         .catch((error) => {
           Toast.fire({
             icon: "warning",
-            title: "Fail to delete the tenant!!!!! ",
+            title: "Fail to delete the rental!!!!! ",
+          });
+          this.$Progress.finish();
+          this.endLoadingAction();
+        });
+    },
+    deletePayment($uid) {
+      this.$Progress.start();
+      this.showLoadingAction();
+      this.deletePaymentAction({ uid: $uid })
+        .then((data) => {
+          Toast.fire({
+            icon: "success",
+            title: "Successful Deleted. ",
+          });
+          this.deletePaymentDetails(data.data);
+          this.$Progress.finish();
+          this.endLoadingAction();
+        })
+        .catch((error) => {
+          Toast.fire({
+            icon: "warning",
+            title: "Fail to delete the payment!!!!! ",
           });
           this.$Progress.finish();
           this.endLoadingAction();
@@ -396,6 +464,14 @@ export default {
             <v-row justify="start" align="center" class="pa-2">
               <v-col cols="12" md="4">
                 <div class="form-group mb-0">
+                  <label class="form-label mb-0">Sequence No</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.sequence }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
                   <label class="form-label mb-0">Contract Start Date</label>
                   <div class="form-control-plaintext">
                     <h4>{{ data.startdate }}</h4>
@@ -458,6 +534,14 @@ export default {
                   </div>
                 </div>
               </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Outstanding Deposit</label>
+                  <div class="form-control-plaintext">
+                    <h4>RM {{ data.outstanding_deposit }}</h4>
+                  </div>
+                </div>
+              </v-col>
               <!-- <v-col cols="12">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Terms</label>
@@ -466,14 +550,14 @@ export default {
                   </div>
                 </div>
               </v-col> -->
-              <v-col cols="12" md="4">
+              <!-- <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Auto Renew</label>
                   <div class="form-control-plaintext">
                     <h4>{{ data.autorenew ? "Yes" : "No" }}</h4>
                   </div>
                 </div>
-              </v-col>
+              </v-col> -->
               <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Checked Out</label>
@@ -631,7 +715,7 @@ export default {
                         >
                         <v-spacer></v-spacer>
                         <v-btn
-                        v-if="!data.checkedout"
+                          v-if="!data.checkedout"
                           color="primary"
                           dark
                           class="mb-2"
@@ -655,14 +739,15 @@ export default {
                         </td>
                         <td>{{ props.item.paymentdate | formatDate }}</td>
                         <td>
-                          <v-icon
-                            small
-                            class="mr-2"
-                            @click="print(props.item)"
+                          <print-rental-payment-button
+                            :item="props.item"
+                            :roomcontract="data"
                             v-if="props.item.paid"
-                            color="success"
-                            >mdi-printer</v-icon
                           >
+                            <v-icon small class="mr-2" color="success"
+                              >mdi-printer</v-icon
+                            >
+                          </print-rental-payment-button>
                           <!-- <v-icon
                             small
                             class="mr-2"
@@ -687,6 +772,81 @@ export default {
                               $event
                                 ? deleteRentalPayment(props.item.uid)
                                 : null
+                            "
+                          ></confirm-dialog>
+                        </td>
+                      </tr>
+                    </template>
+                  </v-data-table>
+                </v-card>
+              </v-col>
+            </v-row>
+            <v-divider
+              class="mx-3"
+              :color="helpers.managementStyles().dividerColor"
+            ></v-divider>
+            <v-row>
+              <v-col
+                cols="12"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
+                <v-card raised width="100%">
+                  <v-data-table
+                    :headers="paymentHeaders"
+                    :items="sortedPayments"
+                    fixed-header
+                    height="300px"
+                    :items-per-page="5"
+                  >
+                    <template v-slot:top>
+                      <v-toolbar flat color="white">
+                        <v-toolbar-title
+                          :class="helpers.managementStyles().subtitleClass"
+                          >Add On Payment</v-toolbar-title
+                        >
+                        <v-spacer></v-spacer>
+                        <v-btn
+                          v-if="!data.checkedout"
+                          color="success"
+                          dark
+                          class="mb-2 mr-2"
+                          @click="addOnPaymentDialog = true"
+                          >New Add On Payment</v-btn
+                        >
+                      </v-toolbar>
+                    </template>
+                    <template v-slot:item="props">
+                      <tr>
+                        <td>{{ props.item.sequence }}</td>
+                        <td>{{ props.item.paymentdate | formatDate }}</td>
+                        <td>{{ props.item.totalpayment | toDouble }}</td>
+                        <td>{{ props.item.other_charges | toDouble }}</td>
+                        <td>
+                          {{
+                            _.compact(
+                              _.map(props.item.services, function (service) {
+                                return _.get(service, ["text"]) || "";
+                              })
+                            ) | getArrayValues
+                          }}
+                        </td>
+                        <td>{{ props.item.remark }}</td>
+                        <td>
+                          <print-payment-button
+                            :item="props.item"
+                            :roomcontract="data"
+                          >
+                            <v-icon small class="mr-2" color="success"
+                              >mdi-printer</v-icon
+                            >
+                          </print-payment-button>
+
+                          <confirm-dialog
+                            :activatorStyle="
+                              deleteRentalButtonConfig.activatorStyle
+                            "
+                            @confirmed="
+                              $event ? deletePayment(props.item.uid) : null
                             "
                           ></confirm-dialog>
                         </td>
@@ -730,6 +890,23 @@ export default {
             </v-row>
           </v-container>
         </v-card>
+
+        <v-dialog
+          persistent
+          :maxWidth="'30%'"
+          :fullscreen="false"
+          hideOverlay
+          v-model="addOnPaymentDialog"
+          transition="dialog-bottom-transition"
+        >
+          <payment-form
+            :uid="selectedPayment.uid"
+            :roomcontractid="this.data.id ? `${this.data.id || ''}` : ''"
+            @close="addOnPaymentDialog = false"
+            :editMode="this.editMode"
+            @createPayment="updatePaymentDetails($event)"
+          ></payment-form>
+        </v-dialog>
 
         <v-dialog
           persistent
@@ -1022,8 +1199,8 @@ export default {
                   RM
                   {{
                     (parseFloat(selectedRental.penalty) +
-                      parseFloat(selectedRental.price)+
-                      parseFloat(selectedRental.processing_fees)+
+                      parseFloat(selectedRental.price) +
+                      parseFloat(selectedRental.processing_fees) +
                       parseFloat(selectedRental.service_fees))
                       | toDouble
                   }}

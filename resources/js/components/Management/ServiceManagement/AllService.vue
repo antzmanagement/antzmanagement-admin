@@ -48,7 +48,7 @@ export default {
       },
       headers: [
         {
-          text: "uid",
+          text: "id",
         },
         {
           text: "Name",
@@ -182,7 +182,7 @@ export default {
                 :server-items-length="totalDataLength"
                 :loading="loading"
               >
-                <template v-slot:top>
+                <!-- <template v-slot:top>
                   <v-toolbar flat class="mb-5">
                     <v-btn
                       color="primary"
@@ -194,10 +194,10 @@ export default {
                       <v-icon left>mdi-magnify</v-icon>Filter Service
                     </v-btn>
                   </v-toolbar>
-                </template>
+                </template> -->
                 <template v-slot:item="props">
                   <tr @click="showService(props.item)">
-                    <td>{{ props.item.uid }}</td>
+                    <td>{{ props.item.id }}</td>
                     <td>{{ props.item.name }}</td>
                   </tr>
                 </template>

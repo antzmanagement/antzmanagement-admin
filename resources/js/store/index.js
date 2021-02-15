@@ -18,6 +18,7 @@ import roomContract from "./roomContract.module";
 import roomType from "./roomType.module";
 import service from "./service.module";
 import claim from "./claim.module";
+import payment from "./payment.module";
 
 Vue.use(Vuex);
 
@@ -40,5 +41,6 @@ export default new Vuex.Store({
     user,
     auth,
     loading,
+    payment,
   }
 });

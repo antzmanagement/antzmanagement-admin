@@ -25,7 +25,6 @@ trait ContractServices
 
     private function filterContracts($data, $params)
     {
-        $data = $this->globalFilter($data, $params);
         $params = $this->checkUndefinedProperty($params, $this->contractFilterCols());
 
         if ($params->keyword) {

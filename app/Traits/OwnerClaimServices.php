@@ -31,7 +31,6 @@ trait OwnerClaimServices
 
     private function filterClaims($data, $params)
     {
-        $data = $this->globalFilter($data, $params);
         $params = $this->checkUndefinedProperty($params, $this->claimFilterCols());
 
         if ($params->keyword) {

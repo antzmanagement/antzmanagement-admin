@@ -104,7 +104,7 @@ export default {
         <v-btn icon dark @click="dialog = false">
           <v-icon>mdi-close</v-icon>
         </v-btn>
-        <v-toolbar-title v->Staff Filter</v-toolbar-title>
+        <v-toolbar-title >Staff Filter</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-toolbar-items>
           <v-btn dark text :disabled="isLoading" @click="submitFilter()">Apply</v-btn>

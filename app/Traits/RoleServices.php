@@ -22,7 +22,6 @@ trait RoleServices
 
     private function filterRoles($data, $params)
     {
-        $data = $this->globalFilter($data, $params);
         $params = $this->checkUndefinedProperty($params, $this->roleFilterCols());
 
         if ($params->keyword) {

@@ -56,7 +56,6 @@ export default {
           this.data.checkout_date = moment().format("YYYY-MM-DD");
           this.data.return_deposit =
             this.data.deposit -
-            this.data.agreement_fees -
             this.data.booking_fees;
           this.$Progress.finish();
           this.endLoadingAction();
@@ -86,7 +85,7 @@ export default {
         .catch((error) => {
           Toast.fire({
             icon: "warning",
-            title: "Fail to check out. Please make sure all the data is valid and rentals are paid (included all subcontracts).  ",
+            title: "Fail to check out. Please make sure all the data is valid and rentals are paid .  ",
           });
           this.$Progress.finish();
           this.endLoadingAction();

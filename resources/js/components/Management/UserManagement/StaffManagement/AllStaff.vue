@@ -46,6 +46,11 @@ export default {
       },
       headers: [
         {
+          text: "Id",
+          align: "start",
+          value: "id",
+        },
+        {
           text: "Name",
           align: "start",
           value: "name",
@@ -95,17 +100,13 @@ export default {
       endLoadingAction: "endLoadingAction",
     }),
     initStaffFilter(filterGroup) {
+      console.log(filterGroup);
       this.staffFilterGroup.reset();
       if (filterGroup) {
-        this.staffFilterGroup.selectedRoomTypes = filterGroup.roomTypes;
-        this.staffFilterGroup.roomTypes = filterGroup.roomTypes.map(function (
-          roomType
-        ) {
-          return roomType.id;
-        });
         this.staffFilterGroup.keyword = filterGroup.keyword;
       }
       this.getStaffs();
+      this.options.page = 1;
     },
     showStaff($data) {
       this.$router.push("/staff/" + $data.uid);
@@ -211,6 +212,7 @@ export default {
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showStaff(props.item)">
+                    <td>{{ props.item.id }}</td>
                     <td>{{ props.item.name }}</td>
                     <td>{{ props.item.icno }}</td>
                     <td>{{ props.item.tel1 }}</td>

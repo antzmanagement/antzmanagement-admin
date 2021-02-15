@@ -96,8 +96,6 @@ export default {
     this.fixedServices = this.origServices;
   },
   updated(){
-    console.log('data');
-    console.log(this.data.services);
   },
   methods: {
     ...mapActions({

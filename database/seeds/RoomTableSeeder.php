@@ -36,6 +36,9 @@ class RoomTableSeeder extends Seeder
             $room->unit = $roomType->text . '-'.  Room::count();
             $room->price = $roomType->price;
             $room->address = $faker->address;
+            $room->jalan = $faker->city;
+            $room->block = $faker->city;
+            $room->floor = $faker->city;
             $room->state = $faker->state;
             $room->postcode = $faker->postcode;
             $room->city = $faker->city;

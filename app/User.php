@@ -116,4 +116,12 @@ class User extends Authenticatable
         return $this->hasMany('App\Claim', 'owner_id');
     }
     
+    public function creator()
+    {
+        return $this->belongsTo('App\User', 'pic');
+    }
+    public function createdUsers()
+    {
+        return $this->hasMany('App\User', 'pic');
+    }
 }

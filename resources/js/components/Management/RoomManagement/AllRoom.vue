@@ -1,9 +1,11 @@
 
 <script>
 import { mapActions } from "vuex";
+import { _ } from "../../../common/common-function";
 export default {
   data() {
     return {
+      _: _,
       totalDataLength: 0,
       data: [],
       loading: true,
@@ -45,17 +47,30 @@ export default {
       },
       headers: [
         {
+          text: "Id",
+        },
+        {
           text: "Room Types",
-          align: "start",
-          sortable: true,
         },
         {
           text: "Unit No",
-          align: "start",
-          sortable: true,
-          value: "name",
         },
-        { text: "Price (RM)", value: "price", sortable: true },
+        {
+          text: "Jalan",
+        },
+        {
+          text: "Block",
+        },
+        {
+          text: "Floor",
+        },
+        { text: "Price (RM)" },
+        {
+          text: "Room Status",
+        },
+        {
+          text: "Owner",
+        },
       ],
     };
   },
@@ -97,15 +112,30 @@ export default {
     }),
     initRoomFilter(filterGroup) {
       this.roomFilterGroup.reset();
-      if (filterGroup) {
-        this.roomFilterGroup.selectedRoomTypes = filterGroup.roomTypes;
-        this.roomFilterGroup.roomTypes = filterGroup.roomTypes.map(function (
-          roomType
-        ) {
-          return roomType.id;
-        });
-        this.roomFilterGroup.keyword = filterGroup.keyword;
+      if (filterGroup.unit) {
+        this.roomFilterGroup.unit = filterGroup.unit;
       }
+      if (filterGroup.jalan) {
+        this.roomFilterGroup.jalan = filterGroup.jalan;
+      }
+      if (filterGroup.floor) {
+        this.roomFilterGroup.floor = filterGroup.floor;
+      }
+      if (filterGroup.block) {
+        this.roomFilterGroup.block = filterGroup.block;
+      }
+      if (filterGroup.room_status) {
+        this.roomFilterGroup.room_status = filterGroup.room_status;
+      }
+      if (filterGroup.roomType) {
+        this.roomFilterGroup.room_type_id = filterGroup.roomType.id;
+        this.roomFilterGroup.roomTypeObj = filterGroup.roomType;
+      }
+      if (filterGroup.owner) {
+        this.roomFilterGroup.owner_id = filterGroup.owner.id;
+        this.roomFilterGroup.ownerObj = filterGroup.owner;
+      }
+      console.log(this.roomFilterGroup);
       this.options.page = 1;
       this.getRooms();
     },
@@ -128,6 +158,8 @@ export default {
 
       this.filterRoomsAction(this.roomFilterGroup)
         .then((data) => {
+          console.log('data');
+          console.log(data);
           if (data.data) {
             this.data = data.data;
           } else {
@@ -167,27 +199,33 @@ export default {
         <v-row justify="center" align="center" class="mx-3">
           <v-col cols="12">
             <v-card raised>
-              <v-card-subtitle v-show="!keywordEmpty">
-                Keyword :
-                <v-chip class="mx-2">{{ roomFilterGroup.keyword }}</v-chip>
+              <v-card-subtitle v-show="roomFilterGroup.unit">
+                Unit :
+                <v-chip class="mx-2">{{ roomFilterGroup.unit }}</v-chip>
               </v-card-subtitle>
-              <v-card-subtitle v-show="!fromdateEmpty">
-                From Date :
-                <v-chip class="mx-2">{{ roomFilterGroup.keyword }}</v-chip>
+              <v-card-subtitle v-show="roomFilterGroup.jalan">
+                Jalan :
+                <v-chip class="mx-2">{{ roomFilterGroup.jalan }}</v-chip>
               </v-card-subtitle>
-              <v-card-subtitle v-show="!todateEmpty">
-                To Date :
-                <v-chip class="mx-2">{{ roomFilterGroup.todate }}</v-chip>
+              <v-card-subtitle v-show="roomFilterGroup.block">
+                Block :
+                <v-chip class="mx-2">{{ roomFilterGroup.block }}</v-chip>
               </v-card-subtitle>
-
-              <v-card-subtitle v-show="!roomTypesEmpty">
-                Room Types :
-                <v-chip
-                  class="mx-2"
-                  v-for="roomType in roomFilterGroup.selectedRoomTypes"
-                  :key="roomType.id"
-                  >{{ roomType.name | capitalizeFirstLetter }}</v-chip
-                >
+              <v-card-subtitle v-show="roomFilterGroup.floor">
+                Floor :
+                <v-chip class="mx-2">{{ roomFilterGroup.floor }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="roomFilterGroup.room_status">
+                Room Status :
+                <v-chip class="mx-2">{{ roomFilterGroup.room_status }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="roomFilterGroup.roomTypeObj">
+                Room Type :
+                <v-chip class="mx-2">{{ _.get(roomFilterGroup, ['roomTypeObj', 'name']) || 'N/A' }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="roomFilterGroup.ownerObj">
+                Owner :
+                <v-chip class="mx-2">{{ _.get(roomFilterGroup, ['ownerObj', 'name']) || 'N/A' }}</v-chip>
               </v-card-subtitle>
             </v-card>
           </v-col>
@@ -213,9 +251,15 @@ export default {
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showRoom(props.item)">
+                    <td>{{ props.item.id }}</td>
                     <td>{{ props.item.room_types[0].name }}</td>
                     <td>{{ props.item.unit }}</td>
-                    <td>{{ props.item.price }}</td>
+                    <td>{{ props.item.jalan }}</td>
+                    <td>{{ props.item.block }}</td>
+                    <td>{{ props.item.floor }}</td>
+                    <td>{{ props.item.price | toDouble }}</td>
+                    <td>{{ props.item.room_status }}</td>
+                    <td>{{ _.get(props.item, ["owners", 0, "name"]) || "N/A" }}</td>
                   </tr>
                 </template>
               </v-data-table>

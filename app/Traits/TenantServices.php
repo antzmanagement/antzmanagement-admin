@@ -16,7 +16,7 @@ trait TenantServices
         $data = collect([]);
         //Role Based Retrieve Done in Store
         $userType = $this->getUserTypeById($this->tenantType);
-        $data = $data->merge($userType->users()->wherePivot('status', true)->where('users.status', true)->get());
+        $data = $data->merge($userType->users()->with('creator')->wherePivot('status', true)->where('users.status', true)->get());
 
         $data = $data->unique('id')->sortBy('id')->flatten(1);
 
@@ -26,7 +26,6 @@ trait TenantServices
 
     private function filterTenants($data, $params)
     {
-        $data = $this->globalFilter($data, $params);
         $params = $this->checkUndefinedProperty($params, $this->tenantFilterCols());
 
         if ($params->keyword) {
@@ -34,7 +33,7 @@ trait TenantServices
             $data = collect($data);
             $data = $data->filter(function ($item) use ($keyword) {
                 //check string exist inside or not
-                if ( stristr($item->name, $keyword) == TRUE || stristr($item->icno, $keyword) == TRUE ) {
+                if ( stristr($item->name, $keyword) == TRUE || stristr($item->icno, $keyword) == TRUE || stristr($item->occupation, $keyword) == TRUE) {
                     return true;
                 } else {
                     return false;
@@ -42,8 +41,56 @@ trait TenantServices
             })->values();
         }
 
-        error_log('444======================');
-        error_log($data);
+        if ($params->religion) {
+            $religion = $params->religion;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($religion) {
+                return $item->religion == $religion;
+            })->values();
+        }
+
+        if ($params->approach_method) {
+            $approach_method = $params->approach_method;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($approach_method) {
+                return $item->approach_method == $approach_method;
+            })->values();
+        }
+
+        if ($params->pic) {
+            $pic = $params->pic;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($pic) {
+                if($item->creator){
+                    return $item->creator->id == $pic;
+                }else{
+                    return false;
+                }
+            })->values();
+        }
+
+        if ($params->gender) {
+            $gender = $params->gender;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($gender) {
+                return $item->gender == $gender;
+            })->values();
+        }
+
+        if ($params->birthdayfromdate) {
+            $date = Carbon::parse($params->birthdayfromdate)->startOfDay();
+            $data = $data->filter(function ($item) use ($date) {
+                return (Carbon::parse(data_get($item, 'birthday')) >= $date);
+            });
+        }
+
+        if ($params->birthdaytodate) {
+            $date = Carbon::parse($params->birthdaytodate)->endOfDay();
+            $data = $data->filter(function ($item) use ($date) {
+                return (Carbon::parse(data_get($item, 'birthday')) <= $date);
+            });
+        }
+
         $data = $data->unique('id');
 
         return $data;
@@ -66,7 +113,7 @@ trait TenantServices
                 // Query the name field in status table
                 $q->where('status', true);
             }]);
-        }])->where('users.status', true)->first();
+        }, 'creator'])->where('users.status', true)->first();
 
         return $data;
     }
@@ -79,7 +126,7 @@ trait TenantServices
             $q->where('status', true);
             $q->where('expired', false);
             $q->with(['room', 'contract', 'rentalpayments', 'tenant']);
-        }])->where('users.status', true)->first();
+        }, 'creator'])->where('users.status', true)->first();
         return $data;
     }
 
@@ -140,7 +187,7 @@ trait TenantServices
     public function tenantFilterCols()
     {
 
-        return ['keyword', 'roomTypes'];
+        return ['keyword', 'religion', 'approach_method', 'gender', 'birthdayfromdate', 'birthdaytodate', 'pic'];
     }
 
 }

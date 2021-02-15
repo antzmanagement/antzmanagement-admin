@@ -26,14 +26,13 @@ trait StaffServices
 
     private function filterStaffs($data, $params)
     {
-        $data = $this->globalFilter($data, $params);
         $params = $this->checkUndefinedProperty($params, $this->staffFilterCols());
 
         if ($params->keyword) {
             $keyword = $params->keyword;
             $data = $data->filter(function ($item) use ($keyword) {
                 //check string exist inside or not
-                if (stristr($item->uid, $keyword) == TRUE || stristr($item->name, $keyword) == TRUE || stristr($item->icno, $keyword) == TRUE || stristr($item->email, $keyword) == TRUE) {
+                if (stristr($item->name, $keyword) == TRUE || stristr($item->icno, $keyword) == TRUE) {
                     return true;
                 } else {
                     return false;

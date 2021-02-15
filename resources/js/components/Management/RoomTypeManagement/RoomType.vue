@@ -77,7 +77,7 @@ export default {
           });
           this.$Progress.finish();
           this.endLoadingAction();
-            this.$router.push("/roomtypes");
+          this.$router.push("/roomtypes");
         })
         .catch((error) => {
           Toast.fire({
@@ -138,6 +138,14 @@ export default {
                   </div>
                 </div>
               </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Remark</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.remark }}</h4>
+                  </div>
+                </div>
+              </v-col>
             </v-row>
 
             <v-divider
@@ -186,9 +194,7 @@ export default {
               <v-col cols="auto">
                 <confirm-dialog
                   :activatorStyle="deleteButtonConfig.buttonStyle"
-                  @confirmed="
-                    $event ? deleteRoomType(data.uid) : null
-                  "
+                  @confirmed="$event ? deleteRoomType(data.uid) : null"
                 ></confirm-dialog>
               </v-col>
             </v-row>

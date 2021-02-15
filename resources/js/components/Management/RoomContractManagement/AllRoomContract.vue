@@ -45,16 +45,46 @@ export default {
       },
       headers: [
         {
-          text: "uid",
+          text: "Sequence No",
+        },
+        {
+          text: "Contract Type",
         },
         {
           text: "Room",
+        },
+        {
+          text: "Owner",
         },
         {
           text: "Tenant",
         },
         {
           text: "Start date",
+        },
+        {
+          text: "Deposit",
+        },
+        {
+          text: "Outstanding Deposit",
+        },
+        {
+          text: "Rental",
+        },
+        {
+          text: "Duration",
+        },
+        {
+          text: "Services",
+        },
+        {
+          text: "Checked out",
+        },
+        {
+          text: "Check Out Date",
+        },
+        {
+          text: "Owner",
         },
       ],
     };
@@ -97,9 +127,40 @@ export default {
     }),
     initRoomContractFilter(filterGroup) {
       this.roomContractFilterGroup.reset();
-      if (filterGroup) {
-        this.roomContractFilterGroup.keyword = filterGroup.keyword;
+      if (filterGroup.tenant) {
+        this.roomContractFilterGroup.tenant_id = filterGroup.tenant.id;
+        this.roomContractFilterGroup.tenant = filterGroup.tenant;
       }
+      if (filterGroup.owner) {
+        this.roomContractFilterGroup.owner_id = filterGroup.owner.id;
+        this.roomContractFilterGroup.owner = filterGroup.owner;
+      }
+      if (filterGroup.room) {
+        this.roomContractFilterGroup.room_id = filterGroup.room.id;
+        this.roomContractFilterGroup.room = filterGroup.room;
+      }
+      if (filterGroup.services) {
+        this.roomContractFilterGroup.service_ids =
+          _.map(filterGroup.services, "id") || [];
+        this.roomContractFilterGroup.services = filterGroup.services;
+      }
+      if (filterGroup.fromdate) {
+        this.roomContractFilterGroup.fromdate = filterGroup.fromdate;
+      }
+      if (filterGroup.todate) {
+        this.roomContractFilterGroup.todate = filterGroup.todate;
+      }
+      if (filterGroup.sequence) {
+        this.roomContractFilterGroup.sequence = filterGroup.sequence;
+      }
+      if (filterGroup.checkedout === 1 || filterGroup.checkedout === 0) {
+        this.roomContractFilterGroup.checkedout = filterGroup.checkedout;
+      }
+      if (filterGroup.outstanding_deposit === 1 || filterGroup.outstanding_deposit === 0) {
+        this.roomContractFilterGroup.outstanding_deposit =
+          filterGroup.outstanding_deposit;
+      }
+      console.log(this.roomContractFilterGroup);
       this.options.page = 1;
       this.getRoomContracts();
     },
@@ -161,22 +222,65 @@ export default {
         <v-row justify="center" align="center" class="mx-3">
           <v-col cols="12">
             <v-card raised>
-              <v-card-subtitle v-show="!keywordEmpty">
-                Keyword :
-                <v-chip class="mx-2">{{
-                  roomContractFilterGroup.keyword
-                }}</v-chip>
-              </v-card-subtitle>
-              <v-card-subtitle v-show="!fromdateEmpty">
+              <v-card-subtitle v-show="roomContractFilterGroup.fromdate">
                 From Date :
                 <v-chip class="mx-2">{{
-                  roomContractFilterGroup.keyword
+                  roomContractFilterGroup.fromdate
                 }}</v-chip>
               </v-card-subtitle>
-              <v-card-subtitle v-show="!todateEmpty">
+              <v-card-subtitle v-show="roomContractFilterGroup.todate">
                 To Date :
                 <v-chip class="mx-2">{{
                   roomContractFilterGroup.todate
+                }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="roomContractFilterGroup.sequence">
+                Sequence No :
+                <v-chip class="mx-2">{{
+                  roomContractFilterGroup.sequence
+                }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="roomContractFilterGroup.tenant">
+                Tenant :
+                <v-chip class="mx-2">{{
+                  _.get(roomContractFilterGroup, ["tenant", "name"]) || "N/A"
+                }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="roomContractFilterGroup.owner">
+                Owner :
+                <v-chip class="mx-2">{{
+                  _.get(roomContractFilterGroup, ["owner", "name"]) || "N/A"
+                }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="roomContractFilterGroup.room">
+                Room :
+                <v-chip class="mx-2">{{
+                  _.get(roomContractFilterGroup, ["room", "unit"]) || "N/A"
+                }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="_.isArray(roomContractFilterGroup.services) && !_.isEmpty(roomContractFilterGroup.services)">
+                Services :
+                <v-chip
+                  v-for="(service, i) in roomContractFilterGroup.services"
+                  :key="`service-${i}`"
+                  class="mx-2"
+                  >{{
+                    _.get(service, ["text"]) || "N/A"
+                  }}</v-chip
+                >
+              </v-card-subtitle>
+              <v-card-subtitle
+                v-show="roomContractFilterGroup.outstanding_deposit === 1 || roomContractFilterGroup.outstanding_deposit === 0 "
+              >
+                Outstanding Deposit :
+                <v-chip class="mx-2">{{
+                  roomContractFilterGroup.outstanding_deposit ? "Yes" : "No"
+                }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="roomContractFilterGroup.checkedout === 1 || roomContractFilterGroup.checkedout === 0">
+                Checked out :
+                <v-chip class="mx-2">{{
+                  roomContractFilterGroup.checkedout ? "Yes" : "No"
                 }}</v-chip>
               </v-card-subtitle>
             </v-card>
@@ -191,6 +295,12 @@ export default {
                 :options.sync="options"
                 :server-items-length="totalDataLength"
                 :loading="loading"
+                calculate-widths
+                disable-sort
+                :footer-props="{
+                  'items-per-page-options': [10],
+                  'show-current-page': true,
+                }"
               >
                 <template v-slot:top>
                   <v-toolbar flat class="mb-5">
@@ -203,10 +313,54 @@ export default {
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showRoomContract(props.item)">
-                    <td>{{ props.item.uid }}</td>
+                    <td>{{ props.item.sequence }}</td>
+                    <td>{{ props.item.contract.name }}</td>
                     <td>{{ props.item.room.name }}</td>
+                    <td>
+                      {{
+                        _.get(props.item, ["room", "owners", 0, "name"]) ||
+                        "N/A"
+                      }}
+                    </td>
                     <td>{{ props.item.tenant.name }}</td>
                     <td>{{ props.item.startdate }}</td>
+                    <td>RM {{ props.item.deposit | toDouble }}</td>
+                    <td>RM {{ props.item.outstanding_deposit | toDouble }}</td>
+                    <td>RM {{ props.item.rental | toDouble }}</td>
+                    <td>
+                      {{ props.item.duration }}
+                      {{ props.item.rental_type || "day" }}
+                    </td>
+                    <td>
+                      {{
+                        _.compact(
+                          _.map(
+                            _.concat(
+                              _.get(props.item, ["addonservices"]) || [],
+                              _.get(props.item, ["origservices"]) || []
+                            ),
+                            function (service) {
+                              return _.get(service, ["text"]) || "";
+                            }
+                          )
+                        ) | getArrayValues
+                      }}
+                    </td>
+                    <td class="text-center" v-if="props.item.checkedout">
+                      <v-icon small color="success">mdi-check</v-icon>
+                    </td>
+                    <td class="text-center" v-else>
+                      <v-icon small color="danger">mdi-close</v-icon>
+                    </td>
+                    <td>
+                      {{ props.item.checkout_date | formatDate }}
+                    </td>
+                    <td>
+                      {{
+                        _.get(props.item, ["room", "owners", 0, "name"]) ||
+                        "N/A"
+                      }}
+                    </td>
                   </tr>
                 </template>
               </v-data-table>

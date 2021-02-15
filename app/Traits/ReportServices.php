@@ -25,7 +25,6 @@ trait ReportServices
 
     private function filterReports($data, $params)
     {
-        $data = $this->globalFilter($data, $params);
         $params = $this->checkUndefinedProperty($params, $this->reportFilterCols());
 
         if ($params->keyword) {

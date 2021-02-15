@@ -16,18 +16,30 @@ export default {
       //   name: "home",
       //   modulename: "home"
       // },
-      // {
-      //   icon: "mdi-view-dashboard-outline",
-      //   text: "Dashboard",
-      //   name: "management",
-      //   modulename: "management",
-      // },
-      // {
-      //   icon: "mdi-account-multiple",
-      //   text: "User",
-      //   name: "usermanagement",
-      //   modulename: "user",
-      // },
+      {
+        icon: "mdi-view-dashboard-outline",
+        text: "Dashboard",
+        name: "management",
+        modulename: "management",
+      },
+      {
+        icon: "mdi-account-cog",
+        text: "Staff",
+        name: "staffs",
+        modulename: "staff",
+      },
+      {
+        icon: "mdi-account-tie",
+        text: "Owner",
+        name: "owners",
+        modulename: "owner",
+      },
+      {
+        icon: "mdi-account-group",
+        text: "Tenant",
+        name: "tenants",
+        modulename: "tenant",
+      },
       {
         icon: "mdi-home-group",
         text: "Room Type",
@@ -46,30 +58,30 @@ export default {
         name: "rooms",
         modulename: "room",
       },
-      // {
-      //   icon: "mdi-bank-plus",
-      //   text: "Room Contract",
-      //   name: "roomcontracts",
-      //   modulename: "roomcontract",
-      // },
-      // {
-      //   icon: "mdi-home-currency-usd",
-      //   text: "Rental Payment",
-      //   name: "rentalpayments",
-      //   modulename: "rentalpayment",
-      // },
-      // {
-      //   icon: "mdi-home-currency-usd",
-      //   text: "Claim",
-      //   name: "claims",
-      //   modulename: "claim",
-      // },
-      // {
-      //   icon: "mdi-screwdriver",
-      //   text: "Room Maintenance",
-      //   name: "maintenances",
-      //   modulename: "maintenance",
-      // },
+      {
+        icon: "mdi-bank-plus",
+        text: "Room Contract",
+        name: "roomcontracts",
+        modulename: "roomcontract",
+      },
+      {
+        icon: "mdi-home-currency-usd",
+        text: "Rental Payment",
+        name: "rentalpayments",
+        modulename: "rentalpayment",
+      },
+      {
+        icon: "mdi-home-currency-usd",
+        text: "Claim",
+        name: "claims",
+        modulename: "claim",
+      },
+      {
+        icon: "mdi-screwdriver",
+        text: "Room Maintenance",
+        name: "maintenances",
+        modulename: "maintenance",
+      },
       // {
       //   icon: "mdi-chair-rolling",
       //   text: "Property",

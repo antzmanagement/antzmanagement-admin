@@ -79,6 +79,7 @@ class RoomTypeController extends Controller
             'name' => $request->name,
             'price' => $request->price,
             'area' => $request->area,
+            'remark' => $request->remark,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
@@ -111,6 +112,7 @@ class RoomTypeController extends Controller
             'name' => 'required|string|max:300',
             'price' => 'nullable|numeric',
             'services' => 'array',
+            'remark' => $request->remark,
         ]);
         if ($this->isEmpty($roomType)) {
             DB::rollBack();
@@ -120,6 +122,7 @@ class RoomTypeController extends Controller
             'name' => $request->name,
             'price' => $request->price,
             'area' => $request->area,
+            'remark' => $request->remark,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

@@ -45,6 +45,7 @@ export default {
     this.showLoadingAction();
     this.getTenantAction({ uid: this.$route.params.uid })
       .then((data) => {
+        console.log(data.data);
         this.data = data.data;
         this.$Progress.finish();
         this.endLoadingAction();
@@ -290,6 +291,14 @@ export default {
                   <label class="form-label mb-0">How you know Us?</label>
                   <div class="form-control-plaintext">
                     <h4>{{ data.approach_method }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Person In Charge</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ _.get(data, ['creator', 'name']) || 'N/A' }}</h4>
                   </div>
                 </div>
               </v-col>

@@ -35,11 +35,13 @@ class RoomController extends Controller
         error_log($this->controllerName . 'Retrieving list of filtered rooms.');
         // api/room/filter (GET)
         $params = collect([
-            'keyword' => $request->keyword,
-            'fromdate' => $request->fromdate,
-            'todate' => $request->todate,
-            'roomTypes' => $request->roomTypes,
-            'status' => $request->status,
+            'unit' => $request->unit,
+            'floor' => $request->floor,
+            'block' => $request->block,
+            'jalan' => $request->jalan,
+            'owner_id' => $request->owner_id,
+            'room_type_id' => $request->room_type_id,
+            'room_status' => $request->room_status,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
@@ -72,7 +74,7 @@ class RoomController extends Controller
         // Can only be used by Authorized personnel
         // api/room (POST)
         $this->validate($request, [
-            'name' => 'required|string|max:300',
+            'unit' => 'required|string|max:300',
             'address' => 'nullable|string|max:300',
             'postcode' => 'nullable|string|max:300',
             'state' => 'nullable|string|max:300',
@@ -84,9 +86,10 @@ class RoomController extends Controller
             'sublet' => 'required|boolean',
             'room_status' => 'required|string',
         ]);
+        error_log($request->unit);
         error_log($this->controllerName . 'Creating room.');
         $params = collect([
-            'name' => $request->name,
+            'name' => $request->unit,
             'address' => $request->address,
             'postcode' => $request->postcode,
             'state' => $request->state,
@@ -165,7 +168,7 @@ class RoomController extends Controller
         error_log($this->controllerName . 'Updating room of uid: ' . $uid);
         $room = $this->getRoom($uid);
         $this->validate($request, [
-            'name' => 'required|string|max:300',
+            'unit' => 'required|string|max:300',
             'address' => 'nullable|string|max:300',
             'postcode' => 'nullable|string|max:300',
             'state' => 'nullable|string|max:300',
@@ -182,7 +185,7 @@ class RoomController extends Controller
             return $this->notFoundResponse('Room');
         }
         $params = collect([
-            'name' => $request->name,
+            'name' => $request->unit,
             'address' => $request->address,
             'postcode' => $request->postcode,
             'state' => $request->state,

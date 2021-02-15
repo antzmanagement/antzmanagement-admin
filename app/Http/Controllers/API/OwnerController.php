@@ -8,6 +8,7 @@ use DB;
 use Carbon\Carbon;
 use App\Room;
 use App\UserType;
+use App\Role;
 use Illuminate\Support\Facades\Hash;
 use App\Traits\AllServices;
 use Illuminate\Validation\Rule;
@@ -203,15 +204,26 @@ class OwnerController extends Controller
                     $query->where('status', true);
                 }),
             ],
-            'password' => 'required|string|min:6|confirmed',
+            // 'password' => 'required|string|min:6|confirmed',
         ]);
+        $role = Role::where('name', 'owner')->where('status', true)->first();
+        if ($this->isEmpty($role)) {
+            DB::rollBack();
+            return $this->errorResponse();
+        }
         error_log($this->controllerName . 'Creating owner.');
         $params = collect([
             'name' => $request->name,
             'icno' => $request->icno,
             'tel1' => $request->tel1,
             'email' => $request->email,
-            'password' => $request->password,
+            'occupation' => $request->occupation,
+            'address' => $request->address,
+            'postcode' => $request->postcode,
+            'state' => $request->state,
+            'city' => $request->city,
+            'role_id' => $role->id,
+            // 'password' => $request->password,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
@@ -364,11 +376,22 @@ class OwnerController extends Controller
             DB::rollBack();
             return $this->notFoundResponse('Owner');
         }
+        $role = Role::where('name', 'owner')->where('status', true)->first();
+        if ($this->isEmpty($role)) {
+            DB::rollBack();
+            return $this->errorResponse();
+        }
         $params = collect([
             'icno' => $request->icno,
             'name' => $request->name,
             'email' => $request->email,
             'tel1' => $request->tel1,
+            'occupation' => $request->occupation,
+            'address' => $request->address,
+            'postcode' => $request->postcode,
+            'state' => $request->state,
+            'city' => $request->city,
+            'role_id' => $role->id,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

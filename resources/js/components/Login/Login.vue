@@ -9,7 +9,7 @@
               <v-toolbar color="primary" dark flat>
                 <v-toolbar-title>Login form</v-toolbar-title>
                 <v-spacer />
-                <v-tooltip bottom>
+                <!-- <v-tooltip bottom>
                   <template v-slot:activator="{ on }">
                     <v-btn href="#" icon large target="_blank" v-on="on">
                       <v-icon>mdi-code-tags</v-icon>
@@ -24,7 +24,7 @@
                     </v-btn>
                   </template>
                   <span>Codepen</span>
-                </v-tooltip>
+                </v-tooltip> -->
               </v-toolbar>
               <v-card-text>
                 <v-form>

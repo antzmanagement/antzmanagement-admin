@@ -46,6 +46,11 @@ export default {
         password_confirmation: "",
         roomTypes: [],
         rooms: [],
+        occupation: "",
+        address: "",
+        postcode: "",
+        state: "",
+        city: "",
       }),
       roomFilterGroup: new Form({
         roomTypes: [],
@@ -77,11 +82,11 @@ export default {
           icno: { required, maxLength: maxLength(14) },
           tel1: {},
           email: { required, email },
-          password: { required, minLength: minLength(8) },
-          password_confirmation: {
-            required,
-            sameAsPassword: sameAs("password"),
-          },
+          // password: { required, minLength: minLength(8) },
+          // password_confirmation: {
+          //   required,
+          //   sameAsPassword: sameAs("password"),
+          // },
         },
       };
     } else {
@@ -442,7 +447,7 @@ export default {
                 :error-messages="tel1Errors"
               ></v-text-field>
             </v-col>
-            <v-col cols="12">
+            <v-col cols="6">
               <v-text-field
                 label="Email*"
                 hint="Email that used to login the website"
@@ -455,7 +460,43 @@ export default {
                 :error-messages="emailErrors"
               ></v-text-field>
             </v-col>
-            <v-col cols="12" v-if="!editMode">
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="Occupation"
+                v-model="data.occupation"
+                :maxlength="300"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="12">
+              <v-text-field
+                label="Address"
+                v-model="data.address"
+                :maxlength="300"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="Postcode"
+                v-model="data.postcode"
+                :maxlength="300"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="City"
+                v-model="data.city"
+                :maxlength="300"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="State"
+                v-model="data.state"
+                :maxlength="300"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6"> </v-col>
+            <!-- <v-col cols="12" v-if="!editMode">
               <v-text-field
                 label="Password*"
                 hint="Password should be more than 8 characters."
@@ -480,9 +521,9 @@ export default {
                 @blur="$v.data.password_confirmation.$touch()"
                 :error-messages="passwordConfirmErrors"
               ></v-text-field>
-            </v-col>
+            </v-col> -->
 
-            <v-col cols="12" md="6">
+            <v-col cols="12" md="12">
               <v-autocomplete
                 v-model="data.rooms"
                 :items="rooms"
@@ -490,7 +531,7 @@ export default {
                 item-value="id"
                 chips
                 deletable-chips
-                label="Room"
+                label="Owner Room"
                 multiple
               >
                 <template v-slot:append-outer>

@@ -28,7 +28,6 @@ trait UserTypeServices {
 
 
     private function filterUserTypes($data , $params) {
-        $data = $this->globalFilter($data, $params);
         $params = $this->checkUndefinedProperty($params , $this->userTypeFilterCols());
 
         if($params->keyword){

@@ -27,7 +27,6 @@ trait ServiceServices
 
     private function filterServices($data, $params)
     {
-        $data = $this->globalFilter($data, $params);
         $params = $this->checkUndefinedProperty($params, $this->serviceFilterCols());
 
         if ($params->keyword) {

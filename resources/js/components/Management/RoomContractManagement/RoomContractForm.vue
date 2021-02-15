@@ -193,6 +193,7 @@ export default {
           room.price = parseFloat(room.price);
           room.deposit = 700;
           room.booking_fees = 200;
+          room.outstanding_deposit = room.deposit - room.booking_fees;
           room.agreement_fees = 50;
           room.autorenew = false;
           return room;
@@ -617,13 +618,13 @@ export default {
                         <th class="text-left" v-if="!isSubContract">
                           Booking Fees
                         </th>
-                        <!-- <th class="text-left" v-if="editMode">
+                        <th class="text-left" v-if="editMode">
                           Outstanding Deposit
-                        </th> -->
+                        </th>
                         <th class="text-left">Contract</th>
                         <th class="text-left">Contract Start Date</th>
                         <th class="text-left">Contract End Date</th>
-                        <th class="text-left">Auto Renew</th>
+                        <!-- <th class="text-left">Auto Renew</th> -->
                         <th class="text-left">Services</th>
                       </tr>
                     </thead>
@@ -682,7 +683,7 @@ export default {
                             "
                           ></v-text-field>
                         </td>
-                        <!-- <td v-if="editMode">
+                        <td v-if="editMode">
                           <v-text-field
                             v-model="data.room.outstanding_deposit"
                             prefix="RM"
@@ -694,7 +695,7 @@ export default {
                                 : ''
                             "
                           ></v-text-field>
-                        </td> -->
+                        </td>
                         <td>
                           <v-autocomplete
                             v-model="data.room.contract_id"
@@ -774,9 +775,9 @@ export default {
                           </v-menu>
                         </td>
 
-                        <td>
+                        <!-- <td>
                           <v-switch v-model="data.room.autorenew"></v-switch>
-                        </td>
+                        </td> -->
                         <td>
                           <services-dialog
                             :dialogStyle="servicesDialogConfig.dialogStyle"

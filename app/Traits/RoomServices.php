@@ -24,6 +24,9 @@ trait RoomServices
             // Query the name field in status table
             $q->with('services');
             $q->wherePivot('status', true);
+        }, 'owners' => function ($q) {
+            // Query the name field in status table
+            $q->wherePivot('status', true);
         }])->where('status', true)->get();
 
         $data = $data->unique('id')->sortBy('id')->flatten(1);
@@ -34,33 +37,69 @@ trait RoomServices
 
     private function filterRooms($data, $params)
     {
-        $data = $this->globalFilter($data, $params);
         $params = $this->checkUndefinedProperty($params, $this->roomFilterCols());
 
-        if ($params->keyword) {
-            $keyword = $params->keyword;
-            $data = $data->filter(function ($item) use ($keyword) {
-                //check string exist inside or not
-                if (stristr($item->unit, $keyword) == TRUE) {
-                    return true;
-                } else {
-                    return false;
-                }
-            });
-        }
-        if ($params->roomTypes) {
-            $roomTypes = collect($params->roomTypes);
-            $data = $data->filter(function ($item) use ($roomTypes) {
-                $item = $item->roomTypes()->wherePivot('status', true)->where('room_types.status', true)->get();
-                $ids = $item->pluck('id');
-                foreach ($roomTypes as $roomType) {
-                    if ($ids->contains($roomType)) {
-                        return true;
-                    }
-                }
-                return false;
+    
+        if ($params->unit) {
+            $unit = $params->unit;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($unit) {
+                return $item->unit == $unit;
             })->values();
         }
+
+        if ($params->block) {
+            $block = $params->block;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($block) {
+                return $item->block == $block;
+            })->values();
+        }
+
+        if ($params->floor) {
+            $floor = $params->floor;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($floor) {
+                return $item->floor == $floor;
+            })->values();
+        }
+
+        if ($params->jalan) {
+            $jalan = $params->jalan;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($jalan) {
+                return $item->jalan == $jalan;
+            })->values();
+        }
+
+        if ($params->room_status) {
+            $room_status = $params->room_status;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($room_status) {
+                return $item->room_status == $room_status;
+            })->values();
+        }
+
+        if($params->room_type_id){
+            $room_type_id = $params->room_type_id;
+            $data = $data->filter(function ($item) use($room_type_id) {
+                if($item->roomtypes){
+                    return $item->roomtypes->contains('id' , $room_type_id);
+                }
+                return false;
+            });
+        }
+
+        if($params->owner_id){
+            $owner_id = $params->owner_id;
+            $data = $data->filter(function ($item) use($owner_id) {
+                if($item->owners){
+                    return $item->owners->contains('id' , $owner_id);
+                }
+                return false;
+            });
+        }
+
 
         $data = $data->unique('id');
 
@@ -240,6 +279,6 @@ trait RoomServices
     public function roomFilterCols()
     {
 
-        return ['keyword', 'roomTypes'];
+        return ['unit', 'jalan','block', 'floor','room_type_id', 'owner_id','room_status'];
     }
 }

@@ -44,7 +44,7 @@ export default {
       },
       headers: [
         {
-          text: "uid",
+          text: "id",
         },
         {
           text: "Name",
@@ -194,7 +194,7 @@ export default {
                 </template> -->
                 <template v-slot:item="props">
                   <tr @click="showRoomType(props.item)">
-                    <td>{{ props.item.uid }}</td>
+                    <td>{{ props.item.id }}</td>
                     <td>{{ props.item.name }}</td>
                     <td>{{ props.item.price }}</td>
                   </tr>

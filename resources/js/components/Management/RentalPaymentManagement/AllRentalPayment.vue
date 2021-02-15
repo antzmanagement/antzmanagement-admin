@@ -20,22 +20,34 @@ export default {
         paymentdate: "",
         uid: "",
       },
-      totalDataLength: 0,
+      rentalPaymentTotal: 0,
+      paymentTotal: 0,
       data: [],
+      paymentData: [],
       loading: true,
+      paymentLoading: true,
       options: {},
+      paymentOptions: {},
       rentalPaymentFilterGroup: new Form({
         rooms: [],
         selectedRooms: [],
         keyword: null,
         fromdate: null,
         todate: null,
-        paid: "all",
+        paid: null,
+      }),
+      paymentFilterGroup: new Form({
+        rooms: [],
+        selectedRooms: [],
+        keyword: null,
+        fromdate: null,
+        todate: null,
+        paid: null,
       }),
       rentalPaymentFilterDialogConfig: {
         buttonStyle: {
-          block: true,
-          class: "ma-2",
+          block: false,
+          class: "",
           text: "Filter",
           icon: "mdi-magnify",
           isIcon: false,
@@ -84,6 +96,9 @@ export default {
       },
       headers: [
         {
+          text: "Sequence No",
+        },
+        {
           text: "Tenant",
         },
         {
@@ -117,12 +132,42 @@ export default {
           text: "Action",
         },
       ],
+      paymentHeaders: [
+        {
+          text: "Sequence No",
+          value: "sequence",
+        },
+        {
+          text: "Tenant",
+        },
+        {
+          text: "Room Contract",
+        },
+        {
+          text: "Room",
+        },
+        { text: "Payment Date", value: "paymentdate" },
+        { text: "Price", value: "price" },
+        { text: "Other Charges", value: "other_charges" },
+        {
+          text: "Services",
+          value: "services",
+        },
+        { text: "Remark", value: "remark" },
+        { text: "Actions" },
+      ],
     };
   },
   watch: {
     options: {
       handler() {
         this.getRentalPayments();
+      },
+      deep: true,
+    },
+    paymentOptions: {
+      handler() {
+        this.getPayments();
       },
       deep: true,
     },
@@ -147,12 +192,16 @@ export default {
   created() {},
   mounted() {
     this.getRentalPayments();
+    this.getPayments();
   },
   methods: {
     ...mapActions({
       getRentalPaymentsAction: "getRentalPayments",
       filterRentalPaymentsAction: "filterRentalPayments",
+      getPaymentsAction: "getPayments",
+      filterPaymentsAction: "filterPayments",
       deleteRentalPaymentAction: "deleteRentalPayment",
+      deletePaymentAction: "deletePayment",
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction",
     }),
@@ -163,11 +212,70 @@ export default {
     },
     initRentalPaymentFilter(filterGroup) {
       this.rentalPaymentFilterGroup.reset();
-      if (filterGroup) {
-        this.rentalPaymentFilterGroup.keyword = filterGroup.keyword;
-        this.rentalPaymentFilterGroup.paid = filterGroup.paid;
+      if (filterGroup.tenant) {
+        this.rentalPaymentFilterGroup.tenant_id = filterGroup.tenant.id;
+        this.rentalPaymentFilterGroup.tenant = filterGroup.tenant;
       }
+      if (filterGroup.room) {
+        this.rentalPaymentFilterGroup.room_id = filterGroup.room.id;
+        this.rentalPaymentFilterGroup.room = filterGroup.room;
+      }
+      if (filterGroup.fromdate) {
+        this.rentalPaymentFilterGroup.fromdate = filterGroup.fromdate;
+      }
+      if (filterGroup.sequence) {
+        this.rentalPaymentFilterGroup.sequence = filterGroup.sequence;
+      }
+      if (filterGroup.todate) {
+        this.rentalPaymentFilterGroup.todate = filterGroup.todate;
+      }
+      if (filterGroup.penalty === 1 || filterGroup.penalty === 0) {
+        this.rentalPaymentFilterGroup.penalty =
+          filterGroup.penalty;
+      }
+      if (filterGroup.paid === 1 || filterGroup.paid === 0) {
+        this.rentalPaymentFilterGroup.paid =
+          filterGroup.paid;
+      }
+
+      this.options.page = 1;
       this.getRentalPayments();
+    },
+    initPaymentFilter(filterGroup) {
+      this.paymentFilterGroup.reset();
+      if (filterGroup.tenant) {
+        this.paymentFilterGroup.tenant_id = filterGroup.tenant.id;
+        this.paymentFilterGroup.tenant = filterGroup.tenant;
+      }
+      if (filterGroup.room) {
+        this.paymentFilterGroup.room_id = filterGroup.room.id;
+        this.paymentFilterGroup.room = filterGroup.room;
+      }
+      if (filterGroup.fromdate) {
+        this.paymentFilterGroup.fromdate = filterGroup.fromdate;
+      }
+      if (filterGroup.services) {
+        this.paymentFilterGroup.service_ids =
+          _.map(filterGroup.services, "id") || [];
+        this.paymentFilterGroup.services = filterGroup.services;
+      }
+      if (filterGroup.sequence) {
+        this.paymentFilterGroup.sequence = filterGroup.sequence;
+      }
+      if (filterGroup.todate) {
+        this.paymentFilterGroup.todate = filterGroup.todate;
+      }
+      if (filterGroup.penalty === 1 || filterGroup.penalty === 0) {
+        this.paymentFilterGroup.penalty =
+          filterGroup.penalty;
+      }
+      if (filterGroup.paid === 1 || filterGroup.paid === 0) {
+        this.paymentFilterGroup.paid =
+          filterGroup.paid;
+      }
+
+      this.paymentOptions.page = 1;
+      this.getPayments();
     },
     showRentalPayment($data) {
       this.$router.push("/rentalpayment/" + $data.uid);
@@ -185,6 +293,34 @@ export default {
           return item;
         }
       });
+    },
+    deletePaymentDetails(data) {
+      var id = data.id;
+      this.paymentData = this.paymentData.filter(function (item) {
+        return item.id != id;
+      });
+    },
+    deletePayment($uid) {
+      this.$Progress.start();
+      this.showLoadingAction();
+      this.deletePaymentAction({ uid: $uid })
+        .then((data) => {
+          Toast.fire({
+            icon: "success",
+            title: "Successful Deleted. ",
+          });
+          this.deletePaymentDetails(data.data);
+          this.$Progress.finish();
+          this.endLoadingAction();
+        })
+        .catch((error) => {
+          Toast.fire({
+            icon: "warning",
+            title: "Fail to delete the payment!!!!! ",
+          });
+          this.$Progress.finish();
+          this.endLoadingAction();
+        });
     },
     deleteRentalPaymentDetails(data) {
       var id = data.id;
@@ -236,11 +372,46 @@ export default {
           } else {
             this.data = [];
           }
-          this.totalDataLength = data.totalResult;
+          this.rentalPaymentTotal = data.totalResult;
           this.loading = false;
         })
         .catch((error) => {
           this.loading = false;
+          Toast.fire({
+            icon: "warning",
+            title: "Something went wrong... ",
+          });
+        });
+    },
+    getPayments() {
+      this.paymentLoading = true;
+      const { sortBy, sortDesc, page, itemsPerPage } = this.paymentOptions;
+
+      var totalResult = itemsPerPage;
+      //Show All Items
+      if (totalResult == -1) {
+        this.paymentFilterGroup.pageNumber = -1;
+        this.paymentFilterGroup.pageSize = -1;
+      } else {
+        this.paymentFilterGroup.pageNumber = page;
+        this.paymentFilterGroup.pageSize = itemsPerPage;
+      }
+
+      console.log(this.paymentFilterGroup);
+      this.filterPaymentsAction(this.paymentFilterGroup)
+        .then((data) => {
+          if (data.data) {
+            this.paymentData = data.data;
+          } else {
+            this.paymentData = [];
+          }
+          this.paymentTotal = data.totalResult;
+          this.paymentLoading = false;
+          console.log('data');
+          console.log(this.paymentData);
+        })
+        .catch((error) => {
+          this.paymentLoading = false;
           Toast.fire({
             icon: "warning",
             title: "Something went wrong... ",
@@ -270,22 +441,48 @@ export default {
         <v-row justify="center" align="center" class="mx-3">
           <v-col cols="12">
             <v-card raised>
-              <v-card-subtitle v-show="!keywordEmpty">
-                Keyword :
-                <v-chip class="mx-2">{{
-                  rentalPaymentFilterGroup.keyword
-                }}</v-chip>
-              </v-card-subtitle>
-              <v-card-subtitle v-show="!fromdateEmpty">
+              <v-card-subtitle v-show="rentalPaymentFilterGroup.fromdate">
                 From Date :
                 <v-chip class="mx-2">{{
-                  rentalPaymentFilterGroup.keyword
+                  rentalPaymentFilterGroup.fromdate
                 }}</v-chip>
               </v-card-subtitle>
-              <v-card-subtitle v-show="!todateEmpty">
+              <v-card-subtitle v-show="rentalPaymentFilterGroup.todate">
                 To Date :
                 <v-chip class="mx-2">{{
                   rentalPaymentFilterGroup.todate
+                }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="rentalPaymentFilterGroup.sequence">
+                Sequence No :
+                <v-chip class="mx-2">{{
+                  rentalPaymentFilterGroup.sequence
+                }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="rentalPaymentFilterGroup.tenant">
+                Tenant :
+                <v-chip class="mx-2">{{
+                  _.get(rentalPaymentFilterGroup, ["tenant", "name"]) || "N/A"
+                }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="rentalPaymentFilterGroup.room">
+                Room :
+                <v-chip class="mx-2">{{
+                  _.get(rentalPaymentFilterGroup, ["room", "unit"]) || "N/A"
+                }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle
+                v-show="rentalPaymentFilterGroup.penalty === 1 || rentalPaymentFilterGroup.penalty === 0 "
+              >
+                Penalty :
+                <v-chip class="mx-2">{{
+                  rentalPaymentFilterGroup.penalty ? "Yes" : "No"
+                }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="rentalPaymentFilterGroup.paid === 1 || rentalPaymentFilterGroup.paid === 0">
+                Paid :
+                <v-chip class="mx-2">{{
+                  rentalPaymentFilterGroup.paid ? "Yes" : "No"
                 }}</v-chip>
               </v-card-subtitle>
             </v-card>
@@ -298,11 +495,16 @@ export default {
                 :headers="headers"
                 :items="data"
                 :options.sync="options"
-                :server-items-length="totalDataLength"
+                :server-items-length="rentalPaymentTotal"
                 :loading="loading"
               >
                 <template v-slot:top>
-                  <v-toolbar flat class="mb-5">
+                  <v-toolbar flat color="white">
+                    <v-toolbar-title
+                      :class="helpers.managementStyles().subtitleClass"
+                      >All Rental Payment</v-toolbar-title
+                    >
+                    <v-spacer></v-spacer>
                     <rental-payment-filter-dialog
                       :buttonStyle="rentalPaymentFilterDialogConfig.buttonStyle"
                       :dialogStyle="rentalPaymentFilterDialogConfig.dialogStyle"
@@ -312,6 +514,7 @@ export default {
                 </template>
                 <template v-slot:item="props">
                   <tr>
+                    <td>{{ props.item.sequence }}</td>
                     <td>{{ props.item.roomcontract.tenant.name }}</td>
                     <td>{{ props.item.roomcontract.name }}</td>
                     <td>{{ props.item.roomcontract.room.name }}</td>
@@ -328,14 +531,15 @@ export default {
                     </td>
                     <td>{{ props.item.paymentdate | formatDate }}</td>
                     <td>
-                      <v-icon
-                        small
-                        class="mr-2"
-                        @click="print(props.item)"
+                      <print-rental-payment-button
+                        :item="props.item"
+                        :roomcontract="props.item.roomcontract"
                         v-if="props.item.paid"
-                        color="success"
-                        >mdi-printer</v-icon
                       >
+                        <v-icon small class="mr-2" color="success"
+                          >mdi-printer</v-icon
+                        >
+                      </print-rental-payment-button>
                       <!-- <rental-print
                         @click="selectedRental = props.item"
                         class="mr-2"
@@ -369,278 +573,76 @@ export default {
               </v-data-table>
             </v-card>
           </v-col>
+          <v-col
+            cols="12"
+            :class="helpers.managementStyles().centerWrapperClass"
+          >
+            <v-card raised width="100%">
+              <v-data-table
+                :headers="paymentHeaders"
+                :items="paymentData"
+                :options.sync="paymentOptions"
+                :server-items-length="paymentTotal"
+                :loading="paymentLoading"
+              >
+                <template v-slot:top>
+                  <v-toolbar flat color="white">
+                    <v-toolbar-title
+                      :class="helpers.managementStyles().subtitleClass"
+                      >Add On Payment</v-toolbar-title
+                    >
+                    <v-spacer></v-spacer>
+                    <payment-filter-dialog
+                      :buttonStyle="rentalPaymentFilterDialogConfig.buttonStyle"
+                      :dialogStyle="rentalPaymentFilterDialogConfig.dialogStyle"
+                      @submitFilter="initPaymentFilter($event)"
+                    ></payment-filter-dialog>
+                  </v-toolbar>
+                </template>
+                <template v-slot:item="props">
+                  <tr>
+                    <td>{{ props.item.sequence }}</td>
+                    <td>{{ props.item.roomcontract.tenant.name }}</td>
+                    <td>{{ props.item.roomcontract.name }}</td>
+                    <td>{{ props.item.roomcontract.room.name }}</td>
+                    <td>{{ props.item.paymentdate | formatDate }}</td>
+                    <td>{{ props.item.totalpayment | toDouble }}</td>
+                    <td>{{ props.item.other_charges | toDouble }}</td>
+                    <td>
+                      {{
+                        _.compact(
+                          _.map(props.item.services, function (service) {
+                            return _.get(service, ["text"]) || "";
+                          })
+                        ) | getArrayValues
+                      }}
+                    </td>
+                    <td>{{ props.item.remark }}</td>
+                    <td>
+                      <print-payment-button
+                        :item="props.item"
+                        :roomcontract="props.item.roomcontract"
+                      >
+                        <v-icon small class="mr-2" color="success"
+                          >mdi-printer</v-icon
+                        >
+                      </print-payment-button>
+
+                      <confirm-dialog
+                        :activatorStyle="
+                          deleteRentalButtonConfig.activatorStyle
+                        "
+                        @confirmed="
+                          $event ? deletePayment(props.item.uid) : null
+                        "
+                      ></confirm-dialog>
+                    </td>
+                  </tr>
+                </template>
+              </v-data-table>
+            </v-card>
+          </v-col>
         </v-row>
-        <div class="d-none" id="printMe">
-          <v-container>
-            <v-row>
-              <v-col
-                cols="12"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div class="h5 my-5 font-weight-bold">Payment Receipt</div>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="3"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">
-                  Payment Id
-                </div>
-              </v-col>
-              <v-col
-                cols="1"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">:</div>
-              </v-col>
-              <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">
-                  {{ selectedRental.uid }}
-                </div>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="3"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">
-                  Tenant
-                </div>
-              </v-col>
-              <v-col
-                cols="1"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">:</div>
-              </v-col>
-              <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">
-                  {{ selectedRental.roomcontract.tenant.name }}
-                </div>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="3"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">
-                  Room
-                </div>
-              </v-col>
-              <v-col
-                cols="1"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">:</div>
-              </v-col>
-              <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">
-                  {{ selectedRental.roomcontract.room.name }}
-                </div>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="3"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">
-                  Contract
-                </div>
-              </v-col>
-              <v-col
-                cols="1"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">:</div>
-              </v-col>
-              <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">
-                  {{ selectedRental.roomcontract.name }}
-                </div>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="3"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">
-                  Contract Start Date
-                </div>
-              </v-col>
-              <v-col
-                cols="1"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">:</div>
-              </v-col>
-              <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">
-                  {{ selectedRental.roomcontract.startdate | formatDate }}
-                </div>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="3"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">
-                  Rental
-                </div>
-              </v-col>
-              <v-col
-                cols="1"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">:</div>
-              </v-col>
-              <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">
-                  {{ selectedRental.rentaldate | formatDate }}
-                </div>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="3"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">
-                  Payment Date
-                </div>
-              </v-col>
-              <v-col
-                cols="1"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">:</div>
-              </v-col>
-              <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">
-                  {{ selectedRental.paymentdate | formatDate }}
-                </div>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="3"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">
-                  Price
-                </div>
-              </v-col>
-              <v-col
-                cols="1"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">:</div>
-              </v-col>
-              <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">
-                  RM {{ selectedRental.price | toDouble }}
-                </div>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="3"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">
-                  Penalty
-                </div>
-              </v-col>
-              <v-col
-                cols="1"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">:</div>
-              </v-col>
-              <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">
-                  RM {{ selectedRental.penalty | toDouble }}
-                </div>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="3"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">
-                  Processing Fees
-                </div>
-              </v-col>
-              <v-col
-                cols="1"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">:</div>
-              </v-col>
-              <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">
-                  RM {{ selectedRental.processing_fees | toDouble }}
-                </div>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="3"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">
-                  Service Fees
-                </div>
-              </v-col>
-              <v-col
-                cols="1"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">:</div>
-              </v-col>
-              <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">
-                  RM {{ selectedRental.service_fees | toDouble }}
-                </div>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="3"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">
-                  Total Paid
-                </div>
-              </v-col>
-              <v-col
-                cols="1"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">:</div>
-              </v-col>
-              <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">
-                  RM
-                  {{
-                    (parseFloat(selectedRental.penalty) +
-                      parseFloat(selectedRental.price)+
-                      parseFloat(selectedRental.processing_fees)+
-                      parseFloat(selectedRental.service_fees))
-                      | toDouble
-                  }}
-                </div>
-              </v-col>
-            </v-row>
-          </v-container>
-        </div>
         <v-dialog
           persistent
           :maxWidth="'30%'"

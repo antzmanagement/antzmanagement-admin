@@ -169,14 +169,14 @@ export default {
               v-model="data.price"
             ></v-text-field>
           </v-col>
-          <v-col cols="12">
+          <!-- <v-col cols="12">
             <v-text-field
               label="Service Fees"
               type="number"
               step="0.01"
               v-model="data.service_fees"
             ></v-text-field>
-          </v-col>
+          </v-col> -->
           <v-col cols="12">
             <v-text-field
               label="Processing Fees"
@@ -197,7 +197,7 @@ export default {
       </v-container>
     </v-card-text>
     <v-card-actions>
-      <services-dialog
+      <!-- <services-dialog
         :dialogStyle="servicesDialogConfig.dialogStyle"
         :services="pluckUid(!_.isEmpty(services) ? _.cloneDeep(services) : [])"
         editMode
@@ -208,7 +208,7 @@ export default {
         "
       >
       <v-btn color="green darken-1" text>Add On Services</v-btn>
-      </services-dialog>
+      </services-dialog> -->
       <v-spacer></v-spacer>
       <v-btn color="blue darken-1" text @click="close()">Close</v-btn>
       <v-btn color="blue darken-1" text @click="makePayment()">Save</v-btn>

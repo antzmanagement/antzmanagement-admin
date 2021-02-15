@@ -45,6 +45,11 @@ export default {
       },
       headers: [
         {
+          text: "Id",
+          align: "start",
+          value: "id",
+        },
+        {
           text: "Name",
           align: "start",
           value: "name",
@@ -96,14 +101,9 @@ export default {
     initOwnerFilter(filterGroup) {
       this.ownerFilterGroup.reset();
       if (filterGroup) {
-        this.ownerFilterGroup.selectedRoomTypes = filterGroup.roomTypes;
-        this.ownerFilterGroup.roomTypes = filterGroup.roomTypes.map(function (
-          roomType
-        ) {
-          return roomType.id;
-        });
         this.ownerFilterGroup.keyword = filterGroup.keyword;
       }
+      this.options.page = 1;
       this.getOwners();
     },
     showOwner($data) {
@@ -210,6 +210,7 @@ export default {
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showOwner(props.item)">
+                    <td>{{ props.item.id }}</td>
                     <td>{{ props.item.name }}</td>
                     <td>{{ props.item.icno }}</td>
                     <td>{{ props.item.tel1 }}</td>

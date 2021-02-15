@@ -1,9 +1,11 @@
 
 <script>
 import { mapActions } from "vuex";
+import { _ } from '../../../common/common-function';
 export default {
   data() {
     return {
+      _ : _,
       totalDataLength: 0,
       data: [],
       loading: true,
@@ -45,7 +47,7 @@ export default {
       },
       headers: [
         {
-          text: "uid",
+          text: "id",
         },
         {
           text: "Unit No",
@@ -53,7 +55,11 @@ export default {
         {
           text: "Property",
         },
+        { text: "Repair Type" },
+        { text: "Maintenance Status" },
         { text: "Price (RM)" },
+        { text: "Claimed By" },
+        { text: "Created At" },
       ],
     };
   },
@@ -95,9 +101,31 @@ export default {
     }),
     initMaintenanceFilter(filterGroup) {
       this.maintenanceFilterGroup.reset();
-      if (filterGroup) {
-        this.maintenanceFilterGroup.keyword = filterGroup.keyword;
+      if (filterGroup.owner) {
+        this.maintenanceFilterGroup.owner_id = filterGroup.owner.id;
+        this.maintenanceFilterGroup.owner = filterGroup.owner;
       }
+      if (filterGroup.room) {
+        this.maintenanceFilterGroup.room_id = filterGroup.room.id;
+        this.maintenanceFilterGroup.room = filterGroup.room;
+      }
+      if (filterGroup.property) {
+        this.maintenanceFilterGroup.property_id = filterGroup.property.id;
+        this.maintenanceFilterGroup.property = filterGroup.property;
+      }
+      if (filterGroup.fromdate) {
+        this.maintenanceFilterGroup.fromdate = filterGroup.fromdate;
+      }
+      if (filterGroup.todate) {
+        this.maintenanceFilterGroup.todate = filterGroup.todate;
+      }
+      if (filterGroup.maintenance_status) {
+        this.maintenanceFilterGroup.maintenance_status = filterGroup.maintenance_status;
+      }
+      if (filterGroup.maintenance_type) {
+        this.maintenanceFilterGroup.maintenance_type = filterGroup.maintenance_type;
+      }
+      console.log(this.maintenanceFilterGroup);
       this.options.page = 1;
       this.getMaintenances();
     },
@@ -159,26 +187,47 @@ export default {
         <v-row justify="center" align="center" class="mx-3">
           <v-col cols="12">
             <v-card raised>
-              <v-card-subtitle v-show="!keywordEmpty">
-                Keyword :
-                <v-chip class="mx-2">{{ maintenanceFilterGroup.keyword }}</v-chip>
-              </v-card-subtitle>
-              <v-card-subtitle v-show="!fromdateEmpty">
+              <v-card-subtitle v-show="maintenanceFilterGroup.fromdate">
                 From Date :
-                <v-chip class="mx-2">{{ maintenanceFilterGroup.keyword }}</v-chip>
+                <v-chip class="mx-2">{{
+                  maintenanceFilterGroup.fromdate
+                }}</v-chip>
               </v-card-subtitle>
-              <v-card-subtitle v-show="!todateEmpty">
+              <v-card-subtitle v-show="maintenanceFilterGroup.todate">
                 To Date :
-                <v-chip class="mx-2">{{ maintenanceFilterGroup.todate }}</v-chip>
+                <v-chip class="mx-2">{{
+                  maintenanceFilterGroup.todate
+                }}</v-chip>
               </v-card-subtitle>
-
-              <v-card-subtitle v-show="!roomsEmpty">
-                Rooms :
-                <v-chip
-                  class="mx-2"
-                  v-for="maintenanceType in maintenanceFilterGroup.selectedRooms"
-                  :key="maintenanceType.id"
-                >{{ maintenanceType.name }}</v-chip>
+              <v-card-subtitle v-show="maintenanceFilterGroup.owner">
+                Claim By :
+                <v-chip class="mx-2">{{
+                  _.get(maintenanceFilterGroup, ["owner", "name"]) || "N/A"
+                }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="maintenanceFilterGroup.room">
+                Room :
+                <v-chip class="mx-2">{{
+                  _.get(maintenanceFilterGroup, ["room", "unit"]) || "N/A"
+                }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="maintenanceFilterGroup.property">
+                Property :
+                <v-chip class="mx-2">{{
+                  _.get(maintenanceFilterGroup, ["property", "name"]) || "N/A"
+                }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="maintenanceFilterGroup.maintenance_type">
+                Maintenance Type :
+                <v-chip class="mx-2">{{
+                  _.get(maintenanceFilterGroup, ["maintenance_type"]) || "N/A"
+                }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="maintenanceFilterGroup.maintenance_status">
+                Maintenance Status :
+                <v-chip class="mx-2">{{
+                  _.get(maintenanceFilterGroup, ["maintenance_status"]) || "N/A"
+                }}</v-chip>
               </v-card-subtitle>
             </v-card>
           </v-col>
@@ -204,10 +253,14 @@ export default {
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showMaintenance(props.item)">
-                    <td>{{props.item.uid}}</td>
+                    <td>{{props.item.id}}</td>
                     <td>{{props.item.room.name}}</td>
                     <td>{{props.item.property.name}}</td>
+                    <td>{{props.item.maintenance_type}}</td>
+                    <td>{{props.item.maintenance_status}}</td>
                     <td>{{props.item.price}}</td>
+                    <td>{{_.get(props.item, ['owner', 'name']) || 'N/A'}}</td>
+                    <td>{{props.item.created_at | formatDate}}</td>
                   </tr>
                 </template>
               </v-data-table>

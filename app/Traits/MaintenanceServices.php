@@ -26,6 +26,9 @@ trait MaintenanceServices
         }, 'property' => function ($q) {
             // Query the name field in status table
             $q->where('status', true);
+        }, 'owner' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
         }])->get();
 
         $data = $data->unique('id')->sortBy('id')->flatten(1);
@@ -36,20 +39,68 @@ trait MaintenanceServices
 
     private function filterMaintenances($data, $params)
     {
-        $data = $this->globalFilter($data, $params);
         $params = $this->checkUndefinedProperty($params, $this->maintenanceFilterCols());
 
-        if ($params->keyword) {
-            $keyword = $params->keyword;
-            $data = $data->filter(function ($item) use ($keyword) {
-                //check string exist inside or not
-                if (stristr($item->room->name, $keyword) == TRUE || stristr($item->property->name, $keyword) == TRUE ) {
-                    return true;
-                } else {
-                    return false;
+        if($params->room_id){
+            $room_id = $params->room_id;
+            $data = $data->filter(function ($item) use($room_id) {
+                if($item->room){
+                    return $item->room->id == $room_id;
                 }
+                return false;
             });
         }
+
+        if($params->property_id){
+            $property_id = $params->property_id;
+            $data = $data->filter(function ($item) use($property_id) {
+                if($item->property){
+                    return $item->property->id == $property_id;
+                }
+                return false;
+            });
+        }
+        if($params->owner_id){
+            $owner_id = $params->owner_id;
+            $data = $data->filter(function ($item) use($owner_id) {
+                if($item->owner){
+                    return $item->owner->id == $owner_id;
+                }
+                return false;
+            });
+        }
+        if ($params->maintenance_status) {
+            $maintenance_status = $params->maintenance_status;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($maintenance_status) {
+                return $item->maintenance_status == $maintenance_status;
+            })->values();
+        }
+        if ($params->maintenance_type) {
+            $maintenance_type = $params->maintenance_type;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($maintenance_type) {
+                return $item->maintenance_type == $maintenance_type;
+            })->values();
+        }
+
+        if ($params->fromdate) {
+            $date = Carbon::parse($params->fromdate);
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($date) {
+                return Carbon::parse(data_get($item, 'created_at'))->gte($date);
+            });
+        }
+        
+        if ($params->todate) {
+            $date = Carbon::parse($params->todate)->endOfDay();
+            $data = $data->filter(function ($item) use ($date) {
+                return Carbon::parse(data_get($item, 'created_at'))->lte($date);
+            });
+        }
+
+
+
         $data = $data->unique('id');
 
         return $data;
@@ -206,6 +257,6 @@ trait MaintenanceServices
     }
     public function maintenanceFilterCols()
     {
-        return ['keyword'];
+        return ['fromdate', 'todate', 'owner_id', 'room_id', 'property_id', 'maintenance_status', 'maintenance_type'];
     }
 }

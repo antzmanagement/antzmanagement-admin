@@ -5,18 +5,18 @@ import {
   required,
   minLength,
   maxLength,
-  decimal
+  decimal,
 } from "vuelidate/lib/validators";
 import { mapActions } from "vuex";
 export default {
   props: {
     editMode: {
       type: Boolean,
-      default: false
+      default: false,
     },
     uid: {
       type: String,
-      default: ""
+      default: "",
     },
     buttonStyle: {
       type: Object,
@@ -26,8 +26,8 @@ export default {
         class: "ma-1",
         text: "Maintenance Filter",
         icon: "",
-        isIcon: false
-      })
+        isIcon: false,
+      }),
     },
     dialogStyle: {
       type: Object,
@@ -35,46 +35,61 @@ export default {
         persistent: true,
         maxWidth: "",
         fullscreen: true,
-        hideOverlay: true
-      })
-    }
+        hideOverlay: true,
+      }),
+    },
   },
   data() {
     return {
       dialog: false,
-      maintenanceTypes: [],
+      owners: [],
+      rooms: [],
+      properties : [],
+      fromdatemenu: false,
+      todatemenu: false,
+      maintenanceTypes: ["repair", "renew"],
+      maintenanceStatus: ["pending", "inprogress", "reject", "done"],
       data: new Form({
         keyword: "",
         fromdate: null,
         todate: null,
-        rooms: []
-      })
+        rooms: [],
+      }),
     };
   },
 
   computed: {
     isLoading() {
       return this.$store.getters.isLoading;
-    }
+    },
   },
   watch: {
-    dialog: function(val) {
+    dialog: function (val) {
       if (val) {
         this.data.reset();
       }
-    }
+    },
   },
   mounted() {
     this.showLoadingAction();
-    this.getRoomsAction({ pageNumber: -1, pageSize: -1 })
-      .then(data => {
-        this.rooms = data.data;
+    let promises = [];
+    promises.push(this.getRoomsAction({ pageNumber: -1, pageSize: -1 }));
+    promises.push(this.getOwnersAction({ pageNumber: -1, pageSize: -1 }));
+    promises.push(this.getPropertiesAction({ pageNumber: -1, pageSize: -1 }));
+
+
+    Promise.all(promises)
+      .then(([roomRes, ownerRes, propertyRes]) => {
+        this.rooms = _.get(roomRes, ["data"]) || [];
+        this.owners = _.get(ownerRes, ["data"]) || [];
+        this.properties = _.get(propertyRes, ["data"]) || [];
         this.endLoadingAction();
       })
-      .catch(error => {
+      .catch((err) => {
+        console.log(err);
         Toast.fire({
           icon: "warning",
-          title: "Something went wrong... "
+          title: "Something went wrong...",
         });
         this.endLoadingAction();
       });
@@ -82,14 +97,16 @@ export default {
   methods: {
     ...mapActions({
       getRoomsAction: "getRooms",
+      getPropertiesAction: "getProperties",
+      getOwnersAction: "getOwners",
       showLoadingAction: "showLoadingAction",
-      endLoadingAction: "endLoadingAction"
+      endLoadingAction: "endLoadingAction",
     }),
     submitFilter() {
       this.$emit("submitFilter", this.data);
       this.dialog = false;
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -112,8 +129,8 @@ export default {
         v-on="on"
         :disabled="isLoading"
       >
-        <v-icon left>{{buttonStyle.icon}}</v-icon>
-        {{buttonStyle.text}}
+        <v-icon left>{{ buttonStyle.icon }}</v-icon>
+        {{ buttonStyle.text }}
       </v-btn>
     </template>
     <v-card>
@@ -124,30 +141,136 @@ export default {
         <v-toolbar-title v->Maintenance Filter</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-toolbar-items>
-          <v-btn dark text :disabled="isLoading" @click="submitFilter()">Apply</v-btn>
+          <v-btn dark text :disabled="isLoading" @click="submitFilter()"
+            >Apply</v-btn
+          >
         </v-toolbar-items>
       </v-toolbar>
       <v-card-text>
         <v-container>
           <v-row>
-            <v-col cols="12">
-              <v-text-field label="Keyword" :maxlength="300" v-model="data.keyword"></v-text-field>
+            <v-col cols="6">
+              <div class="d-flex align-center">
+                <span className=" d-inline-block half-width">
+                  <v-menu
+                    ref="menu"
+                    v-model="fromdatemenu"
+                    :close-on-content-click="true"
+                    transition="scale-transition"
+                    offset-y
+                  >
+                    <template v-slot:activator="{ on }">
+                      <v-text-field
+                        v-model="data.fromdate"
+                        label="From Date"
+                        readonly
+                        v-on="on"
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      v-model="data.fromdate"
+                      no-title
+                      scrollable
+                      :max="data.todate"
+                    ></v-date-picker>
+                  </v-menu>
+                </span>
+                <span className="d-inline-block">
+                  <v-icon
+                    class="btn"
+                    v-if="data.fromdate"
+                    @click="data.fromdate = ''"
+                    >mdi-close</v-icon
+                  >
+                </span>
+              </div>
             </v-col>
-          </v-row>
-          <!-- <v-row>
+            <v-col cols="6">
+              <div class="d-flex align-center">
+                <span className=" d-inline-block half-width">
+                  <v-menu
+                    ref="menu"
+                    v-model="todatemenu"
+                    :close-on-content-click="true"
+                    transition="scale-transition"
+                    offset-y
+                  >
+                    <template v-slot:activator="{ on }">
+                      <v-text-field
+                        v-model="data.todate"
+                        label="To Date"
+                        readonly
+                        v-on="on"
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      v-model="data.todate"
+                      no-title
+                      scrollable
+                      :min="data.fromdate"
+                    ></v-date-picker>
+                  </v-menu>
+                </span>
+                <span className="d-inline-block">
+                  <v-icon
+                    class="btn"
+                    v-if="data.todate"
+                    @click="data.todate = ''"
+                    >mdi-close</v-icon
+                  >
+                </span>
+              </div>
+            </v-col>
             <v-col cols="12">
               <v-autocomplete
-                v-model="data.rooms"
-                :item-text="item => helpers.capitalizeFirstLetter(item.name)"
+                v-model="data.room"
+                :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
                 :items="rooms"
                 label="Room"
                 chips
                 deletable-chips
-                multiple
                 :return-object="true"
               ></v-autocomplete>
             </v-col>
-          </v-row> -->
+            <v-col cols="12">
+              <v-autocomplete
+                v-model="data.owner"
+                :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
+                :items="owners"
+                label="Claim By"
+                chips
+                return-object
+                deletable-chips
+              >
+              </v-autocomplete>
+            </v-col>
+            <v-col cols="12">
+              <v-autocomplete
+                v-model="data.property"
+                :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
+                item-value="id"
+                :items="properties"
+                label="Property"
+                chips
+                return-object
+              >
+              </v-autocomplete>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-select
+                :items="maintenanceTypes"
+                v-model="data.maintenance_type"
+                label="Maintenance Type"
+              ></v-select>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-select
+                :items="maintenanceStatus"
+                v-model="data.maintenance_status"
+                label="Maintenance status"
+              ></v-select>
+            </v-col>
+          </v-row>
         </v-container>
       </v-card-text>
     </v-card>

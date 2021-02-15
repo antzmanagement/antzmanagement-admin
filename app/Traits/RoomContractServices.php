@@ -22,6 +22,10 @@ trait RoomContractServices
                 // Query the name field in status table
                 $q1->wherePivot('status', true);
             }]);
+            $q->with(['owners' => function ($q1) {
+                // Query the name field in status table
+                $q1->wherePivot('status', true);
+            }]);
             $q->where('status', true);
         }, 'contract' => function ($q) {
             // Query the name field in status table
@@ -44,6 +48,10 @@ trait RoomContractServices
         }, 'parentroomcontract' => function ($q) {
             // Query the name field in status table
             $q->where('status', true);
+        }, 'payments' => function ($q) {
+            // Query the name field in status table
+            $q->with('services');
+            $q->where('status', true);
         }])->get();
 
         $data = $data->unique('id')->sortBy('id')->flatten(1);
@@ -54,20 +62,104 @@ trait RoomContractServices
 
     private function filterRoomContracts($data, $params)
     {
-        $data = $this->globalFilter($data, $params);
         $params = $this->checkUndefinedProperty($params, $this->roomContractFilterCols());
 
-        if ($params->keyword) {
-            $keyword = $params->keyword;
-            $data = $data->filter(function ($item) use ($keyword) {
-                //check string exist inside or not
-                if (stristr($item->room->name, $keyword) == TRUE || stristr($item->tenant->name, $keyword) == TRUE) {
-                    return true;
-                } else {
-                    return false;
+        if($params->tenant_id){
+            $tenant_id = $params->tenant_id;
+            $data = $data->filter(function ($item) use($tenant_id) {
+                if($item->tenant){
+                    return $item->tenant->id == $tenant_id;
                 }
+                return false;
             });
         }
+
+        if($params->room_id){
+            $room_id = $params->room_id;
+            $data = $data->filter(function ($item) use($room_id) {
+                if($item->room){
+                    return $item->room->id == $room_id;
+                }
+                return false;
+            });
+        }
+
+        if($params->owner_id){
+            $owner_id = $params->owner_id;
+            $data = $data->filter(function ($item) use($owner_id) {
+                if($item->room){
+                    if($item->room->owners){
+                        return $item->room->owners->contains('id' , $owner_id);
+                    }
+                }
+                return false;
+            });
+        }
+
+        if($params->service_ids){
+            $service_ids = collect($params->service_ids);
+            error_log($service_ids);
+            $data = $data->filter(function ($item) use($service_ids) {
+                $existed = false;
+                if($item->origservices || $item->addonservices ){
+                    $services = collect($item->origservices)->concat($item->addonservices);
+                    error_log($services->pluck('id'));
+                    foreach ($services as $service) {
+                        if($service_ids->contains($service->id)){
+                            $existed = true;
+                            break;
+                        }
+                    }
+                }
+                error_log($existed. ' ');
+                return $existed;
+            });
+        }
+
+        if ($params->sequence) {
+            $sequence = $params->sequence;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($sequence) {
+                return $item->sequence == $sequence;
+            })->values();
+        }
+
+
+        if (property_exists($params, 'outstanding_deposit') && $params->outstanding_deposit != null) {
+            $outstanding_deposit = $params->outstanding_deposit;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($outstanding_deposit) {
+                return $outstanding_deposit ? $item->outstanding_deposit > 0 : $item->outstanding_deposit == 0;
+            })->values();
+        }
+        
+        if (property_exists($params, 'checkedout') && $params->checkedout != null) {
+            error_log('filter checkedout');
+            $checkedout = $params->checkedout;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($checkedout) {
+                return $item->checkedout == $checkedout;
+            })->values();
+        }
+
+
+        if ($params->fromdate) {
+            $date = Carbon::parse($params->fromdate);
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($date) {
+                return Carbon::parse(data_get($item, 'startdate'))->gte($date);
+            });
+        }
+        
+        if ($params->todate) {
+            $date = Carbon::parse($params->todate)->endOfDay();
+            $data = $data->filter(function ($item) use ($date) {
+                return Carbon::parse(data_get($item, 'startdate'))->lte($date);
+            });
+        }
+
+
+
 
         $data = $data->unique('id');
 
@@ -105,6 +197,10 @@ trait RoomContractServices
         }, 'parentroomcontract' => function ($q) {
             // Query the name field in status table
             $q->where('status', true);
+        }, 'payments' => function ($q) {
+            // Query the name field in status table
+            $q->with('services');
+            $q->where('status', true);
         }])->where('status', true)->first();
         return $data;
     }
@@ -139,6 +235,10 @@ trait RoomContractServices
         }, 'parentroomcontract' => function ($q) {
             // Query the name field in status table
             $q->where('status', true);
+        }, 'payments' => function ($q) {
+            // Query the name field in status table
+            $q->with('services');
+            $q->where('status', true);
         }])->where('status', true)->first();
         return $data;
     }
@@ -165,8 +265,9 @@ trait RoomContractServices
         $data->agreement_fees  = $this->toDouble($params->agreement_fees);
         $data->deposit  = $this->toDouble($params->deposit);
         $data->agreement_fees  = $this->toDouble($params->agreement_fees);
-        // $data->outstanding_deposit  = $this->toDouble($data->deposit - $data->booking_fees);
+        $data->outstanding_deposit  = $this->toDouble($data->deposit - $data->booking_fees);
         $data->rental  = $this->toDouble($params->rental);
+        $data->sequence = $this->toInt($params->sequence);
 
         $room = $this->getRoomById($params->room_id);
         if ($this->isEmpty($room)) {
@@ -236,6 +337,7 @@ trait RoomContractServices
         $data->autorenew  = $params->autorenew;
         $data->booking_fees  = $this->toDouble($params->booking_fees);
         $data->agreement_fees  = $this->toDouble($params->agreement_fees);
+        $data->outstanding_deposit  = $this->toDouble($params->outstanding_deposit);
         $data->deposit  = $this->toDouble($params->deposit);
         $data->rental  = $this->toDouble($params->rental);
 
@@ -256,6 +358,7 @@ trait RoomContractServices
             $subcontract->booking_fees  = $this->toDouble($params->booking_fees);
             $subcontract->agreement_fees  = $this->toDouble($params->agreement_fees);
             $subcontract->deposit  = $this->toDouble($params->deposit);
+            $subcontract->outstanding_deposit  = $this->toDouble($params->outstanding_deposit);
             $subcontract->rental  = $this->toDouble($params->rental);
             if (!$this->saveModel($subcontract)) {
                 return null;
@@ -576,6 +679,6 @@ trait RoomContractServices
     }
     public function roomContractFilterCols()
     {
-        return ['keyword'];
+        return ['keyword', 'fromdate', 'todate', 'tenant_id', 'owner_id', 'service_ids', 'room_id', 'checkedout', 'outstanding_deposit', 'sequence'];
     }
 }

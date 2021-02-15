@@ -91,7 +91,7 @@ export default {
   validations() {
     return {
       data: {
-        name: { required, maxLength: maxLength(100) },
+        unit: { required, maxLength: maxLength(100) },
         price: { required, decimal },
         address: { maxLength: maxLength(300) },
         postcode: { maxLength: maxLength(300) },
@@ -106,19 +106,19 @@ export default {
     isLoading() {
       return this.$store.getters.isLoading;
     },
-    nameErrors() {
+    unitErrors() {
       const errors = [];
-      if (!this.$v.data.name.$dirty) {
+      if (!this.$v.data.unit.$dirty) {
         return errors;
       }
 
-      if (!this.$v.data.name.required) {
-        errors.push("Name is required");
+      if (!this.$v.data.unit.required) {
+        errors.push("Unit is required");
         return errors;
       }
 
-      if (!this.$v.data.name.maxLength) {
-        errors.push("Name should be less than 300 characters");
+      if (!this.$v.data.unit.maxLength) {
+        errors.push("Unit should be less than 300 characters");
         return errors;
       }
     },
@@ -518,10 +518,10 @@ export default {
                 label="Unit No*"
                 required
                 :maxlength="300"
-                v-model="data.name"
-                @input="$v.data.name.$touch()"
-                @blur="$v.data.name.$touch()"
-                :error-messages="nameErrors"
+                v-model="data.unit"
+                @input="$v.data.unit.$touch()"
+                @blur="$v.data.unit.$touch()"
+                :error-messages="unitErrors"
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="6">

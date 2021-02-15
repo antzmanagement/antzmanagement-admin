@@ -148,6 +148,46 @@ export default {
                   </div>
                 </div>
               </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Occupation</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.occupation }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="12">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Address</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.address }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Postcode</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.postcode }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">City</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.city }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">State</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.state }}</h4>
+                  </div>
+                </div>
+              </v-col>
             </v-row>
 
             <v-divider

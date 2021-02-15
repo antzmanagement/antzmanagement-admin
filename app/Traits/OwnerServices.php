@@ -27,14 +27,13 @@ trait OwnerServices
 
     private function filterOwners($data, $params)
     {
-        $data = $this->globalFilter($data, $params);
         $params = $this->checkUndefinedProperty($params, $this->ownerFilterCols());
 
         if ($params->keyword) {
             $keyword = $params->keyword;
             $data = $data->filter(function ($item) use ($keyword) {
                 //check string exist inside or not
-                if (stristr($item->uid, $keyword) == TRUE || stristr($item->name, $keyword) == TRUE || stristr($item->icno, $keyword) == TRUE || stristr($item->email, $keyword) == TRUE) {
+                if (stristr($item->name, $keyword) == TRUE || stristr($item->icno, $keyword) == TRUE) {
                     return true;
                 } else {
                     return false;
@@ -42,30 +41,6 @@ trait OwnerServices
             });
         }
 
-        if ($params->roomTypes) {
-            error_log('Filtering owners with roomTypes....');
-            $roomTypes = collect($params->roomTypes);
-            $data = $data->filter(function ($item) use ($roomTypes) {
-                $rooms = $item->ownrooms()->wherePivot('status', true)->where('rooms.status', true)->get();
-                $roomTypeids = collect();
-
-                //Merge All Room's Type ids;
-                foreach($rooms as $room){
-                    $temp = $room->roomTypes()->wherePivot('status', true)->where('room_types.status', true)->get();
-                    $ids = $temp->pluck('id');
-                    $roomTypeids = $roomTypeids->merge($ids);
-                }
-                
-                //Check pass in ids exist or not
-                foreach($roomTypes as $roomType){
-                    if(!$roomTypeids->contains($roomType)){
-                        return false;
-                    }
-                }
-
-                return true;
-            })->values();
-        }
         $data = $data->unique('id');
 
         return $data;

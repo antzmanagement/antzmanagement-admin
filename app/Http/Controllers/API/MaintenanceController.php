@@ -30,11 +30,13 @@ class MaintenanceController extends Controller
         error_log($this->controllerName . 'Retrieving list of filtered maintenances.');
         // api/maintenance/filter (GET)
         $params = collect([
-            'keyword' => $request->keyword,
             'fromdate' => $request->fromdate,
             'todate' => $request->todate,
-            'rooms' => $request->rooms,
-            'status' => $request->status,
+            'maintenance_type' => $request->maintenance_type,
+            'owner_id' => $request->owner_id,
+            'room_id' => $request->room_id,
+            'property_id' => $request->property_id,
+            'maintenance_status' => $request->maintenance_status,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

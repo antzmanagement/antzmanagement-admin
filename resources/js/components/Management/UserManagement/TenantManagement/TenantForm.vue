@@ -40,9 +40,18 @@ export default {
       roomTypes: [],
       rooms: [],
       contracts: [],
+      staffs: [],
       approachmethods: ["fb", "friend", "banner", "others"],
       genders: ["male", "female"],
-      religions: ["islam", "buddhism", 'christianity','hinduism', 'taoism', 'no-region','others'],
+      religions: [
+        "islam",
+        "buddhism",
+        "christianity",
+        "hinduism",
+        "taoism",
+        "no-region",
+        "others",
+      ],
       data: new Form({
         name: "",
         icno: "",
@@ -67,6 +76,7 @@ export default {
         postcode: "",
         state: "",
         city: "",
+        pic: '',
       }),
       roomFormDialogConfig: {
         dialogStyle: {
@@ -163,6 +173,9 @@ export default {
   computed: {
     isLoading() {
       return this.$store.getters.isLoading;
+    },
+    authUser() {
+      return this.$store.getters.authUser;
     },
     nameErrors() {
       const errors = [];
@@ -302,23 +315,37 @@ export default {
           .then((data) => {
             this.contracts = data.data;
 
-            if (this.editMode && this.uid) {
-              this.getTenantAction({ uid: this.uid })
-                .then((data) => {
-                  data.data.rooms = [];
-                  this.data = new Form(data.data);
+            this.getStaffsAction({
+              pageNumber: -1,
+              pageSize: -1,
+            })
+              .then((data) => {
+                this.staffs = data.data;
+                if (this.editMode && this.uid) {
+                  this.getTenantAction({ uid: this.uid })
+                    .then((data) => {
+                      data.data.rooms = [];
+                      this.data = new Form(data.data);
+                      this.endLoadingAction();
+                    })
+                    .catch((error) => {
+                      Toast.fire({
+                        icon: "warning",
+                        title: "Something went wrong... ",
+                      });
+                      this.endLoadingAction();
+                    });
+                } else {
                   this.endLoadingAction();
-                })
-                .catch((error) => {
-                  Toast.fire({
-                    icon: "warning",
-                    title: "Something went wrong... ",
-                  });
-                  this.endLoadingAction();
+                }
+              })
+              .catch((error) => {
+                this.endLoadingAction();
+                Toast.fire({
+                  icon: "warning",
+                  title: "Something went wrong... ",
                 });
-            } else {
-              this.endLoadingAction();
-            }
+              });
           })
           .catch((error) => {
             this.endLoadingAction();
@@ -339,6 +366,7 @@ export default {
   methods: {
     ...mapActions({
       getContractsAction: "getContracts",
+      getStaffsAction: "getStaffs",
       getRoomsAction: "getRooms",
       filterRoomsAction: "filterRooms",
       getRoomTypesAction: "getRoomTypes",
@@ -546,6 +574,26 @@ export default {
       <v-card-text>
         <v-container>
           <v-row>
+            <v-col cols="12">
+              <v-autocomplete
+                v-model="data.pic"
+                :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
+                item-value="id"
+                :items="staffs"
+                label="Person In Charge"
+                chips
+                deletable-chips
+              >
+                <!-- <template v-slot:append>
+                  <room-type-form
+                    :editMode="false"
+                    :dialogStyle="roomFormDialogConfig.dialogStyle"
+                    :buttonStyle="roomFormDialogConfig.buttonStyle"
+                    @created="appendRoomTypeList($event)"
+                  ></room-type-form>
+                </template>-->
+              </v-autocomplete>
+            </v-col>
             <v-col cols="12" md="6">
               <v-text-field
                 label="Name*"
@@ -647,7 +695,7 @@ export default {
                 :maxlength="300"
               ></v-text-field>
             </v-col>
-            <v-col cols="12" md="6">
+            <v-col cols="12" md="12">
               <v-text-field
                 label="Address"
                 v-model="data.address"
@@ -675,6 +723,7 @@ export default {
                 :maxlength="300"
               ></v-text-field>
             </v-col>
+            <v-col cols="12" md="6"> </v-col>
             <v-col cols="6">
               <v-text-field
                 label="Mother Name"

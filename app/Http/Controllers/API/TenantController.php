@@ -68,9 +68,12 @@ class TenantController extends Controller
         // api/tenant/filter (GET)
         $params = collect([
             'keyword' => $request->keyword,
-            'fromdate' => $request->fromdate,
-            'todate' => $request->todate,
-            'roomTypes' => $request->roomTypes,
+            'gender' => $request->gender,
+            'religion' => $request->religion,
+            'approach_method' => $request->approach_method,
+            'pic' => $request->pic,
+            'birthdayfromdate' => $request->birthdayfromdate,
+            'birthdaytodate' => $request->birthdaytodate,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
@@ -237,6 +240,7 @@ class TenantController extends Controller
             'emergency_contact' => $request->emergency_contact,
             'emergency_relationship' => $request->emergency_relationship,
             'role_id' => $role->id,
+            'pic' => $request->pic,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
@@ -446,6 +450,7 @@ class TenantController extends Controller
             'emergency_contact' => $request->emergency_contact,
             'emergency_relationship' => $request->emergency_relationship,
             'role_id' => $role->id,
+            'pic' => $request->pic,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

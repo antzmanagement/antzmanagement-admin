@@ -15,6 +15,11 @@ class RoomContract extends Model
     {
         return $this->hasMany('App\RentalPayment' , 'room_contract_id');
     }
+
+    public function payments()
+    {
+        return $this->hasMany('App\Payment' , 'room_contract_id');
+    }
     
     public function tenant()
     {

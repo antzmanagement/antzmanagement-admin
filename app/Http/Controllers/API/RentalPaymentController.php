@@ -34,11 +34,13 @@ class RentalPaymentController extends Controller
         error_log($this->controllerName . 'Retrieving list of filtered rentalPayments.');
         // api/rentalPayment/filter (GET)
         $params = collect([
-            'keyword' => $request->keyword,
+            'tenant_id' => $request->tenant_id,
+            'room_id' => $request->room_id,
             'fromdate' => $request->fromdate,
             'todate' => $request->todate,
-            'status' => $request->status,
+            'penalty' => $request->penalty,
             'paid' => $request->paid,
+            'sequence' => $request->sequence,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
@@ -227,6 +229,8 @@ class RentalPaymentController extends Controller
             DB::rollBack();
             return $this->notFoundResponse('RentalPayment');
         }
+        
+        $max = RentalPayment::where('status', true)->max('sequence') + 1;
 
         $params = collect([
             'price' => $request->price,
@@ -238,6 +242,7 @@ class RentalPaymentController extends Controller
             'paymentdate' => Carbon::now()->format('Y-m-d'),
             'rentaldate' => $rentalPayment->rentaldate,
             'remark' => $rentalPayment->remark,
+            'sequence' => $max,
             'room_contract_id' => $rentalPayment->roomcontract->id,
         ]);
         //Convert To Json Object

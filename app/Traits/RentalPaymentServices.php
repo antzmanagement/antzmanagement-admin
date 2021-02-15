@@ -35,28 +35,69 @@ trait RentalPaymentServices
 
     private function filterRentalPayments($data, $params)
     {
-        $data = $this->globalFilter($data, $params);
         $params = $this->checkUndefinedProperty($params, $this->rentalPaymentFilterCols());
 
-        if ($params->keyword) {
-            $keyword = $params->keyword;
-            $data = $data->filter(function ($item) use ($keyword) {
-                //check string exist inside or not
-                if (stristr($item->roomcontract->tenant->name, $keyword) == TRUE || stristr($item->roomcontract->room->name, $keyword) == TRUE) {
-                    return true;
-                } else {
-                    return false;
+        if($params->tenant_id){
+            $tenant_id = $params->tenant_id;
+            $data = $data->filter(function ($item) use($tenant_id) {
+                if($item->roomcontract){
+                    if($item->roomcontract->tenant)
+                    return $item->roomcontract->tenant->id == $tenant_id;
                 }
+                return false;
+            });
+        }
+
+        if($params->room_id){
+            $room_id = $params->room_id;
+            $data = $data->filter(function ($item) use($room_id) {
+                if($item->roomcontract){
+                    if($item->roomcontract->room)
+                    return $item->roomcontract->room->id == $room_id;
+                }
+                return false;
+            });
+        }
+
+        if ($params->sequence) {
+            $sequence = $params->sequence;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($sequence) {
+                return $item->sequence == $sequence;
             })->values();
         }
 
-        if (property_exists($params, 'paid') && $params->paid != 'all') {
+
+        if (property_exists($params, 'penalty') && $params->penalty != null) {
+            $penalty = $params->penalty;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($penalty) {
+                return $penalty ? $item->penalty > 0 : $item->penalty == 0;
+            })->values();
+        }
+        
+        if (property_exists($params, 'paid') && $params->paid != null) {
             $paid = $params->paid;
+            $data = collect($data);
             $data = $data->filter(function ($item) use ($paid) {
                 return $item->paid == $paid;
             })->values();
         }
 
+        if ($params->fromdate) {
+            $date = Carbon::parse($params->fromdate);
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($date) {
+                return Carbon::parse(data_get($item, 'rentaldate'))->gte($date);
+            });
+        }
+        
+        if ($params->todate) {
+            $date = Carbon::parse($params->todate)->endOfDay();
+            $data = $data->filter(function ($item) use ($date) {
+                return Carbon::parse(data_get($item, 'rentaldate'))->lte($date);
+            });
+        }
 
         $data = $data->unique('id');
 
@@ -142,6 +183,7 @@ trait RentalPaymentServices
         $data->paid = $params->paid;
         $data->rentaldate = $this->toDate($params->rentaldate);
         $data->paymentdate = $this->toDate($params->paymentdate);
+        $data->sequence = $this->toInt($params->sequence);
         $data->remark = $params->remark;
         
         $roomContract = $this->getRoomContractById($params->room_contract_id);
@@ -190,6 +232,6 @@ trait RentalPaymentServices
     }
     public function rentalPaymentFilterCols()
     {
-        return ['keyword'];
+        return ['fromdate', 'todate', 'tenant_id', 'room_id', 'penalty', 'paid', 'sequence'];
     }
 }

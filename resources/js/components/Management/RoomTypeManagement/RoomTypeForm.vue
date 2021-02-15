@@ -51,6 +51,7 @@ export default {
         name: "",
         price: "",
         services: [],
+        remark: "",
       }),
     };
   },
@@ -94,7 +95,6 @@ export default {
         errors.push("Price is required");
         return errors;
       }
-
     },
   },
 
@@ -223,8 +223,8 @@ export default {
     transition="dialog-bottom-transition"
   >
     <template v-slot:activator="{ on }">
-      <a v-on="on" >
-        <slot  >
+      <a v-on="on">
+        <slot>
           <v-btn tile isIcon :disabled="isLoading" v-if="editMode">
             <v-icon left>mdi-plus</v-icon>
             Edit New Room Type
@@ -309,6 +309,13 @@ export default {
               >
                 <v-btn> Modify Room Services </v-btn>
               </services-dialog>
+            </v-col>
+            <v-col cols="12">
+              <v-textarea
+                name="input-7-1"
+                label="Remark"
+                v-model="data.remark"
+              ></v-textarea>
             </v-col>
           </v-row>
         </v-container>

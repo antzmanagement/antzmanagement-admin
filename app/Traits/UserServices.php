@@ -15,7 +15,6 @@ trait UserServices
 
     private function filterUsers($data, $params)
     {
-        $data = $this->globalFilter($data, $params);
         $params = $this->checkUndefinedProperty($params, $this->userFilterCols());
 
         if ($params->keyword) {
@@ -62,7 +61,7 @@ trait UserServices
                 }]);
 
             }]);
-        }])->where('status', 1)->first();
+        }, 'creator'])->where('status', 1)->first();
         return $data;
     }
 
@@ -79,7 +78,7 @@ trait UserServices
                 }]);
 
             }]);
-        }])->where('status', 1)->first();
+        }, 'creator'])->where('status', 1)->first();
         return $data;
     }
 
@@ -120,6 +119,14 @@ trait UserServices
             return null;
         }
         $data->role()->associate($role);
+
+        if($params->pic){
+            $user = $this->getUserById($params->pic);
+            if ($this->isEmpty($role)) {
+                return null;
+            }
+            $data->creator()->associate($user);
+        }
         if (!$this->saveModel($data)) {
             return null;
         }
@@ -161,6 +168,14 @@ trait UserServices
             return false;
         }
         $data->role()->associate($role);
+
+        if($params->pic){
+            $user = $this->getUserById($params->pic);
+            if ($this->isEmpty($role)) {
+                return null;
+            }
+            $data->creator()->associate($user);
+        }
 
         if (!$this->saveModel($data)) {
             return null;
@@ -260,7 +275,7 @@ trait UserServices
 
         return [
             'id', 'uid', 'name', 'email',
-            'icno', 'tel1', 'mother_name', 'mother_tel', 'father_name',
+            'icno', 'tel1', 'mother_name', 'mother_tel', 'father_name', 'age', 'birthday', 'gender', 'religion', 'approach_method', 'occupation', 'address', 'state', 'postcode', 'city', 'pic',
             'father_tel', 'emergency_name', 'emergency_contact', 'emergency_relationship', 'password', 'status'
         ];
     }

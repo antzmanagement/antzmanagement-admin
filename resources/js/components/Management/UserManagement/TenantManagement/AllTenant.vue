@@ -3,16 +3,16 @@
 
 <script>
 import { mapActions } from "vuex";
+import { _ } from "../../../../common/common-function";
 export default {
   data() {
     return {
+      _: _,
       totalDataLength: 0,
       data: [],
       loading: true,
       options: {},
       tenantFilterGroup: new Form({
-        roomTypes: [],
-        selectedRoomTypes: [],
         keyword: null,
         fromdate: null,
         todate: null,
@@ -46,13 +46,29 @@ export default {
       },
       headers: [
         {
+          text: "Id",
+        },
+        {
           text: "Name",
-          align: "start",
-          value: "name",
+        },
+        {
+          text: "Age",
+        },
+        {
+          text: "Birthday",
+        },
+        {
+          text: "Gender",
         },
         { text: "Ic No", value: "icno" },
         { text: "Phone", value: "tel1" },
         { text: "Email", value: "email" },
+        { text: "Religion" },
+        { text: "Occupation" },
+        {
+          text: "Approach Methods",
+        },
+        { text: "Person In Charge" },
       ],
     };
   },
@@ -96,15 +112,30 @@ export default {
     }),
     initTenantFilter(filterGroup) {
       this.tenantFilterGroup.reset();
-      if (filterGroup) {
-        this.tenantFilterGroup.selectedRoomTypes = filterGroup.roomTypes;
-        this.tenantFilterGroup.roomTypes = filterGroup.roomTypes.map(function (
-          roomType
-        ) {
-          return roomType.id;
-        });
+      if (filterGroup.keyword) {
         this.tenantFilterGroup.keyword = filterGroup.keyword;
       }
+      if (filterGroup.gender) {
+        this.tenantFilterGroup.gender = filterGroup.gender;
+      }
+      if (filterGroup.approach_method) {
+        this.tenantFilterGroup.approach_method = filterGroup.approach_method;
+      }
+      if (filterGroup.religion) {
+        this.tenantFilterGroup.religion = filterGroup.religion;
+      }
+      if (filterGroup.pic) {
+        this.tenantFilterGroup.pic = filterGroup.pic.id;
+        this.tenantFilterGroup.picObj = filterGroup.pic;
+      }
+      if (filterGroup.birthdayfromdate) {
+        this.tenantFilterGroup.birthdayfromdate = filterGroup.birthdayfromdate;
+      }
+      if (filterGroup.birthdaytodate) {
+        this.tenantFilterGroup.birthdaytodate = filterGroup.birthdaytodate;
+      }
+      console.log(this.tenantFilterGroup);
+      this.options.page = 1;
       this.getTenants();
     },
     showTenant($data) {
@@ -164,27 +195,41 @@ export default {
         <v-row justify="center" align="center" class="mx-3">
           <v-col cols="12">
             <v-card raised>
-              <v-card-subtitle v-show="!keywordEmpty">
+              <v-card-subtitle v-show="tenantFilterGroup.keyword">
                 Keyword :
                 <v-chip class="mx-2">{{ tenantFilterGroup.keyword }}</v-chip>
               </v-card-subtitle>
-              <v-card-subtitle v-show="!fromdateEmpty">
-                From Date :
-                <v-chip class="mx-2">{{ tenantFilterGroup.keyword }}</v-chip>
+              <v-card-subtitle v-show="tenantFilterGroup.birthdayfromdate">
+                Birthday From Date :
+                <v-chip class="mx-2">{{
+                  tenantFilterGroup.birthdayfromdate | formatDate
+                }}</v-chip>
               </v-card-subtitle>
-              <v-card-subtitle v-show="!todateEmpty">
-                To Date :
-                <v-chip class="mx-2">{{ tenantFilterGroup.todate }}</v-chip>
+              <v-card-subtitle v-show="tenantFilterGroup.birthdaytodate">
+                Birthday To Date :
+                <v-chip class="mx-2">{{
+                  tenantFilterGroup.birthdaytodate | formatDate
+                }}</v-chip>
               </v-card-subtitle>
-
-              <v-card-subtitle v-show="!roomTypesEmpty">
-                Room Types :
-                <v-chip
-                  class="mx-2"
-                  v-for="roomType in tenantFilterGroup.selectedRoomTypes"
-                  :key="roomType.id"
-                  >{{ roomType.name | capitalizeFirstLetter }}</v-chip
-                >
+              <v-card-subtitle v-show="tenantFilterGroup.religion">
+                Religion :
+                <v-chip class="mx-2">{{ tenantFilterGroup.religion }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="tenantFilterGroup.gender">
+                Gender :
+                <v-chip class="mx-2">{{ tenantFilterGroup.gender }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="tenantFilterGroup.approach_method">
+                Approach Method :
+                <v-chip class="mx-2">{{
+                  tenantFilterGroup.approach_method
+                }}</v-chip>
+              </v-card-subtitle>
+              <v-card-subtitle v-show="tenantFilterGroup.picObj">
+                Person In Charge :
+                <v-chip class="mx-2">{{
+                  _.get(tenantFilterGroup, ["picObj", "name"]) || 'N/A'
+                }}</v-chip>
               </v-card-subtitle>
             </v-card>
           </v-col>
@@ -210,10 +255,20 @@ export default {
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showTenant(props.item)">
+                    <td>{{ props.item.id }}</td>
                     <td>{{ props.item.name }}</td>
+                    <td>{{ props.item.age }}</td>
+                    <td>{{ props.item.birthday | formatDate }}</td>
+                    <td>{{ props.item.gender }}</td>
                     <td>{{ props.item.icno }}</td>
                     <td>{{ props.item.tel1 }}</td>
                     <td>{{ props.item.email }}</td>
+                    <td>{{ props.item.religion }}</td>
+                    <td>{{ props.item.occupation }}</td>
+                    <td>{{ props.item.approach_method }}</td>
+                    <td>
+                      {{ _.get(props.item, ["creator", "name"]) || "N/A" }}
+                    </td>
                   </tr>
                 </template>
               </v-data-table>

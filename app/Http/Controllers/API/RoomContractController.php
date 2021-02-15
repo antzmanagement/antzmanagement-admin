@@ -34,10 +34,15 @@ class RoomContractController extends Controller
         error_log($this->controllerName . 'Retrieving list of filtered roomContracts.');
         // api/property/filter (GET)
         $params = collect([
-            'keyword' => $request->keyword,
+            'tenant_id' => $request->tenant_id,
+            'owner_id' => $request->owner_id,
+            'service_ids' => $request->service_ids,
+            'room_id' => $request->room_id,
+            'checkedout' => $request->checkedout,
+            'outstanding_deposit' => $request->outstanding_deposit,
             'fromdate' => $request->fromdate,
             'todate' => $request->todate,
-            'status' => $request->status,
+            'sequence' => $request->sequence,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
@@ -105,6 +110,8 @@ class RoomContractController extends Controller
         $servicesIds = collect($request->room->services)->pluck('id');
         $origServiceIds = collect($request->room->origServices)->pluck('id');
         $addOnServicesIds = $servicesIds->diff($origServiceIds);
+
+        $max = RoomContract::where('status', true)->max('sequence') + 1;
         $params = collect([
             'tenant_id' => $tenant->id,
             'room_id' => $room->id,
@@ -124,6 +131,7 @@ class RoomContractController extends Controller
             'deposit' => $request->room->deposit,
             'agreement_fees' => $request->room->agreement_fees,
             'booking_fees' => $request->room->booking_fees,
+            'sequence' => $max,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

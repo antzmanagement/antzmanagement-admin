@@ -42,11 +42,30 @@ export default {
   },
   data() {
     return {
+      fromdatemenu: false,
+      todatemenu: false,
       dialog: false,
       roomTypes: [],
+      staffs: [],
+      approachmethods: ["fb", "friend", "banner", "others"],
+      genders: ["male", "female"],
+      religions: [
+        "islam",
+        "buddhism",
+        "christianity",
+        "hinduism",
+        "taoism",
+        "no-region",
+        "others",
+      ],
       data: new Form({
         keyword: "",
-        roomTypes: [],
+        gender: "",
+        approach_method: "",
+        religion: "",
+        pic: "",
+        birthdayfromdate: "",
+        birthdaytodate: "",
       }),
     };
   },
@@ -65,9 +84,9 @@ export default {
   },
   mounted() {
     this.showLoadingAction();
-    this.getRoomTypesAction({ pageNumber: -1, pageSize: -1 })
+    this.getStaffsAction({ pageNumber: -1, pageSize: -1 })
       .then((data) => {
-        this.roomTypes = data.data;
+        this.staffs = data.data;
         this.endLoadingAction();
       })
       .catch((error) => {
@@ -80,7 +99,7 @@ export default {
   },
   methods: {
     ...mapActions({
-      getRoomTypesAction: "getRoomTypes",
+      getStaffsAction: "getStaffs",
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction",
     }),
@@ -119,7 +138,7 @@ export default {
         <v-btn icon dark @click="dialog = false">
           <v-icon>mdi-close</v-icon>
         </v-btn>
-        <v-toolbar-title v->Tenant Filter</v-toolbar-title>
+        <v-toolbar-title>Tenant Filter</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-toolbar-items>
           <v-btn dark text :disabled="isLoading" @click="submitFilter()"
@@ -130,12 +149,125 @@ export default {
       <v-card-text>
         <v-container>
           <v-row>
+            <v-col cols="6">
+              <div class="d-flex align-center">
+                <span className=" d-inline-block half-width">
+                  <v-menu
+                    ref="menu"
+                    v-model="fromdatemenu"
+                    :close-on-content-click="true"
+                    transition="scale-transition"
+                    offset-y
+                  >
+                    <template v-slot:activator="{ on }">
+                      <v-text-field
+                        v-model="data.birthdayfromdate"
+                        label="Birthday From Date"
+                        readonly
+                        v-on="on"
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      v-model="data.birthdayfromdate"
+                      no-title
+                      scrollable
+                      :max="data.birthdaytodate"
+                    ></v-date-picker>
+                  </v-menu>
+                </span>
+                <span className="d-inline-block">
+                  <v-icon
+                    class="btn"
+                    v-if="data.birthdayfromdate"
+                    @click="data.birthdayfromdate = ''"
+                    >mdi-close</v-icon
+                  >
+                </span>
+              </div>
+            </v-col>
+            <v-col cols="6">
+              <div class="d-flex align-center">
+                <span className=" d-inline-block half-width">
+                  <v-menu
+                    ref="menu"
+                    v-model="todatemenu"
+                    :close-on-content-click="true"
+                    transition="scale-transition"
+                    offset-y
+                  >
+                    <template v-slot:activator="{ on }">
+                      <v-text-field
+                        v-model="data.birthdaytodate"
+                        label="Birthday To Date"
+                        readonly
+                        v-on="on"
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      v-model="data.birthdaytodate"
+                      no-title
+                      scrollable
+                      :min="data.birthdayfromdate"
+                    ></v-date-picker>
+                  </v-menu>
+                </span>
+                <span className="d-inline-block">
+                  <v-icon
+                    class="btn"
+                    v-if="data.birthdaytodate"
+                    @click="data.birthdaytodate = ''"
+                    >mdi-close</v-icon
+                  >
+                </span>
+              </div>
+            </v-col>
             <v-col cols="12">
               <v-text-field
                 label="Keyword"
                 :maxlength="300"
                 v-model="data.keyword"
               ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="12">
+              <v-autocomplete
+                v-model="data.gender"
+                :items="genders"
+                label="Gender"
+              ></v-autocomplete>
+            </v-col>
+            <v-col cols="12" md="12">
+              <v-autocomplete
+                v-model="data.religion"
+                :items="religions"
+                label="Religion"
+              ></v-autocomplete>
+            </v-col>
+            <v-col cols="12" md="12">
+              <v-autocomplete
+                v-model="data.approach_method"
+                :items="approachmethods"
+                label="How you know us?"
+              ></v-autocomplete>
+            </v-col>
+            <v-col cols="12">
+              <v-autocomplete
+                v-model="data.pic"
+                :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
+                :items="staffs"
+                label="Person In Charge"
+                chips
+                deletable-chips
+                return-object
+              >
+                <!-- <template v-slot:append>
+                  <room-type-form
+                    :editMode="false"
+                    :dialogStyle="roomFormDialogConfig.dialogStyle"
+                    :buttonStyle="roomFormDialogConfig.buttonStyle"
+                    @created="appendRoomTypeList($event)"
+                  ></room-type-form>
+                </template>-->
+              </v-autocomplete>
             </v-col>
           </v-row>
         </v-container>
