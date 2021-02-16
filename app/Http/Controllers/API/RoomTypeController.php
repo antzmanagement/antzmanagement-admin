@@ -112,7 +112,6 @@ class RoomTypeController extends Controller
             'name' => 'required|string|max:300',
             'price' => 'nullable|numeric',
             'services' => 'array',
-            'remark' => $request->remark,
         ]);
         if ($this->isEmpty($roomType)) {
             DB::rollBack();

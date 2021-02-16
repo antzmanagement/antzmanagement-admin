@@ -6,17 +6,8 @@ import { commonConfig } from "../common/config";
 
 const UserServices = {
 
-    init() {
-
-        Vue.axios.defaults.baseURL = commonConfig.API_URL;
-    },
-    setHeader() {
-        Vue.axios.defaults.headers.common.Authorization = `Bearer ${PassportServices.getToken()}`;
-    },
     index(data) {
-
-        this.init();
-        this.setHeader();
+        PassportServices.AuthenticationServices.setHeader();
         const clonedata = Object.assign({}, data);
         
         return Vue.axios.get('/api/user', {
@@ -25,16 +16,14 @@ const UserServices = {
     },
 
     show(data) {
-        this.init();
-        this.setHeader();
+        PassportServices.AuthenticationServices.setHeader();
         return Vue.axios.get('/api/user/' + data.uid);
     },
 
     create(data) {
 
         //Init axios with oauth headers
-        this.init();
-        this.setHeader();
+    PassportServices.AuthenticationServices.setHeader();
         //The data is pass by reference, any modified data will reflected to front end view.
         //In practice way, we must clone it to prevent any error that caused by manipulation stage.
         const clonedata = Object.assign({}, data);
@@ -43,8 +32,7 @@ const UserServices = {
     },
 
     update(data) {
-        this.init();
-        this.setHeader();
+        PassportServices.AuthenticationServices.setHeader();
         const clonedata = Object.assign({}, data);
         
         return Vue.axios.put('/api/user/' + clonedata.uid, clonedata);
@@ -52,8 +40,7 @@ const UserServices = {
 
 
     delete(data) {
-        this.init();
-        this.setHeader();
+        PassportServices.AuthenticationServices.setHeader();
         const clonedata = Object.assign({}, data);
         
         return Vue.axios.delete('/api/user/' + data.uid);
@@ -61,16 +48,14 @@ const UserServices = {
 
 
     changePassword(data) {
-        this.init();
-        this.setHeader();
+        PassportServices.AuthenticationServices.setHeader();
         const clonedata = Object.assign({}, data);
         
         return Vue.axios.post('/api/user/' + clonedata.uid + '/changepassword', clonedata);
     },
 
     checkPassword(data) {
-        this.init();
-        this.setHeader();
+        PassportServices.AuthenticationServices.setHeader();
         const clonedata = Object.assign({}, data);
         return Vue.axios.post('/api/user/' + clonedata.uid + '/checkpassword', clonedata);
     },

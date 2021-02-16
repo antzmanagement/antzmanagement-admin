@@ -83,9 +83,6 @@ export default {
         {
           text: "Check Out Date",
         },
-        {
-          text: "Owner",
-        },
       ],
     };
   },
@@ -354,12 +351,6 @@ export default {
                     </td>
                     <td>
                       {{ props.item.checkout_date | formatDate }}
-                    </td>
-                    <td>
-                      {{
-                        _.get(props.item, ["room", "owners", 0, "name"]) ||
-                        "N/A"
-                      }}
                     </td>
                   </tr>
                 </template>

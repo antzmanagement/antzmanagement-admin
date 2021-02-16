@@ -204,7 +204,7 @@ export default {
       .then((res) => {
         this.endLoadingAction();
         this.roles = res.data.filter(function (role) {
-          return role.name != "tenant" && role.name != "owner";
+          return role.name != "tenant" && role.name != "owner" && role.name != "superadmin";
         });
       })
       .catch((err) => {
@@ -488,7 +488,7 @@ export default {
               <v-col cols="12">
                 <v-autocomplete
                   v-model="data.role_id"
-                  :items="roles"
+                  :items="roles || []"
                   item-value="id"
                   item-text="name"
                   label="Role"

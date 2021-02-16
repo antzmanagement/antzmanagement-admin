@@ -203,6 +203,7 @@ export default {
         });
     },
     async checkPassword(password) {
+      console.log('run');
       this.checkPasswordAction({
         uid: this.uid,
         password: password,

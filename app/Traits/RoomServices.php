@@ -245,6 +245,32 @@ trait RoomServices
         return $data->refresh();
     }
 
+    private function syncRoomStatus($room)
+    {
+
+        if($room){
+            $status = $room->room_status;
+            $contracts = $room->roomcontracts()->where('status', true)->where('checkedout', false)->count();
+    
+            if($contracts > 0){
+                $status = 'occupied';
+            }else{
+                $status = 'empty';
+            }
+    
+            $maintenances = $room->maintenances()->where('status', true)->where('maintenance_status', 'inprogress')->count();
+            if($maintenances > 0){
+                $status = 'maintaining';
+            }
+
+            $room->room_status = $status;
+
+            if (!$this->saveModel($room)) {
+                return null;
+            }
+        }
+    }
+
 
     // Modifying Display Data
     // -----------------------------------------------------------------------------------------------------------------------------------------

@@ -526,7 +526,7 @@ export default {
             <v-col cols="12" md="12">
               <v-autocomplete
                 v-model="data.rooms"
-                :items="rooms"
+                :items="rooms || []"
                 item-text="name"
                 item-value="id"
                 chips

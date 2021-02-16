@@ -168,7 +168,7 @@ export default {
                       class="ma-2"
                       v-for="roomType in data.room_types"
                       :key="roomType.uid"
-                      :to="{name : 'roomtype', params : {uid : roomType.uid}}"
+                      :to="{ name: 'roomtype', params: { uid: roomType.uid } }"
                     >
                       <h4 class="text-center ma-2">
                         {{ roomType.name | capitalizeFirstLetter }}
@@ -231,7 +231,10 @@ export default {
                       class="ma-2"
                       v-for="roomcontract in data.roomcontracts"
                       :key="roomcontract.uid"
-                      :to="{name : 'roomcontract', params : {uid : roomcontract.uid}}"
+                      :to="{
+                        name: 'roomcontract',
+                        params: { uid: roomcontract.uid },
+                      }"
                     >
                       <h4 class="text-center ma-2">
                         {{
@@ -265,7 +268,7 @@ export default {
                       class="ma-2"
                       v-for="owner in data.owners"
                       :key="owner.uid"
-                      :to="{name : 'owner', params : {uid : owner.uid}}"
+                      :to="{ name: 'owner', params: { uid: owner.uid } }"
                     >
                       <h4 class="text-center ma-2" type="button">
                         {{
@@ -377,16 +380,23 @@ export default {
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Is Sublet</label>
                   <div class="form-control-plaintext">
-                    <h4>{{ data.sublet ? 'yes' : 'no' }}</h4>
+                    <h4>{{ data.sublet ? "yes" : "no" }}</h4>
                   </div>
                 </div>
               </v-col>
-              <v-col cols="12" md="4" >
+              <v-col cols="12" md="4">
                 <div class="form-group mb-0">
-                  <label class="form-label mb-0" v-if="data.sublet ? true : false">Sublet Claim</label>
+                  <label
+                    class="form-label mb-0"
+                    v-if="data.sublet ? true : false"
+                    >Sublet Claim</label
+                  >
                   <label class="form-label mb-0" v-else>Owner Claim</label>
                   <div class="form-control-plaintext">
-                    <h4>RM {{ data.sublet ? data.sublet_claim : data.owner_claim }}</h4>
+                    <h4>
+                      RM
+                      {{ data.sublet ? data.sublet_claim : data.owner_claim }}
+                    </h4>
                   </div>
                 </div>
               </v-col>
@@ -423,6 +433,7 @@ export default {
                     :items="data.maintenances"
                     items-per-page="5"
                     item-key="uid"
+                    disable-sort
                   >
                     <template v-slot:top>
                       <v-container>

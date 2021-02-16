@@ -315,7 +315,7 @@ export default {
                 v-model="data.room"
                 item-text="name"
                 item-value="id"
-                :items="rooms"
+                :items="rooms || []"
                 label="Room"
                 chips
               >
@@ -326,7 +326,7 @@ export default {
                 v-model="data.property"
                 :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
                 item-value="id"
-                :items="properties"
+                :items="properties || []"
                 label="Property"
                 chips
               >
@@ -337,7 +337,7 @@ export default {
                 v-model="data.owner"
                 :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
                 item-value="id"
-                :items="owners"
+                :items="owners || []"
                 label="Claim By Owner"
                 clearable
               >

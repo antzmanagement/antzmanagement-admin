@@ -70,12 +70,12 @@ export default {
         name: "rentalpayments",
         modulename: "rentalpayment",
       },
-      {
-        icon: "mdi-home-currency-usd",
-        text: "Claim",
-        name: "claims",
-        modulename: "claim",
-      },
+      // {
+      //   icon: "mdi-home-currency-usd",
+      //   text: "Claim",
+      //   name: "claims",
+      //   modulename: "claim",
+      // },
       {
         icon: "mdi-screwdriver",
         text: "Room Maintenance",

@@ -207,7 +207,10 @@ export default {
           this.showLoadingAction();
           this.getRoomContractAction({ uid: this.uid })
             .then((data) => {
-              if(_.isPlainObject(data.data.parentroomcontract) && !_.isEmpty(data.data.parentroomcontract)){
+              if (
+                _.isPlainObject(data.data.parentroomcontract) &&
+                !_.isEmpty(data.data.parentroomcontract)
+              ) {
                 this.isSubContract = true;
               }
               data.data.tenant = data.data.tenant.id;
@@ -552,7 +555,7 @@ export default {
             <v-col cols="12" md="12">
               <v-autocomplete
                 v-model="data.tenant"
-                :items="tenants"
+                :items="tenants || []"
                 item-value="id"
                 item-text="name"
                 label="Tenant"
@@ -580,17 +583,18 @@ export default {
             <v-col cols="12" md="12">
               <v-autocomplete
                 v-model="data.room"
-                :items="rooms"
+                :items="rooms || []"
                 item-text="name"
                 label="Room"
                 :error-messages="isEmpty(data.room) ? 'Room is required' : ''"
                 return-object
+                :disabled="editMode"
               >
                 <!-- <template v-slot:append>
                   <room-form
                     :editMode="false"
                     :dialogStyle="roomFormDialogConfig.dialogStyle"
-                    :buttonStyle="roomFormDialogConfig.buttonStyle"
+                    :buttonStyle="roomFormDialogConfig.buttonStyl·e"
                     @created="appendRoomList($event)"
                   ></room-form>
                 </template>-->
@@ -699,7 +703,7 @@ export default {
                         <td>
                           <v-autocomplete
                             v-model="data.room.contract_id"
-                            :items="contracts"
+                            :items="contracts || []"
                             item-text="name"
                             item-value="id"
                             label="Contract"

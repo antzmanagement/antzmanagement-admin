@@ -36,7 +36,6 @@ trait RentalPaymentServices
     private function filterRentalPayments($data, $params)
     {
         $params = $this->checkUndefinedProperty($params, $this->rentalPaymentFilterCols());
-
         if($params->tenant_id){
             $tenant_id = $params->tenant_id;
             $data = $data->filter(function ($item) use($tenant_id) {
@@ -77,6 +76,7 @@ trait RentalPaymentServices
         }
         
         if (property_exists($params, 'paid') && $params->paid != null) {
+            error_log('$check paid');
             $paid = $params->paid;
             $data = collect($data);
             $data = $data->filter(function ($item) use ($paid) {
@@ -99,6 +99,31 @@ trait RentalPaymentServices
             });
         }
 
+        if ($params->paymentfromdate) {
+            error_log('$check paymentfromdate');
+            $date = Carbon::parse($params->paymentfromdate);
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($date) {
+                if(data_get($item, 'paymentdate')){
+                    return Carbon::parse(data_get($item, 'paymentdate'))->gte($date);
+                }else{
+                    return false;
+                }
+            });
+        }
+        
+        if ($params->paymenttodate) {
+            $date = Carbon::parse($params->paymenttodate);
+            $data = $data->filter(function ($item) use ($date) {
+                error_log(data_get($item, 'paymentdate'));
+                if(data_get($item, 'paymentdate')){
+                    return Carbon::parse(data_get($item, 'paymentdate'))->lte($date);
+                }else{
+                    return false;
+                }
+            });
+        }
+        
         $data = $data->unique('id');
 
         return $data;
@@ -232,6 +257,6 @@ trait RentalPaymentServices
     }
     public function rentalPaymentFilterCols()
     {
-        return ['fromdate', 'todate', 'tenant_id', 'room_id', 'penalty', 'paid', 'sequence'];
+        return ['fromdate', 'todate', 'tenant_id', 'room_id', 'penalty', 'paid', 'sequence', 'paymentfromdate', 'paymenttodate'];
     }
 }

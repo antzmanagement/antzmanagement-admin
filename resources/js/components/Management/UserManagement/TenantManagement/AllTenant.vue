@@ -159,13 +159,15 @@ export default {
         .then((data) => {
           if (data.data) {
             this.data = data.data;
+          this.totalDataLength = data.totalResult;
           } else {
             this.data = [];
+          this.totalDataLength = 0;
           }
-          this.totalDataLength = data.totalResult;
           this.loading = false;
         })
         .catch((error) => {
+          console.log(error);
           this.loading = false;
           Toast.fire({
             icon: "warning",
@@ -243,6 +245,7 @@ export default {
                 :options.sync="options"
                 :server-items-length="totalDataLength"
                 :loading="loading"
+                disable-sort
               >
                 <template v-slot:top>
                   <v-toolbar flat class="mb-5">

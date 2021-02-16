@@ -272,7 +272,15 @@ class TenantController extends Controller
                     DB::rollBack();
                     return $this->notFoundResponse('Contract');
                 }
-                $startdate = Carbon::parse($room->contractstartdate)->format('Y-m-d');
+                $startdate = Carbon::parse($room->startdate)->format('Y-m-d');
+                $enddate = Carbon::parse($room->enddate)->format('Y-m-d');
+
+                $duration = $contract->duration;
+                if($contract->rental_type == 'day'){
+                    $duration = Carbon::parse($startdate)->diffInDays(Carbon::parse($enddate)) + 1;
+                }else{
+                    $duration = Carbon::parse($startdate)->diffInMonths(Carbon::parse($enddate)) + 1;
+                }        
                 $origRoom = $this->getRoomById($room->id);
                 if ($this->isEmpty($origRoom)) {
                     DB::rollBack();
@@ -281,21 +289,29 @@ class TenantController extends Controller
 
                 $servicesIds = collect($room->services)->pluck('id');
                 $origServiceIds = collect($room->origServices)->pluck('id');
-                $addOnServicesIds = $servicesIds->diff($origServiceIds);
+                $addOnServicesIds = $servicesIds->diff($origServiceIds);        
+                $max = RoomContract::where('status', true)->max('sequence') + 1;
+
                 $params = collect([
-                    'room_id' => $origRoom->id,
                     'tenant_id' => $tenant->id,
+                    'room_id' => $origRoom->id,
                     'contract_id' => $contract->id,
                     'orig_service_ids' => $origServiceIds,
                     'add_on_service_ids' => $addOnServicesIds,
-                    'name' => $contract->name,
-                    'duration' => $contract->duration,
+                    'name' => $room->unit . '_' . $startdate. '_' . $contract->name,
+                    'duration' => $duration,
+                    'penalty' => $contract->penalty,
+                    'penalty_day' => $contract->penalty_day,
+                    'rental_type' => $contract->rental_type,
                     'terms' => $contract->terms,
-                    'autorenew' => $contract->autorenew,
+                    'autorenew' => $room->autorenew,
                     'startdate' => $startdate,
+                    'enddate' => $enddate,
                     'rental' => $room->price,
                     'deposit' => $room->deposit,
+                    'agreement_fees' => $room->agreement_fees,
                     'booking_fees' => $room->booking_fees,
+                    'sequence' => $max,
                 ]);
                 //Convert To Json Object
                 $params = json_decode(json_encode($params));

@@ -245,7 +245,7 @@ export default {
                 v-model="selectedTenant"
                 item-text="name"
                 item-value="id"
-                :items="tenants"
+                :items="tenants || []"
                 label="Tenant"
               ></v-autocomplete>
             </template>
@@ -324,6 +324,7 @@ export default {
               fixed-header
               height="300px"
               :items-per-page="5"
+                disable-sort
             >
               <template v-slot:top>
                 <v-toolbar flat color="white">

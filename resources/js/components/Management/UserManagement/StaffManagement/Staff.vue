@@ -113,6 +113,9 @@ export default {
           ></v-divider>
           <v-container>
             <v-row justify="start" align="center" class="pa-2">
+              <v-col cols="12" v-if="data.profile_img">
+                <v-img :src="data.profile_img" :height="400" :width="400" contain ></v-img>
+              </v-col>
               <v-col cols="12">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Role</label>
@@ -128,6 +131,7 @@ export default {
             </v-row>
 
             <v-row justify="start" align="center" class="pa-2">
+
               <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Name</label>

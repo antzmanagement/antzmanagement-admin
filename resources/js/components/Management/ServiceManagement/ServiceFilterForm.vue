@@ -101,7 +101,7 @@ export default {
             <v-autocomplete
               v-model="data.rooms"
               :item-text="item => helpers.capitalizeFirstLetter(item.name)"
-              :items="rooms"
+              :items="rooms || []"
               label="Room"
               chips
               deletable-chips

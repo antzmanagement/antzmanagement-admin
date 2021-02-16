@@ -456,7 +456,7 @@ export default {
                 v-model="data.roomType"
                 :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
                 item-value="id"
-                :items="roomTypes"
+                :items="roomTypes || []"
                 label="Room Type"
                 chips
                 deletable-chips
@@ -477,7 +477,7 @@ export default {
                 v-model="data.owner"
                 :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
                 item-value="id"
-                :items="owners"
+                :items="owners || []"
                 label="Owner"
                 chips
                 deletable-chips
@@ -497,7 +497,7 @@ export default {
                 v-model="data.properties"
                 :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
                 item-value="id"
-                :items="properties"
+                :items="properties || []"
                 label="Property"
                 chips
                 multiple

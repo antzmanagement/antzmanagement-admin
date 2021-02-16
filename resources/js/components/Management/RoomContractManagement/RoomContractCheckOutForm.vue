@@ -56,7 +56,7 @@ export default {
           this.data.checkout_date = moment().format("YYYY-MM-DD");
           this.data.return_deposit =
             this.data.deposit -
-            this.data.booking_fees;
+            this.data.agreement_fees;
           this.$Progress.finish();
           this.endLoadingAction();
         })

@@ -268,7 +268,7 @@ export default {
               v-model="data.owner"
               :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
               item-value="uid"
-              :items="owners"
+              :items="owners || []"
               label="Owner"
               @change="getUnclaimData()"
             >
@@ -283,7 +283,7 @@ export default {
                 }
               "
               item-value="id"
-              :items="rentalpayments"
+              :items="rentalpayments || []"
               label="Rental Payments"
               chips
               deletable-chips
@@ -300,7 +300,7 @@ export default {
                   helpers.capitalizeFirstLetter(_.get(item, 'name') || '')
               "
               item-value="id"
-              :items="maintenances"
+              :items="maintenances || []"
               label="Maintenances"
               chips
               deletable-chips

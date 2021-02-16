@@ -19,6 +19,7 @@
               :server-items-length="totalDesserts"
               :loading="loading"
               class="elevation-1"
+                disable-sort
             ></v-data-table>
           </v-col>
         </v-row>

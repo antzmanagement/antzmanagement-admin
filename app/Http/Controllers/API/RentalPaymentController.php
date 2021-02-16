@@ -36,6 +36,8 @@ class RentalPaymentController extends Controller
         $params = collect([
             'tenant_id' => $request->tenant_id,
             'room_id' => $request->room_id,
+            'paymentfromdate' => $request->paymentfromdate,
+            'paymenttodate' => $request->paymenttodate,
             'fromdate' => $request->fromdate,
             'todate' => $request->todate,
             'penalty' => $request->penalty,

@@ -80,14 +80,22 @@ trait TenantServices
         if ($params->birthdayfromdate) {
             $date = Carbon::parse($params->birthdayfromdate)->startOfDay();
             $data = $data->filter(function ($item) use ($date) {
-                return (Carbon::parse(data_get($item, 'birthday')) >= $date);
+                if(data_get($item, 'birthday')){
+                    return Carbon::parse(data_get($item, 'birthday'))->gte($date);
+                }else{
+                    return false;
+                }
             });
         }
 
         if ($params->birthdaytodate) {
             $date = Carbon::parse($params->birthdaytodate)->endOfDay();
             $data = $data->filter(function ($item) use ($date) {
-                return (Carbon::parse(data_get($item, 'birthday')) <= $date);
+                if(data_get($item, 'birthday')){
+                    return Carbon::parse(data_get($item, 'birthday'))->lte($date);
+                }else{
+                    return false;
+                }
             });
         }
 

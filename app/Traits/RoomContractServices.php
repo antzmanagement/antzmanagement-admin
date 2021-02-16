@@ -126,6 +126,7 @@ trait RoomContractServices
 
 
         if (property_exists($params, 'outstanding_deposit') && $params->outstanding_deposit != null) {
+            error_log('filter outstanding_deposit');
             $outstanding_deposit = $params->outstanding_deposit;
             $data = collect($data);
             $data = $data->filter(function ($item) use ($outstanding_deposit) {
@@ -255,7 +256,8 @@ trait RoomContractServices
         $data->latest = 0;
         $data->expired = false;
         $data->terms  = $params->terms;
-        $data->autorenew  = $params->autorenew;
+        // $data->autorenew  = $params->autorenew;
+        $data->autorenew  = false;
         $data->penalty_day  = $this->toInt($params->penalty_day);
         $data->penalty  = $this->toDouble($params->penalty);
         $data->startdate  = $this->toDate($params->startdate);
@@ -325,6 +327,7 @@ trait RoomContractServices
             }
         }
 
+        $this->syncRoomStatus($data->room);
 
         return $data->refresh();
     }
@@ -334,7 +337,8 @@ trait RoomContractServices
     {
 
         $params = $this->checkUndefinedProperty($params, $this->roomContractAllCols());
-        $data->autorenew  = $params->autorenew;
+        // $data->autorenew  = $params->autorenew;
+        $data->autorenew  = false;
         $data->booking_fees  = $this->toDouble($params->booking_fees);
         $data->agreement_fees  = $this->toDouble($params->agreement_fees);
         $data->outstanding_deposit  = $this->toDouble($params->outstanding_deposit);
@@ -396,6 +400,7 @@ trait RoomContractServices
         }
 
 
+        $this->syncRoomStatus($data->room);
         return $data->refresh();
     }
 
@@ -435,6 +440,7 @@ trait RoomContractServices
             return null;
         }
 
+        $this->syncRoomStatus($data->room);
         return $data->refresh();
     }
 
@@ -595,6 +601,7 @@ trait RoomContractServices
         $data->checkout_remark  = $params->checkout_remark;
         $data->checkedout = true;
 
+        $totalPaidRental = 0;
         $totalPaidRental  += $data->rentalpayments()->where('paid', true)->where('status', true)->count();
         if($totalPaidRental > 12 && $data->rental_type == 'month'){
             $data->commission = $data->rental;
@@ -651,6 +658,8 @@ trait RoomContractServices
         if (!$this->saveModel($data)) {
             return null;
         }
+
+        $this->syncRoomStatus($data->room);
         return $data->refresh();
     }
 

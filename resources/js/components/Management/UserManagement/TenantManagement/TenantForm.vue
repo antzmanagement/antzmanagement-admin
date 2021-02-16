@@ -1,6 +1,7 @@
 
 
 <script>
+import moment from 'moment';
 import { validationMixin } from "vuelidate";
 import {
   required,
@@ -10,6 +11,7 @@ import {
   email,
 } from "vuelidate/lib/validators";
 import { mapActions } from "vuex";
+import { _ } from '../../../../common/common-function';
 export default {
   props: {
     editMode: {
@@ -34,6 +36,7 @@ export default {
   },
   data() {
     return {
+      _ : _,
       dialog: false,
       menu: false,
       birthdayMenu: false,
@@ -76,7 +79,7 @@ export default {
         postcode: "",
         state: "",
         city: "",
-        pic: '',
+        pic: "",
       }),
       roomFormDialogConfig: {
         dialogStyle: {
@@ -291,7 +294,7 @@ export default {
       pageSize: -1,
     })
       .then((data) => {
-        this.rooms = data.data.map(function (room) {
+        this.rooms = (data.data || []).map(function (room) {
           if (
             room.room_types.length > 0 &&
             room.room_types[0].services.length > 0
@@ -302,10 +305,13 @@ export default {
             room.services = [];
             room.origServices = [];
           }
-          room.price = parseFloat(room.price);
           room.origPrice = parseFloat(room.price);
-          room.deposit = parseFloat(room.price) * 2.5;
+          room.price = parseFloat(room.price);
+          room.deposit = 700;
           room.booking_fees = 200;
+          room.outstanding_deposit = room.deposit - room.booking_fees;
+          room.agreement_fees = 50;
+          room.autorenew = false;
           return room;
         });
         this.getContractsAction({
@@ -329,6 +335,7 @@ export default {
                       this.endLoadingAction();
                     })
                     .catch((error) => {
+                      console.log(error);
                       Toast.fire({
                         icon: "warning",
                         title: "Something went wrong... ",
@@ -340,6 +347,7 @@ export default {
                 }
               })
               .catch((error) => {
+                console.log(error);
                 this.endLoadingAction();
                 Toast.fire({
                   icon: "warning",
@@ -356,6 +364,7 @@ export default {
           });
       })
       .catch((error) => {
+        console.log(error);
         this.endLoadingAction();
         Toast.fire({
           icon: "warning",
@@ -422,6 +431,7 @@ export default {
             this.dialog = false;
           })
           .catch((error) => {
+            console.log(error);
             Toast.fire({
               icon: "error",
               title: "Something went wrong. ",
@@ -455,6 +465,7 @@ export default {
             this.dialog = false;
           })
           .catch((error) => {
+            console.log(error);
             Toast.fire({
               icon: "error",
               title: "Something went wrong. ",
@@ -510,6 +521,7 @@ export default {
           this.endLoadingAction();
         })
         .catch((error) => {
+          console.log(error);
           Toast.fire({
             icon: "error",
             title: "Something went wrong. ",
@@ -525,6 +537,31 @@ export default {
         });
       } else {
         return [];
+      }
+    },
+    updateContractInfo(room) {
+      let self = this;
+      let contract = _.find(this.contracts, function (contract) {
+        return contract.id == room.contract_id;
+      });
+
+      if (_.isPlainObject(contract) && !_.isEmpty(contract)) {
+        if (
+          _.get(room, ["startdate"]) &&
+          _.get(room, ["contract_id"])
+        ) {
+          let duration = contract.duration || 1;
+          room.enddate = moment(room.startdate)
+            .add(
+              duration - 1,
+              contract.rental_type == "month" ? "months" : "days"
+            )
+            .format("YYYY-MM-DD");
+        }
+
+        if (_.get(room, ["autorenew"])) {
+          room.autorenew = contract.autorenew;
+        }
       }
     },
   },
@@ -579,7 +616,7 @@ export default {
                 v-model="data.pic"
                 :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
                 item-value="id"
-                :items="staffs"
+                :items="staffs || []"
                 label="Person In Charge"
                 chips
                 deletable-chips
@@ -638,7 +675,7 @@ export default {
                 <template v-slot:activator="{ on, attrs }">
                   <v-text-field
                     v-model="data.birthday"
-                    label="Picker in menu"
+                    label="Birthday"
                     prepend-icon="mdi-calendar"
                     readonly
                     v-bind="attrs"
@@ -652,7 +689,7 @@ export default {
             <v-col cols="12" md="6">
               <v-autocomplete
                 v-model="data.gender"
-                :items="genders"
+                :items="genders || []"
                 label="Gender"
               ></v-autocomplete>
             </v-col>
@@ -684,7 +721,7 @@ export default {
             <v-col cols="12" md="6">
               <v-autocomplete
                 v-model="data.religion"
-                :items="religions"
+                :items="religions || []"
                 label="Religion"
               ></v-autocomplete>
             </v-col>
@@ -797,7 +834,7 @@ export default {
             <v-col cols="12" md="6">
               <v-autocomplete
                 v-model="data.approach_method"
-                :items="approachmethods"
+                :items="approachmethods || []"
                 label="How you know us?"
               ></v-autocomplete>
             </v-col>
@@ -831,7 +868,7 @@ export default {
             <v-col cols="12" md="12" v-if="!editMode">
               <v-autocomplete
                 v-model="data.rooms"
-                :items="rooms"
+                :items="rooms || []"
                 item-text="name"
                 label="Room"
                 multiple
@@ -857,7 +894,7 @@ export default {
               </v-autocomplete>
             </v-col>
           </v-row>
-          <v-row v-show="!helpers.isEmpty(data.rooms)">
+          <v-row v-show="!_.isEmpty(data.rooms)">
             <v-col cols="12">
               <v-card>
                 <v-simple-table fixed-header height="300px">
@@ -865,16 +902,26 @@ export default {
                     <thead>
                       <tr>
                         <th class="text-left">Room</th>
-                        <th class="text-left">Price</th>
-                        <th class="text-left">Deposit</th>
-                        <th class="text-left">Booking Fees</th>
+                        <th class="text-left">Rental</th>
+                        <th class="text-left" >Deposit</th>
+                        <th class="text-left" >
+                          Agreement Fees
+                        </th>
+                        <th class="text-left">
+                          Booking Fees
+                        </th>
+                        <th class="text-left" v-if="editMode">
+                          Outstanding Deposit
+                        </th>
                         <th class="text-left">Contract</th>
                         <th class="text-left">Contract Start Date</th>
+                        <th class="text-left">Contract End Date</th>
+                        <!-- <th class="text-left">Auto Renew</th> -->
                         <th class="text-left">Services</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="room in data.rooms" :key="room.uid">
+                      <tr  v-for="room in data.rooms" :key="room.uid">
                         <td>{{ room.name }}</td>
                         <td>
                           <v-text-field
@@ -882,14 +929,37 @@ export default {
                             prefix="RM"
                             type="number"
                             step="0.01"
+                            :error-messages="
+                              helpers.isEmpty(room.price)
+                                ? 'Rental is required'
+                                : ''
+                            "
                           ></v-text-field>
                         </td>
-                        <td>
+                        <td >
                           <v-text-field
                             v-model="room.deposit"
                             prefix="RM"
                             type="number"
                             step="0.01"
+                            :error-messages="
+                              helpers.isEmpty(room.deposit)
+                                ? 'Deposit is required'
+                                : ''
+                            "
+                          ></v-text-field>
+                        </td>
+                        <td >
+                          <v-text-field
+                            v-model="room.agreement_fees"
+                            prefix="RM"
+                            type="number"
+                            step="0.01"
+                            :error-messages="
+                              helpers.isEmpty(room.agreement_fees)
+                                ? 'Agreement is required'
+                                : ''
+                            "
                           ></v-text-field>
                         </td>
                         <td>
@@ -898,12 +968,30 @@ export default {
                             prefix="RM"
                             type="number"
                             step="0.01"
+                            :error-messages="
+                              helpers.isEmpty(room.booking_fees)
+                                ? 'Booking fees is required'
+                                : ''
+                            "
+                          ></v-text-field>
+                        </td>
+                        <td v-if="editMode">
+                          <v-text-field
+                            v-model="room.outstanding_deposit"
+                            prefix="RM"
+                            type="number"
+                            step="0.01"
+                            :error-messages="
+                              helpers.isEmpty(room.outstanding_deposit)
+                                ? 'Outstanding deposit is required'
+                                : ''
+                            "
                           ></v-text-field>
                         </td>
                         <td>
                           <v-autocomplete
                             v-model="room.contract_id"
-                            :items="contracts"
+                            :items="contracts || []"
                             item-text="name"
                             item-value="id"
                             label="Contract"
@@ -912,6 +1000,8 @@ export default {
                                 ? 'Contract is required'
                                 : ''
                             "
+                            @change="updateContractInfo(room)"
+                            :disabled="editMode"
                           ></v-autocomplete>
                         </td>
                         <td>
@@ -920,6 +1010,7 @@ export default {
                             v-model="room.menu"
                             :close-on-content-click="true"
                             transition="scale-transition"
+                            :disabled="editMode"
                             offset-y
                           >
                             <template v-slot:activator="{ on }">
@@ -928,6 +1019,7 @@ export default {
                                 label="Start Date"
                                 prepend-icon="event"
                                 readonly
+                                :disabled="editMode"
                                 v-on="on"
                                 :error-messages="
                                   helpers.isEmpty(room.startdate)
@@ -944,11 +1036,57 @@ export default {
                           </v-menu>
                         </td>
                         <td>
+                          <v-menu
+                            ref="menu"
+                            v-model="room.enddatemenu"
+                            :close-on-content-click="true"
+                            transition="scale-transition"
+                            :disabled="editMode"
+                            offset-y
+                          >
+                            <template v-slot:activator="{ on }">
+                              <v-text-field
+                                v-model="room.enddate"
+                                label="End Date"
+                                prepend-icon="event"
+                                readonly
+                                v-on="on"
+                                :disabled="editMode"
+                                :error-messages="
+                                  helpers.isEmpty(room.enddate)
+                                    ? 'Date is required'
+                                    : ''
+                                "
+                              ></v-text-field>
+                            </template>
+                            <v-date-picker
+                              v-model="room.enddate"
+                              no-title
+                              scrollable
+                            ></v-date-picker>
+                          </v-menu>
+                        </td>
+
+                        <!-- <td>
+                          <v-switch v-model="room.autorenew"></v-switch>
+                        </td> -->
+                        <td>
                           <services-dialog
                             :dialogStyle="servicesDialogConfig.dialogStyle"
-                            :buttonStyle="servicesDialogConfig.buttonStyle"
-                            :services="pluckUid(room.services)"
-                            :origServices="pluckUid(room.origServices)"
+                            :services="
+                              pluckUid(
+                                !_.isEmpty(room.services)
+                                  ? room.services
+                                  : []
+                              )
+                            "
+                            :origServices="
+                              pluckUid(
+                                !_.isEmpty(room.origServices)
+                                  ? room.origServices
+                                  : []
+                              )
+                            "
                             editMode
                             @submit="
                               (e) => {

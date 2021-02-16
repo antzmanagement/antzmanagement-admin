@@ -95,6 +95,7 @@ class MaintenanceController extends Controller
             return $this->errorResponse();
         }
 
+
         error_log($maintenance);
 
         DB::commit();

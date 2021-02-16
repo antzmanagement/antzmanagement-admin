@@ -232,7 +232,7 @@ export default {
               <v-autocomplete
                 v-model="data.tenant"
                 :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
-                :items="tenants"
+                :items="tenants || []"
                 label="Tenant"
                 chips
                 deletable-chips
@@ -243,7 +243,7 @@ export default {
               <v-autocomplete
                 v-model="data.room"
                 :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
-                :items="rooms"
+                :items="rooms || []"
                 label="Room"
                 chips
                 deletable-chips
@@ -254,7 +254,7 @@ export default {
               <v-autocomplete
                 v-model="data.services"
                 :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
-                :items="services"
+                :items="services || []"
                 label="Service"
                 chips
                 multiple

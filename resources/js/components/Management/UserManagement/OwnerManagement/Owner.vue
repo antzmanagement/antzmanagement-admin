@@ -224,12 +224,12 @@ export default {
               </v-col>
             </v-row>
             <v-row class="pa-2" justify="end" align="center">
-              <v-col cols="auto">
+              <!-- <v-col cols="auto">
                 <change-password-dialog
                   :uid="this.$route.params.uid"
                   @updated="refreshPage()"
                 ></change-password-dialog>
-              </v-col>
+              </v-col> -->
               <v-col cols="auto">
                 <owner-form
                   :editMode="true"

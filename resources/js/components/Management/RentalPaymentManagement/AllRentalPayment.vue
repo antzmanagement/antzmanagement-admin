@@ -497,6 +497,7 @@ export default {
                 :options.sync="options"
                 :server-items-length="rentalPaymentTotal"
                 :loading="loading"
+                disable-sort
               >
                 <template v-slot:top>
                   <v-toolbar flat color="white">
@@ -577,13 +578,14 @@ export default {
             cols="12"
             :class="helpers.managementStyles().centerWrapperClass"
           >
-            <v-card raised width="100%">
+            <v-card raised width="100%" class="pa-8">
               <v-data-table
                 :headers="paymentHeaders"
                 :items="paymentData"
                 :options.sync="paymentOptions"
                 :server-items-length="paymentTotal"
                 :loading="paymentLoading"
+                disable-sort
               >
                 <template v-slot:top>
                   <v-toolbar flat color="white">

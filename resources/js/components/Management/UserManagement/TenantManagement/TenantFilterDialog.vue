@@ -231,21 +231,21 @@ export default {
             <v-col cols="12" md="12">
               <v-autocomplete
                 v-model="data.gender"
-                :items="genders"
+                :items="genders || []"
                 label="Gender"
               ></v-autocomplete>
             </v-col>
             <v-col cols="12" md="12">
               <v-autocomplete
                 v-model="data.religion"
-                :items="religions"
+                :items="religions || []"
                 label="Religion"
               ></v-autocomplete>
             </v-col>
             <v-col cols="12" md="12">
               <v-autocomplete
                 v-model="data.approach_method"
-                :items="approachmethods"
+                :items="approachmethods || []"
                 label="How you know us?"
               ></v-autocomplete>
             </v-col>
@@ -253,7 +253,7 @@ export default {
               <v-autocomplete
                 v-model="data.pic"
                 :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
-                :items="staffs"
+                :items="staffs || []"
                 label="Person In Charge"
                 chips
                 deletable-chips

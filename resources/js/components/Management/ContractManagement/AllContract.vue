@@ -157,6 +157,7 @@ export default {
                 :options.sync="options"
                 :server-items-length="totalDataLength"
                 :loading="loading"
+                disable-sort
               >
                 <template v-slot:top>
                   <v-toolbar flat class="mb-5">

@@ -182,6 +182,8 @@ trait MaintenanceServices
             return null;
         }
 
+        $this->syncRoomStatus($data->room);
+
         return $data->refresh();
     }
 
@@ -220,6 +222,7 @@ trait MaintenanceServices
             return null;
         }
 
+        $this->syncRoomStatus($data->room);
         return $data->refresh();
     }
 
@@ -233,6 +236,7 @@ trait MaintenanceServices
             return null;
         }
 
+        $this->syncRoomStatus($data->room);
         return $data->refresh();
     }
 

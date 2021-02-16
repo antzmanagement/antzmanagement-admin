@@ -706,6 +706,7 @@ export default {
                     fixed-header
                     height="300px"
                     :items-per-page="5"
+                    disable-sort
                   >
                     <template v-slot:top>
                       <v-toolbar flat color="white">
@@ -797,6 +798,7 @@ export default {
                     fixed-header
                     height="300px"
                     :items-per-page="5"
+                    disable-sort
                   >
                     <template v-slot:top>
                       <v-toolbar flat color="white">
