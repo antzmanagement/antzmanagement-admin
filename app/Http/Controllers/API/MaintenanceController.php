@@ -86,6 +86,7 @@ class MaintenanceController extends Controller
             'owner_id' => $request->owner,
             'maintenance_status' => $request->maintenance_status,
             'maintenance_type' => $request->maintenance_type,
+            'claim_by_owner' => $request->claim_by_owner,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
@@ -129,6 +130,7 @@ class MaintenanceController extends Controller
             'owner_id' => $request->owner,
             'maintenance_status' => $request->maintenance_status,
             'maintenance_type' => $request->maintenance_type,
+            'claim_by_owner' => $request->claim_by_owner,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

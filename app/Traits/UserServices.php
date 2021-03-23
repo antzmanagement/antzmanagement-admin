@@ -26,7 +26,7 @@ trait UserServices
                 } else {
                     return false;
                 }
-            });
+            })->values();
         }
 
         if ($params->scope) {
@@ -35,11 +35,11 @@ trait UserServices
             if ($scope == 'private') {
                 $data = $data->filter(function ($item) {
                     return $item->scope == 'private';
-                });
+                })->values();
             } else {
                 $data = $data->filter(function ($item) {
                     return $item->scope == 'public';
-                });
+                })->values();
             }
         }
 
@@ -93,6 +93,8 @@ trait UserServices
         $data->icno = $params->icno;
         $data->email = $params->email;
         $data->tel1 = $params->tel1;
+        $data->tel2 = $params->tel2;
+        $data->tel3 = $params->tel3;
         $data->mother_name = $params->mother_name;
         $data->mother_tel = $params->mother_tel;
         $data->father_name = $params->father_name;
@@ -111,6 +113,9 @@ trait UserServices
         $data->address = $params->address;
         $data->state = $params->state;
         $data->city = $params->city;
+        $data->referenceno = $params->referenceno;
+        $data->banktype = $params->banktype;
+        $data->bankaccount = $params->bankaccount;
 
         $data->password = Hash::make($params->password);
 
@@ -144,6 +149,8 @@ trait UserServices
         $data->icno = $params->icno;
         $data->email = $params->email;
         $data->tel1 = $params->tel1;
+        $data->tel2 = $params->tel2;
+        $data->tel3 = $params->tel3;
         $data->mother_name = $params->mother_name;
         $data->mother_tel = $params->mother_tel;
         $data->father_name = $params->father_name;
@@ -162,6 +169,9 @@ trait UserServices
         $data->address = $params->address;
         $data->state = $params->state;
         $data->city = $params->city;
+        $data->referenceno = $params->referenceno;
+        $data->banktype = $params->banktype;
+        $data->bankaccount = $params->bankaccount;
 
         $role = $this->getRoleById($params->role_id);
         if ($this->isEmpty($role)) {
@@ -271,8 +281,8 @@ trait UserServices
 
         return [
             'id', 'uid', 'name', 'email',
-            'icno', 'tel1', 'mother_name', 'mother_tel', 'father_name', 'age', 'birthday', 'gender', 'religion', 'approach_method', 'occupation', 'address', 'state', 'postcode', 'city', 'pic',
-            'father_tel', 'emergency_name', 'emergency_contact', 'emergency_relationship', 'password', 'status'
+            'icno', 'tel1', 'tel2', 'tel3', 'mother_name', 'mother_tel', 'father_name', 'age', 'birthday', 'gender', 'religion', 'approach_method', 'occupation', 'address', 'state', 'postcode', 'city', 'pic',
+            'father_tel', 'emergency_name', 'emergency_contact', 'emergency_relationship', 'password', 'status', 'referenceno', 'bankaccount', 'banktype'
         ];
     }
 

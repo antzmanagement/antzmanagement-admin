@@ -33,7 +33,7 @@ trait RoleServices
                 } else {
                     return false;
                 }
-            });
+            })->values();
         }
 
       

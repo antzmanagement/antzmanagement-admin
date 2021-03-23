@@ -99,6 +99,9 @@ export default {
           text: "Sequence No",
         },
         {
+          text: "Reference No",
+        },
+        {
           text: "Tenant",
         },
         {
@@ -136,6 +139,9 @@ export default {
         {
           text: "Sequence No",
           value: "sequence",
+        },
+        {
+          text: "Reference No",
         },
         {
           text: "Tenant",
@@ -516,6 +522,7 @@ export default {
                 <template v-slot:item="props">
                   <tr>
                     <td>{{ props.item.sequence }}</td>
+                    <td>{{ props.item.referenceno }}</td>
                     <td>{{ props.item.roomcontract.tenant.name }}</td>
                     <td>{{ props.item.roomcontract.name }}</td>
                     <td>{{ props.item.roomcontract.room.name }}</td>
@@ -604,6 +611,7 @@ export default {
                 <template v-slot:item="props">
                   <tr>
                     <td>{{ props.item.sequence }}</td>
+                    <td>{{ props.item.referenceno }}</td>
                     <td>{{ props.item.roomcontract.tenant.name }}</td>
                     <td>{{ props.item.roomcontract.name }}</td>
                     <td>{{ props.item.roomcontract.room.name }}</td>

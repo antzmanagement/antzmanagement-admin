@@ -54,9 +54,7 @@ export default {
         .then((data) => {
           this.data = data.data;
           this.data.checkout_date = moment().format("YYYY-MM-DD");
-          this.data.return_deposit =
-            this.data.deposit -
-            this.data.agreement_fees;
+          this.data.return_deposit = this.data.deposit;
           this.$Progress.finish();
           this.endLoadingAction();
         })
@@ -72,7 +70,6 @@ export default {
     checkout() {
       this.checkoutRoomContractAction(this.data)
         .then((data) => {
-            
           Toast.fire({
             icon: "success",
             title: "Checked out! ",
@@ -80,12 +77,13 @@ export default {
           this.$Progress.finish();
           this.endLoadingAction();
           location.reload();
-          this.$emit('close')
+          this.$emit("close");
         })
         .catch((error) => {
           Toast.fire({
             icon: "warning",
-            title: "Fail to check out. Please make sure all the data is valid and rentals are paid .  ",
+            title:
+              "Fail to check out. Please make sure all the data is valid and rentals are paid .  ",
           });
           this.$Progress.finish();
           this.endLoadingAction();

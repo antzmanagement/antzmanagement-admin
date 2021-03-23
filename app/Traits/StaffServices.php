@@ -18,7 +18,7 @@ trait StaffServices
         $userType = $this->getUserTypeById($this->staffType);
         $data = $data->merge($userType->users()->wherePivot('status', true)->where('users.status', true)->get());
 
-        $data = $data->unique('id')->sortBy('id')->flatten(1);
+        $data = $data->unique('id')->sortByDesc('id')->flatten(1);
 
         return $data;
     }

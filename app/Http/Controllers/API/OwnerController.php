@@ -193,16 +193,15 @@ class OwnerController extends Controller
         $this->validate($request, [
             'name' => 'required|string|max:300',
             'icno' => 'required|string|max:14',
-            'tel1' => 'nullable|string|max:20',
+            'tel1' => 'nullable|string|max:100',
+            'tel2' => 'nullable|string|max:100',
+            'tel3' => 'nullable|string|max:100',
             'email' =>
             [
                 'required',
                 'string',
                 'email',
-                'max:191',
-                Rule::unique('users')->where(function ($query) {
-                    $query->where('status', true);
-                }),
+                'max:300',
             ],
             // 'password' => 'required|string|min:6|confirmed',
         ]);
@@ -216,12 +215,17 @@ class OwnerController extends Controller
             'name' => $request->name,
             'icno' => $request->icno,
             'tel1' => $request->tel1,
+            'tel2' => $request->tel2,
+            'tel3' => $request->tel3,
             'email' => $request->email,
             'occupation' => $request->occupation,
             'address' => $request->address,
             'postcode' => $request->postcode,
             'state' => $request->state,
             'city' => $request->city,
+            'bankaccount' => $request->bankaccount,
+            'banktype' => $request->banktype,
+            'referenceno' => $request->referenceno,
             'role_id' => $role->id,
             // 'password' => $request->password,
         ]);
@@ -364,11 +368,7 @@ class OwnerController extends Controller
                 'required',
                 'string',
                 'email',
-                'max:191',
-                Rule::unique('users')->where(function ($query) use ($owner) {
-                    $query->where('status', true);
-                    $query->where('id', '!=', $owner->id);
-                }),
+                'max:300',
             ],
             'name' => 'required|string|max:191',
         ]);
@@ -386,12 +386,17 @@ class OwnerController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'tel1' => $request->tel1,
+            'tel2' => $request->tel2,
+            'tel3' => $request->tel3,
             'occupation' => $request->occupation,
             'address' => $request->address,
             'postcode' => $request->postcode,
             'state' => $request->state,
             'city' => $request->city,
             'role_id' => $role->id,
+            'bankaccount' => $request->bankaccount,
+            'banktype' => $request->banktype,
+            'referenceno' => $request->referenceno,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

@@ -167,10 +167,28 @@ export default {
                 </div>
               </v-col>
               <v-col cols="12" md="4">
+              </v-col>
+              <v-col cols="12" md="4">
                 <div class="form-group mb-0">
-                  <label class="form-label mb-0">Phone</label>
+                  <label class="form-label mb-0">Phone 1</label>
                   <div class="form-control-plaintext">
                     <h4>{{ data.tel1 }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Phone 2</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.tel2 }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Phone 3</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.tel3 }}</h4>
                   </div>
                 </div>
               </v-col>

@@ -28,9 +28,12 @@ export default {
   },
   data() {
     return {
+      moment : moment,
       _: _,
       menu: false,
+      otherPaymentDialog: false,
       penaltyRate: 3,
+      otherpayments : [],
       expiredDays: 9,
       origPrice: 0,
       data: new Form({
@@ -40,6 +43,7 @@ export default {
         services: [],
         paymentdate: moment().format("YYYY-MM-DD"),
         room_contract_id: "",
+        otherpayments: [],
       }),
       servicesDialogConfig: {
         dialogStyle: {
@@ -66,9 +70,16 @@ export default {
       console.log("room contract changed");
       console.log(val);
     },
+    otherPaymentDialog: function (val) {
+      if(val){
+        this.otherpayments = this.data.otherpayments || [];
+      }else{
+        this.otherpayments = [];
+      }
+      console.log('dialog', val);
+    },
   },
-  mounted() {
-  },
+  mounted() {},
   methods: {
     ...mapActions({
       createPaymentAction: "createPayment",
@@ -96,6 +107,14 @@ export default {
 
       this.data.price = parseFloat(price);
       this.data.services = this.pluckUid(event.services);
+    },
+    otherPaymentUpdated() {
+      let price = 0;
+      this.data.otherpayments.forEach((item) => {
+        price += parseFloat(item.price);
+      });
+
+      this.data.other_charges = parseFloat(price);
     },
     createPayment() {
       console.log(this.data);
@@ -140,6 +159,12 @@ export default {
       <v-container>
         <v-row>
           <v-col cols="12">
+            <v-text-field
+              label="Reference No"
+              v-model="data.referenceno"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12">
             <v-menu
               ref="menu"
               v-model="menu"
@@ -172,8 +197,8 @@ export default {
               label="Service Fees"
               type="number"
               step="0.01"
-              readonly
               v-model="data.price"
+              readonly
             ></v-text-field>
           </v-col>
           <v-col cols="12">
@@ -182,6 +207,7 @@ export default {
               type="number"
               step="0.01"
               v-model="data.other_charges"
+              readonly
             ></v-text-field>
           </v-col>
           <v-col cols="12">
@@ -207,9 +233,107 @@ export default {
       >
         <v-btn color="green darken-1" text>Add On Services</v-btn>
       </services-dialog>
+      <v-btn color="yellow darken-4" text @click="otherPaymentDialog = true"
+        >Other Payment</v-btn
+      >
       <v-spacer></v-spacer>
       <v-btn color="blue darken-1" text @click="close()">Close</v-btn>
       <v-btn color="blue darken-1" text @click="createPayment()">Save</v-btn>
     </v-card-actions>
+
+    <v-dialog v-model="otherPaymentDialog" >
+      <v-card>
+        <v-toolbar dark color="primary">
+          <v-btn icon dark @click="otherPaymentDialog = false">
+            <v-icon>mdi-close</v-icon>
+          </v-btn>
+          <v-toolbar-title>Other Payment</v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-toolbar-items>
+            <v-btn dark text :disabled="isLoading" @click="() => {
+              data.otherpayments = otherpayments;
+              otherPaymentDialog = false;
+              otherPaymentUpdated();
+              }"
+              >Save</v-btn
+            >
+          </v-toolbar-items>
+        </v-toolbar>
+        <v-card-text>
+          <v-container>
+            <v-row>
+              <v-col cols="12">
+                <v-data-table
+                  :items="otherpayments || []"
+                  :headers="[
+                    {
+                      text: 'Name',
+                    },
+                    {
+                      text: 'Price',
+                    },
+                    {
+                      text: 'Actions',
+                    },
+                  ]"
+                >
+                  <template v-slot:top>
+                    <v-toolbar flat color="white">
+                      <v-spacer></v-spacer>
+                      <v-btn
+                        @click="
+                          () => {
+                            otherpayments.push({
+                              id: moment().valueOf(),
+                              name: '',
+                              price: 0,
+                            });
+                          }
+                        "
+                        >Add Other Payment</v-btn
+                      >
+                    </v-toolbar>
+                  </template>
+                  <template v-slot:item="props">
+                    <tr>
+                      <td>
+                        <v-text-field
+                          label="Item Name"
+                          v-model="props.item.name"
+                        ></v-text-field>
+                      </td>
+                      <td>
+                        <v-text-field
+                          label="Item Price"
+                          type="number"
+                          step="0.01"
+                          v-model="props.item.price"
+                        ></v-text-field>
+                      </td>
+                      <td>
+                        <v-btn
+                          icon
+                          color="red"
+                          @click="
+                            () => {
+                              otherpayments = (
+                                otherpayments || []
+                              ).filter(function (item) {
+                                return item.id != props.item.id;
+                              });
+                            }
+                          "
+                          ><v-icon>mdi-trash-can-outline</v-icon></v-btn
+                        >
+                      </td>
+                    </tr>
+                  </template>
+                </v-data-table>
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-card-text>
+      </v-card>
+    </v-dialog>
   </v-card>
 </template>

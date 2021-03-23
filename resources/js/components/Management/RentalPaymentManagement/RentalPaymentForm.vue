@@ -33,6 +33,7 @@ export default {
         price: 0,
         service_fees : 0,
         processing_fees : 0,
+        referenceno : 0,
       }),
       servicesDialogConfig: {
         dialogStyle: {
@@ -161,6 +162,12 @@ export default {
     <v-card-text>
       <v-container>
         <v-row>
+          <v-col cols="12">
+            <v-text-field
+              label="Reference No"
+              v-model="data.referenceno"
+            ></v-text-field>
+          </v-col>
           <v-col cols="12">
             <v-text-field
               label="Rental"

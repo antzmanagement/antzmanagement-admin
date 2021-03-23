@@ -31,7 +31,7 @@ trait MaintenanceServices
             $q->where('status', true);
         }])->get();
 
-        $data = $data->unique('id')->sortBy('id')->flatten(1);
+        $data = $data->unique('id')->sortByDesc('id')->flatten(1);
 
         return $data;
     }
@@ -48,7 +48,7 @@ trait MaintenanceServices
                     return $item->room->id == $room_id;
                 }
                 return false;
-            });
+            })->values();
         }
 
         if($params->property_id){
@@ -58,7 +58,7 @@ trait MaintenanceServices
                     return $item->property->id == $property_id;
                 }
                 return false;
-            });
+            })->values();
         }
         if($params->owner_id){
             $owner_id = $params->owner_id;
@@ -67,7 +67,7 @@ trait MaintenanceServices
                     return $item->owner->id == $owner_id;
                 }
                 return false;
-            });
+            })->values();
         }
         if ($params->maintenance_status) {
             $maintenance_status = $params->maintenance_status;
@@ -89,19 +89,19 @@ trait MaintenanceServices
             $data = collect($data);
             $data = $data->filter(function ($item) use ($date) {
                 return Carbon::parse(data_get($item, 'created_at'))->gte($date);
-            });
+            })->values();
         }
         
         if ($params->todate) {
             $date = Carbon::parse($params->todate)->endOfDay();
             $data = $data->filter(function ($item) use ($date) {
                 return Carbon::parse(data_get($item, 'created_at'))->lte($date);
-            });
+            })->values();
         }
 
 
 
-        $data = $data->unique('id');
+        $data = $data->unique('id')->sortByDesc('id')->flatten(1);
 
         return $data;
     }
@@ -156,6 +156,7 @@ trait MaintenanceServices
         $data->remark = $params->remark;
         $data->maintenance_type = $params->maintenance_type;
         $data->maintenance_status = $params->maintenance_status;
+        $data->claim_by_owner = $params->claim_by_owner;
 
         $room = $this->getRoomById($params->room_id);
         if ($this->isEmpty($room)) {
@@ -170,12 +171,19 @@ trait MaintenanceServices
         $data->property()->associate($property);
 
         $data->name = $room->name. '-'. $property->name. '-' .Carbon::now()->format('Y-m-d');
-        if ($params->owner_id) {
-            $owner = $this->getOwnerById($params->owner_id);
-            if ($this->isEmpty($owner)) {
+        if ($params->claim_by_owner) {
+            $owners = $room->owners;
+            if(collect($owners)->count() > 0){
+                $owner = $this->getOwnerById($owners[0]->id);
+                if ($this->isEmpty($owner)) {
+                    return null;
+                }
+            }else{
                 return null;
             }
             $data->owner()->associate($owner);
+        }else{
+            $data->owner_id = null;
         }
 
         if (!$this->saveModel($data)) {
@@ -196,6 +204,8 @@ trait MaintenanceServices
         $data->remark = $params->remark;
         $data->maintenance_type = $params->maintenance_type;
         $data->maintenance_status = $params->maintenance_status;
+        $data->claim_by_owner = $params->claim_by_owner;
+
 
         $room = $this->getRoomById($params->room_id);
         if ($this->isEmpty($room)) {
@@ -210,14 +220,21 @@ trait MaintenanceServices
         $data->property()->associate($property);
 
 
-        if ($params->owner_id) {
-            $owner = $this->getOwnerById($params->owner_id);
-            if ($this->isEmpty($owner)) {
+        $data->name = $room->name. '-'. $property->name. '-' .Carbon::now()->format('Y-m-d');
+        if ($params->claim_by_owner) {
+            $owners = $room->owners;
+            if(collect($owners)->count() > 0){
+                $owner = $this->getOwnerById($owners[0]->id);
+                if ($this->isEmpty($owner)) {
+                    return null;
+                }
+            }else{
                 return null;
             }
             $data->owner()->associate($owner);
+        }else{
+            $data->owner_id = null;
         }
-
         if (!$this->saveModel($data)) {
             return null;
         }

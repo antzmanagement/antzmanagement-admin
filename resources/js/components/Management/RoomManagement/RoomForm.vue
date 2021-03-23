@@ -56,6 +56,7 @@ export default {
         state: "",
         city: "",
         country: "",
+        lot: "",
         jalan: "",
         block: "",
         floor: "",
@@ -69,6 +70,7 @@ export default {
         owner: "",
         room_status: "empty",
         properties: [],
+        tnb_account_no: "",
       }),
       roomFormDialogConfig: {
         dialogStyle: {
@@ -393,9 +395,10 @@ export default {
 
       if (!_.isNaN(parseFloat(this.data.price))) {
         if (!this.data.sublet) {
-          this.data.owner_claim = parseFloat(
-            (parseFloat(this.data.price) * 0.9).toFixed(2)
-          );
+          this.data.owner_claim =
+            parseFloat((parseFloat(this.data.price) * 0.1).toFixed(2)) < 30
+              ? 30
+              : parseFloat((parseFloat(this.data.price) * 0.1).toFixed(2));
         }
       } else {
         if (!this.data.sublet) {
@@ -481,6 +484,7 @@ export default {
                 label="Owner"
                 chips
                 deletable-chips
+                @change="updateFormDetails()"
               >
                 <!-- <template v-slot:append>
                   <room-type-form
@@ -580,7 +584,7 @@ export default {
                 :error-messages="cityErrors"
               ></v-text-field>
             </v-col>
-            <v-col cols="12" md="6">
+            <!-- <v-col cols="12" md="6">
               <v-text-field
                 label="Country"
                 required
@@ -589,6 +593,14 @@ export default {
                 @input="$v.data.country.$touch()"
                 @blur="$v.data.country.$touch()"
                 :error-messages="countryErrors"
+              ></v-text-field>
+            </v-col> -->
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="Lot"
+                required
+                :maxlength="300"
+                v-model="data.lot"
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="6">
@@ -599,14 +611,14 @@ export default {
                 v-model="data.jalan"
               ></v-text-field>
             </v-col>
-            <v-col cols="12" md="6">
+            <!-- <v-col cols="12" md="6">
               <v-text-field
                 label="Block"
                 required
                 :maxlength="300"
                 v-model="data.block"
               ></v-text-field>
-            </v-col>
+            </v-col> -->
             <v-col cols="12" md="6">
               <v-text-field
                 label="Floor"
@@ -626,16 +638,23 @@ export default {
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="6">
+              <v-text-field
+                label="TNB Account No"
+                :maxlength="300"
+                v-model="data.tnb_account_no"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
               <v-select
                 :items="roomStatusOptions"
                 v-model="data.room_status"
                 label="Room Status"
               ></v-select>
             </v-col>
-            <v-col cols="12" md="6">
+            <v-col cols="12" md="6" v-if="data.owner">
               <v-switch v-model="data.sublet" :label="`Is Sublet`"></v-switch>
             </v-col>
-            <v-col cols="12" md="6" v-if="data.sublet == true">
+            <v-col cols="12" md="6" v-if="data.sublet == true && data.owner">
               <v-text-field
                 label="Sublet Claim"
                 required
@@ -645,7 +664,7 @@ export default {
                 v-model="data.sublet_claim"
               ></v-text-field>
             </v-col>
-            <v-col cols="12" md="6" v-else>
+            <v-col cols="12" md="6" v-if="data.sublet == false && data.owner">
               <v-text-field
                 label="Owner Claim"
                 required

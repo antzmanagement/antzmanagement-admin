@@ -303,11 +303,27 @@ export default {
                 </div>
               </v-col>
 
-              <v-col cols="12" md="4">
+              <!-- <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Block</label>
                   <div class="form-control-plaintext">
                     <h4>{{ data.block }}</h4>
+                  </div>
+                </div>
+              </v-col> -->
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Jalan</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.jalan }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Lot</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.lot }}</h4>
                   </div>
                 </div>
               </v-col>
@@ -338,14 +354,6 @@ export default {
 
               <v-col cols="12" md="4">
                 <div class="form-group mb-0">
-                  <label class="form-label mb-0">Jalan</label>
-                  <div class="form-control-plaintext">
-                    <h4>{{ data.jalan }}</h4>
-                  </div>
-                </div>
-              </v-col>
-              <v-col cols="12" md="4">
-                <div class="form-group mb-0">
                   <label class="form-label mb-0">Postcode</label>
                   <div class="form-control-plaintext">
                     <h4>{{ data.postcode }}</h4>
@@ -368,15 +376,23 @@ export default {
                   </div>
                 </div>
               </v-col>
-              <v-col cols="12" md="4">
+              <!-- <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Country</label>
                   <div class="form-control-plaintext">
                     <h4>{{ data.country }}</h4>
                   </div>
                 </div>
-              </v-col>
+              </v-col> -->
               <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">TNB Account No</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.tnb_account_no }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4" v-if="_.isArray(data.owners) && !_.isEmpty(data.owners)">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Is Sublet</label>
                   <div class="form-control-plaintext">
@@ -384,7 +400,7 @@ export default {
                   </div>
                 </div>
               </v-col>
-              <v-col cols="12" md="4">
+              <v-col cols="12" md="4"  v-if="_.isArray(data.owners) && !_.isEmpty(data.owners)">
                 <div class="form-group mb-0">
                   <label
                     class="form-label mb-0"

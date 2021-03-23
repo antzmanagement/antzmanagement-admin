@@ -109,6 +109,8 @@ class RoomController extends Controller
             'owner' => $request->owner,
             'room_status' => $request->room_status,
             'properties' => $request->properties,
+            'lot' =>  $request->lot,
+            'tnb_account_no' => $request->tnb_account_no,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
@@ -204,6 +206,8 @@ class RoomController extends Controller
             'roomType' => $request->roomType,
             'owner' => $request->owner,
             'room_status' => $request->room_status,
+            'lot' =>  $request->lot,
+            'tnb_account_no' => $request->tnb_account_no,
             'properties' => $request->properties,
         ]);
         //Convert To Json Object

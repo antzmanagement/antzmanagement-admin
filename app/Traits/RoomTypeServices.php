@@ -25,7 +25,7 @@ trait RoomTypeServices
             $q->where('services.status', true);
         }])->get();
 
-        $data = $data->unique('id')->sortBy('id')->flatten(1);
+        $data = $data->unique('id')->sortByDesc('id')->flatten(1);
 
         return $data;
     }
@@ -44,7 +44,7 @@ trait RoomTypeServices
                 } else {
                     return false;
                 }
-            });
+            })->values();
         }
 
         if ($params->scope) {
@@ -53,11 +53,11 @@ trait RoomTypeServices
             if ($scope == 'private') {
                 $data = $data->filter(function ($item) {
                     return $item->scope == 'private';
-                });
+                })->values();
             } else {
                 $data = $data->filter(function ($item) {
                     return $item->scope == 'public';
-                });
+                })->values();
             }
         }
 

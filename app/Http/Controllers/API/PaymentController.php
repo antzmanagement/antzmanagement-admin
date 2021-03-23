@@ -76,7 +76,8 @@ class PaymentController extends Controller
         $this->validate($request, [
             'room_contract_id' => 'required',
             'price' => 'required|numeric',
-            'properties' => 'array',
+            'services' => 'array',
+            'otherpayments' => 'array',
         ]);
         error_log($this->controllerName . 'Creating payment.');
 
@@ -88,7 +89,9 @@ class PaymentController extends Controller
             'remark' => $request->remark,
             'sequence' => $max,
             'paymentdate' => $request->paymentdate,
+            'referenceno' => $request->referenceno,
         ]);
+        error_log(collect($request->otherpayments));
         //Convert To Json Object
         $params = json_decode(json_encode($params));
         $payment = $this->createPayment($params);
@@ -96,6 +99,7 @@ class PaymentController extends Controller
             DB::rollBack();
             return $this->errorResponse();
         }
+        //For front end view
         $payment->services = collect();
 
         if($request->services){
@@ -105,6 +109,32 @@ class PaymentController extends Controller
                 if (!$this->isEmpty($service)) {
                     $payment->services->push($service);
                     $payment->services()->syncWithoutDetaching([$service->id => ['status' => true, 'price' => $this->toDouble($service->price)]]);
+                }
+            }
+        }
+        
+        $payment->otherpayments = collect();
+        if($request->otherpayments){
+            $otherpayments = collect(json_decode(json_encode($request->otherpayments)));
+            foreach ($otherpayments as $otherpayment) {
+                $data = $this->getOtherPaymentTitleByName($otherpayment->name);
+                if (!$this->isEmpty($data)) {
+                    $data->price = $this->toDouble($otherpayment->price);
+                    $payment->otherpayments->push($data);
+                    $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
+                }else{
+                    $params = collect([
+                        'name' => $otherpayment->name,
+                    ]);
+                    //Convert To Json Object
+                    $params = json_decode(json_encode($params));
+                    $data = $this->createOtherPaymentTitle($params);
+                    if (!$this->isEmpty($data)) {
+                        $data->price = $this->toDouble($otherpayment->price);
+                        $payment->otherpayments->push($data);
+                        $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
+                    }
+
                 }
             }
         }

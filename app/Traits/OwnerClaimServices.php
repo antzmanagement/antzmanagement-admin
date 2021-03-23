@@ -17,13 +17,25 @@ trait OwnerClaimServices
 
         $data = Claim::where('status', true)->with(['rentalpayments' => function ($q) {
             $q->where('status', true);
+
+            $q->with(['roomcontract' => function ($q1) {
+            // Query the name field in status table
+                $q1->with(['tenant' => function ($q2) {
+                    // Query the name field in status table
+                    $q2->where('status', true);
+                }]);
+                $q1->with(['room' => function ($q2) {
+                    // Query the name field in status table
+                    $q2->where('status', true);
+                }]);
+            }]);
         },'maintenances' => function ($q) {
             $q->where('status', true);
         },'owner' => function ($q) {
             $q->where('status', true);
         }])->get();
 
-        $data = $data->unique('id')->sortBy('id')->flatten(1);
+        $data = $data->unique('id')->sortByDesc('id')->flatten(1);
 
         return $data;
     }
@@ -63,8 +75,22 @@ trait OwnerClaimServices
 
         $data = Claim::where('uid', $uid)->with(['rentalpayments' => function ($q) {
             $q->where('status', true);
+
+            $q->with(['roomcontract' => function ($q1) {
+            // Query the name field in status table
+                $q1->with(['tenant' => function ($q2) {
+                    // Query the name field in status table
+                    $q2->where('status', true);
+                }]);
+                $q1->with(['room' => function ($q2) {
+                    // Query the name field in status table
+                    $q2->where('status', true);
+                }]);
+            }]);
         },'maintenances' => function ($q) {
-            $q->where('status', true);
+            $q->where('status', true);  
+            $q->with('property');
+            $q->with('room');
         },'owner' => function ($q) {
             $q->where('status', true);
         }])->where('status', true)->first();
@@ -75,8 +101,22 @@ trait OwnerClaimServices
     {
         $data = Claim::where('id', $id)->with(['rentalpayments' => function ($q) {
             $q->where('status', true);
+
+            $q->with(['roomcontract' => function ($q1) {
+            // Query the name field in status table
+                $q1->with(['tenant' => function ($q2) {
+                    // Query the name field in status table
+                    $q2->where('status', true);
+                }]);
+                $q1->with(['room' => function ($q2) {
+                    // Query the name field in status table
+                    $q2->where('status', true);
+                }]);
+            }]);
         },'maintenances' => function ($q) {
             $q->where('status', true);
+            $q->with('property');
+            $q->with('room');
         },'owner' => function ($q) {
             $q->where('status', true);
         }])->where('status', true)->first();
@@ -90,10 +130,8 @@ trait OwnerClaimServices
 
         $data = new Claim();
         $data->uid = Carbon::now()->timestamp . Claim::count();
-        $data->maintenance_fees = $this->toDouble($params->maintenance_fees);
         $data->admin_fees = $this->toDouble($params->admin_fees);
         $data->other_fees = $this->toDouble($params->other_fees);
-        $data->rental_fees = $this->toDouble($params->rental_fees);
         $data->remark = $params->remark;
 
         $owner = $this->getOwner($params->owner_id);
@@ -102,18 +140,24 @@ trait OwnerClaimServices
         }
         $data->owner()->associate($owner);
         
+        $total = 0;
+        $total += $data->other_fees;
+        $total += $data->admin_fees;
+
         if (!$this->saveModel($data)) {
             return null;
         }
-
+        $data = $data->refresh();
         if($params->rentalpayments){
-            foreach ($params->rentalpayments as $id) {
-                $rentalpayment = $this->getRentalPaymentById($id);
+            foreach ($params->rentalpayments as $item) {
+                $rentalpayment = $this->getRentalPaymentById($item->id);
                 if ($this->isEmpty($rentalpayment)) {
                     return null;
                 }
 
                 $rentalpayment->isClaimed = true;
+                $rentalpayment->claim_amount = $this->toDouble($item->claim_amount);
+                $total += $rentalpayment->claim_amount;
                 $rentalpayment->claim()->associate($data);
                 if (!$this->saveModel($rentalpayment)) {
                     return null;
@@ -122,13 +166,15 @@ trait OwnerClaimServices
         }
 
         if($params->maintenances){
-            foreach ($params->maintenances as $id) {
-                $maintenance = $this->getMaintenanceById($id);
+            foreach ($params->maintenances as $item) {
+                $maintenance = $this->getMaintenanceById($item->id);
                 if ($this->isEmpty($maintenance)) {
                     return null;
                 }
 
                 $maintenance->isClaimed = true;
+                $maintenance->claim_amount = $this->toDouble($item->claim_amount);
+                $total += $maintenance->claim_amount;
                 $maintenance->claim()->associate($data);
                 if (!$this->saveModel($maintenance)) {
                     return null;
@@ -136,9 +182,7 @@ trait OwnerClaimServices
             }
         }
 
-        if (!$this->saveModel($data)) {
-            return null;
-        }
+        $data->totalamount = $total;
 
         return $data->refresh();
     }
@@ -148,23 +192,55 @@ trait OwnerClaimServices
     {
 
         $params = $this->checkUndefinedProperty($params, $this->claimAllCols());
-        $data->price = $this->toDouble($params->price);
-        $data->payment = $this->toDouble($params->payment);
-        $data->penalty =  $this->toDouble($params->penalty);
-        $data->processing_fees =  $this->toDouble($params->processing_fees);
-        $data->service_fees =  $this->toDouble($params->service_fees);
-        $data->outstanding = $this->toDouble($data->price + $data->penalty  - $data->payment);
-        $data->paid = $params->paid;
-        $data->rentaldate = $this->toDate($params->rentaldate);
-        $data->paymentdate = $this->toDate($params->paymentdate);
+        $data->admin_fees = $this->toDouble($params->admin_fees);
+        $data->other_fees = $this->toDouble($params->other_fees);
         $data->remark = $params->remark;
-        
-        $roomContract = $this->getRoomContractById($params->room_contract_id);
-        if ($this->isEmpty($roomContract)) {
-            return false;
-        }
-        $data->roomcontract()->associate($roomContract);
 
+        $owner = $this->getOwner($params->owner_id);
+        if ($this->isEmpty($owner)) {
+            return null;
+        }
+        $data->owner()->associate($owner);
+        
+        $total = 0;
+        $total += $data->other_fees;
+        $total += $data->admin_fees;
+
+        if($params->rentalpayments){
+            foreach ($params->rentalpayments as $item) {
+                $rentalpayment = $this->getRentalPaymentById($item->id);
+                if ($this->isEmpty($rentalpayment)) {
+                    return null;
+                }
+
+                $rentalpayment->isClaimed = true;
+                $rentalpayment->claim_amount = $this->toDouble($item->claim_amount);
+                $total += $rentalpayment->claim_amount;
+                $rentalpayment->claim()->associate($data);
+                if (!$this->saveModel($rentalpayment)) {
+                    return null;
+                }
+            }
+        }
+
+        if($params->maintenances){
+            foreach ($params->maintenances as $item) {
+                $maintenance = $this->getMaintenanceById($item->id);
+                if ($this->isEmpty($maintenance)) {
+                    return null;
+                }
+
+                $maintenance->isClaimed = true;
+                $maintenance->claim_amount = $this->toDouble($item->claim_amount);
+                $total += $maintenance->claim_amount;
+                $maintenance->claim()->associate($data);
+                if (!$this->saveModel($maintenance)) {
+                    return null;
+                }
+            }
+        }
+
+        $data->totalamount = $total;
         if (!$this->saveModel($data)) {
             return null;
         }

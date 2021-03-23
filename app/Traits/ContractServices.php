@@ -36,7 +36,7 @@ trait ContractServices
                 } else {
                     return false;
                 }
-            });
+            })->values();
         }
 
         $data = $data->unique('id');

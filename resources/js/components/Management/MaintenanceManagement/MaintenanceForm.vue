@@ -63,6 +63,7 @@ export default {
         owner: "",
         maintenance_type: "repair",
         maintenance_status: "pending",
+        claim_by_owner: false,
       }),
       roomFormDialogConfig: {
         dialogStyle: {
@@ -152,11 +153,11 @@ export default {
 
         if (maintenanceRes) {
           console.log(maintenanceRes);
-          maintenanceRes.data.room = _.get(maintenanceRes, [
+          let maintenanceRoom = _.get(maintenanceRes, [
             "data",
             "room",
-            "id",
-          ]);
+          ]) || {};
+          maintenanceRes.data.room = _.find(this.rooms, ['id', maintenanceRoom.id]);
           maintenanceRes.data.property = _.get(maintenanceRes, [
             "data",
             "property",
@@ -207,6 +208,7 @@ export default {
       } else {
         this.$Progress.start();
         this.showLoadingAction();
+        this.data.room = _.get(this.data, 'room.id') || null;
         this.createMaintenanceAction(this.data)
           .then((data) => {
             Toast.fire({
@@ -240,6 +242,7 @@ export default {
       } else {
         this.$Progress.start();
         this.showLoadingAction();
+        this.data.room = _.get(this.data, 'room.id') || null;
         this.updateMaintenanceAction(this.data)
           .then((data) => {
             Toast.fire({
@@ -314,12 +317,15 @@ export default {
               <v-autocomplete
                 v-model="data.room"
                 item-text="name"
-                item-value="id"
                 :items="rooms || []"
                 label="Room"
                 chips
+                return-object
               >
               </v-autocomplete>
+            </v-col>
+            <v-col cols="12" md="12" v-if="_.isArray(_.get(data , ['room', 'owners'])) && !_.isEmpty(_.get(data , ['room', 'owners']))">
+              <v-switch v-model="data.claim_by_owner" :label="`Claimed By Owner (${_.get(data, ['room', 'owners',0 ,'name']) || 'N/A'})`"></v-switch>
             </v-col>
             <v-col cols="12">
               <v-autocomplete
@@ -332,7 +338,7 @@ export default {
               >
               </v-autocomplete>
             </v-col>
-            <v-col cols="12">
+            <!-- <v-col cols="12">
               <v-autocomplete
                 v-model="data.owner"
                 :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
@@ -342,7 +348,7 @@ export default {
                 clearable
               >
               </v-autocomplete>
-            </v-col>
+            </v-col> -->
             <v-col cols="12" md="12">
               <v-text-field
                 label="Price"

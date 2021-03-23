@@ -29,6 +29,54 @@ export default {
       maintenances: [],
       rentalpayments: [],
       owners: [],
+      rentalPaymentHeaders: [
+        {
+          text: "Sequence No",
+        },
+        {
+          text: "Tenant",
+        },
+        {
+          text: "Room Contract",
+        },
+        {
+          text: "Room",
+        },
+        {
+          text: "Rental Date",
+        },
+        {
+          text: "Rental Price",
+        },
+        {
+          text: "Penalty",
+        },
+        {
+          text: "Processing Fees",
+        },
+        {
+          text: "Claim Amount",
+        },
+        {
+          text: "Payment Date",
+        },
+      ],
+      maintenanceHeaders: [
+        {
+          text: "id",
+        },
+        {
+          text: "Unit No",
+        },
+        {
+          text: "Property",
+        },
+        { text: "Repair Type" },
+        { text: "Maintenance Status" },
+        { text: "Price (RM)" },
+        { text: "Claim Amount (RM)" },
+        { text: "Created At" },
+      ],
       data: new Form({
         rentalpayments: [],
         maintenances: [],
@@ -49,6 +97,26 @@ export default {
   computed: {
     isLoading() {
       return this.$store.getters.isLoading;
+    },
+    totalRentalClaim() {
+      console.log(this.data.rentalpayments);
+      let total = 0;
+      if (_.isArray(this.data.rentalpayments) && !_.isEmpty(this.data.rentalpayments)) {
+        _.forEach(this.data.rentalpayments, function(item) { 
+         total += parseFloat(_.get(item,'claim_amount') || 0); 
+        })
+      }
+      return total;
+    },
+    totalMaintenanceClaim() {
+      console.log(this.data.maintenances);
+      let maintenanceTotal = 0;
+      if (_.isArray(this.data.maintenances) && !_.isEmpty(this.data.maintenances)) {
+        _.forEach(this.data.maintenances, function(item) { 
+         maintenanceTotal += parseFloat(_.get(item,'claim_amount') || 0); 
+        })
+      }
+      return maintenanceTotal;
     },
   },
   watch: {
@@ -77,6 +145,8 @@ export default {
       this.getClaimAction({ uid: this.uid })
         .then((data) => {
           this.data = new Form(data.data);
+          this.rentalpayments = data.data.rentalpayments || [];
+          this.maintenances = data.data.maintenances || [];
           this.endLoadingAction();
         })
         .catch((error) => {
@@ -110,10 +180,13 @@ export default {
       if (uid) {
         this.getUnclaimRentalPaymentsAction({ uid: uid })
           .then((res) => {
-            console.log(res);
-            this.rentalpayments = res.data;
-            this.data.rentalpayments = _.map(res.data, "id");
-            this.updatePrice();
+            this.rentalpayments = _.map(res.data, function (item) {
+              item.claim_amount = _.get(item, "roomcontract.room.sublet")
+                ? _.get(item, "roomcontract.room.sublet_claim") || 0
+                : _.get(item, "roomcontract.room.owner_claim") || 0;
+              return item;
+            });
+            this.data.rentalpayments = this.rentalpayments;
           })
           .catch((err) => {
             // Toast.fire({
@@ -128,10 +201,11 @@ export default {
       if (uid) {
         this.getUnclaimMaintenancesAction({ uid: uid })
           .then((res) => {
-            console.log(res);
-            this.maintenances = res.data;
-            this.data.maintenances = _.map(res.data, "id");
-            this.updatePrice();
+            this.maintenances = _.map(res.data, function (item) {
+              item.claim_amount = _.get(item, "price") || 0;
+              return item;
+            });
+            this.data.maintenances = this.maintenances;
           })
           .catch((err) => {
             // Toast.fire({
@@ -175,35 +249,6 @@ export default {
       }
     },
 
-    updatePrice() {
-      let totalRental = 0;
-      let totalMaintenance = 0;
-      let self = this;
-
-      _.forEach(this.data.maintenances, function (maintenance) {
-        let selected = _.find(self.maintenances, function (v) {
-          return v.id == maintenance;
-        });
-        totalMaintenance += parseFloat(_.get(selected, ["price"])) || 0;
-      });
-
-      _.forEach(this.data.rentalpayments, function (rentalpayment) {
-        let selected = _.find(self.rentalpayments, function (v) {
-          return v.id == rentalpayment;
-        });
-        totalRental += parseFloat(_.get(selected, ["price"])) || 0;
-      });
-
-      this.data.maintenance_fees = totalMaintenance;
-      if (totaRental > 0) {
-        this.data.admin_fees =
-          parseFloat(totalRental) * 0.1 < 30
-            ? 30
-            : parseFloat(totalRental) * 0.1;
-        this.data.rental_fees =
-          parseFloat(totalRental) - parseFloat(this.data.admin_fees);
-      }
-    },
 
     updateClaim() {
       this.$v.$touch(); //it will validate all fields
@@ -270,64 +315,109 @@ export default {
               item-value="uid"
               :items="owners || []"
               label="Owner"
+              :disabled="editMode"
               @change="getUnclaimData()"
             >
             </v-autocomplete>
           </v-col>
-          <v-col cols="12" md="12">
-            <v-autocomplete
+          <v-col cols="12" md="12" v-if="_.isArray(rentalpayments) && !_.isEmpty(rentalpayments)">
+            <v-data-table
               v-model="data.rentalpayments"
-              :item-text="
-                (item) => {
-                  return item.roomcontract.room.unit + '-' + item.paymentdate;
-                }
-              "
-              item-value="id"
-              :items="rentalpayments || []"
-              label="Rental Payments"
-              chips
-              deletable-chips
-              multiple
-              @change="updatePrice()"
+              :headers="rentalPaymentHeaders"
+              :items="rentalpayments"
+              show-select
+              class="elevation-1"
             >
-            </v-autocomplete>
+              <template v-slot:item="props">
+                <tr>
+                  <td>
+                    <v-checkbox
+                      :input-value="props.isSelected"
+                      @change="props.select($event)"
+                    ></v-checkbox>
+                  </td>
+                  <td>{{ props.item.sequence }}</td>
+                  <td>{{ props.item.roomcontract.tenant.name }}</td>
+                  <td>{{ props.item.roomcontract.name }}</td>
+                  <td>{{ props.item.roomcontract.room.name }}</td>
+                  <td>{{ props.item.rentaldate | formatDate }}</td>
+                  <td>{{ props.item.price | toDouble }}</td>
+                  <td>{{ props.item.penalty | toDouble }}</td>
+                  <td>{{ props.item.processing_fees | toDouble }}</td>
+                  <td>
+                    <v-text-field
+                      type="number"
+                      step="0.01"
+                      required
+                      :maxlength="300"
+                      v-model="props.item.claim_amount"
+                    ></v-text-field>
+                  </td>
+                  <td>{{ props.item.paymentdate | formatDate }}</td>
+                </tr>
+              </template>
+              <template v-slot:footer>
+                <div
+                  class="px-4 d-flex justify-end align-center w-100 border-blue mt-3"
+                >
+                  <span class="d-inline-block h6 bold mr-2">
+                    Total Claim Amount :
+                  </span>
+                  <span class="d-inline-block h6 bold">
+                    RM {{totalRentalClaim | toDouble}}
+                  </span>
+                </div>
+              </template>
+            </v-data-table>
           </v-col>
-          <v-col cols="12" md="12">
-            <v-autocomplete
+          <v-col cols="12" md="12" v-if="_.isArray(maintenances) && !_.isEmpty(maintenances)">
+            <v-data-table
               v-model="data.maintenances"
-              :item-text="
-                (item) =>
-                  helpers.capitalizeFirstLetter(_.get(item, 'name') || '')
-              "
-              item-value="id"
-              :items="maintenances || []"
-              label="Maintenances"
-              chips
-              deletable-chips
-              @change="updatePrice()"
-              multiple
+              :headers="maintenanceHeaders"
+              :items="maintenances"
+              show-select
+              item-key="uid"
+              class="elevation-1"
             >
-            </v-autocomplete>
-          </v-col>
-          <v-col cols="12" md="12">
-            <v-text-field
-              label="Rental Fees"
-              type="number"
-              step="0.01"
-              required
-              :maxlength="300"
-              v-model="data.rental_fees"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="12" md="12">
-            <v-text-field
-              label="Maintenance Fees"
-              type="number"
-              step="0.01"
-              required
-              :maxlength="300"
-              v-model="data.maintenance_fees"
-            ></v-text-field>
+              <template v-slot:item="props">
+                <tr>
+                  <td>
+                    <v-checkbox
+                      :input-value="props.isSelected"
+                      @change="props.select($event)"
+                    ></v-checkbox>
+                  </td>
+                  <td>{{ props.item.id }}</td>
+                  <td>{{ props.item.room.name }}</td>
+                  <td>{{ props.item.property.name }}</td>
+                  <td>{{ props.item.maintenance_type }}</td>
+                  <td>{{ props.item.maintenance_status }}</td>
+                  <td>{{ props.item.price }}</td>
+                  <td>
+                    <v-text-field
+                      type="number"
+                      step="0.01"
+                      required
+                      :maxlength="300"
+                      v-model="props.item.claim_amount"
+                    ></v-text-field>
+                  </td>
+                  <td>{{ props.item.created_at | formatDate }}</td>
+                </tr>
+              </template>
+              <template v-slot:footer>
+                <div
+                  class="px-4 d-flex justify-end align-center w-100 border-blue mt-3"
+                >
+                  <span class="d-inline-block h6 bold mr-2">
+                    Total Claim Amount :
+                  </span>
+                  <span class="d-inline-block h6 bold">
+                    RM {{totalMaintenanceClaim | toDouble}}
+                  </span>
+                </div>
+              </template>
+            </v-data-table>
           </v-col>
           <v-col cols="12" md="12">
             <v-text-field
@@ -354,9 +444,6 @@ export default {
               label="Description"
               :maxlength="2500"
               v-model="data.desc"
-              @input="$v.data.desc.$touch()"
-              @blur="$v.data.desc.$touch()"
-              :error-messages="descErrors"
             ></v-textarea>
           </v-col>
         </v-row>

@@ -246,6 +246,7 @@ class RentalPaymentController extends Controller
             'remark' => $rentalPayment->remark,
             'sequence' => $max,
             'room_contract_id' => $rentalPayment->roomcontract->id,
+            'referenceno' => $request->referenceno,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

@@ -19,7 +19,7 @@ trait ServiceServices
 
         $data = Service::where('status', true)->get();
 
-        $data = $data->unique('id')->sortBy('id')->flatten(1);
+        $data = $data->unique('id')->sortByDesc('id')->flatten(1);
 
         return $data;
     }

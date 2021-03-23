@@ -25,6 +25,7 @@ use App\Traits\RoomTypeServices;
 use App\Traits\ServiceServices;
 use App\Traits\StaffServices;
 use App\Traits\PaymentServices;
+use App\Traits\OtherPaymentTitleServices;
 
 
 trait AllServices {
@@ -50,6 +51,7 @@ trait AllServices {
     UserServices,
     UserTypeServices,
     StaffServices,
+    OtherPaymentTitleServices,
     PaymentServices;
 
     private $staffType = "1";

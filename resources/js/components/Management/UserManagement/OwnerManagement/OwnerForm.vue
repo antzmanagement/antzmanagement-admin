@@ -37,10 +37,30 @@ export default {
       dialog: false,
       roomTypes: [],
       rooms: [],
+      banks: [
+        "Affin Bank",
+        "Alliance Bank",
+        "Am Bank",
+        "Bank Islam",
+        "Bank Muamalat",
+        "Bank Rakyat",
+        "BSN",
+        "Cimb Bank",
+        "Citi Bank",
+        "Hong Leong Bank",
+        "HSBC",
+        "Maybank",
+        "OCBC",
+        "Public Bank",
+        "RHB Bank",
+        "Standard Chartered",
+      ],
       data: new Form({
         name: "",
         icno: "",
         tel1: "",
+        tel2: "",
+        tel3: "",
         email: "",
         password: "",
         password_confirmation: "",
@@ -51,6 +71,9 @@ export default {
         postcode: "",
         state: "",
         city: "",
+        bankaccount: "",
+        banktype: "",
+        referenceno: "",
       }),
       roomFilterGroup: new Form({
         roomTypes: [],
@@ -81,7 +104,9 @@ export default {
           name: { required, maxLength: maxLength(100) },
           icno: { required, maxLength: maxLength(14) },
           tel1: {},
-          email: { required, email },
+          tel2: {},
+          tel3: {},
+          email: { email },
           // password: { required, minLength: minLength(8) },
           // password_confirmation: {
           //   required,
@@ -95,7 +120,9 @@ export default {
           name: { required, maxLength: maxLength(100) },
           icno: { required, maxLength: maxLength(14) },
           tel1: {},
-          email: { required, email },
+          tel2: {},
+          tel3: {},
+          email: { email },
         },
       };
     }
@@ -146,16 +173,39 @@ export default {
         return errors;
       }
     },
+    tel2Errors() {
+      const errors = [];
+      if (!this.$v.data.tel2.$dirty) {
+        return errors;
+      }
+
+      if (
+        !this.helpers.isPhoneFormat(this.$v.data.tel2.$model) &&
+        this.$v.data.tel2.$model
+      ) {
+        errors.push("Phone must be in format 012-XXXXXXX");
+        return errors;
+      }
+    },
+    tel3Errors() {
+      const errors = [];
+      if (!this.$v.data.tel3.$dirty) {
+        return errors;
+      }
+
+      if (
+        !this.helpers.isPhoneFormat(this.$v.data.tel3.$model) &&
+        this.$v.data.tel3.$model
+      ) {
+        errors.push("Phone must be in format 012-XXXXXXX");
+        return errors;
+      }
+    },
     emailErrors() {
       const errors = [];
       if (!this.$v.data.email.$dirty) {
         return errors;
       }
-      if (!this.$v.data.email.required) {
-        errors.push("E-mail is required");
-        return errors;
-      }
-
       if (!this.$v.data.email.email) {
         errors.push("Must be valid e-mail");
         return errors;
@@ -262,6 +312,8 @@ export default {
     customValidate() {
       return (
         (!this.data.tel1 || this.helpers.isPhoneFormat(this.data.tel1)) &&
+        (!this.data.tel2 || this.helpers.isPhoneFormat(this.data.tel2)) &&
+        (!this.data.tel3 || this.helpers.isPhoneFormat(this.data.tel3)) &&
         this.helpers.isIcFormat(this.data.icno)
       );
     },
@@ -334,14 +386,30 @@ export default {
 
     initRoomFilter(filterGroup) {
       this.roomFilterGroup.reset();
-      this.data.rooms = [];
-      if (filterGroup) {
-        this.roomFilterGroup.roomTypes = filterGroup.roomTypes.map(function (
-          roomType
-        ) {
-          return roomType.id;
-        });
+      if (filterGroup.unit) {
+        this.roomFilterGroup.unit = filterGroup.unit;
       }
+      if (filterGroup.jalan) {
+        this.roomFilterGroup.jalan = filterGroup.jalan;
+      }
+      if (filterGroup.floor) {
+        this.roomFilterGroup.floor = filterGroup.floor;
+      }
+      if (filterGroup.block) {
+        this.roomFilterGroup.block = filterGroup.block;
+      }
+      if (filterGroup.room_status) {
+        this.roomFilterGroup.room_status = filterGroup.room_status;
+      }
+      if (filterGroup.roomType) {
+        this.roomFilterGroup.room_type_id = filterGroup.roomType.id;
+        this.roomFilterGroup.roomTypeObj = filterGroup.roomType;
+      }
+      if (filterGroup.owner) {
+        this.roomFilterGroup.owner_id = filterGroup.owner.id;
+        this.roomFilterGroup.ownerObj = filterGroup.owner;
+      }
+      console.log(this.roomFilterGroup);
       this.applyRoomFilter();
     },
 
@@ -349,6 +417,7 @@ export default {
       this.showLoadingAction();
       this.filterRoomsAction(this.roomFilterGroup)
         .then((data) => {
+          console.log(data.data);
           if (data.data) {
             this.rooms = data.data;
           } else {
@@ -411,6 +480,13 @@ export default {
       <v-card-text>
         <v-container>
           <v-row>
+            <v-col cols="12" md="12">
+              <v-text-field
+                label="Reference No"
+                v-model="data.referenceno"
+                :maxlength="300"
+              ></v-text-field>
+            </v-col>
             <v-col cols="12" md="6">
               <v-text-field
                 label="Name*"
@@ -436,8 +512,21 @@ export default {
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="6">
+              <v-select
+                :items="banks"
+                v-model="data.banktype"
+                label="Bank"
+              ></v-select>
+            </v-col>
+            <v-col cols="12" md="6">
               <v-text-field
-                label="Phone No"
+                label="Bank Account"
+                v-model="data.bankaccount"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="Phone No 1"
                 hint="Example of Phone No : 014-12019231 (With Dash)"
                 persistent-hint
                 v-model="data.tel1"
@@ -447,12 +536,37 @@ export default {
                 :error-messages="tel1Errors"
               ></v-text-field>
             </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="Phone No 2"
+                hint="Example of Phone No : 014-12019231 (With Dash)"
+                persistent-hint
+                v-model="data.tel2"
+                :maxlength="20"
+                @input="$v.data.tel2.$touch()"
+                @blur="$v.data.tel2.$touch()"
+                :error-messages="tel2Errors"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="Phone No 3"
+                hint="Example of Phone No : 014-12019231 (With Dash)"
+                persistent-hint
+                v-model="data.tel3"
+                :maxlength="20"
+                @input="$v.data.tel3.$touch()"
+                @blur="$v.data.tel3.$touch()"
+                :error-messages="tel3Errors"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6">
+            </v-col>
             <v-col cols="6">
               <v-text-field
                 label="Email*"
                 hint="Email that used to login the website"
                 persistent-hint
-                required
                 :maxlength="255"
                 v-model="data.email"
                 @input="$v.data.email.$touch()"

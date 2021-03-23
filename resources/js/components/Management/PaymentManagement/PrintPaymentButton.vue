@@ -217,6 +217,15 @@ export default {
 
           <td>RM {{_.get(service , ['pivot', 'price']) || 'N/A' | toDouble}}</td>
         </tr>
+        <tr
+          class="item"
+          v-for="otherpayment in data.otherpayments"
+          :key="otherpayment.uid"
+        >
+          <td>{{_.get(otherpayment , ['name']) || 'N/A'}}</td>
+
+          <td>RM {{_.get(otherpayment , ['pivot', 'price']) || 'N/A' | toDouble}}</td>
+        </tr>
 
         <tr class="total">
           <td></td>

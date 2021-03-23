@@ -199,16 +199,15 @@ class TenantController extends Controller
         $this->validate($request, [
             'name' => 'required|string|max:300',
             'icno' => 'required|string|max:14',
-            'tel1' => 'nullable|string|max:20',
+            'tel1' => 'nullable|string|max:100',
+            'tel2' => 'nullable|string|max:100',
+            'tel3' => 'nullable|string|max:100',
             'email' =>
             [
                 'required',
                 'string',
                 'email',
-                'max:191',
-                Rule::unique('users')->where(function ($query) {
-                    $query->where('status', true);
-                }),
+                'max:300',
             ],
         ]);
         error_log($this->controllerName . 'Creating tenant.');
@@ -221,6 +220,8 @@ class TenantController extends Controller
             'name' => $request->name,
             'icno' => $request->icno,
             'tel1' => $request->tel1,
+            'tel2' => $request->tel2,
+            'tel3' => $request->tel3,
             'email' => $request->email,
             'age' => $request->age,
             'birthday' => $request->birthday,
@@ -435,11 +436,11 @@ class TenantController extends Controller
                 'required',
                 'string',
                 'email',
-                'max:191',
-                Rule::unique('users')->where(function ($query) use ($tenant) {
-                    $query->where('status', true);
-                    $query->where('id', '!=', $tenant->id);
-                }),
+                'max:300',
+                // Rule::unique('users')->where(function ($query) use ($tenant) {
+                //     $query->where('status', true);
+                //     $query->where('id', '!=', $tenant->id);
+                // }),
             ],
             'name' => 'required|string|max:191',
         ]);
@@ -447,6 +448,8 @@ class TenantController extends Controller
             'name' => $request->name,
             'icno' => $request->icno,
             'tel1' => $request->tel1,
+            'tel2' => $request->tel2,
+            'tel3' => $request->tel3,
             'email' => $request->email,
             'age' => $request->age,
             'birthday' => $request->birthday,

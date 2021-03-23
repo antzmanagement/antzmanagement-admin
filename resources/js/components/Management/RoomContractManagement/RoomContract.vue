@@ -28,6 +28,14 @@ export default {
     },
     rentalPaymentHeaders: [
       {
+        text: "Sequence No",
+        value: "sequence",
+      },
+      {
+        text: "Reference No",
+        value: "referenceno",
+      },
+      {
         text: "Rental",
         value: "rentaldate",
       },
@@ -48,16 +56,19 @@ export default {
     paymentHeaders: [
       {
         text: "Sequence No",
-        value: "sequence",
       },
-      { text: "Payment Date", value: "paymentdate" },
-      { text: "Price", value: "price" },
-      { text: "Other Charges", value: "other_charges" },
+      {
+        text: "Reference No",
+      },
+      { text: "Payment Date" },
+      { text: "Other Charges" },
+      { text: "Other Payments" },
+      { text: "Service Payment" },
       {
         text: "Services",
-        value: "services",
       },
-      { text: "Remark", value: "remark" },
+      { text: "Remark" },
+      { text: "Total Payment" },
       { text: "Actions" },
     ],
     editButtonStyle: {
@@ -110,7 +121,7 @@ export default {
     this.getRoomContractAction({ uid: this.$route.params.uid })
       .then((data) => {
         this.data = data.data;
-        console.log(this.data.id);
+        console.log(this.data);
         this.$Progress.finish();
         this.endLoadingAction();
       })
@@ -205,6 +216,20 @@ export default {
         });
       }
       this.data.payments = this.data.payments.concat([data]);
+
+      if (
+        _.isArray(_.get(payment, ["otherpayments"])) &&
+        !_.isEmpty(_.get(payment, ["otherpayments"]))
+      ) {
+        payment.otherpayments = _.map(payment.otherpayments, function (otherpayment) {
+          otherpayment.pivot = {
+            price: otherpayment.price,
+          };
+          return otherpayment;
+        });
+      }
+      this.data.otherpayments = this.data.otherpayments.concat([data]);
+
     },
     deleteRoomContract($isConfirmed, $uid) {
       if ($isConfirmed) {
@@ -727,6 +752,8 @@ export default {
                     </template>
                     <template v-slot:item="props">
                       <tr>
+                        <td>{{ props.item.sequence }}</td>
+                        <td>{{ props.item.referenceno }}</td>
                         <td>{{ props.item.rentaldate | formatDate }}</td>
                         <td>{{ props.item.price | toDouble }}</td>
                         <td>{{ props.item.penalty | toDouble }}</td>
@@ -820,9 +847,19 @@ export default {
                     <template v-slot:item="props">
                       <tr>
                         <td>{{ props.item.sequence }}</td>
+                        <td>{{ props.item.referenceno }}</td>
                         <td>{{ props.item.paymentdate | formatDate }}</td>
-                        <td>{{ props.item.totalpayment | toDouble }}</td>
                         <td>{{ props.item.other_charges | toDouble }}</td>
+                        <td>
+                          {{
+                            _.compact(
+                              _.map(props.item.otherpayments, function (otherpayment) {
+                                return _.get(otherpayment, ["name"]) || "";
+                              })
+                            ) | getArrayValues
+                          }}
+                        </td>
+                        <td>{{ props.item.price | toDouble }}</td>
                         <td>
                           {{
                             _.compact(
@@ -833,6 +870,7 @@ export default {
                           }}
                         </td>
                         <td>{{ props.item.remark }}</td>
+                        <td>{{ props.item.totalpayment | toDouble }}</td>
                         <td>
                           <print-payment-button
                             :item="props.item"
@@ -895,7 +933,7 @@ export default {
 
         <v-dialog
           persistent
-          :maxWidth="'30%'"
+          :maxWidth="'50%'"
           :fullscreen="false"
           hideOverlay
           v-model="addOnPaymentDialog"

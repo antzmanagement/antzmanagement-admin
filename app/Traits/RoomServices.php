@@ -29,7 +29,7 @@ trait RoomServices
             $q->wherePivot('status', true);
         }])->where('status', true)->get();
 
-        $data = $data->unique('id')->sortBy('id')->flatten(1);
+        $data = $data->unique('id')->sortByDesc('id')->flatten(1);
 
         return $data;
     }
@@ -87,7 +87,7 @@ trait RoomServices
                     return $item->roomtypes->contains('id' , $room_type_id);
                 }
                 return false;
-            });
+            })->values();
         }
 
         if($params->owner_id){
@@ -97,7 +97,7 @@ trait RoomServices
                     return $item->owners->contains('id' , $owner_id);
                 }
                 return false;
-            });
+            })->values();
         }
 
 
@@ -174,6 +174,8 @@ trait RoomServices
         $data->sublet_claim = $this->toDouble($params->sublet_claim);
         $data->owner_claim = $this->toDouble($params->owner_claim);
         $data->room_status =  $params->room_status;
+        $data->lot =  $params->lot;
+        $data->tnb_account_no =  $params->tnb_account_no;
 
         if (!$this->saveModel($data)) {
             return null;
@@ -204,6 +206,8 @@ trait RoomServices
         $data->sublet_claim = $this->toDouble($params->sublet_claim);
         $data->owner_claim = $this->toDouble($params->owner_claim);
         $data->room_status =  $params->room_status;
+        $data->lot =  $params->lot;
+        $data->tnb_account_no =  $params->tnb_account_no;
 
         if (!$this->saveModel($data)) {
             return null;

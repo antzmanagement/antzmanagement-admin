@@ -17,9 +17,9 @@ trait OwnerServices
         $data = collect();
         //Role Based Retrieve Done in Store
         $userType = $this->getUserTypeById($this->ownerType);
-        $data = $data->merge($userType->users()->wherePivot('status', true)->where('users.status', true)->get());
+        $data = $data->merge($userType->users()->where('users.status', true)->get());
 
-        $data = $data->unique('id')->sortBy('id')->flatten(1);
+        $data = $data->unique('id')->sortByDesc('id')->flatten(1);
 
         return $data;
     }
@@ -38,7 +38,7 @@ trait OwnerServices
                 } else {
                     return false;
                 }
-            });
+            })->values();
         }
 
         $data = $data->unique('id');
@@ -52,12 +52,8 @@ trait OwnerServices
         $userType = $this->getUserTypeById($this->ownerType);
         $data = $userType->users()->where('users.uid', $uid)->wherePivot('status', 1)->with(['ownrooms' => function ($q) {
             // Query the name field in status table
-            $q->wherePivot('status', true);
-            $q->where('rooms.status', true);
-            $q->with(['roomTypes' => function($q1){
-                $q1->wherePivot('status', true);
-                $q1->where('room_types.status', true);
-            }]);
+        }])->with(['claims' => function ($q) {
+            // Query the name field in status table
         }])->where('users.status', true)->first();
         return $data;
     }
@@ -67,12 +63,6 @@ trait OwnerServices
         $userType = $this->getUserTypeById($this->ownerType);
         $data = $userType->users()->where('users.id', $id)->wherePivot('status', 1)->with(['ownrooms' => function ($q) {
             // Query the name field in status table
-            $q->wherePivot('status', true);
-            $q->where('rooms.status', true);
-            $q->with(['roomTypes' => function($q1){
-                $q1->wherePivot('status', true);
-                $q1->where('room_types.status', true);
-            }]);
         }])->where('users.status', true)->first();
         return $data;
     }
@@ -103,7 +93,7 @@ trait OwnerServices
         foreach ($rooms as $room) {
             $roomcontracts = $room->roomcontracts()->where('status', true)->get();
             foreach ($roomcontracts as $roomcontract) {
-                $paidrentals = $roomcontract->rentalpayments()->where('status', true)->where('paid', true)->where('isClaimed', false)->with('roomcontract.room')->get();
+                $paidrentals = $roomcontract->rentalpayments()->where('status', true)->where('paid', true)->where('isClaimed', false)->with('roomcontract.room', 'roomcontract.tenant')->get();
                 if($paidrentals->count() > 0){
                     $rentalPayments = $rentalPayments->concat($paidrentals);
                 }
@@ -119,7 +109,13 @@ trait OwnerServices
         $rooms = $data->ownrooms()->where('rooms.status', true)->get();
 
         foreach ($rooms as $room) {
-            $unclaimmaintenances = $room->maintenances()->where('status', true)->where('isClaimed',false)->get();
+            $unclaimmaintenances = $room->maintenances()->where('status', true)->where('claim_by_owner', true)->where('isClaimed',false)->with(['room' => function ($q) {
+                // Query the name field in status table
+                $q->where('status', true);
+            }, 'property' => function ($q) {
+                // Query the name field in status table
+                $q->where('status', true);
+            }])->get();
             if($unclaimmaintenances->count() > 0){
                 $maintenances = $maintenances->concat($unclaimmaintenances);
             }

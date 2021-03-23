@@ -15,4 +15,9 @@ class Payment extends Model
     {
         return $this->belongsToMany('App\Service','payments_services','payment_id', 'service_id')->withPivot('price', 'remark','status','created_at','updated_at');
     }
+
+    public function otherpayments()
+    {
+        return $this->belongsToMany('App\OtherPaymentTitle','other_payment_titles_payments', 'payment_id', 'other_payment_title_id')->withPivot('price','status','created_at','updated_at');
+    }
 }

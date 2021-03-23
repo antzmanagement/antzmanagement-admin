@@ -28,7 +28,7 @@ trait PaymentServices
         }, 'services' => function ($q) {
         }])->get();
 
-        $data = $data->unique('id')->sortBy('id')->flatten(1);
+        $data = $data->unique('id')->sortByDesc('id')->flatten(1);
 
         return $data;
     }
@@ -47,7 +47,7 @@ trait PaymentServices
                     return $item->roomcontract->tenant->id == $tenant_id;
                 }
                 return false;
-            });
+            })->values();
         }
 
         if($params->room_id){
@@ -58,7 +58,7 @@ trait PaymentServices
                     return $item->roomcontract->room->id == $room_id;
                 }
                 return false;
-            });
+            })->values();
         }
 
         if ($params->sequence) {
@@ -74,14 +74,14 @@ trait PaymentServices
             $data = collect($data);
             $data = $data->filter(function ($item) use ($date) {
                 return Carbon::parse(data_get($item, 'paymentdate'))->gte($date);
-            });
+            })->values();
         }
         
         if ($params->todate) {
             $date = Carbon::parse($params->todate)->endOfDay();
             $data = $data->filter(function ($item) use ($date) {
                 return Carbon::parse(data_get($item, 'paymentdate'))->lte($date);
-            });
+            })->values();
         }
 
         if($params->service_ids){
@@ -100,7 +100,7 @@ trait PaymentServices
                 }
                 error_log($existed. ' ');
                 return $existed;
-            });
+            })->values();
         }
         $data = $data->unique('id');
 
@@ -156,6 +156,7 @@ trait PaymentServices
         $data->sequence = $this->toInt($params->sequence);
         $data->remark = $params->remark;
         $data->sequence = Payment::where('status', true)->count() + 1;
+        $data->referenceno = $params->referenceno;
         
         $roomContract = $this->getRoomContractById($params->room_contract_id);
         if ($this->isEmpty($roomContract)) {
@@ -186,6 +187,7 @@ trait PaymentServices
         $data->rentaldate = $this->toDate($params->rentaldate);
         $data->paymentdate = $this->toDate($params->paymentdate);
         $data->remark = $params->remark;
+        $data->referenceno = $params->referenceno;
         
         $roomContract = $this->getRoomContractById($params->room_contract_id);
         if ($this->isEmpty($roomContract)) {

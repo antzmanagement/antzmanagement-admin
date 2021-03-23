@@ -1,7 +1,7 @@
 
 
 <script>
-import moment from 'moment';
+import moment from "moment";
 import { validationMixin } from "vuelidate";
 import {
   required,
@@ -11,7 +11,7 @@ import {
   email,
 } from "vuelidate/lib/validators";
 import { mapActions } from "vuex";
-import { _ } from '../../../../common/common-function';
+import { _ } from "../../../../common/common-function";
 export default {
   props: {
     editMode: {
@@ -36,7 +36,7 @@ export default {
   },
   data() {
     return {
-      _ : _,
+      _: _,
       dialog: false,
       menu: false,
       birthdayMenu: false,
@@ -59,6 +59,8 @@ export default {
         name: "",
         icno: "",
         tel1: "",
+        tel2: "",
+        tel3: "",
         email: "",
         mother_name: "",
         mother_tel: "",
@@ -138,8 +140,10 @@ export default {
         data: {
           name: { required, maxLength: maxLength(100) },
           icno: { required, maxLength: maxLength(14) },
-          tel1: { required },
-          email: { required, email },
+          tel1: {},
+          tel2: {},
+          tel3: {},
+          email: { email },
           // password: { required, minLength: minLength(8) },
           // password_confirmation: {
           //   required,
@@ -159,8 +163,10 @@ export default {
         data: {
           name: { required, maxLength: maxLength(100) },
           icno: { required, maxLength: maxLength(14) },
-          tel1: { required },
-          email: { required, email },
+          tel1: {},
+          tel2: {},
+          tel3: {},
+          email: { email },
           mother_name: {},
           mother_tel: {},
           father_name: {},
@@ -212,14 +218,38 @@ export default {
       if (!this.$v.data.tel1.$dirty) {
         return errors;
       }
-      if (!this.$v.data.tel1.required) {
-        errors.push("Contact is required");
-        return errors;
-      }
 
       if (
         !this.helpers.isPhoneFormat(this.$v.data.tel1.$model) &&
         this.$v.data.tel1.$model
+      ) {
+        errors.push("Phone must be in format 012-XXXXXXX");
+        return errors;
+      }
+    },
+    tel2Errors() {
+      const errors = [];
+      if (!this.$v.data.tel2.$dirty) {
+        return errors;
+      }
+
+      if (
+        !this.helpers.isPhoneFormat(this.$v.data.tel2.$model) &&
+        this.$v.data.tel2.$model
+      ) {
+        errors.push("Phone must be in format 012-XXXXXXX");
+        return errors;
+      }
+    },
+    tel3Errors() {
+      const errors = [];
+      if (!this.$v.data.tel3.$dirty) {
+        return errors;
+      }
+
+      if (
+        !this.helpers.isPhoneFormat(this.$v.data.tel3.$model) &&
+        this.$v.data.tel3.$model
       ) {
         errors.push("Phone must be in format 012-XXXXXXX");
         return errors;
@@ -546,10 +576,7 @@ export default {
       });
 
       if (_.isPlainObject(contract) && !_.isEmpty(contract)) {
-        if (
-          _.get(room, ["startdate"]) &&
-          _.get(room, ["contract_id"])
-        ) {
+        if (_.get(room, ["startdate"]) && _.get(room, ["contract_id"])) {
           let duration = contract.duration || 1;
           room.enddate = moment(room.startdate)
             .add(
@@ -695,7 +722,7 @@ export default {
             </v-col>
             <v-col cols="12" md="6">
               <v-text-field
-                label="Phone No"
+                label="Phone No 1"
                 hint="Example of Phone No : 014-12019231 (With Dash)"
                 persistent-hint
                 v-model="data.tel1"
@@ -703,6 +730,30 @@ export default {
                 @input="$v.data.tel1.$touch()"
                 @blur="$v.data.tel1.$touch()"
                 :error-messages="tel1Errors"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="Phone No 2"
+                hint="Example of Phone No : 014-12019231 (With Dash)"
+                persistent-hint
+                v-model="data.tel2"
+                :maxlength="20"
+                @input="$v.data.tel2.$touch()"
+                @blur="$v.data.tel2.$touch()"
+                :error-messages="tel2Errors"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="Phone No 3"
+                hint="Example of Phone No : 014-12019231 (With Dash)"
+                persistent-hint
+                v-model="data.tel3"
+                :maxlength="20"
+                @input="$v.data.tel3.$touch()"
+                @blur="$v.data.tel3.$touch()"
+                :error-messages="tel3Errors"
               ></v-text-field>
             </v-col>
             <v-col cols="6">
@@ -903,13 +954,9 @@ export default {
                       <tr>
                         <th class="text-left">Room</th>
                         <th class="text-left">Rental</th>
-                        <th class="text-left" >Deposit</th>
-                        <th class="text-left" >
-                          Agreement Fees
-                        </th>
-                        <th class="text-left">
-                          Booking Fees
-                        </th>
+                        <th class="text-left">Deposit</th>
+                        <th class="text-left">Agreement Fees</th>
+                        <th class="text-left">Booking Fees</th>
                         <th class="text-left" v-if="editMode">
                           Outstanding Deposit
                         </th>
@@ -921,7 +968,7 @@ export default {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr  v-for="room in data.rooms" :key="room.uid">
+                      <tr v-for="room in data.rooms" :key="room.uid">
                         <td>{{ room.name }}</td>
                         <td>
                           <v-text-field
@@ -936,7 +983,7 @@ export default {
                             "
                           ></v-text-field>
                         </td>
-                        <td >
+                        <td>
                           <v-text-field
                             v-model="room.deposit"
                             prefix="RM"
@@ -949,7 +996,7 @@ export default {
                             "
                           ></v-text-field>
                         </td>
-                        <td >
+                        <td>
                           <v-text-field
                             v-model="room.agreement_fees"
                             prefix="RM"
@@ -1075,9 +1122,7 @@ export default {
                             :dialogStyle="servicesDialogConfig.dialogStyle"
                             :services="
                               pluckUid(
-                                !_.isEmpty(room.services)
-                                  ? room.services
-                                  : []
+                                !_.isEmpty(room.services) ? room.services : []
                               )
                             "
                             :origServices="

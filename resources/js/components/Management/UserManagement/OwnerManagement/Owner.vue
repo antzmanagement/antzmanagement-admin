@@ -118,6 +118,14 @@ export default {
             <v-row justify="start" align="center" class="pa-2">
               <v-col cols="12" md="4">
                 <div class="form-group mb-0">
+                  <label class="form-label mb-0">Reference No</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.referenceno }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
                   <label class="form-label mb-0">Name</label>
                   <div class="form-control-plaintext">
                     <h4>{{ data.name }}</h4>
@@ -134,9 +142,43 @@ export default {
               </v-col>
               <v-col cols="12" md="4">
                 <div class="form-group mb-0">
-                  <label class="form-label mb-0">Phone</label>
+                  <label class="form-label mb-0">Bank</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.banktype }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Bank Account</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.bankaccount }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Phone 1</label>
                   <div class="form-control-plaintext">
                     <h4>{{ data.tel1 }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Phone 2</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.tel2 }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Phone 3</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.tel3 }}</h4>
                   </div>
                 </div>
               </v-col>

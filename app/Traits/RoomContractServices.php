@@ -54,7 +54,7 @@ trait RoomContractServices
             $q->where('status', true);
         }])->get();
 
-        $data = $data->unique('id')->sortBy('id')->flatten(1);
+        $data = $data->unique('id')->sortByDesc('sequence')->flatten(1);
 
         return $data;
     }
@@ -71,7 +71,7 @@ trait RoomContractServices
                     return $item->tenant->id == $tenant_id;
                 }
                 return false;
-            });
+            })->values();
         }
 
         if($params->room_id){
@@ -81,7 +81,7 @@ trait RoomContractServices
                     return $item->room->id == $room_id;
                 }
                 return false;
-            });
+            })->values();
         }
 
         if($params->owner_id){
@@ -93,7 +93,7 @@ trait RoomContractServices
                     }
                 }
                 return false;
-            });
+            })->values();
         }
 
         if($params->service_ids){
@@ -113,7 +113,7 @@ trait RoomContractServices
                 }
                 error_log($existed. ' ');
                 return $existed;
-            });
+            })->values();
         }
 
         if ($params->sequence) {
@@ -149,20 +149,20 @@ trait RoomContractServices
             $data = collect($data);
             $data = $data->filter(function ($item) use ($date) {
                 return Carbon::parse(data_get($item, 'startdate'))->gte($date);
-            });
+            })->values();
         }
         
         if ($params->todate) {
             $date = Carbon::parse($params->todate)->endOfDay();
             $data = $data->filter(function ($item) use ($date) {
                 return Carbon::parse(data_get($item, 'startdate'))->lte($date);
-            });
+            })->values();
         }
 
 
 
 
-        $data = $data->unique('id');
+        $data = $data->unique('id')->sortByDesc('sequence')->flatten(1);;
 
         return $data;
     }
@@ -201,6 +201,7 @@ trait RoomContractServices
         }, 'payments' => function ($q) {
             // Query the name field in status table
             $q->with('services');
+            $q->with('otherpayments');
             $q->where('status', true);
         }])->where('status', true)->first();
         return $data;
@@ -239,6 +240,7 @@ trait RoomContractServices
         }, 'payments' => function ($q) {
             // Query the name field in status table
             $q->with('services');
+            $q->with('otherpayments');
             $q->where('status', true);
         }])->where('status', true)->first();
         return $data;

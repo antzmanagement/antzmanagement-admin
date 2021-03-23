@@ -18,7 +18,7 @@ trait TenantServices
         $userType = $this->getUserTypeById($this->tenantType);
         $data = $data->merge($userType->users()->with('creator')->wherePivot('status', true)->where('users.status', true)->get());
 
-        $data = $data->unique('id')->sortBy('id')->flatten(1);
+        $data = $data->unique('id')->sortByDesc('id')->flatten(1);
 
         return $data;
     }
@@ -85,7 +85,7 @@ trait TenantServices
                 }else{
                     return false;
                 }
-            });
+            })->values();
         }
 
         if ($params->birthdaytodate) {
@@ -96,7 +96,7 @@ trait TenantServices
                 }else{
                     return false;
                 }
-            });
+            })->values();
         }
 
         $data = $data->unique('id');

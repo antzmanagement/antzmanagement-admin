@@ -27,7 +27,7 @@ trait RentalPaymentServices
             $q->where('status', true);
         }])->get();
 
-        $data = $data->unique('id')->sortBy('id')->flatten(1);
+        $data = $data->unique('id')->sortByDesc('sequence')->flatten(1);
 
         return $data;
     }
@@ -44,7 +44,7 @@ trait RentalPaymentServices
                     return $item->roomcontract->tenant->id == $tenant_id;
                 }
                 return false;
-            });
+            })->values();
         }
 
         if($params->room_id){
@@ -55,7 +55,7 @@ trait RentalPaymentServices
                     return $item->roomcontract->room->id == $room_id;
                 }
                 return false;
-            });
+            })->values();
         }
 
         if ($params->sequence) {
@@ -89,14 +89,14 @@ trait RentalPaymentServices
             $data = collect($data);
             $data = $data->filter(function ($item) use ($date) {
                 return Carbon::parse(data_get($item, 'rentaldate'))->gte($date);
-            });
+            })->values();
         }
         
         if ($params->todate) {
             $date = Carbon::parse($params->todate)->endOfDay();
             $data = $data->filter(function ($item) use ($date) {
                 return Carbon::parse(data_get($item, 'rentaldate'))->lte($date);
-            });
+            })->values();
         }
 
         if ($params->paymentfromdate) {
@@ -109,7 +109,7 @@ trait RentalPaymentServices
                 }else{
                     return false;
                 }
-            });
+            })->values();
         }
         
         if ($params->paymenttodate) {
@@ -121,10 +121,10 @@ trait RentalPaymentServices
                 }else{
                     return false;
                 }
-            });
+            })->values();
         }
         
-        $data = $data->unique('id');
+        $data = $data->unique('id')->sortByDesc('sequence')->flatten(1);
 
         return $data;
     }
@@ -210,6 +210,7 @@ trait RentalPaymentServices
         $data->paymentdate = $this->toDate($params->paymentdate);
         $data->sequence = $this->toInt($params->sequence);
         $data->remark = $params->remark;
+        $data->referenceno = $params->referenceno;
         
         $roomContract = $this->getRoomContractById($params->room_contract_id);
         if ($this->isEmpty($roomContract)) {
@@ -242,7 +243,7 @@ trait RentalPaymentServices
     public function rentalPaymentAllCols()
     {
 
-        return ['id', 'uid', 'price', 'remark'];
+        return ['id', 'uid', 'price', 'remark', 'referenceno'];
     }
 
     public function rentalPaymentDefaultCols()
