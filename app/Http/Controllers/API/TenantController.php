@@ -204,8 +204,7 @@ class TenantController extends Controller
             'tel3' => 'nullable|string|max:100',
             'email' =>
             [
-                'required',
-                'string',
+                'nullable',
                 'email',
                 'max:300',
             ],
@@ -433,8 +432,7 @@ class TenantController extends Controller
         $this->validate($request, [
             'email' =>
             [
-                'required',
-                'string',
+                'nullable',
                 'email',
                 'max:300',
                 // Rule::unique('users')->where(function ($query) use ($tenant) {

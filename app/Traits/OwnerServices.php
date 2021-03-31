@@ -33,7 +33,7 @@ trait OwnerServices
             $keyword = $params->keyword;
             $data = $data->filter(function ($item) use ($keyword) {
                 //check string exist inside or not
-                if (stristr($item->name, $keyword) == TRUE || stristr($item->icno, $keyword) == TRUE) {
+                if (stristr($item->name, $keyword) == TRUE || stristr($item->icno, $keyword) == TRUE || stristr($item->referenceno, $keyword) == TRUE) {
                     return true;
                 } else {
                     return false;

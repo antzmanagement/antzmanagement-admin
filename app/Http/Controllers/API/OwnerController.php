@@ -198,8 +198,7 @@ class OwnerController extends Controller
             'tel3' => 'nullable|string|max:100',
             'email' =>
             [
-                'required',
-                'string',
+                'nullable',
                 'email',
                 'max:300',
             ],
@@ -365,8 +364,7 @@ class OwnerController extends Controller
 
             'email' =>
             [
-                'required',
-                'string',
+                'nullable',
                 'email',
                 'max:300',
             ],

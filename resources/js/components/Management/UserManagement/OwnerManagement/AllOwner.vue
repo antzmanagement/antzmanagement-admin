@@ -45,7 +45,7 @@ export default {
       },
       headers: [
         {
-          text: "Id",
+          text: "Reference No",
           align: "start",
           value: "id",
         },
@@ -211,7 +211,7 @@ export default {
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showOwner(props.item)">
-                    <td>{{ props.item.id }}</td>
+                    <td>{{ props.item.referenceno }}</td>
                     <td>{{ props.item.name }}</td>
                     <td>{{ props.item.icno }}</td>
                     <td>{{ props.item.tel1 }}</td>

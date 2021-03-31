@@ -260,10 +260,6 @@ export default {
       if (!this.$v.data.email.$dirty) {
         return errors;
       }
-      if (!this.$v.data.email.required) {
-        errors.push("E-mail is required");
-        return errors;
-      }
 
       if (!this.$v.data.email.email) {
         errors.push("Must be valid e-mail");
@@ -758,7 +754,7 @@ export default {
             </v-col>
             <v-col cols="6">
               <v-text-field
-                label="Email*"
+                label="Email"
                 hint="Email that used to login the website"
                 persistent-hint
                 required
