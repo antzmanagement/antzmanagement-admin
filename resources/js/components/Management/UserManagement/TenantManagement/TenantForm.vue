@@ -425,9 +425,12 @@ export default {
         }
       }
       if (
-        (!this.data.tel1 && !this.helpers.isPhoneFormat(this.data.tel1)) ||
+        (this.data.tel1  && !this.helpers.isPhoneFormat(this.data.tel1)) ||
         !this.helpers.isIcFormat(this.data.icno)
       ) {
+        console.log(this.data.tel1);
+        console.log('tel', (this.data.tel1 && !this.helpers.isPhoneFormat(this.data.tel1)));
+        console.log('ic', !this.helpers.isIcFormat(this.data.icno));
         return false;
       }
 
