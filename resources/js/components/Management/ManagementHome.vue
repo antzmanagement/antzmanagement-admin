@@ -7,6 +7,8 @@ import { insertBetween, notEmptyLength, _ } from "../../common/common-function";
 export default {
   data() {
     return {
+      _: _,
+      moment: moment,
       editMode: false,
       paymentDialog: false,
       unpaidrentals: [],
@@ -84,7 +86,7 @@ export default {
           text: "Action",
         },
       ],
-      roomContractHeaders : [
+      roomContractHeaders: [
         {
           text: "Sequence No",
         },
@@ -102,6 +104,9 @@ export default {
         },
         {
           text: "Start date",
+        },
+        {
+          text: "End date",
         },
         {
           text: "Deposit",
@@ -185,6 +190,115 @@ export default {
         { text: "Rental", value: "price" },
         { text: "Action", value: "action" },
       ],
+      rentalPaymentExcelFields: {
+        id: "id",
+        uid: "uid",
+        referenceno: "referenceno",
+        sequence: "sequence",
+        room: {
+          field: "roomcontract",
+          callback: (value) => {
+            return _.get(value, `room.name`) || "N/A";
+          },
+        },
+        tenant: {
+          field: "roomcontract",
+          callback: (value) => {
+            return _.get(value, `tenant.name`) || "N/A";
+          },
+        },
+        room_contract_start_date: {
+          field: "roomcontract",
+          callback: (value) => {
+            return _.get(value, `startdate`) || "N/A";
+          },
+        },
+        room_contract_end_date: {
+          field: "roomcontract",
+          callback: (value) => {
+            return _.get(value, `enddate`) || "N/A";
+          },
+        },
+        room_contract_id: {
+          field: "roomcontract",
+          callback: (value) => {
+            return _.get(value, `id`) || "N/A";
+          },
+        },
+        totalpayment: "price",
+        penalty: "penalty",
+        processing_fees: "processing_fees",
+        service_fees: "service_fees",
+        outstanding_payment: "outstanding",
+        paymentdate: "paymentdate",
+        rentaldate: "rentaldate",
+        paid: {
+          field: "paid",
+          callback: (value) => (value ? "Yes" : "No"),
+        },
+        remark: "remark",
+        created_at: "created_at",
+        updated_at: "updated_at",
+      },
+      roomContractExcelFields: {
+        id: "id",
+        sequence: "sequence",
+        room: {
+          field : 'room',
+          callback : (value) => {
+            return _.get(value , `name`) || 'N/A';
+          }
+        },
+        room_id: {
+          field : 'room',
+          callback : (value) => {
+            return _.get(value , `id`) || 'N/A';
+          }
+        },
+        contract: {
+          field : 'contract',
+          callback : (value) => {
+            return _.get(value , `name`) || 'N/A';
+          }
+        },
+        contract_id: {
+          field : 'contract',
+          callback : (value) => {
+            return _.get(value , `id`) || 'N/A';
+          }
+        },
+        tenant: {
+          field : 'tenant',
+          callback : (value) => {
+            return _.get(value , `name`) || 'N/A';
+          }
+        },
+        tenant_id: {
+          field : 'tenant',
+          callback : (value) => {
+            return _.get(value , `id`) || 'N/A';
+          }
+        },
+        startdate: "startdate",
+        enddate: "enddate",
+        "duration(months)": "duration",
+        "left(months)": "left",
+        rental: "rental",
+        booking_fees: "booking_fees",
+        deposit: "deposit",
+        agreement_fees: "agreement_fees",
+        outstanding_deposit: "outstanding_deposit",
+        checkedout: {
+          field : 'sublet',
+          callback : (value) => value ? 'Yes' : 'No',
+        },
+        checkout_date: "checkout_date",
+        checkout_charges: "checkout_charges",
+        checkout_remark: "checkout_remark",
+        remark : 'remark',
+        created_at: "created_at",
+        updated_at: "updated_at",
+      },
     };
   },
   created() {
@@ -263,7 +377,8 @@ export default {
           console.log(res.data.unpaidTenant);
           this.unpaidrentals = res.data.unpaidTenant;
           this.todayPaidRentals = _.get(res.data, ["todayPaidRental"]) || [];
-          this.roomContractAlmostEnd = _.get(res.data, ["roomContractAlmostEnd"]) || [];
+          this.roomContractAlmostEnd =
+            _.get(res.data, ["roomContractAlmostEnd"]) || [];
 
           this.updateRoomTypePortion(
             _.get(res.data, ["roomTypesPortion", "data"]) || []
@@ -441,6 +556,11 @@ export default {
                 <download-excel
                   :data="unpaidrentals"
                   type="csv"
+                  :header="`Unpaid_Rental_Tenant_Data_${moment().format('YYYY_MM_DD')}`"
+                  :name="`Unpaid_Rental_Tenant_Data_${moment().format(
+                    'YYYY_MM_DD'
+                  )}.csv`"
+                  :fields="rentalPaymentExcelFields || {}"
                   class="float-right mx-5"
                 >
                   <v-btn>download</v-btn>
@@ -524,6 +644,11 @@ export default {
                 <download-excel
                   :data="todayPaidRentals"
                   type="csv"
+                  :header="`TotalPaidRentals_${moment().format('YYYY_MM_DD')}`"
+                  :name="`TotalPaidRentals_${moment().format(
+                    'YYYY_MM_DD'
+                  )}.csv`"
+                  :fields="rentalPaymentExcelFields || {}"
                   class="float-right mx-5"
                 >
                   <v-btn>download</v-btn>
@@ -603,10 +728,17 @@ export default {
           <v-col cols="12">
             <v-card raised>
               <v-card-title class="mx-2">
-                <div class="title font-weight-bold">Room Contract End In 3 Months</div>
+                <div class="title font-weight-bold">
+                  Room Contract End In 3 Months
+                </div>
                 <download-excel
-                  :data="todayPaidRentals"
+                  :data="roomContractAlmostEnd"
                   type="csv"
+                  :header="`Room_Contract_End_In_3_Months_${moment().format('YYYY_MM_DD')}`"
+                  :name="`Room_Contract_End_In_3_Months_${moment().format(
+                    'YYYY_MM_DD'
+                  )}.csv`"
+                  :fields="roomContractExcelFields || {}"
                   class="float-right mx-5"
                 >
                   <v-btn>download</v-btn>
@@ -632,6 +764,7 @@ export default {
                     </td>
                     <td>{{ props.item.tenant.name }}</td>
                     <td>{{ props.item.startdate }}</td>
+                    <td>{{ props.item.enddate }}</td>
                     <td>RM {{ props.item.deposit | toDouble }}</td>
                     <td>RM {{ props.item.outstanding_deposit | toDouble }}</td>
                     <td>RM {{ props.item.rental | toDouble }}</td>

@@ -1,9 +1,13 @@
 
 <script>
 import { mapActions } from "vuex";
+import { getArrayValues, _ } from "../../../common/common-function";
+import moment from "moment";
 export default {
   data() {
     return {
+      moment: moment,
+      _: _,
       editMode: false,
       paymentDialog: false,
       selectedPayment: {
@@ -155,6 +159,7 @@ export default {
         { text: "Payment Date", value: "paymentdate" },
         { text: "Price", value: "price" },
         { text: "Other Charges", value: "other_charges" },
+        { text: "Other Payments" },
         {
           text: "Services",
           value: "services",
@@ -162,6 +167,112 @@ export default {
         { text: "Remark", value: "remark" },
         { text: "Actions" },
       ],
+      paymentExcelData: [],
+      paymentExcelFields: {
+        id: "id",
+        uid: "uid",
+        referenceno: "referenceno",
+        sequence: "sequence",
+        room: {
+          field: "roomcontract",
+          callback: (value) => {
+            return _.get(value, `room.name`) || "N/A";
+          },
+        },
+        tenant: {
+          field: "roomcontract",
+          callback: (value) => {
+            return _.get(value, `tenant.name`) || "N/A";
+          },
+        },
+        room_contract_start_date: {
+          field: "roomcontract",
+          callback: (value) => {
+            return _.get(value, `startdate`) || "N/A";
+          },
+        },
+        room_contract_end_date: {
+          field: "roomcontract",
+          callback: (value) => {
+            return _.get(value, `enddate`) || "N/A";
+          },
+        },
+        room_contract_id: {
+          field: "roomcontract",
+          callback: (value) => {
+            return _.get(value, `id`) || "N/A";
+          },
+        },
+        service_payment: "price",
+        other_payment: "other_charges",
+        paymentdate: "paymentdate",
+        services: {
+          field: "services",
+          callback: (value) => {
+            return getArrayValues(_.map(value, 'name')) || "N/A";
+          },
+        },
+        other_services: {
+          field: "otherpayments",
+          callback: (value) => {
+            return getArrayValues(_.map(value, 'name')) || "N/A";
+          },
+        },
+        remark: "remark",
+        created_at: "created_at",
+        updated_at: "updated_at",
+      },
+      rentalPaymentExcelData: [],
+      rentalPaymentExcelFields: {
+        id: "id",
+        uid: "uid",
+        referenceno: "referenceno",
+        sequence: "sequence",
+        room: {
+          field: "roomcontract",
+          callback: (value) => {
+            return _.get(value, `room.name`) || "N/A";
+          },
+        },
+        tenant: {
+          field: "roomcontract",
+          callback: (value) => {
+            return _.get(value, `tenant.name`) || "N/A";
+          },
+        },
+        room_contract_start_date: {
+          field: "roomcontract",
+          callback: (value) => {
+            return _.get(value, `startdate`) || "N/A";
+          },
+        },
+        room_contract_end_date: {
+          field: "roomcontract",
+          callback: (value) => {
+            return _.get(value, `enddate`) || "N/A";
+          },
+        },
+        room_contract_id: {
+          field: "roomcontract",
+          callback: (value) => {
+            return _.get(value, `id`) || "N/A";
+          },
+        },
+        totalpayment: "price",
+        penalty: "penalty",
+        processing_fees: "processing_fees",
+        service_fees: "service_fees",
+        outstanding_payment: "outstanding",
+        paymentdate: "paymentdate",
+        rentaldate: "rentaldate",
+        paid: {
+          field: "paid",
+          callback: (value) => (value ? "Yes" : "No"),
+        },
+        remark: "remark",
+        created_at: "created_at",
+        updated_at: "updated_at",
+      },
     };
   },
   watch: {
@@ -176,6 +287,18 @@ export default {
         this.getPayments();
       },
       deep: true,
+    },
+    paymentTotal(v) {
+      console.log(v);
+      if (v > 0) {
+        this.fetchPaymentExcelData();
+      }
+    },
+    rentalPaymentTotal(v) {
+      console.log(v);
+      if (v > 0) {
+        this.fetchRentalPaymentExcelData();
+      }
     },
   },
   computed: {
@@ -236,12 +359,10 @@ export default {
         this.rentalPaymentFilterGroup.todate = filterGroup.todate;
       }
       if (filterGroup.penalty === 1 || filterGroup.penalty === 0) {
-        this.rentalPaymentFilterGroup.penalty =
-          filterGroup.penalty;
+        this.rentalPaymentFilterGroup.penalty = filterGroup.penalty;
       }
       if (filterGroup.paid === 1 || filterGroup.paid === 0) {
-        this.rentalPaymentFilterGroup.paid =
-          filterGroup.paid;
+        this.rentalPaymentFilterGroup.paid = filterGroup.paid;
       }
 
       this.options.page = 1;
@@ -272,12 +393,10 @@ export default {
         this.paymentFilterGroup.todate = filterGroup.todate;
       }
       if (filterGroup.penalty === 1 || filterGroup.penalty === 0) {
-        this.paymentFilterGroup.penalty =
-          filterGroup.penalty;
+        this.paymentFilterGroup.penalty = filterGroup.penalty;
       }
       if (filterGroup.paid === 1 || filterGroup.paid === 0) {
-        this.paymentFilterGroup.paid =
-          filterGroup.paid;
+        this.paymentFilterGroup.paid = filterGroup.paid;
       }
 
       this.paymentOptions.page = 1;
@@ -413,7 +532,7 @@ export default {
           }
           this.paymentTotal = data.totalResult;
           this.paymentLoading = false;
-          console.log('data');
+          console.log("data");
           console.log(this.paymentData);
         })
         .catch((error) => {
@@ -432,6 +551,62 @@ export default {
         this.endLoadingAction();
         this.$htmlToPaper("printMe");
       }, 2000);
+    },
+    async fetchPaymentExcelData() {
+      let total = this.paymentTotal || 0;
+      let size = 50;
+      let maxPage = Math.ceil(total / size);
+      let promises = [];
+      let self = this;
+      _.forEach(_.range(maxPage), function (index) {
+        console.log(index);
+        promises.push(
+          self.filterPaymentsAction({
+            pageSize: size,
+            pageNumber: index + 1,
+          })
+        );
+      });
+
+      let responses = await Promise.all(promises);
+      console.log(responses);
+      let finalData = [];
+      _.forEach(responses, function (response) {
+        finalData = _.compact(
+          _.concat(finalData, _.get(response, `data`) || [])
+        );
+      });
+      console.log(finalData);
+      this.paymentExcelData = finalData;
+      return finalData;
+    },
+    async fetchRentalPaymentExcelData() {
+      let total = this.rentalPaymentTotal || 0;
+      let size = 50;
+      let maxPage = Math.ceil(total / size);
+      let promises = [];
+      let self = this;
+      _.forEach(_.range(maxPage), function (index) {
+        console.log(index);
+        promises.push(
+          self.filterRentalPaymentsAction({
+            pageSize: size,
+            pageNumber: index + 1,
+          })
+        );
+      });
+
+      let responses = await Promise.all(promises);
+      console.log(responses);
+      let finalData = [];
+      _.forEach(responses, function (response) {
+        finalData = _.compact(
+          _.concat(finalData, _.get(response, `data`) || [])
+        );
+      });
+      console.log(finalData);
+      this.rentalPaymentExcelData = finalData;
+      return finalData;
     },
   },
 };
@@ -478,14 +653,22 @@ export default {
                 }}</v-chip>
               </v-card-subtitle>
               <v-card-subtitle
-                v-show="rentalPaymentFilterGroup.penalty === 1 || rentalPaymentFilterGroup.penalty === 0 "
+                v-show="
+                  rentalPaymentFilterGroup.penalty === 1 ||
+                  rentalPaymentFilterGroup.penalty === 0
+                "
               >
                 Penalty :
                 <v-chip class="mx-2">{{
                   rentalPaymentFilterGroup.penalty ? "Yes" : "No"
                 }}</v-chip>
               </v-card-subtitle>
-              <v-card-subtitle v-show="rentalPaymentFilterGroup.paid === 1 || rentalPaymentFilterGroup.paid === 0">
+              <v-card-subtitle
+                v-show="
+                  rentalPaymentFilterGroup.paid === 1 ||
+                  rentalPaymentFilterGroup.paid === 0
+                "
+              >
                 Paid :
                 <v-chip class="mx-2">{{
                   rentalPaymentFilterGroup.paid ? "Yes" : "No"
@@ -512,6 +695,24 @@ export default {
                       >All Rental Payment</v-toolbar-title
                     >
                     <v-spacer></v-spacer>
+                    <download-excel
+                      :header="`All_RentalPayment_${moment().format(
+                        'YYYY_MM_DD'
+                      )}`"
+                      :name="`All_RentalPayment_${moment().format(
+                        'YYYY_MM_DD'
+                      )}.csv`"
+                      type="csv"
+                      :data="rentalPaymentExcelData || []"
+                      :fields="rentalPaymentExcelFields || {}"
+                      v-if="
+                        _.isArray(rentalPaymentExcelData) &&
+                        !_.isEmpty(rentalPaymentExcelData)
+                      "
+                      ><v-btn text color="primary" class="mr-3"
+                        >Download as Excel</v-btn
+                      ></download-excel
+                    >
                     <rental-payment-filter-dialog
                       :buttonStyle="rentalPaymentFilterDialogConfig.buttonStyle"
                       :dialogStyle="rentalPaymentFilterDialogConfig.dialogStyle"
@@ -601,6 +802,24 @@ export default {
                       >Add On Payment</v-toolbar-title
                     >
                     <v-spacer></v-spacer>
+                    <download-excel
+                      :header="`All_AddOnPayment_${moment().format(
+                        'YYYY_MM_DD'
+                      )}`"
+                      :name="`All_AddOnPayment_${moment().format(
+                        'YYYY_MM_DD'
+                      )}.csv`"
+                      type="csv"
+                      :data="paymentExcelData || []"
+                      :fields="paymentExcelFields || {}"
+                      v-if="
+                        _.isArray(paymentExcelData) &&
+                        !_.isEmpty(paymentExcelData)
+                      "
+                      ><v-btn text color="primary" class="mr-3"
+                        >Download as Excel</v-btn
+                      ></download-excel
+                    >
                     <payment-filter-dialog
                       :buttonStyle="rentalPaymentFilterDialogConfig.buttonStyle"
                       :dialogStyle="rentalPaymentFilterDialogConfig.dialogStyle"
@@ -618,6 +837,18 @@ export default {
                     <td>{{ props.item.paymentdate | formatDate }}</td>
                     <td>{{ props.item.totalpayment | toDouble }}</td>
                     <td>{{ props.item.other_charges | toDouble }}</td>
+                    <td>
+                      {{
+                        _.compact(
+                          _.map(
+                            props.item.otherpayments,
+                            function (otherpayment) {
+                              return _.get(otherpayment, ["name"]) || "";
+                            }
+                          )
+                        ) | getArrayValues
+                      }}
+                    </td>
                     <td>
                       {{
                         _.compact(

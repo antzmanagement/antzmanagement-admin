@@ -173,8 +173,10 @@ trait ReportServices
     private function getRoomContractAlmostEnd($requester)
     {
         try {
-            $roomcontracts = RoomContract::whereDate('enddate', '>=', Carbon::now()->firstOfMonth()->addMonths(2)->startOfMonth()->startOfDay())->whereDate('enddate', '<=', Carbon::now()->firstOfMonth()->addMonths(2)->endOfMonth()->endOfDay())->get();
+            $roomcontracts = RoomContract::whereDate('enddate', '>=', Carbon::now()->firstOfMonth()->startOfMonth()->startOfDay())->whereDate('enddate', '<=', Carbon::now()->firstOfMonth()->addMonths(2)->endOfMonth()->endOfDay())->get();
     
+            error_log(Carbon::now()->firstOfMonth()->startOfMonth()->startOfDay());
+            error_log(Carbon::now()->firstOfMonth()->addMonths(2)->endOfMonth()->endOfDay());
             $roomcontracts = $roomcontracts->map(function($roomcontract){
                 $roomcontract['room'] = $roomcontract->room;
                 $roomcontract['contract'] = $roomcontract->contract;

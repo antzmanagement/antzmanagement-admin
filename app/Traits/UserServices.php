@@ -115,7 +115,9 @@ trait UserServices
         $data->city = $params->city;
         $data->referenceno = $params->referenceno;
         $data->banktype = $params->banktype;
+        $data->otherbanktype = $params->otherbanktype;
         $data->bankaccount = $params->bankaccount;
+        $data->bankaccountname = $params->bankaccountname;
 
         $data->password = Hash::make($params->password);
 
@@ -171,7 +173,9 @@ trait UserServices
         $data->city = $params->city;
         $data->referenceno = $params->referenceno;
         $data->banktype = $params->banktype;
+        $data->otherbanktype = $params->otherbanktype;
         $data->bankaccount = $params->bankaccount;
+        $data->bankaccountname = $params->bankaccountname;
 
         $role = $this->getRoleById($params->role_id);
         if ($this->isEmpty($role)) {
@@ -282,7 +286,7 @@ trait UserServices
         return [
             'id', 'uid', 'name', 'email',
             'icno', 'tel1', 'tel2', 'tel3', 'mother_name', 'mother_tel', 'father_name', 'age', 'birthday', 'gender', 'religion', 'approach_method', 'occupation', 'address', 'state', 'postcode', 'city', 'pic',
-            'father_tel', 'emergency_name', 'emergency_contact', 'emergency_relationship', 'password', 'status', 'referenceno', 'bankaccount', 'banktype'
+            'father_tel', 'emergency_name', 'emergency_contact', 'emergency_relationship', 'password', 'status', 'referenceno', 'bankaccount', 'banktype', 'otherbanktype', 'bankaccountname'
         ];
     }
 

@@ -12,6 +12,7 @@ export default {
     checkoutDialog: false,
     paymentDialog: false,
     addOnPaymentDialog: false,
+    depositPaymentDialog : false,
     selectedPayment: {
       uid: "",
     },
@@ -121,7 +122,6 @@ export default {
     this.getRoomContractAction({ uid: this.$route.params.uid })
       .then((data) => {
         this.data = data.data;
-        console.log(this.data);
         this.$Progress.finish();
         this.endLoadingAction();
       })
@@ -229,7 +229,6 @@ export default {
         });
       }
       this.data.otherpayments = this.data.otherpayments.concat([data]);
-
     },
     deleteRoomContract($isConfirmed, $uid) {
       if ($isConfirmed) {
@@ -835,6 +834,14 @@ export default {
                         >
                         <v-spacer></v-spacer>
                         <v-btn
+                          v-if="data.outstanding_deposit > 0"
+                          color="success"
+                          dark
+                          class="mb-2 mr-2"
+                          @click="depositPaymentDialog = true"
+                          >Deposit Payment</v-btn
+                        >
+                        <v-btn
                           v-if="!data.checkedout"
                           color="success"
                           dark
@@ -930,6 +937,21 @@ export default {
             </v-row>
           </v-container>
         </v-card>
+
+        <v-dialog
+          :maxWidth="'50%'"
+          :fullscreen="false"
+          hideOverlay
+          v-model="depositPaymentDialog"
+          transition="dialog-bottom-transition"
+        >
+          <deposit-payment-form
+            @close="depositPaymentDialog = false"
+            :roomcontract="depositPaymentDialog ? this.data || {} : null"
+            :editMode="this.editMode"
+            @createPayment="($event) => {this.data.outstanding_deposit = 0; updatePaymentDetails($event); }"
+          ></deposit-payment-form>
+        </v-dialog>
 
         <v-dialog
           persistent

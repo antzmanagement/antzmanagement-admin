@@ -41,7 +41,7 @@ export default {
   },
   data() {
     return {
-      roomStatusOptions: ["empty", "maintaining", "occupied"],
+      roomStatusOptions: ["empty", "maintaining", "occupied", 'vacant', 'defect'],
       dialog: false,
       roomTypes: [],
       owners: [],

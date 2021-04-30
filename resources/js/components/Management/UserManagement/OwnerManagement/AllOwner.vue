@@ -2,9 +2,13 @@
 
 <script>
 import { mapActions } from "vuex";
+import moment from "moment";
+import { _ } from "../../../../common/common-function";
 export default {
   data() {
     return {
+      moment: moment,
+      _: _,
       totalDataLength: 0,
       data: [],
       loading: true,
@@ -45,19 +49,48 @@ export default {
       },
       headers: [
         {
-          text: "Reference No",
-          align: "start",
-          value: "id",
-        },
-        {
           text: "Name",
           align: "start",
           value: "name",
         },
+        {
+          text: "Unit",
+        },
         { text: "Ic No", value: "icno" },
         { text: "Phone", value: "tel1" },
         { text: "Email", value: "email" },
+        {
+          text: "Benificiary Name",
+        },
+        {
+          text: "Benificiary Bank",
+        },
+        {
+          text: "Bank A/C No",
+        },
       ],
+      excelData: [],
+      excelFields: {
+        id: "id",
+        uid: "uid",
+        name: "name",
+        email: "email",
+        icno: "icno",
+        tel1: "tel1",
+        tel2: "tel2",
+        tel3: "tel3",
+        occupation: "occupation",
+        address: "address",
+        postcode: "postcode",
+        state: "state",
+        city: "city",
+        bank_type: "banktype",
+        other_bank_type: "otherbanktype",
+        bank_account_name: "bankaccountname",
+        bank_account: "bankaccount",
+        created_at: "created_at",
+        updated_at: "updated_at",
+      },
     };
   },
   watch: {
@@ -66,6 +99,12 @@ export default {
         this.getOwners();
       },
       deep: true,
+    },
+    totalDataLength(v) {
+      console.log(v);
+      if (v > 0) {
+        this.fetchExcelData();
+      }
     },
   },
   computed: {
@@ -141,6 +180,34 @@ export default {
           });
         });
     },
+    async fetchExcelData() {
+      let total = this.totalDataLength || 0;
+      let size = 50;
+      let maxPage = Math.ceil(total / size);
+      let promises = [];
+      let self = this;
+      _.forEach(_.range(maxPage), function (index) {
+        console.log(index);
+        promises.push(
+          self.filterOwnersAction({
+            pageSize: size,
+            pageNumber: index + 1,
+          })
+        );
+      });
+
+      let responses = await Promise.all(promises);
+      console.log(responses);
+      let finalData = [];
+      _.forEach(responses, function (response) {
+        finalData = _.compact(
+          _.concat(finalData, _.get(response, `data`) || [])
+        );
+      });
+      console.log(finalData);
+      this.excelData = finalData;
+      return finalData;
+    },
   },
 };
 </script>
@@ -208,14 +275,35 @@ export default {
                       @submitFilter="initOwnerFilter($event)"
                     ></owner-filter-dialog>
                   </v-toolbar>
+                  <v-toolbar
+                    flat
+                    class="mb-5 justify-end d-flex"
+                    v-if="_.isArray(excelData) && !_.isEmpty(excelData)"
+                  >
+                    <download-excel
+                      :header="`All_Owner_${moment().format('YYYY_MM_DD')}`"
+                      :name="`All_Owner_${moment().format('YYYY_MM_DD')}.csv`"
+                      type="csv"
+                      :fields="excelFields || {}"
+                      :data="excelData || []"
+                      ><v-btn text color="primary"
+                        >Download as Excel</v-btn
+                      ></download-excel
+                    >
+                  </v-toolbar>
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showOwner(props.item)">
-                    <td>{{ props.item.referenceno }}</td>
                     <td>{{ props.item.name }}</td>
+                    <td>
+                      {{ _.map(props.item.ownrooms, "unit") | getArrayValues }}
+                    </td>
                     <td>{{ props.item.icno }}</td>
                     <td>{{ props.item.tel1 }}</td>
                     <td>{{ props.item.email }}</td>
+                    <td>{{ props.item.bankaccountname }}</td>
+                    <td>{{ props.item.banktype }}</td>
+                    <td>{{ props.item.bankaccount }}</td>
                   </tr>
                 </template>
               </v-data-table>

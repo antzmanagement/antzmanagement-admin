@@ -2,9 +2,11 @@
 <script>
 import { mapActions } from "vuex";
 import { _ } from "../../../common/common-function";
+import moment from "moment";
 export default {
   data() {
     return {
+      moment: moment,
       _: _,
       totalDataLength: 0,
       data: [],
@@ -59,19 +61,72 @@ export default {
           text: "Jalan",
         },
         {
-          text: "Block",
+          text: "Lot",
         },
         {
           text: "Floor",
         },
-        { text: "Price (RM)" },
+        { text: "Rental (RM)" },
         {
           text: "Room Status",
         },
         {
-          text: "Owner",
+          text: "TNB Account No",
         },
+        // {
+        //   text: "Owner",
+        // },
       ],
+      excelData: [],
+      excelFields: {
+        id: "id",
+        uid: "uid",
+        unit: "unit",
+        floor: "floor",
+        lot: "lot",
+        jalan: "jalan",
+        price: "price",
+        size: "size",
+        room_status: "room_status",
+        address: "address",
+        postcode: "postcode",
+        state: "state",
+        city: "city",
+        isSublet: {
+          field : 'sublet',
+          callback : (value) => value ? 'Yes' : 'No',
+        },
+        sublet_claim: "sublet_claim",
+        owner_claim: "owner_claim",
+        tnb_account_no: "tnb_account_no",
+        room_type: {
+          field : 'room_types',
+          callback : (value) => {
+            return _.get(value , `[0].name`) || 'N/A';
+          }
+        },
+        room_type_id: {
+          field : 'room_types',
+          callback : (value) => {
+            return _.get(value , `[0].id`) || 'N/A';
+          }
+        },
+        owner: {
+          field : 'owners',
+          callback : (value) => {
+            return _.get(value , `[0].name`) || 'N/A';
+          }
+        },
+        owner_id: {
+          field : 'owners',
+          callback : (value) => {
+            return _.get(value , `[0].id`) || 'N/A';
+          }
+        },
+        remark : 'remark',
+        created_at: "created_at",
+        updated_at: "updated_at",
+      },
     };
   },
   watch: {
@@ -80,6 +135,12 @@ export default {
         this.getRooms();
       },
       deep: true,
+    },
+    totalDataLength(v){
+      console.log(v);
+      if(v > 0){
+      this.fetchExcelData();
+      }
     },
   },
   computed: {
@@ -158,7 +219,7 @@ export default {
 
       this.filterRoomsAction(this.roomFilterGroup)
         .then((data) => {
-          console.log('data');
+          console.log("data");
           console.log(data);
           if (data.data) {
             this.data = data.data;
@@ -175,6 +236,34 @@ export default {
             title: "Something went wrong... ",
           });
         });
+    },
+    async fetchExcelData() {
+      let total = this.totalDataLength || 0;
+      let size = 50;
+      let maxPage = Math.ceil(total / size);
+      let promises = [];
+      let self = this;
+      _.forEach(_.range(maxPage), function (index) {
+        console.log(index);
+        promises.push(
+          self.filterRoomsAction({
+            pageSize: size,
+            pageNumber: index + 1,
+          })
+        );
+      });
+
+      let responses = await Promise.all(promises);
+      console.log(responses);
+      let finalData = [];
+      _.forEach(responses, function (response) {
+        finalData = _.compact(
+          _.concat(finalData, _.get(response, `data`) || [])
+        );
+      });
+      console.log(finalData);
+      this.excelData = finalData;
+      return finalData;
     },
   },
 };
@@ -221,11 +310,15 @@ export default {
               </v-card-subtitle>
               <v-card-subtitle v-show="roomFilterGroup.roomTypeObj">
                 Room Type :
-                <v-chip class="mx-2">{{ _.get(roomFilterGroup, ['roomTypeObj', 'name']) || 'N/A' }}</v-chip>
+                <v-chip class="mx-2">{{
+                  _.get(roomFilterGroup, ["roomTypeObj", "name"]) || "N/A"
+                }}</v-chip>
               </v-card-subtitle>
               <v-card-subtitle v-show="roomFilterGroup.ownerObj">
                 Owner :
-                <v-chip class="mx-2">{{ _.get(roomFilterGroup, ['ownerObj', 'name']) || 'N/A' }}</v-chip>
+                <v-chip class="mx-2">{{
+                  _.get(roomFilterGroup, ["ownerObj", "name"]) || "N/A"
+                }}</v-chip>
               </v-card-subtitle>
             </v-card>
           </v-col>
@@ -249,6 +342,22 @@ export default {
                       @submitFilter="initRoomFilter($event)"
                     ></room-filter-dialog>
                   </v-toolbar>
+                  <v-toolbar
+                    flat
+                    class="mb-5 justify-end d-flex"
+                    v-if="_.isArray(excelData) && !_.isEmpty(excelData)"
+                  >
+                    <download-excel
+                      :header="`All_Room_${moment().format('YYYY_MM_DD')}`"
+                      :name="`All_Room_${moment().format('YYYY_MM_DD')}.csv`"
+                      type="csv"
+                      :fields="excelFields || {}"
+                      :data="excelData || []"
+                      ><v-btn text color="primary"
+                        >Download as Excel</v-btn
+                      ></download-excel
+                    >
+                  </v-toolbar>
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showRoom(props.item)">
@@ -260,7 +369,10 @@ export default {
                     <td>{{ props.item.floor }}</td>
                     <td>{{ props.item.price | toDouble }}</td>
                     <td>{{ props.item.room_status }}</td>
-                    <td>{{ _.get(props.item, ["owners", 0, "name"]) || "N/A" }}</td>
+                    <td>{{ props.item.tnb_account_no }}</td>
+                    <!-- <td>
+                      {{ _.get(props.item, ["owners", 0, "name"]) || "N/A" }}
+                    </td> -->
                   </tr>
                 </template>
               </v-data-table>

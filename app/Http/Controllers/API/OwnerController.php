@@ -223,7 +223,9 @@ class OwnerController extends Controller
             'state' => $request->state,
             'city' => $request->city,
             'bankaccount' => $request->bankaccount,
+            'bankaccountname' => $request->bankaccountname,
             'banktype' => $request->banktype,
+            'otherbanktype' => $request->otherbanktype,
             'referenceno' => $request->referenceno,
             'role_id' => $role->id,
             // 'password' => $request->password,
@@ -393,7 +395,9 @@ class OwnerController extends Controller
             'city' => $request->city,
             'role_id' => $role->id,
             'bankaccount' => $request->bankaccount,
+            'bankaccountname' => $request->bankaccountname,
             'banktype' => $request->banktype,
+            'otherbanktype' => $request->otherbanktype,
             'referenceno' => $request->referenceno,
         ]);
         //Convert To Json Object

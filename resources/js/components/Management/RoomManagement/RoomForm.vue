@@ -47,7 +47,7 @@ export default {
       roomTypes: [],
       owners: [],
       properties: [],
-      roomStatusOptions: ["empty", "maintaining", "occupied"],
+      roomStatusOptions: ["empty", "maintaining", "occupied", 'vacant', 'defect'],
       data: new Form({
         name: "",
         price: "",

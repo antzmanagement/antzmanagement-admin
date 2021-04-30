@@ -31,6 +31,10 @@ export const actions = {
         const { data } = await PaymentServices.delete(payload);
         return data;
     },
+    async payDeposit(context, payload) {
+        const { data } = await PaymentServices.payDeposit(payload);
+        return data;
+    },
 };
 
 // export const mutations = {

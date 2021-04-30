@@ -4,12 +4,17 @@
 <script>
 import { mapActions } from "vuex";
 import { _ } from "../../../../common/common-function";
+import ExportExcelButton from "../../../ExportExcelButton.vue";
+import moment from "moment";
 export default {
+  components: { ExportExcelButton },
   data() {
     return {
       _: _,
+      moment: moment,
       totalDataLength: 0,
       data: [],
+      excelData: [],
       loading: true,
       options: {},
       tenantFilterGroup: new Form({
@@ -43,6 +48,36 @@ export default {
           fullscreen: false,
           hideOverlay: true,
         },
+      },
+      excelFields : {
+        'id' : 'id',
+        'uid' : 'uid',
+        'name' : 'name',
+        'email' : 'email',
+        'icno' : 'icno',
+        'tel1' : 'tel1',
+        'tel2' : 'tel2',
+        'tel3' : 'tel3',
+        'mother_name' : 'mother_name',
+        'mother_tel' : 'mother_tel',
+        'father_name' : 'father_name',
+        'father_tel' : 'father_tel',
+        'emergency_contact_name' : 'emergency_name',
+        'age' : 'age',
+        'occupation' : 'occupation',
+        'gender' : 'gender',
+        'religion' : 'religion',
+        'approach_method' : 'approach_method',
+        'address' : 'address',
+        'postcode' : 'postcode',
+        'state' : 'state',
+        'city' : 'city',
+        'birthday' : 'birthday',
+        'created_at' : 'created_at',
+        'updated_at' : 'updated_at',
+        'person_in_charge_id' : 'pic',
+        'person_in_charge' : 'creator.name',
+
       },
       headers: [
         {
@@ -78,6 +113,12 @@ export default {
         this.getTenants();
       },
       deep: true,
+    },
+    totalDataLength(v){
+      console.log(v);
+      if(v > 0){
+      this.fetchExcelData();
+      }
     },
   },
   computed: {
@@ -159,10 +200,10 @@ export default {
         .then((data) => {
           if (data.data) {
             this.data = data.data;
-          this.totalDataLength = data.totalResult;
+            this.totalDataLength = data.totalResult;
           } else {
             this.data = [];
-          this.totalDataLength = 0;
+            this.totalDataLength = 0;
           }
           this.loading = false;
         })
@@ -174,6 +215,34 @@ export default {
             title: "Something went wrong... ",
           });
         });
+    },
+    async fetchExcelData() {
+      let total = this.totalDataLength || 0;
+      let size = 50;
+      let maxPage = Math.ceil(total / size);
+      let promises = [];
+      let self = this;
+      _.forEach(_.range(maxPage), function (index) {
+        console.log(index);
+        promises.push(
+          self.filterTenantsAction({
+            pageSize: size,
+            pageNumber: index + 1,
+          })
+        );
+      });
+
+      let responses = await Promise.all(promises);
+      console.log(responses);
+      let finalData = [];
+      _.forEach(responses, function (response) {
+        finalData = _.compact(
+          _.concat(finalData, _.get(response, `data`) || [])
+        );
+      });
+      console.log(finalData);
+      this.excelData = finalData;
+      return finalData;
     },
   },
 };
@@ -230,7 +299,7 @@ export default {
               <v-card-subtitle v-show="tenantFilterGroup.picObj">
                 Person In Charge :
                 <v-chip class="mx-2">{{
-                  _.get(tenantFilterGroup, ["picObj", "name"]) || 'N/A'
+                  _.get(tenantFilterGroup, ["picObj", "name"]) || "N/A"
                 }}</v-chip>
               </v-card-subtitle>
             </v-card>
@@ -248,12 +317,24 @@ export default {
                 disable-sort
               >
                 <template v-slot:top>
-                  <v-toolbar flat class="mb-5">
+                  <v-toolbar flat>
                     <tenant-filter-dialog
                       :buttonStyle="tenantFilterDialogConfig.buttonStyle"
                       :dialogStyle="tenantFilterDialogConfig.dialogStyle"
                       @submitFilter="initTenantFilter($event)"
                     ></tenant-filter-dialog>
+                  </v-toolbar>
+                  <v-toolbar flat class="mb-5 justify-end d-flex" v-if="_.isArray(excelData) && !_.isEmpty(excelData)">
+                    <download-excel
+                      :header="`All_Tenant_${moment().format('YYYY_MM_DD')}`"
+                      :name="`All_Tenant_${moment().format('YYYY_MM_DD')}.csv`"
+                      :fields="excelFields"
+                      type="csv"
+                      :data="excelData || []"
+                      ><v-btn text color="primary"
+                        >Download as Excel</v-btn
+                      ></download-excel
+                    >
                   </v-toolbar>
                 </template>
                 <template v-slot:item="props">

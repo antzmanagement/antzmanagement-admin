@@ -1,11 +1,13 @@
 
 <script>
 import { mapActions } from "vuex";
-import { _ } from '../../../common/common-function';
+import { _ } from "../../../common/common-function";
+import moment from "moment";
 export default {
   data() {
     return {
-      _ : _,
+      moment: moment,
+      _: _,
       totalDataLength: 0,
       data: [],
       loading: true,
@@ -61,6 +63,41 @@ export default {
         { text: "Claimed By" },
         { text: "Created At" },
       ],
+      excelData: [],
+      excelFields: {
+        id: "id",
+        uid: "uid",
+        room: {
+          field: "room",
+          callback: (value) => {
+            return _.get(value, `name`) || "N/A";
+          },
+        },
+        room_id: {
+          field: "room",
+          callback: (value) => {
+            return _.get(value, `id`) || "N/A";
+          },
+        },
+        property: {
+          field: "property",
+          callback: (value) => {
+            return _.get(value, `name`) || "N/A";
+          },
+        },
+        property_id: {
+          field: "property",
+          callback: (value) => {
+            return _.get(value, `id`) || "N/A";
+          },
+        },
+        price: "price",
+        maintenance_type: "maintenance_type",
+        maintenance_status: "maintenance_status",
+        remark: "remark",
+        created_at: "created_at",
+        updated_at: "updated_at",
+      },
     };
   },
   watch: {
@@ -69,6 +106,12 @@ export default {
         this.getMaintenances();
       },
       deep: true,
+    },
+    totalDataLength(v) {
+      console.log(v);
+      if (v > 0) {
+        this.fetchExcelData();
+      }
     },
   },
   computed: {
@@ -120,10 +163,12 @@ export default {
         this.maintenanceFilterGroup.todate = filterGroup.todate;
       }
       if (filterGroup.maintenance_status) {
-        this.maintenanceFilterGroup.maintenance_status = filterGroup.maintenance_status;
+        this.maintenanceFilterGroup.maintenance_status =
+          filterGroup.maintenance_status;
       }
       if (filterGroup.maintenance_type) {
-        this.maintenanceFilterGroup.maintenance_type = filterGroup.maintenance_type;
+        this.maintenanceFilterGroup.maintenance_type =
+          filterGroup.maintenance_type;
       }
       console.log(this.maintenanceFilterGroup);
       this.options.page = 1;
@@ -163,6 +208,34 @@ export default {
             title: "Something went wrong... ",
           });
         });
+    },
+    async fetchExcelData() {
+      let total = this.totalDataLength || 0;
+      let size = 50;
+      let maxPage = Math.ceil(total / size);
+      let promises = [];
+      let self = this;
+      _.forEach(_.range(maxPage), function (index) {
+        console.log(index);
+        promises.push(
+          self.filterMaintenancesAction({
+            pageSize: size,
+            pageNumber: index + 1,
+          })
+        );
+      });
+
+      let responses = await Promise.all(promises);
+      console.log(responses);
+      let finalData = [];
+      _.forEach(responses, function (response) {
+        finalData = _.compact(
+          _.concat(finalData, _.get(response, `data`) || [])
+        );
+      });
+      console.log(finalData);
+      this.excelData = finalData;
+      return finalData;
     },
   },
 };
@@ -223,7 +296,9 @@ export default {
                   _.get(maintenanceFilterGroup, ["maintenance_type"]) || "N/A"
                 }}</v-chip>
               </v-card-subtitle>
-              <v-card-subtitle v-show="maintenanceFilterGroup.maintenance_status">
+              <v-card-subtitle
+                v-show="maintenanceFilterGroup.maintenance_status"
+              >
                 Maintenance Status :
                 <v-chip class="mx-2">{{
                   _.get(maintenanceFilterGroup, ["maintenance_status"]) || "N/A"
@@ -244,24 +319,44 @@ export default {
                 disable-sort
               >
                 <template v-slot:top>
-                  <v-toolbar flat class="mb-5">
+                  <v-toolbar flat>
                     <maintenance-filter-dialog
                       :buttonStyle="maintenanceFilterDialogConfig.buttonStyle"
                       :dialogStyle="maintenanceFilterDialogConfig.dialogStyle"
                       @submitFilter="initMaintenanceFilter($event)"
                     ></maintenance-filter-dialog>
                   </v-toolbar>
+                    <v-toolbar
+                      flat
+                      class="mb-5 justify-end d-flex"
+                      v-if="_.isArray(excelData) && !_.isEmpty(excelData)"
+                    >
+                      <download-excel
+                        :header="`All_Maintenance_${moment().format(
+                          'YYYY_MM_DD'
+                        )}`"
+                        :name="`All_Maintenance_${moment().format(
+                          'YYYY_MM_DD'
+                        )}.csv`"
+                        type="csv"
+                        :data="excelData || []"
+                        :fields="excelFields || {}"
+                        ><v-btn text color="primary"
+                          >Download as Excel</v-btn
+                        ></download-excel
+                      >
+                    </v-toolbar>
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showMaintenance(props.item)">
-                    <td>{{props.item.id}}</td>
-                    <td>{{props.item.room.name}}</td>
-                    <td>{{props.item.property.name}}</td>
-                    <td>{{props.item.maintenance_type}}</td>
-                    <td>{{props.item.maintenance_status}}</td>
-                    <td>{{props.item.price}}</td>
-                    <td>{{_.get(props.item, ['owner', 'name']) || 'N/A'}}</td>
-                    <td>{{props.item.created_at | formatDate}}</td>
+                    <td>{{ props.item.id }}</td>
+                    <td>{{ props.item.room.name }}</td>
+                    <td>{{ props.item.property.name }}</td>
+                    <td>{{ props.item.maintenance_type }}</td>
+                    <td>{{ props.item.maintenance_status }}</td>
+                    <td>{{ props.item.price }}</td>
+                    <td>{{ _.get(props.item, ["owner", "name"]) || "N/A" }}</td>
+                    <td>{{ props.item.created_at | formatDate }}</td>
                   </tr>
                 </template>
               </v-data-table>

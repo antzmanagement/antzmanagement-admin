@@ -17,7 +17,9 @@ trait OwnerServices
         $data = collect();
         //Role Based Retrieve Done in Store
         $userType = $this->getUserTypeById($this->ownerType);
-        $data = $data->merge($userType->users()->where('users.status', true)->get());
+        $data = $data->merge($userType->users()->where('users.status', true)->with(['ownrooms' => function ($q) {
+            // Query the name field in status table
+        }])->get());
 
         $data = $data->unique('id')->sortByDesc('id')->flatten(1);
 

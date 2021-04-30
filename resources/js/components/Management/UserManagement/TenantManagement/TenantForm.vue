@@ -208,10 +208,10 @@ export default {
         return errors;
       }
 
-      if (!this.helpers.isIcFormat(this.$v.data.icno.$model)) {
-        errors.push("IC must be in format XXXXXX-XX-XXXX");
-        return errors;
-      }
+      // if (!this.helpers.isIcFormat(this.$v.data.icno.$model)) {
+      //   errors.push("IC must be in format XXXXXX-XX-XXXX");
+      //   return errors;
+      // }
     },
     tel1Errors() {
       const errors = [];
@@ -219,13 +219,13 @@ export default {
         return errors;
       }
 
-      if (
-        !this.helpers.isPhoneFormat(this.$v.data.tel1.$model) &&
-        this.$v.data.tel1.$model
-      ) {
-        errors.push("Phone must be in format 012-XXXXXXX");
-        return errors;
-      }
+      // if (
+      //   !this.helpers.isPhoneFormat(this.$v.data.tel1.$model) &&
+      //   this.$v.data.tel1.$model
+      // ) {
+      //   errors.push("Phone must be in format 012-XXXXXXX");
+      //   return errors;
+      // }
     },
     tel2Errors() {
       const errors = [];
@@ -233,13 +233,13 @@ export default {
         return errors;
       }
 
-      if (
-        !this.helpers.isPhoneFormat(this.$v.data.tel2.$model) &&
-        this.$v.data.tel2.$model
-      ) {
-        errors.push("Phone must be in format 012-XXXXXXX");
-        return errors;
-      }
+      // if (
+      //   !this.helpers.isPhoneFormat(this.$v.data.tel2.$model) &&
+      //   this.$v.data.tel2.$model
+      // ) {
+      //   errors.push("Phone must be in format 012-XXXXXXX");
+      //   return errors;
+      // }
     },
     tel3Errors() {
       const errors = [];
@@ -247,13 +247,13 @@ export default {
         return errors;
       }
 
-      if (
-        !this.helpers.isPhoneFormat(this.$v.data.tel3.$model) &&
-        this.$v.data.tel3.$model
-      ) {
-        errors.push("Phone must be in format 012-XXXXXXX");
-        return errors;
-      }
+      // if (
+      //   !this.helpers.isPhoneFormat(this.$v.data.tel3.$model) &&
+      //   this.$v.data.tel3.$model
+      // ) {
+      //   errors.push("Phone must be in format 012-XXXXXXX");
+      //   return errors;
+      // }
     },
     emailErrors() {
       const errors = [];
@@ -424,14 +424,14 @@ export default {
           return false;
         }
       }
-      if (
-        (this.data.tel1  && !this.helpers.isPhoneFormat(this.data.tel1)) ||
-        !this.helpers.isIcFormat(this.data.icno)
-      ) {
-        console.log('tel', (this.data.tel1 && !this.helpers.isPhoneFormat(this.data.tel1)));
-        console.log('ic', !this.helpers.isIcFormat(this.data.icno));
-        return false;
-      }
+      // if (
+      //   (this.data.tel1  && !this.helpers.isPhoneFormat(this.data.tel1)) ||
+      //   !this.helpers.isIcFormat(this.data.icno)
+      // ) {
+      //   console.log('tel', (this.data.tel1 && !this.helpers.isPhoneFormat(this.data.tel1)));
+      //   console.log('ic', !this.helpers.isIcFormat(this.data.icno));
+      //   return false;
+      // }
 
       return true;
     },
@@ -670,7 +670,6 @@ export default {
             <v-col cols="12" md="6">
               <v-text-field
                 label="IC-No*"
-                hint="Example of IC-No : 1234-56-7890 (With Dash)"
                 persistent-hint
                 required
                 :maxlength="14"
@@ -721,7 +720,6 @@ export default {
             <v-col cols="12" md="6">
               <v-text-field
                 label="Phone No 1"
-                hint="Example of Phone No : 014-12019231 (With Dash)"
                 persistent-hint
                 v-model="data.tel1"
                 :maxlength="20"
@@ -733,7 +731,6 @@ export default {
             <v-col cols="12" md="6">
               <v-text-field
                 label="Phone No 2"
-                hint="Example of Phone No : 014-12019231 (With Dash)"
                 persistent-hint
                 v-model="data.tel2"
                 :maxlength="20"
@@ -745,7 +742,6 @@ export default {
             <v-col cols="12" md="6">
               <v-text-field
                 label="Phone No 3"
-                hint="Example of Phone No : 014-12019231 (With Dash)"
                 persistent-hint
                 v-model="data.tel3"
                 :maxlength="20"
@@ -757,7 +753,6 @@ export default {
             <v-col cols="6">
               <v-text-field
                 label="Email"
-                hint="Email that used to login the website"
                 persistent-hint
                 required
                 :maxlength="255"

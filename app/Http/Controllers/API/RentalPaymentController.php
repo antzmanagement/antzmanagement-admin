@@ -241,7 +241,7 @@ class RentalPaymentController extends Controller
             'penalty' => $this->toDouble($request->penalty),
             'processing_fees' => $this->toDouble($request->processing_fees),
             'service_fees' => $this->toDouble($request->service_fees),
-            'paymentdate' => Carbon::now()->format('Y-m-d'),
+            'paymentdate' => $request->paymentdate,
             'rentaldate' => $rentalPayment->rentaldate,
             'remark' => $rentalPayment->remark,
             'sequence' => $max,

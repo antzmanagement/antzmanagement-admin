@@ -10,6 +10,7 @@ import {
   email,
 } from "vuelidate/lib/validators";
 import { mapActions } from "vuex";
+import { _ } from '../../../../common/common-function';
 export default {
   props: {
     editMode: {
@@ -54,6 +55,7 @@ export default {
         "Public Bank",
         "RHB Bank",
         "Standard Chartered",
+        "Other",
       ],
       data: new Form({
         name: "",
@@ -73,6 +75,8 @@ export default {
         city: "",
         bankaccount: "",
         banktype: "",
+        bankaccountname: "",
+        otherbanktype: "",
         referenceno: "",
       }),
       roomFilterGroup: new Form({
@@ -85,6 +89,20 @@ export default {
           class: "ma-1",
           text: "",
           icon: "mdi-magnify",
+          isIcon: true,
+        },
+        dialogStyle: {
+          persistent: true,
+          maxWidth: "1200px",
+          fullscreen: false,
+          hideOverlay: true,
+        },
+      },
+      roomFormDialogConfig: {
+        buttonStyle: {
+          class: "ma-1",
+          text: "Add Room",
+          icon: "mdi-plus",
           isIcon: true,
         },
         dialogStyle: {
@@ -154,10 +172,10 @@ export default {
         return errors;
       }
 
-      if (!this.helpers.isIcFormat(this.$v.data.icno.$model)) {
-        errors.push("IC must be in format XXXXXX-XX-XXXX");
-        return errors;
-      }
+      // if (!this.helpers.isIcFormat(this.$v.data.icno.$model)) {
+      //   errors.push("IC must be in format XXXXXX-XX-XXXX");
+      //   return errors;
+      // }
     },
     tel1Errors() {
       const errors = [];
@@ -165,13 +183,13 @@ export default {
         return errors;
       }
 
-      if (
-        !this.helpers.isPhoneFormat(this.$v.data.tel1.$model) &&
-        this.$v.data.tel1.$model
-      ) {
-        errors.push("Phone must be in format 012-XXXXXXX");
-        return errors;
-      }
+      // if (
+      //   !this.helpers.isPhoneFormat(this.$v.data.tel1.$model) &&
+      //   this.$v.data.tel1.$model
+      // ) {
+      //   errors.push("Phone must be in format 012-XXXXXXX");
+      //   return errors;
+      // }
     },
     tel2Errors() {
       const errors = [];
@@ -179,13 +197,13 @@ export default {
         return errors;
       }
 
-      if (
-        !this.helpers.isPhoneFormat(this.$v.data.tel2.$model) &&
-        this.$v.data.tel2.$model
-      ) {
-        errors.push("Phone must be in format 012-XXXXXXX");
-        return errors;
-      }
+      // if (
+      //   !this.helpers.isPhoneFormat(this.$v.data.tel2.$model) &&
+      //   this.$v.data.tel2.$model
+      // ) {
+      //   errors.push("Phone must be in format 012-XXXXXXX");
+      //   return errors;
+      // }
     },
     tel3Errors() {
       const errors = [];
@@ -193,13 +211,13 @@ export default {
         return errors;
       }
 
-      if (
-        !this.helpers.isPhoneFormat(this.$v.data.tel3.$model) &&
-        this.$v.data.tel3.$model
-      ) {
-        errors.push("Phone must be in format 012-XXXXXXX");
-        return errors;
-      }
+      // if (
+      //   !this.helpers.isPhoneFormat(this.$v.data.tel3.$model) &&
+      //   this.$v.data.tel3.$model
+      // ) {
+      //   errors.push("Phone must be in format 012-XXXXXXX");
+      //   return errors;
+      // }
     },
     emailErrors() {
       const errors = [];
@@ -313,15 +331,16 @@ export default {
       return (
         (!this.data.tel1 || this.helpers.isPhoneFormat(this.data.tel1)) &&
         (!this.data.tel2 || this.helpers.isPhoneFormat(this.data.tel2)) &&
-        (!this.data.tel3 || this.helpers.isPhoneFormat(this.data.tel3)) &&
-        this.helpers.isIcFormat(this.data.icno)
+        (!this.data.tel3 || this.helpers.isPhoneFormat(this.data.tel3)) 
+        // && this.helpers.isIcFormat(this.data.icno)
       );
     },
 
     createOwner() {
       this.$v.$touch(); //it will validate all fields
 
-      if (this.$v.$invalid || !this.customValidate()) {
+      // if (this.$v.$invalid || !this.customValidate()) {
+      if (this.$v.$invalid) {
         Toast.fire({
           icon: "warning",
           title: "Please make sure all the data is valid. ",
@@ -354,7 +373,7 @@ export default {
     updateOwner() {
       this.$v.$touch(); //it will validate all fields
 
-      if (this.$v.$invalid || !this.customValidate()) {
+      if (this.$v.$invalid) {
         Toast.fire({
           icon: "warning",
           title: "Please make sure all the data is valid. ",
@@ -434,6 +453,14 @@ export default {
           this.endLoadingAction();
         });
     },
+    appendRoomList(data){
+      
+      if(_.isPlainObject(data) && !_.isEmpty(data)){
+        console.log(data);
+        this.rooms = _.compact(_.concat(this.rooms || [], [data]));
+        this.data.rooms = data;
+      }
+    }
   },
 };
 </script>
@@ -480,13 +507,13 @@ export default {
       <v-card-text>
         <v-container>
           <v-row>
-            <v-col cols="12" md="12">
+            <!-- <v-col cols="12" md="12">
               <v-text-field
                 label="Reference No"
                 v-model="data.referenceno"
                 :maxlength="300"
               ></v-text-field>
-            </v-col>
+            </v-col> -->
             <v-col cols="12" md="6">
               <v-text-field
                 label="Name*"
@@ -501,7 +528,6 @@ export default {
             <v-col cols="12" md="6">
               <v-text-field
                 label="IC-No*"
-                hint="Example of IC-No : 1234-56-7890 (With Dash)"
                 persistent-hint
                 required
                 :maxlength="14"
@@ -518,6 +544,18 @@ export default {
                 label="Bank"
               ></v-select>
             </v-col>
+            <v-col cols="12" md="6" v-if="data.banktype == 'Other'">
+              <v-text-field
+                label="Other Bank Type"
+                v-model="data.otherbanktype"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="Bank Account Name"
+                v-model="data.bankaccountname"
+              ></v-text-field>
+            </v-col>
             <v-col cols="12" md="6">
               <v-text-field
                 label="Bank Account"
@@ -527,7 +565,6 @@ export default {
             <v-col cols="12" md="6">
               <v-text-field
                 label="Phone No 1"
-                hint="Example of Phone No : 014-12019231 (With Dash)"
                 persistent-hint
                 v-model="data.tel1"
                 :maxlength="20"
@@ -539,7 +576,6 @@ export default {
             <v-col cols="12" md="6">
               <v-text-field
                 label="Phone No 2"
-                hint="Example of Phone No : 014-12019231 (With Dash)"
                 persistent-hint
                 v-model="data.tel2"
                 :maxlength="20"
@@ -551,7 +587,6 @@ export default {
             <v-col cols="12" md="6">
               <v-text-field
                 label="Phone No 3"
-                hint="Example of Phone No : 014-12019231 (With Dash)"
                 persistent-hint
                 v-model="data.tel3"
                 :maxlength="20"
@@ -561,11 +596,8 @@ export default {
               ></v-text-field>
             </v-col>
             <v-col cols="6">
-            </v-col>
-            <v-col cols="6">
               <v-text-field
-                label="Email*"
-                hint="Email that used to login the website"
+                label="Email"
                 persistent-hint
                 :maxlength="255"
                 v-model="data.email"
@@ -648,6 +680,14 @@ export default {
                 label="Owner Room"
                 multiple
               >
+                <template v-slot:append>
+                  <room-form
+                    :editMode="false"
+                    :dialogStyle="roomFormDialogConfig.dialogStyle"
+                    :buttonStyle="roomFormDialogConfig.buttonStyle"
+                    @created="appendRoomList($event)"
+                  ></room-form>
+                </template>
                 <template v-slot:append-outer>
                   <room-filter-dialog
                     :buttonStyle="roomFilterDialogConfig.buttonStyle"

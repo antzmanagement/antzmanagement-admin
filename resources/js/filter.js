@@ -45,6 +45,6 @@ Vue.filter("getArrayValues", function (data) {
 });
 Vue.filter("toDouble", function (value) {
 
-	return helpers.toDouble(value);
+	return helpers.toDouble(value).toFixed(2);
 
 }); 

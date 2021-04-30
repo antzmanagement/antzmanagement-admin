@@ -1,9 +1,13 @@
 
 <script>
 import { mapActions } from "vuex";
+import { _ } from "../../../common/common-function";
+import moment from "moment";
 export default {
   data() {
     return {
+      moment: moment,
+      _: _,
       totalDataLength: 0,
       data: [],
       loading: true,
@@ -45,16 +49,10 @@ export default {
       },
       headers: [
         {
-          text: "Sequence No",
-        },
-        {
-          text: "Contract Type",
-        },
-        {
           text: "Room",
         },
         {
-          text: "Owner",
+          text: "Sequence No",
         },
         {
           text: "Tenant",
@@ -63,13 +61,13 @@ export default {
           text: "Start date",
         },
         {
+          text: "End date",
+        },
+        {
           text: "Deposit",
         },
         {
-          text: "Outstanding Deposit",
-        },
-        {
-          text: "Rental",
+          text: "Rental (RM)",
         },
         {
           text: "Duration",
@@ -78,12 +76,69 @@ export default {
           text: "Services",
         },
         {
-          text: "Checked out",
-        },
-        {
           text: "Check Out Date",
         },
       ],
+      excelData: [],
+      excelFields: {
+        id: "id",
+        sequence: "sequence",
+        room: {
+          field : 'room',
+          callback : (value) => {
+            return _.get(value , `name`) || 'N/A';
+          }
+        },
+        room_id: {
+          field : 'room',
+          callback : (value) => {
+            return _.get(value , `id`) || 'N/A';
+          }
+        },
+        contract: {
+          field : 'contract',
+          callback : (value) => {
+            return _.get(value , `name`) || 'N/A';
+          }
+        },
+        contract_id: {
+          field : 'contract',
+          callback : (value) => {
+            return _.get(value , `id`) || 'N/A';
+          }
+        },
+        tenant: {
+          field : 'tenant',
+          callback : (value) => {
+            return _.get(value , `name`) || 'N/A';
+          }
+        },
+        tenant_id: {
+          field : 'tenant',
+          callback : (value) => {
+            return _.get(value , `id`) || 'N/A';
+          }
+        },
+        startdate: "startdate",
+        enddate: "enddate",
+        "duration(months)": "duration",
+        "left(months)": "left",
+        rental: "rental",
+        booking_fees: "booking_fees",
+        deposit: "deposit",
+        agreement_fees: "agreement_fees",
+        outstanding_deposit: "outstanding_deposit",
+        checkedout: {
+          field : 'sublet',
+          callback : (value) => value ? 'Yes' : 'No',
+        },
+        checkout_date: "checkout_date",
+        checkout_charges: "checkout_charges",
+        checkout_remark: "checkout_remark",
+        remark : 'remark',
+        created_at: "created_at",
+        updated_at: "updated_at",
+      },
     };
   },
   watch: {
@@ -92,6 +147,12 @@ export default {
         this.getRoomContracts();
       },
       deep: true,
+    },
+    totalDataLength(v){
+      console.log(v);
+      if(v > 0){
+      this.fetchExcelData();
+      }
     },
   },
   computed: {
@@ -195,6 +256,34 @@ export default {
             title: "Something went wrong... ",
           });
         });
+    },
+    async fetchExcelData() {
+      let total = this.totalDataLength || 0;
+      let size = 50;
+      let maxPage = Math.ceil(total / size);
+      let promises = [];
+      let self = this;
+      _.forEach(_.range(maxPage), function (index) {
+        console.log(index);
+        promises.push(
+          self.filterRoomContractsAction({
+            pageSize: size,
+            pageNumber: index + 1,
+          })
+        );
+      });
+
+      let responses = await Promise.all(promises);
+      console.log(responses);
+      let finalData = [];
+      _.forEach(responses, function (response) {
+        finalData = _.compact(
+          _.concat(finalData, _.get(response, `data`) || [])
+        );
+      });
+      console.log(finalData);
+      this.excelData = finalData;
+      return finalData;
     },
   },
 };
@@ -307,22 +396,31 @@ export default {
                       @submitFilter="initRoomContractFilter($event)"
                     ></room-contract-filter-dialog>
                   </v-toolbar>
+                  <v-toolbar
+                    flat
+                    class="mb-5 justify-end d-flex"
+                    v-if="_.isArray(excelData) && !_.isEmpty(excelData)"
+                  >
+                    <download-excel
+                      :header="`All_RoomContract_${moment().format('YYYY_MM_DD')}`"
+                      :name="`All_RoomContract_${moment().format('YYYY_MM_DD')}.csv`"
+                      type="csv"
+                      :fields="excelFields || {}"
+                      :data="excelData || []"
+                      ><v-btn text color="primary"
+                        >Download as Excel</v-btn
+                      ></download-excel
+                    >
+                  </v-toolbar>
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showRoomContract(props.item)">
-                    <td>{{ props.item.sequence }}</td>
-                    <td>{{ props.item.contract.name }}</td>
                     <td>{{ props.item.room.name }}</td>
-                    <td>
-                      {{
-                        _.get(props.item, ["room", "owners", 0, "name"]) ||
-                        "N/A"
-                      }}
-                    </td>
+                    <td>{{ props.item.sequence }}</td>
                     <td>{{ props.item.tenant.name }}</td>
                     <td>{{ props.item.startdate }}</td>
+                    <td>{{ props.item.enddate }}</td>
                     <td>RM {{ props.item.deposit | toDouble }}</td>
-                    <td>RM {{ props.item.outstanding_deposit | toDouble }}</td>
                     <td>RM {{ props.item.rental | toDouble }}</td>
                     <td>
                       {{ props.item.duration }}
@@ -342,12 +440,6 @@ export default {
                           )
                         ) | getArrayValues
                       }}
-                    </td>
-                    <td class="text-center" v-if="props.item.checkedout">
-                      <v-icon small color="success">mdi-check</v-icon>
-                    </td>
-                    <td class="text-center" v-else>
-                      <v-icon small color="danger">mdi-close</v-icon>
                     </td>
                     <td>
                       {{ props.item.checkout_date | formatDate }}

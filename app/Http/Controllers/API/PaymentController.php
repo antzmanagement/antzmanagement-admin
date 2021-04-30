@@ -267,4 +267,73 @@ class PaymentController extends Controller
         DB::commit();
         return $this->successResponse('Payment', $payment, 'update');
     }
+
+
+    public function payDeposit(Request $request)
+    {
+        DB::beginTransaction();
+        // Can only be used by Authorized personnel
+        // api/payment (POST)
+        $this->validate($request, [
+            'room_contract_id' => 'required',
+            'price' => 'required|numeric',
+            'other_charges' => 'nullable|numeric',
+        ]);
+        error_log($this->controllerName . 'Creating payment.');
+
+        $max = Payment::where('status', true)->max('sequence') + 1;
+        $params = collect([
+            'room_contract_id' => $request->room_contract_id,
+            'price' => $request->price,
+            'other_charges' => $request->other_charges,
+            'remark' => $request->remark,
+            'sequence' => $max,
+            'paymentdate' => $request->paymentdate,
+            'referenceno' => $request->referenceno,
+        ]);
+        error_log(collect($request->otherpayments));
+        //Convert To Json Object
+        $params = json_decode(json_encode($params));
+        $payment = $this->createPayment($params);
+        if ($this->isEmpty($payment)) {
+            DB::rollBack();
+            return $this->errorResponse();
+        }
+        
+        $data = $this->getOtherPaymentTitleByName('Deposit');
+        if (!$this->isEmpty($data)) {
+            $data->price = $this->toDouble($request->price);
+            $payment->otherpayments->push($data);
+            $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
+        }else{
+            $params = collect([
+                'name' => 'Deposit',
+            ]);
+            //Convert To Json Object
+            $params = json_decode(json_encode($params));
+            $data = $this->createOtherPaymentTitle($params);
+            if (!$this->isEmpty($data)) {
+                $data->price = $this->toDouble($request->price);
+                $payment->otherpayments->push($data);
+                $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
+            }
+        }
+        
+        $roomcontract = $this->getRoomContractById($request->room_contract_id);
+        if ($this->isEmpty($roomcontract)) {
+            DB::rollBack();
+            return $this->errorResponse();
+        }
+
+        $roomcontract = $this->payRoomContractDeposit($roomcontract, $request->price);
+
+        if ($this->isEmpty($roomcontract)) {
+            DB::rollBack();
+            return $this->errorResponse();
+        }
+
+        DB::commit();
+        return $this->successResponse('Payment', $payment, 'create');
+    }
+
 }

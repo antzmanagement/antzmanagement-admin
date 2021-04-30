@@ -70,6 +70,7 @@ Route::group(['middleware' => ['auth:api']], function (){
     Route::resource('payment', 'API\PaymentController');
     Route::get('/filter/payment', 'API\PaymentController@filter');
     Route::post('/payment/{uid}/makepayment', 'API\PaymentController@makePayment');
+    Route::post('/paydeposit', 'API\PaymentController@payDeposit');
 
     Route::resource('claim', 'API\ClaimController');
     Route::get('/filter/claim', 'API\ClaimController@filter');

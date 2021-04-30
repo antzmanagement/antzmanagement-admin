@@ -22,7 +22,24 @@ export function isNumberAndSpace(value) {
         return false;
     }
 }
+export function getArrayValues(data) {
 
+    if (_.isArray(data) && !_.isEmpty(data)) {
+        let str = '';
+        _.forEach(data, function (item, index) {
+            if (!_.isObject(item)) {
+                if (index + 1 == data.length) {
+                    str += `${item}`;
+                } else {
+                    str += `${item}, `;
+                }
+            }
+        })
+        return str;
+    } else {
+        return 'N/A';
+    }
+}
 
 export function formatDate(value, format) {
 

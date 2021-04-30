@@ -2,6 +2,7 @@
 //Common used Component
 Vue.component('example-component', require('./components/ExampleComponent.vue').default);
 Vue.component('loading', require('./components/Loading.vue').default);
+Vue.component('export-excel-button', require('./components/ExportExcelButton.vue').default);
 
 Vue.component('navbar', require('./components/NavBar.vue').default);
 Vue.component('home-navbar', require('./components/HomeNavBar.vue').default);
@@ -58,5 +59,6 @@ Vue.component('room-type-form', require('./components/Management/RoomTypeManagem
 Vue.component('room-type-filter-dialog', require('./components/Management/RoomTypeManagement/RoomTypeForm.vue').default);
 
 Vue.component('payment-form', require('./components/Management/PaymentManagement/PaymentForm.vue').default);
+Vue.component('deposit-payment-form', require('./components/Management/PaymentManagement/DepositPaymentForm.vue').default);
 Vue.component('payment-filter-dialog', require('./components/Management/PaymentManagement/PaymentFilterDialog.vue').default);
 Vue.component('print-payment-button', require('./components/Management/PaymentManagement/PrintPaymentButton.vue').default);

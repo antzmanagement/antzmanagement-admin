@@ -54,7 +54,9 @@ trait RoomContractServices
             $q->where('status', true);
         }])->get();
 
-        $data = $data->unique('id')->sortByDesc('sequence')->flatten(1);
+        $data = $data->unique('id')->sortBy(function ($item, $key) {
+            return $item->room->unit;
+        })->flatten(1);
 
         return $data;
     }
@@ -162,7 +164,9 @@ trait RoomContractServices
 
 
 
-        $data = $data->unique('id')->sortByDesc('sequence')->flatten(1);;
+        $data = $data->unique('id')->sortBy(function ($item, $key) {
+            return $item->room->unit;
+        })->flatten(1);
 
         return $data;
     }
@@ -403,6 +407,19 @@ trait RoomContractServices
 
 
         $this->syncRoomStatus($data->room);
+        return $data->refresh();
+    }
+
+    private function payRoomContractDeposit($data, $price)
+    {
+        $price = $this->toDouble($price);
+        if($data->outstanding_deposit >= $price && $data->outstanding_deposit > 0){
+
+            $data->outstanding_deposit -= $price;
+        }
+        if (!$this->saveModel($data)) {
+            return null;
+        }
         return $data->refresh();
     }
 

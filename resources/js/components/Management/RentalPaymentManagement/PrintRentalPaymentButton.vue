@@ -16,6 +16,9 @@ const styles = `.invoice-box {
     color: #555;
 }
 
+.subtitle td{
+    font-size: 15px;
+}
 .invoice-box table {
     width: 100%;
     line-height: inherit;
@@ -177,12 +180,22 @@ export default {
                     src="https://res.cloudinary.com/dwslzbgaa/image/upload/v1612187469/90207330_3196874863870897_574629034651025408_n_h5scz9.jpg"
                     style="width: 100px; height: 100px"
                   />
+                </td> 
+                <td>
+                  47G Jalan Kampar Barat 1,<br />
+                  Taman Kampar Barat 1,<br />
+                  31900 Kampar, Perak, Malaysia
                 </td>
 
                 <td>
-                  Invoice No #: {{ _.get(data, ["sequence"]) || "N/A" }}<br />
-                  Reference No #: {{ _.get(data, ["uid"]) || "N/A" }}<br />
-                  Room Unit No #: {{ _.get(roomcontract, ['room', 'unit']) || "N/A" }}<br />
+                  010-289 8012<br />
+                  antz.customerservice@gmail.com<br />
+                </td>
+
+                <td>
+                  Receipt No #: {{ _.get(data, ["sequence"]) || "N/A" }}<br />
+                  Payment Method #: {{ _.get(data, ["payment_method"]) || "N/A" }}<br />
+                  Reference No #: {{ _.get(data, ["referenceno"]) || "N/A" }}<br />
                   Created Date:
                   {{ _.get(data, ["paymentdate"]) || "N/A" | formatDate }}<br />
                 </td>
@@ -196,14 +209,8 @@ export default {
             <table>
               <tr>
                 <td>
-                  47G Jalan Kampar Barat 1,<br />
-                  Taman Kampar Barat 1,<br />
-                  31900 Kampar, Perak, Malaysia
-                </td>
-
-                <td>
-                  010-289 8012<br />
-                  antz.customerservice@gmail.com<br />
+                  Receive From #: {{ _.get(data, ["receive_from"]) || "N/A" }}<br />
+                  Room Unit No #: {{ _.get(roomcontract, ['room', 'unit']) || "N/A" }}<br />
                 </td>
               </tr>
             </table>
@@ -215,25 +222,37 @@ export default {
           <td>Price</td>
         </tr>
 
-        <tr class="item">
-          <td>
+        <tr class="item subtitle">
+          <td >
             Rental {{ _.get(data, ["rentaldate"]) || "N/A" | formatDate }}
           </td>
           <td>RM {{ _.get(data, ["price"]) || "N/A" | toDouble }}</td>
         </tr>
-        <tr class="item">
+        <tr class="item subtitle">
           <td>Penalty</td>
           <td>RM {{ _.get(data, ["penalty"]) || "N/A" | toDouble }}</td>
         </tr>
-        <tr class="item">
+        <tr class="item subtitle">
           <td>Processing Fees</td>
           <td>RM {{ _.get(data, ["processing_fees"]) || "N/A" | toDouble }}</td>
         </tr>
 
-        <tr class="total">
+        <tr class="total subtitle">
           <td></td>
 
           <td>Total: RM {{ totalPayment || "N/A" | toDouble }}</td>
+        </tr>
+        
+        <tr class="information">
+          <td colspan="2">
+            <table>
+              <tr>
+                <td>
+                  Issue By #: {{ _.get(data, ["issue_by"]) || "N/A" }}<br />
+                </td>
+              </tr>
+            </table>
+          </td>
         </tr>
       </table>
     </div>

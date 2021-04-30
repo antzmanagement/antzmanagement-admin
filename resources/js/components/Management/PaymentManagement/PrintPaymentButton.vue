@@ -172,8 +172,8 @@ export default {
                 </td>
 
                 <td>
-                  Invoice #: {{ _.get(data, ["sequence"]) || "N/A" }}<br />
-                  Reference No #: {{ _.get(data, ["uid"]) || "N/A" }}<br />
+                  Official Receipt No #: {{ _.get(data, ["sequence"]) || "N/A" }}<br />
+                  Reference No #: {{ _.get(data, ["referenceno"]) || "N/A" }}<br />
                   Room Unit No #: {{ _.get(roomcontract, ['room', 'unit']) || "N/A" }}<br />
                   Created Date:
                   {{ _.get(data, ["paymentdate"]) || "N/A" | formatDate }}<br />

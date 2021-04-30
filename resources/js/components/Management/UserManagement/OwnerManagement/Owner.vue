@@ -116,14 +116,14 @@ export default {
           ></v-divider>
           <v-container>
             <v-row justify="start" align="center" class="pa-2">
-              <v-col cols="12" md="4">
+              <!-- <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Reference No</label>
                   <div class="form-control-plaintext">
                     <h4>{{ data.referenceno }}</h4>
                   </div>
                 </div>
-              </v-col>
+              </v-col> -->
               <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Name</label>
@@ -141,6 +141,8 @@ export default {
                 </div>
               </v-col>
               <v-col cols="12" md="4">
+              </v-col>
+              <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Bank</label>
                   <div class="form-control-plaintext">
@@ -150,9 +152,25 @@ export default {
               </v-col>
               <v-col cols="12" md="4">
                 <div class="form-group mb-0">
+                  <label class="form-label mb-0">Other Bank</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.otherbanktype }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
                   <label class="form-label mb-0">Bank Account</label>
                   <div class="form-control-plaintext">
                     <h4>{{ data.bankaccount }}</h4>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="12" md="4">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Bank Account Name</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.bankaccountname }}</h4>
                   </div>
                 </div>
               </v-col>

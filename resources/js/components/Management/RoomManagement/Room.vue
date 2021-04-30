@@ -298,7 +298,7 @@ export default {
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Area Size</label>
                   <div class="form-control-plaintext">
-                    <h4>RM {{ data.size }}</h4>
+                    <h4>{{ data.size }}</h4>
                   </div>
                 </div>
               </v-col>

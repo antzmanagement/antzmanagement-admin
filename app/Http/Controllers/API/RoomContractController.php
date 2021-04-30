@@ -118,7 +118,7 @@ class RoomContractController extends Controller
             'contract_id' => $contract->id,
             'orig_service_ids' => $origServiceIds,
             'add_on_service_ids' => $addOnServicesIds,
-            'name' => $room->unit . '_' . $startdate. '_' . $contract->name,
+            'name' => $startdate. ' - ' . $enddate,
             'duration' => $duration,
             'penalty' => $contract->penalty,
             'penalty_day' => $contract->penalty_day,
@@ -188,6 +188,7 @@ class RoomContractController extends Controller
             'autorenew' => $request->room->autorenew,
             'rental' => $request->room->price,
             'deposit' => $request->room->deposit,
+            'outstanding_deposit' => $request->room->outstanding_deposit,
             'agreement_fees' => $request->room->agreement_fees,
             'booking_fees' => $request->room->booking_fees,
 

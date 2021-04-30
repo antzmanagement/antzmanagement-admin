@@ -25,15 +25,17 @@ export default {
   data() {
     return {
       _: _,
+      menu: false,
       penaltyRate: 3,
       expiredDays: 9,
       origPrice: 0,
       data: new Form({
+        paymentdate: moment().format("YYYY-MM-DD"),
         penalty: 0,
         price: 0,
-        service_fees : 0,
-        processing_fees : 0,
-        referenceno : 0,
+        service_fees: 0,
+        processing_fees: 0,
+        referenceno: 0,
       }),
       servicesDialogConfig: {
         dialogStyle: {
@@ -82,6 +84,7 @@ export default {
           this.origPrice = data.data.price;
           if (!this.editMode) {
             this.data.penalty = this.calculatePenalty(data.data);
+            this.data.paymentdate = moment().format("YYYY-MM-DD");
           } else {
             this.data.penalty = data.data.penalty;
           }
@@ -167,6 +170,34 @@ export default {
               label="Reference No"
               v-model="data.referenceno"
             ></v-text-field>
+          </v-col>
+          <v-col cols="12">
+            <v-menu
+              ref="menu"
+              v-model="menu"
+              :close-on-content-click="true"
+              transition="scale-transition"
+              offset-y
+            >
+              <template v-slot:activator="{ on }">
+                <v-text-field
+                  v-model="data.paymentdate"
+                  label="Payment Date"
+                  readonly
+                  v-on="on"
+                  :error-messages="
+                    helpers.isEmpty(data.paymentdate)
+                      ? 'Payment Date is required'
+                      : ''
+                  "
+                ></v-text-field>
+              </template>
+              <v-date-picker
+                v-model="data.paymentdate"
+                no-title
+                scrollable
+              ></v-date-picker>
+            </v-menu>
           </v-col>
           <v-col cols="12">
             <v-text-field

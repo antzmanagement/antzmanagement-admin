@@ -26,6 +26,7 @@ trait PaymentServices
             }]);
             $q->where('status', true);
         }, 'services' => function ($q) {
+        },'otherpayments' => function ($q) {
         }])->get();
 
         $data = $data->unique('id')->sortByDesc('id')->flatten(1);
@@ -37,7 +38,6 @@ trait PaymentServices
     private function filterPayments($data, $params)
     {
         $params = $this->checkUndefinedProperty($params, $this->paymentFilterCols());
-
      
         if($params->tenant_id){
             $tenant_id = $params->tenant_id;
@@ -121,6 +121,8 @@ trait PaymentServices
                 $q1->where('status', true);
             }]);
             $q->where('status', true);
+        }, 'services' => function ($q) {
+        },'otherpayments' => function ($q) {
         }])->where('status', true)->first();
         return $data;
     }
@@ -138,6 +140,8 @@ trait PaymentServices
                 $q1->where('status', true);
             }]);
             $q->where('status', true);
+        }, 'services' => function ($q) {
+        },'otherpayments' => function ($q) {
         }])->where('status', true)->first();
         return $data;
     }
@@ -206,6 +210,7 @@ trait PaymentServices
     {
         try {
             $data->services()->sync([]);
+            $data->otherpayments()->sync([]);
             $data->delete();
 
         } catch (Exception $e) {
