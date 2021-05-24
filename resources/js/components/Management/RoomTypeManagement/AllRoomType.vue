@@ -189,7 +189,7 @@ export default {
           justify="center"
           align="center"
           class="ma-3"
-          v-if="helpers.isAccessible(_.get(role, ['name']), 'tenant', 'read')"
+          v-if="helpers.isAccessible(_.get(role, ['name']), 'roomType', 'read')"
         >
           <v-col cols="12">
             <v-card class="pa-8" raised>

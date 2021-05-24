@@ -1427,7 +1427,7 @@ export const roleAccess = {
                 ...(_.get(accessRule, `noAccess`) || {})
             },
             tenant: {
-                ...(_.get(accessRule, `noAccess`) || {})
+                ...(_.get(accessRule, `modify`) || {})
             },
             roomType: {
                 ...(_.get(accessRule, `modify`) || {})
