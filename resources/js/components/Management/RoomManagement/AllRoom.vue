@@ -93,37 +93,37 @@ export default {
         state: "state",
         city: "city",
         isSublet: {
-          field : 'sublet',
-          callback : (value) => value ? 'Yes' : 'No',
+          field: "sublet",
+          callback: (value) => (value ? "Yes" : "No"),
         },
         sublet_claim: "sublet_claim",
         owner_claim: "owner_claim",
         tnb_account_no: "tnb_account_no",
         room_type: {
-          field : 'room_types',
-          callback : (value) => {
-            return _.get(value , `[0].name`) || 'N/A';
-          }
+          field: "room_types",
+          callback: (value) => {
+            return _.get(value, `[0].name`) || "N/A";
+          },
         },
         room_type_id: {
-          field : 'room_types',
-          callback : (value) => {
-            return _.get(value , `[0].id`) || 'N/A';
-          }
+          field: "room_types",
+          callback: (value) => {
+            return _.get(value, `[0].id`) || "N/A";
+          },
         },
         owner: {
-          field : 'owners',
-          callback : (value) => {
-            return _.get(value , `[0].name`) || 'N/A';
-          }
+          field: "owners",
+          callback: (value) => {
+            return _.get(value, `[0].name`) || "N/A";
+          },
         },
         owner_id: {
-          field : 'owners',
-          callback : (value) => {
-            return _.get(value , `[0].id`) || 'N/A';
-          }
+          field: "owners",
+          callback: (value) => {
+            return _.get(value, `[0].id`) || "N/A";
+          },
         },
-        remark : 'remark',
+        remark: "remark",
         created_at: "created_at",
         updated_at: "updated_at",
       },
@@ -136,10 +136,10 @@ export default {
       },
       deep: true,
     },
-    totalDataLength(v){
+    totalDataLength(v) {
       console.log(v);
-      if(v > 0){
-      this.fetchExcelData();
+      if (v > 0) {
+        this.fetchExcelData();
       }
     },
   },
@@ -271,12 +271,21 @@ export default {
 
 <template>
   <v-app>
-    <navbar></navbar>
+    <navbar
+      :returnRole="
+        (role) => {
+          this.role = role;
+        }
+      "
+    ></navbar>
     <v-content :class="helpers.managementStyles().backgroundClass">
       <v-container class="fill-height" fluid>
         <loading></loading>
         <v-row justify="center" align="center" class="ma-3">
-          <v-col cols="12">
+          <v-col
+            cols="12"
+            v-if="helpers.isAccessible(_.get(role, ['name']), 'room', 'create')"
+          >
             <room-form
               :editMode="false"
               :buttonStyle="roomFormDialogConfig.buttonStyle"
@@ -323,7 +332,12 @@ export default {
             </v-card>
           </v-col>
         </v-row>
-        <v-row justify="center" align="center" class="ma-3">
+        <v-row
+          justify="center"
+          align="center"
+          class="ma-3"
+          v-if="helpers.isAccessible(_.get(role, ['name']), 'service', 'read')"
+        >
           <v-col cols="12">
             <v-card class="pa-8" raised>
               <v-data-table
@@ -365,7 +379,7 @@ export default {
                     <td>{{ props.item.room_types[0].name }}</td>
                     <td>{{ props.item.unit }}</td>
                     <td>{{ props.item.jalan }}</td>
-                    <td>{{ props.item.block }}</td>
+                    <td>{{ props.item.lot }}</td>
                     <td>{{ props.item.floor }}</td>
                     <td>{{ props.item.price | toDouble }}</td>
                     <td>{{ props.item.room_status }}</td>

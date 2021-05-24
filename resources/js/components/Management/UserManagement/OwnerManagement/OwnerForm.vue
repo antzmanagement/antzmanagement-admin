@@ -10,7 +10,7 @@ import {
   email,
 } from "vuelidate/lib/validators";
 import { mapActions } from "vuex";
-import { _ } from '../../../../common/common-function';
+import { _ } from "../../../../common/common-function";
 export default {
   props: {
     editMode: {
@@ -331,7 +331,7 @@ export default {
       return (
         (!this.data.tel1 || this.helpers.isPhoneFormat(this.data.tel1)) &&
         (!this.data.tel2 || this.helpers.isPhoneFormat(this.data.tel2)) &&
-        (!this.data.tel3 || this.helpers.isPhoneFormat(this.data.tel3)) 
+        (!this.data.tel3 || this.helpers.isPhoneFormat(this.data.tel3))
         // && this.helpers.isIcFormat(this.data.icno)
       );
     },
@@ -453,14 +453,13 @@ export default {
           this.endLoadingAction();
         });
     },
-    appendRoomList(data){
-      
-      if(_.isPlainObject(data) && !_.isEmpty(data)){
+    appendRoomList(data) {
+      if (_.isPlainObject(data) && !_.isEmpty(data)) {
         console.log(data);
         this.rooms = _.compact(_.concat(this.rooms || [], [data]));
         this.data.rooms = data;
       }
-    }
+    },
   },
 };
 </script>
@@ -680,7 +679,16 @@ export default {
                 label="Owner Room"
                 multiple
               >
-                <template v-slot:append>
+                <template
+                  v-slot:append
+                  v-if="
+                    helpers.isAccessible(
+                      _.get(role, ['name']),
+                      'room',
+                      'create'
+                    )
+                  "
+                >
                   <room-form
                     :editMode="false"
                     :dialogStyle="roomFormDialogConfig.dialogStyle"

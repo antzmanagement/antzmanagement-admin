@@ -25,7 +25,7 @@ trait RentalPaymentServices
                 $q1->where('status', true);
             }]);
             $q->where('status', true);
-        }])->get();
+        }, 'issueby'])->get();
 
         $data = $data->unique('id')->sortByDesc('sequence')->flatten(1);
 
@@ -143,7 +143,7 @@ trait RentalPaymentServices
                 $q1->where('status', true);
             }]);
             $q->where('status', true);
-        }])->where('status', true)->first();
+        }, 'issueby'])->where('status', true)->first();
         return $data;
     }
 
@@ -160,7 +160,7 @@ trait RentalPaymentServices
                 $q1->where('status', true);
             }]);
             $q->where('status', true);
-        }])->where('status', true)->first();
+        }, 'issueby'])->where('status', true)->first();
         return $data;
     }
 
@@ -211,12 +211,20 @@ trait RentalPaymentServices
         $data->sequence = $this->toInt($params->sequence);
         $data->remark = $params->remark;
         $data->referenceno = $params->referenceno;
+        $data->receive_from = $params->receive_from;
+        $data->paymentmethod = $params->paymentmethod;
         
         $roomContract = $this->getRoomContractById($params->room_contract_id);
         if ($this->isEmpty($roomContract)) {
             return false;
         }
         $data->roomcontract()->associate($roomContract);
+
+        $issueBy = $this->getUserById($params->issue_by);
+        if ($this->isEmpty($issueBy)) {
+            return false;
+        }
+        $data->issueby()->associate($issueBy);
 
         if (!$this->saveModel($data)) {
             return null;
@@ -258,6 +266,6 @@ trait RentalPaymentServices
     }
     public function rentalPaymentFilterCols()
     {
-        return ['fromdate', 'todate', 'tenant_id', 'room_id', 'penalty', 'paid', 'sequence', 'paymentfromdate', 'paymenttodate'];
+        return ['fromdate', 'todate', 'tenant_id', 'room_id', 'penalty', 'paid', 'sequence', 'paymentfromdate', 'paymenttodate', 'paymentmethod', 'receive_from'];
     }
 }

@@ -3,9 +3,11 @@
 
 <script>
 import { mapActions } from "vuex";
+
 export default {
   data() {
     return {
+      role: "",
       totalDataLength: 0,
       data: [],
       loading: true,
@@ -68,6 +70,9 @@ export default {
       },
       deep: true,
     },
+    role: function (val) {
+      console.log("role", val);
+    },
   },
   computed: {
     isLoading() {
@@ -91,6 +96,7 @@ export default {
   },
   mounted() {
     this.getStaffs();
+    console.log(this.helpers);
   },
   methods: {
     ...mapActions({
@@ -149,11 +155,22 @@ export default {
 
 <template>
   <v-app>
-    <navbar></navbar>
+    <navbar
+      :returnRole="
+        (role) => {
+          this.role = role;
+        }
+      "
+    ></navbar>
     <v-content :class="helpers.managementStyles().backgroundClass">
       <v-container class="fill-height" fluid>
         <loading></loading>
-        <v-row justify="center" align="center" class="ma-3">
+        <v-row
+          justify="center"
+          align="center"
+          class="ma-3"
+          v-if="helpers.isAccessible(_.get(role, ['name']), 'staff', 'create')"
+        >
           <v-col cols="12">
             <staff-form
               :editMode="false"
@@ -191,7 +208,12 @@ export default {
             </v-card>
           </v-col>
         </v-row>
-        <v-row justify="center" align="center" class="ma-3">
+        <v-row
+          justify="center"
+          align="center"
+          class="ma-3"
+          v-if="helpers.isAccessible(_.get(role, ['name']), 'staff', 'read')"
+        >
           <v-col cols="12">
             <v-card class="pa-8" raised>
               <v-data-table

@@ -11,6 +11,7 @@ export default {
   data() {
     return {
       _: _,
+      role : '',
       moment: moment,
       totalDataLength: 0,
       data: [],
@@ -49,35 +50,34 @@ export default {
           hideOverlay: true,
         },
       },
-      excelFields : {
-        'id' : 'id',
-        'uid' : 'uid',
-        'name' : 'name',
-        'email' : 'email',
-        'icno' : 'icno',
-        'tel1' : 'tel1',
-        'tel2' : 'tel2',
-        'tel3' : 'tel3',
-        'mother_name' : 'mother_name',
-        'mother_tel' : 'mother_tel',
-        'father_name' : 'father_name',
-        'father_tel' : 'father_tel',
-        'emergency_contact_name' : 'emergency_name',
-        'age' : 'age',
-        'occupation' : 'occupation',
-        'gender' : 'gender',
-        'religion' : 'religion',
-        'approach_method' : 'approach_method',
-        'address' : 'address',
-        'postcode' : 'postcode',
-        'state' : 'state',
-        'city' : 'city',
-        'birthday' : 'birthday',
-        'created_at' : 'created_at',
-        'updated_at' : 'updated_at',
-        'person_in_charge_id' : 'pic',
-        'person_in_charge' : 'creator.name',
-
+      excelFields: {
+        id: "id",
+        uid: "uid",
+        name: "name",
+        email: "email",
+        icno: "icno",
+        tel1: "tel1",
+        tel2: "tel2",
+        tel3: "tel3",
+        mother_name: "mother_name",
+        mother_tel: "mother_tel",
+        father_name: "father_name",
+        father_tel: "father_tel",
+        emergency_contact_name: "emergency_name",
+        age: "age",
+        occupation: "occupation",
+        gender: "gender",
+        religion: "religion",
+        approach_method: "approach_method",
+        address: "address",
+        postcode: "postcode",
+        state: "state",
+        city: "city",
+        birthday: "birthday",
+        created_at: "created_at",
+        updated_at: "updated_at",
+        person_in_charge_id: "pic",
+        person_in_charge: "creator.name",
       },
       headers: [
         {
@@ -114,10 +114,10 @@ export default {
       },
       deep: true,
     },
-    totalDataLength(v){
+    totalDataLength(v) {
       console.log(v);
-      if(v > 0){
-      this.fetchExcelData();
+      if (v > 0) {
+        this.fetchExcelData();
       }
     },
   },
@@ -249,12 +249,23 @@ export default {
 </script>
 <template>
   <v-app>
-    <navbar></navbar>
+    <navbar
+      :returnRole="
+        (role) => {
+          this.role = role;
+        }
+      "
+    ></navbar>
     <v-content :class="helpers.managementStyles().backgroundClass">
       <v-container class="fill-height" fluid>
         <loading></loading>
         <v-row justify="center" align="center" class="ma-3">
-          <v-col cols="12">
+          <v-col
+            cols="12"
+            v-if="
+              helpers.isAccessible(_.get(role, ['name']), 'tenant', 'create')
+            "
+          >
             <tenant-form
               :editMode="false"
               :buttonStyle="tenantFormDialogConfig.buttonStyle"
@@ -305,7 +316,12 @@ export default {
             </v-card>
           </v-col>
         </v-row>
-        <v-row justify="center" align="center" class="ma-3">
+        <v-row
+          justify="center"
+          align="center"
+          class="ma-3"
+          v-if="helpers.isAccessible(_.get(role, ['name']), 'tenant', 'read')"
+        >
           <v-col cols="12">
             <v-card class="pa-8" raised>
               <v-data-table
@@ -324,7 +340,11 @@ export default {
                       @submitFilter="initTenantFilter($event)"
                     ></tenant-filter-dialog>
                   </v-toolbar>
-                  <v-toolbar flat class="mb-5 justify-end d-flex" v-if="_.isArray(excelData) && !_.isEmpty(excelData)">
+                  <v-toolbar
+                    flat
+                    class="mb-5 justify-end d-flex"
+                    v-if="_.isArray(excelData) && !_.isEmpty(excelData)"
+                  >
                     <download-excel
                       :header="`All_Tenant_${moment().format('YYYY_MM_DD')}`"
                       :name="`All_Tenant_${moment().format('YYYY_MM_DD')}.csv`"

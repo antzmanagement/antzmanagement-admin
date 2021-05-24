@@ -12,7 +12,7 @@ export default {
     checkoutDialog: false,
     paymentDialog: false,
     addOnPaymentDialog: false,
-    depositPaymentDialog : false,
+    depositPaymentDialog: false,
     selectedPayment: {
       uid: "",
     },
@@ -105,6 +105,15 @@ export default {
     }),
   }),
 
+  watch: {
+    paymentDialog: function (val) {
+      if (!val) {
+        this.selectedPayment = {
+          uid: "",
+        };
+      }
+    },
+  },
   computed: {
     isLoading() {
       return this.$store.getters.isLoading;
@@ -221,12 +230,15 @@ export default {
         _.isArray(_.get(payment, ["otherpayments"])) &&
         !_.isEmpty(_.get(payment, ["otherpayments"]))
       ) {
-        payment.otherpayments = _.map(payment.otherpayments, function (otherpayment) {
-          otherpayment.pivot = {
-            price: otherpayment.price,
-          };
-          return otherpayment;
-        });
+        payment.otherpayments = _.map(
+          payment.otherpayments,
+          function (otherpayment) {
+            otherpayment.pivot = {
+              price: otherpayment.price,
+            };
+            return otherpayment;
+          }
+        );
       }
       this.data.otherpayments = this.data.otherpayments.concat([data]);
     },
@@ -336,8 +348,17 @@ export default {
 
 <template>
   <v-app>
-    <navbar></navbar>
-    <v-content :class="helpers.managementStyles().backgroundClass">
+    <navbar
+      :returnRole="
+        (role) => {
+          this.role = role;
+        }
+      "
+    ></navbar>
+    <v-content
+      :class="helpers.managementStyles().backgroundClass"
+      v-if="helpers.isAccessible(_.get(role, ['name']), 'roomContract', 'read')"
+    >
       <v-container>
         <loading></loading>
         <v-card
@@ -510,6 +531,14 @@ export default {
                   </div>
                 </div>
               </v-col>
+              <v-col cols="12" md="4" v-if="data.rental_payment_start_date">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Rental Start Date</label>
+                  <div class="form-control-plaintext">
+                    <h4>{{ data.rental_payment_start_date }}</h4>
+                  </div>
+                </div>
+              </v-col>
               <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Duration</label>
@@ -518,14 +547,14 @@ export default {
                   </div>
                 </div>
               </v-col>
-              <v-col cols="12" md="4">
+              <!-- <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Left Month</label>
                   <div class="form-control-plaintext">
                     <h4>{{ data.left }} {{ data.rental_type }}</h4>
                   </div>
                 </div>
-              </v-col>
+              </v-col> -->
               <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Rental</label>
@@ -775,6 +804,7 @@ export default {
                               >mdi-printer</v-icon
                             >
                           </print-rental-payment-button>
+
                           <!-- <v-icon
                             small
                             class="mr-2"
@@ -787,8 +817,29 @@ export default {
                             class="mr-2"
                             @click="openPaymentDialog(props.item.uid, false)"
                             color="warning"
-                            v-else
+                            v-else-if="
+                              helpers.isAccessible(
+                                _.get(role, ['name']),
+                                'rentalPayment',
+                                'makePayment'
+                              )
+                            "
                             >mdi-currency-usd</v-icon
+                          >
+                          <v-icon
+                            small
+                            class="mr-2"
+                            @click="openPaymentDialog(props.item.uid, true)"
+                            color="success"
+                            v-if="
+                              props.item.paid == true &&
+                              helpers.isAccessible(
+                                _.get(role, ['name']),
+                                'rentalPayment',
+                                'edit'
+                              )
+                            "
+                            >mdi-pencil</v-icon
                           >
 
                           <confirm-dialog
@@ -860,9 +911,12 @@ export default {
                         <td>
                           {{
                             _.compact(
-                              _.map(props.item.otherpayments, function (otherpayment) {
-                                return _.get(otherpayment, ["name"]) || "";
-                              })
+                              _.map(
+                                props.item.otherpayments,
+                                function (otherpayment) {
+                                  return _.get(otherpayment, ["name"]) || "";
+                                }
+                              )
                             ) | getArrayValues
                           }}
                         </td>
@@ -888,14 +942,24 @@ export default {
                             >
                           </print-payment-button>
 
-                          <confirm-dialog
-                            :activatorStyle="
-                              deleteRentalButtonConfig.activatorStyle
+                          <span
+                            v-if="
+                              helpers.isAccessible(
+                                _.get(role, ['name']),
+                                'rentalPayment',
+                                'delete'
+                              )
                             "
-                            @confirmed="
-                              $event ? deletePayment(props.item.uid) : null
-                            "
-                          ></confirm-dialog>
+                          >
+                            <confirm-dialog
+                              :activatorStyle="
+                                deleteRentalButtonConfig.activatorStyle
+                              "
+                              @confirmed="
+                                $event ? deletePayment(props.item.uid) : null
+                              "
+                            ></confirm-dialog>
+                          </span>
                         </td>
                       </tr>
                     </template>
@@ -909,7 +973,17 @@ export default {
               :color="helpers.managementStyles().dividerColor"
             ></v-divider>
             <v-row class="pa-2" justify="end" align="center">
-              <v-col cols="auto" v-if="!data.checkedout">
+              <v-col
+                cols="auto"
+                v-if="
+                  !data.checkedout &&
+                  helpers.isAccessible(
+                    _.get(role, ['name']),
+                    'roomContract',
+                    'edit'
+                  )
+                "
+              >
                 <v-btn
                   class="m-2"
                   color="primary"
@@ -920,7 +994,17 @@ export default {
                   Checkout
                 </v-btn>
               </v-col>
-              <v-col cols="auto" v-if="!data.checkedout">
+              <v-col
+                cols="auto"
+                v-if="
+                  !data.checkedout &&
+                  helpers.isAccessible(
+                    _.get(role, ['name']),
+                    'roomContract',
+                    'edit'
+                  )
+                "
+              >
                 <room-contract-form
                   :editMode="true"
                   :buttonStyle="editButtonStyle"
@@ -928,7 +1012,16 @@ export default {
                   @updated="refreshPage()"
                 ></room-contract-form>
               </v-col>
-              <v-col cols="auto">
+              <v-col
+                cols="auto"
+                v-if="
+                  helpers.isAccessible(
+                    _.get(role, ['name']),
+                    'roomContract',
+                    'delete'
+                  )
+                "
+              >
                 <confirm-dialog
                   :activatorStyle="deleteButtonConfig.buttonStyle"
                   @confirmed="deleteRoomContract($event, data.uid)"
@@ -949,7 +1042,12 @@ export default {
             @close="depositPaymentDialog = false"
             :roomcontract="depositPaymentDialog ? this.data || {} : null"
             :editMode="this.editMode"
-            @createPayment="($event) => {this.data.outstanding_deposit = 0; updatePaymentDetails($event); }"
+            @createPayment="
+              ($event) => {
+                this.data.outstanding_deposit = 0;
+                updatePaymentDetails($event);
+              }
+            "
           ></deposit-payment-form>
         </v-dialog>
 
@@ -983,6 +1081,7 @@ export default {
             @close="paymentDialog = false"
             :editMode="this.editMode"
             @makePayment="updateRentalPaymentDetails($event)"
+            @updated="updateRentalPaymentDetails($event)"
           ></rental-payment-form>
         </v-dialog>
 

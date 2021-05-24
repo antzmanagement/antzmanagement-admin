@@ -70,10 +70,6 @@ export default {
     showRoomContract($data) {
       this.$router.push("/roomcontract/" + $data.uid);
     },
-    showTenantRoom($data) {
-      this.tenantRoomDialog = true;
-      this.tenantRoomData = $data;
-    },
     deleteTenant($isConfirmed, $uid) {
       if ($isConfirmed) {
         this.$Progress.start();
@@ -106,8 +102,17 @@ export default {
 </script>
 <template>
   <v-app>
-    <navbar></navbar>
-    <v-content :class="helpers.managementStyles().backgroundClass">
+    <navbar
+      :returnRole="
+        (role) => {
+          this.role = role;
+        }
+      "
+    ></navbar>
+    <v-content
+      :class="helpers.managementStyles().backgroundClass"
+      v-if="helpers.isAccessible(_.get(role, ['name']), 'tenant', 'read')"
+    >
       <v-container class="pa-5">
         <loading></loading>
         <v-card
@@ -166,8 +171,7 @@ export default {
                   </div>
                 </div>
               </v-col>
-              <v-col cols="12" md="4">
-              </v-col>
+              <v-col cols="12" md="4"> </v-col>
               <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Phone 1</label>
@@ -282,7 +286,9 @@ export default {
               </v-col>
               <v-col cols="12" md="4">
                 <div class="form-group mb-0">
-                  <label class="form-label mb-0">Emergency Contact Person</label>
+                  <label class="form-label mb-0"
+                    >Emergency Contact Person</label
+                  >
                   <div class="form-control-plaintext">
                     <h4>{{ data.emergency_name }}</h4>
                   </div>
@@ -316,7 +322,7 @@ export default {
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Person In Charge</label>
                   <div class="form-control-plaintext">
-                    <h4>{{ _.get(data, ['creator', 'name']) || 'N/A' }}</h4>
+                    <h4>{{ _.get(data, ["creator", "name"]) || "N/A" }}</h4>
                   </div>
                 </div>
               </v-col>
@@ -359,7 +365,12 @@ export default {
               <!-- <v-col cols="auto">
                 <change-password-dialog :uid="this.$route.params.uid" @updated="refreshPage()"></change-password-dialog>
               </v-col> -->
-              <v-col cols="auto">
+              <v-col
+                cols="auto"
+                v-if="
+                  helpers.isAccessible(_.get(role, ['name']), 'tenant', 'edit')
+                "
+              >
                 <tenant-form
                   :editMode="true"
                   :buttonStyle="editButtonStyle"
@@ -367,7 +378,16 @@ export default {
                   @updated="refreshPage()"
                 ></tenant-form>
               </v-col>
-              <v-col cols="auto">
+              <v-col
+                cols="auto"
+                v-if="
+                  helpers.isAccessible(
+                    _.get(role, ['name']),
+                    'tenant',
+                    'delete'
+                  )
+                "
+              >
                 <confirm-dialog
                   :activatorStyle="deleteButtonConfig.activatorStyle"
                   @confirmed="deleteTenant($event, data.uid)"
@@ -377,14 +397,6 @@ export default {
           </v-container>
         </v-card>
 
-        <v-dialog v-model="tenantRoomDialog" max-width="50%">
-          <tenant-room
-            :tenant="data"
-            :room="tenantRoomData.room"
-            :roomcontract="tenantRoomData"
-            :rentalpayments="tenantRoomData.rentalpayments"
-          ></tenant-room>
-        </v-dialog>
       </v-container>
     </v-content>
   </v-app>

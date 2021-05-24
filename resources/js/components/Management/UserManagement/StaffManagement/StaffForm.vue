@@ -204,7 +204,7 @@ export default {
       .then((res) => {
         this.endLoadingAction();
         this.roles = res.data.filter(function (role) {
-          return role.name != "tenant" && role.name != "owner" && role.name != "superadmin";
+          return role.name != "tenant" && role.name != "owner" && role.name != "superadmin" && role.name != "admin" && role.name != "cashier";
         });
       })
       .catch((err) => {

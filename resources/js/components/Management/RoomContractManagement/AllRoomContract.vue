@@ -84,40 +84,40 @@ export default {
         id: "id",
         sequence: "sequence",
         room: {
-          field : 'room',
-          callback : (value) => {
-            return _.get(value , `name`) || 'N/A';
-          }
+          field: "room",
+          callback: (value) => {
+            return _.get(value, `name`) || "N/A";
+          },
         },
         room_id: {
-          field : 'room',
-          callback : (value) => {
-            return _.get(value , `id`) || 'N/A';
-          }
+          field: "room",
+          callback: (value) => {
+            return _.get(value, `id`) || "N/A";
+          },
         },
         contract: {
-          field : 'contract',
-          callback : (value) => {
-            return _.get(value , `name`) || 'N/A';
-          }
+          field: "contract",
+          callback: (value) => {
+            return _.get(value, `name`) || "N/A";
+          },
         },
         contract_id: {
-          field : 'contract',
-          callback : (value) => {
-            return _.get(value , `id`) || 'N/A';
-          }
+          field: "contract",
+          callback: (value) => {
+            return _.get(value, `id`) || "N/A";
+          },
         },
         tenant: {
-          field : 'tenant',
-          callback : (value) => {
-            return _.get(value , `name`) || 'N/A';
-          }
+          field: "tenant",
+          callback: (value) => {
+            return _.get(value, `name`) || "N/A";
+          },
         },
         tenant_id: {
-          field : 'tenant',
-          callback : (value) => {
-            return _.get(value , `id`) || 'N/A';
-          }
+          field: "tenant",
+          callback: (value) => {
+            return _.get(value, `id`) || "N/A";
+          },
         },
         startdate: "startdate",
         enddate: "enddate",
@@ -129,13 +129,13 @@ export default {
         agreement_fees: "agreement_fees",
         outstanding_deposit: "outstanding_deposit",
         checkedout: {
-          field : 'sublet',
-          callback : (value) => value ? 'Yes' : 'No',
+          field: "sublet",
+          callback: (value) => (value ? "Yes" : "No"),
         },
         checkout_date: "checkout_date",
         checkout_charges: "checkout_charges",
         checkout_remark: "checkout_remark",
-        remark : 'remark',
+        remark: "remark",
         created_at: "created_at",
         updated_at: "updated_at",
       },
@@ -148,10 +148,10 @@ export default {
       },
       deep: true,
     },
-    totalDataLength(v){
+    totalDataLength(v) {
       console.log(v);
-      if(v > 0){
-      this.fetchExcelData();
+      if (v > 0) {
+        this.fetchExcelData();
       }
     },
   },
@@ -214,7 +214,10 @@ export default {
       if (filterGroup.checkedout === 1 || filterGroup.checkedout === 0) {
         this.roomContractFilterGroup.checkedout = filterGroup.checkedout;
       }
-      if (filterGroup.outstanding_deposit === 1 || filterGroup.outstanding_deposit === 0) {
+      if (
+        filterGroup.outstanding_deposit === 1 ||
+        filterGroup.outstanding_deposit === 0
+      ) {
         this.roomContractFilterGroup.outstanding_deposit =
           filterGroup.outstanding_deposit;
       }
@@ -291,11 +294,28 @@ export default {
 
 <template>
   <v-app>
-    <navbar></navbar>
+    <navbar
+      :returnRole="
+        (role) => {
+          this.role = role;
+        }
+      "
+    ></navbar>
     <v-content :class="helpers.managementStyles().backgroundClass">
       <v-container class="fill-height" fluid>
         <loading></loading>
-        <v-row justify="center" align="center" class="ma-3">
+        <v-row
+          justify="center"
+          align="center"
+          class="ma-3"
+          v-if="
+            helpers.isAccessible(
+              _.get(role, ['name']),
+              'roomContract',
+              'create'
+            )
+          "
+        >
           <v-col cols="12">
             <room-contract-form
               :editMode="false"
@@ -344,26 +364,37 @@ export default {
                   _.get(roomContractFilterGroup, ["room", "unit"]) || "N/A"
                 }}</v-chip>
               </v-card-subtitle>
-              <v-card-subtitle v-show="_.isArray(roomContractFilterGroup.services) && !_.isEmpty(roomContractFilterGroup.services)">
+              <v-card-subtitle
+                v-show="
+                  _.isArray(roomContractFilterGroup.services) &&
+                  !_.isEmpty(roomContractFilterGroup.services)
+                "
+              >
                 Services :
                 <v-chip
                   v-for="(service, i) in roomContractFilterGroup.services"
                   :key="`service-${i}`"
                   class="mx-2"
-                  >{{
-                    _.get(service, ["text"]) || "N/A"
-                  }}</v-chip
+                  >{{ _.get(service, ["text"]) || "N/A" }}</v-chip
                 >
               </v-card-subtitle>
               <v-card-subtitle
-                v-show="roomContractFilterGroup.outstanding_deposit === 1 || roomContractFilterGroup.outstanding_deposit === 0 "
+                v-show="
+                  roomContractFilterGroup.outstanding_deposit === 1 ||
+                  roomContractFilterGroup.outstanding_deposit === 0
+                "
               >
                 Outstanding Deposit :
                 <v-chip class="mx-2">{{
                   roomContractFilterGroup.outstanding_deposit ? "Yes" : "No"
                 }}</v-chip>
               </v-card-subtitle>
-              <v-card-subtitle v-show="roomContractFilterGroup.checkedout === 1 || roomContractFilterGroup.checkedout === 0">
+              <v-card-subtitle
+                v-show="
+                  roomContractFilterGroup.checkedout === 1 ||
+                  roomContractFilterGroup.checkedout === 0
+                "
+              >
                 Checked out :
                 <v-chip class="mx-2">{{
                   roomContractFilterGroup.checkedout ? "Yes" : "No"
@@ -372,7 +403,12 @@ export default {
             </v-card>
           </v-col>
         </v-row>
-        <v-row justify="center" align="center" class="ma-3">
+        <v-row
+          justify="center"
+          align="center"
+          class="ma-3"
+          v-if="helpers.isAccessible(_.get(role, ['name']), 'roomContract', 'read')"
+        >
           <v-col cols="12">
             <v-card class="pa-8" raised>
               <v-data-table
@@ -402,8 +438,12 @@ export default {
                     v-if="_.isArray(excelData) && !_.isEmpty(excelData)"
                   >
                     <download-excel
-                      :header="`All_RoomContract_${moment().format('YYYY_MM_DD')}`"
-                      :name="`All_RoomContract_${moment().format('YYYY_MM_DD')}.csv`"
+                      :header="`All_RoomContract_${moment().format(
+                        'YYYY_MM_DD'
+                      )}`"
+                      :name="`All_RoomContract_${moment().format(
+                        'YYYY_MM_DD'
+                      )}.csv`"
                       type="csv"
                       :fields="excelFields || {}"
                       :data="excelData || []"

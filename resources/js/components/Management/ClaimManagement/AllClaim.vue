@@ -125,7 +125,7 @@ export default {
 
 <template>
   <v-app>
-    <navbar></navbar>
+    <navbar  :returnRole="(role) => { this.role = role}"></navbar>
     <v-content :class="helpers.managementStyles().backgroundClass">
       <v-container class="fill-height" fluid>
         <loading></loading>

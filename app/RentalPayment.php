@@ -16,4 +16,8 @@ class RentalPayment extends Model
         return $this->belongsTo('App\Claim');
     }
 
+    public function issueby()
+    {
+        return $this->belongsTo('App\User', 'issueby');
+    }
 }

@@ -94,8 +94,11 @@ export default {
 
 <template>
   <v-app>
-    <navbar></navbar>
-    <v-content :class="helpers.managementStyles().backgroundClass">
+    <navbar  :returnRole="(role) => { this.role = role}"></navbar>
+    <v-content :class="helpers.managementStyles().backgroundClass" 
+              v-if="
+                helpers.isAccessible(_.get(role, ['name']), 'tenant', 'read')
+              ">
       <v-container>
         <loading></loading>
         <v-card
@@ -180,7 +183,10 @@ export default {
               :color="helpers.managementStyles().dividerColor"
             ></v-divider>
             <v-row class="pa-2" justify="end" align="center">
-              <v-col cols="auto">
+              <v-col cols="auto" 
+              v-if="
+                helpers.isAccessible(_.get(role, ['name']), 'tenant', 'edit')
+              ">
                 <room-type-form
                   :editMode="true"
                   :uid="this.$route.params.uid"
@@ -191,7 +197,10 @@ export default {
                   >
                 </room-type-form>
               </v-col>
-              <v-col cols="auto">
+              <v-col cols="auto" 
+              v-if="
+                helpers.isAccessible(_.get(role, ['name']), 'tenant', 'delete')
+              ">
                 <confirm-dialog
                   :activatorStyle="deleteButtonConfig.buttonStyle"
                   @confirmed="$event ? deleteRoomType(data.uid) : null"

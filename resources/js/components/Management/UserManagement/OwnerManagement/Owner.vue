@@ -4,6 +4,7 @@
 import { mapActions } from "vuex";
 export default {
   data: () => ({
+    role: "",
     editButtonStyle: {
       block: false,
       color: "success",
@@ -96,8 +97,17 @@ export default {
 
 <template>
   <v-app>
-    <navbar></navbar>
-    <v-content :class="helpers.managementStyles().backgroundClass">
+    <navbar
+      :returnRole="
+        (role) => {
+          this.role = role;
+        }
+      "
+    ></navbar>
+    <v-content
+      :class="helpers.managementStyles().backgroundClass"
+      v-if="helpers.isAccessible(_.get(role, ['name']), 'owner', 'read')"
+    >
       <v-container class="pa-5">
         <loading></loading>
         <v-card
@@ -140,8 +150,7 @@ export default {
                   </div>
                 </div>
               </v-col>
-              <v-col cols="12" md="4">
-              </v-col>
+              <v-col cols="12" md="4"> </v-col>
               <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Bank</label>
@@ -174,8 +183,7 @@ export default {
                   </div>
                 </div>
               </v-col>
-              <v-col cols="12" md="4">
-              </v-col>
+              <v-col cols="12" md="4"> </v-col>
               <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Phone 1</label>
@@ -290,7 +298,12 @@ export default {
                   @updated="refreshPage()"
                 ></change-password-dialog>
               </v-col> -->
-              <v-col cols="auto">
+              <v-col
+                cols="auto"
+                v-if="
+                  helpers.isAccessible(_.get(role, ['name']), 'owner', 'edit')
+                "
+              >
                 <owner-form
                   :editMode="true"
                   :buttonStyle="editButtonStyle"
@@ -298,7 +311,12 @@ export default {
                   @updated="refreshPage()"
                 ></owner-form>
               </v-col>
-              <v-col cols="auto">
+              <v-col
+                cols="auto"
+                v-if="
+                  helpers.isAccessible(_.get(role, ['name']), 'owner', 'delete')
+                "
+              >
                 <confirm-dialog
                   :activatorStyle="deleteButtonConfig.activatorStyle"
                   @confirmed="deleteOwner($event, data.uid)"

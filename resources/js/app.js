@@ -42,6 +42,7 @@ import VueHtmlToPaper from 'vue-html-to-paper';
 import VueLodash from 'vue-lodash'
 import lodash from 'lodash'
 import Cloudinary,{ CldImage, CldTransformation } from "cloudinary-vue";
+import { _ } from './common/common-function';
 
 const options = {
   name: '_blank',
@@ -116,6 +117,8 @@ Vue.mixin({
         return {
             hi: "hi",
             helpers,
+            _ : _,
+            role : '',
         }
     },
 })

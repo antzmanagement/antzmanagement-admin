@@ -139,6 +139,7 @@ export default {
     },
     print() {
       console.log(this.roomcontract);
+      console.log(this.data);
       this.data = this.item;
       this.showLoadingAction();
       console.log(this.data);
@@ -194,7 +195,7 @@ export default {
 
                 <td>
                   Receipt No #: {{ _.get(data, ["sequence"]) || "N/A" }}<br />
-                  Payment Method #: {{ _.get(data, ["payment_method"]) || "N/A" }}<br />
+                  Payment Method #: {{ _.get(data, ["paymentmethod"]) || "N/A" }}<br />
                   Reference No #: {{ _.get(data, ["referenceno"]) || "N/A" }}<br />
                   Created Date:
                   {{ _.get(data, ["paymentdate"]) || "N/A" | formatDate }}<br />
@@ -248,7 +249,7 @@ export default {
             <table>
               <tr>
                 <td>
-                  Issue By #: {{ _.get(data, ["issue_by"]) || "N/A" }}<br />
+                  Issue By #: {{ _.get(data, ["issueby", 'name']) || "N/A" }}<br />
                 </td>
               </tr>
             </table>

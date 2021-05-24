@@ -93,8 +93,17 @@ export default {
 
 <template>
   <v-app>
-    <navbar></navbar>
-    <v-content :class="helpers.managementStyles().backgroundClass">
+    <navbar
+      :returnRole="
+        (role) => {
+          this.role = role;
+        }
+      "
+    ></navbar>
+    <v-content
+      :class="helpers.managementStyles().backgroundClass"
+      v-if="helpers.isAccessible(_.get(role, ['name']), 'staff', 'read')"
+    >
       <v-container class="pa-5">
         <loading></loading>
         <v-card
@@ -114,7 +123,12 @@ export default {
           <v-container>
             <v-row justify="start" align="center" class="pa-2">
               <v-col cols="12" v-if="data.profile_img">
-                <v-img :src="data.profile_img" :height="400" :width="400" contain ></v-img>
+                <v-img
+                  :src="data.profile_img"
+                  :height="400"
+                  :width="400"
+                  contain
+                ></v-img>
               </v-col>
               <v-col cols="12">
                 <div class="form-group mb-0">
@@ -131,7 +145,6 @@ export default {
             </v-row>
 
             <v-row justify="start" align="center" class="pa-2">
-
               <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Name</label>
@@ -172,13 +185,23 @@ export default {
             ></v-divider>
 
             <v-row class="pa-2" justify="end" align="center">
-              <v-col cols="auto">
+              <v-col
+                cols="auto"
+                v-if="
+                  helpers.isAccessible(_.get(role, ['name']), 'staff', 'edit')
+                "
+              >
                 <change-password-dialog
                   :uid="this.$route.params.uid"
                   @updated="refreshPage()"
                 ></change-password-dialog>
               </v-col>
-              <v-col cols="auto">
+              <v-col
+                cols="auto"
+                v-if="
+                  helpers.isAccessible(_.get(role, ['name']), 'staff', 'edit')
+                "
+              >
                 <staff-form
                   :editMode="true"
                   :buttonStyle="editButtonStyle"
@@ -186,7 +209,12 @@ export default {
                   @updated="refreshPage()"
                 ></staff-form>
               </v-col>
-              <v-col cols="auto">
+              <v-col
+                cols="auto"
+                v-if="
+                  helpers.isAccessible(_.get(role, ['name']), 'staff', 'delete')
+                "
+              >
                 <confirm-dialog
                   :activatorStyle="deleteButtonConfig.activatorStyle"
                   @confirmed="deleteStaff($event, data.uid)"

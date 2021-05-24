@@ -140,17 +140,29 @@ export default {
 
 <template>
   <v-app>
-    <navbar></navbar>
+    <navbar
+      :returnRole="
+        (role) => {
+          this.role = role;
+        }
+      "
+    ></navbar>
     <v-content :class="helpers.managementStyles().backgroundClass">
       <v-container class="fill-height" fluid>
         <loading></loading>
-        <v-row justify="center" align="center" class="ma-3">
+        <v-row
+          justify="center"
+          align="center"
+          class="ma-3"
+          v-if="
+            helpers.isAccessible(_.get(role, ['name']), 'roomType', 'create')
+          "
+        >
           <v-col cols="12">
-            <room-type-form
-              :editMode="false"
-              @created="showRoomType($event)"
-            >
-            <v-btn block color="primary" class="ma-2" ><v-icon left>mdi-plus</v-icon> Add Room Type</v-btn>
+            <room-type-form :editMode="false" @created="showRoomType($event)">
+              <v-btn block color="primary" class="ma-2"
+                ><v-icon left>mdi-plus</v-icon> Add Room Type</v-btn
+              >
             </room-type-form>
           </v-col>
         </v-row>
@@ -173,7 +185,12 @@ export default {
             </v-card>
           </v-col>
         </v-row>
-        <v-row justify="center" align="center" class="ma-3">
+        <v-row
+          justify="center"
+          align="center"
+          class="ma-3"
+          v-if="helpers.isAccessible(_.get(role, ['name']), 'tenant', 'read')"
+        >
           <v-col cols="12">
             <v-card class="pa-8" raised>
               <v-data-table

@@ -209,13 +209,13 @@ export default {
         services: {
           field: "services",
           callback: (value) => {
-            return getArrayValues(_.map(value, 'name')) || "N/A";
+            return getArrayValues(_.map(value, "name")) || "N/A";
           },
         },
         other_services: {
           field: "otherpayments",
           callback: (value) => {
-            return getArrayValues(_.map(value, 'name')) || "N/A";
+            return getArrayValues(_.map(value, "name")) || "N/A";
           },
         },
         remark: "remark",
@@ -408,11 +408,8 @@ export default {
     updateRentalPaymentDetails(data) {
       var id = data.id;
       var rentalpayment = data;
-      console.log("rentalpayment");
-      console.log(rentalpayment);
       this.data = this.data.map(function (item) {
         if (item.id == id) {
-          console.log("Found");
           return rentalpayment;
         } else {
           return item;
@@ -615,7 +612,13 @@ export default {
 
 <template>
   <v-app>
-    <navbar></navbar>
+    <navbar
+      :returnRole="
+        (role) => {
+          this.role = role;
+        }
+      "
+    ></navbar>
     <v-content :class="helpers.managementStyles().backgroundClass">
       <v-container class="fill-height" fluid>
         <loading></loading>
@@ -677,7 +680,14 @@ export default {
             </v-card>
           </v-col>
         </v-row>
-        <v-row justify="center" align="center" class="ma-3">
+        <v-row
+          justify="center"
+          align="center"
+          class="ma-3"
+          v-if="
+            helpers.isAccessible(_.get(role, ['name']), 'rentalPayment', 'read')
+          "
+        >
           <v-col cols="12">
             <v-card class="pa-8" raised>
               <v-data-table
@@ -764,11 +774,39 @@ export default {
                         class="mr-2"
                         @click="openPaymentDialog(props.item.uid, false)"
                         color="warning"
-                        v-else
+                        v-else-if="
+                          helpers.isAccessible(
+                            _.get(role, ['name']),
+                            'rentalPayment',
+                            'makePayment'
+                          )
+                        "
                         >mdi-currency-usd</v-icon
+                      >
+                      <v-icon
+                        small
+                        class="mr-2"
+                        @click="openPaymentDialog(props.item.uid, true)"
+                        color="success"
+                        v-if="
+                          props.item.paid == true &&
+                          helpers.isAccessible(
+                            _.get(role, ['name']),
+                            'rentalPayment',
+                            'edit'
+                          )
+                        "
+                        >mdi-pencil</v-icon
                       >
 
                       <confirm-dialog
+                        v-if="
+                          helpers.isAccessible(
+                            _.get(role, ['name']),
+                            'rentalPayment',
+                            'delete'
+                          )
+                        "
                         :activatorStyle="
                           deleteRentalButtonConfig.activatorStyle
                         "
@@ -869,14 +907,21 @@ export default {
                         >
                       </print-payment-button>
 
-                      <confirm-dialog
-                        :activatorStyle="
-                          deleteRentalButtonConfig.activatorStyle
+                        <confirm-dialog
+                        v-if="
+                          helpers.isAccessible(
+                            _.get(role, ['name']),
+                            'rentalPayment',
+                            'delete'
+                          )
                         "
-                        @confirmed="
-                          $event ? deletePayment(props.item.uid) : null
-                        "
-                      ></confirm-dialog>
+                          :activatorStyle="
+                            deleteRentalButtonConfig.activatorStyle
+                          "
+                          @confirmed="
+                            $event ? deletePayment(props.item.uid) : null
+                          "
+                        ></confirm-dialog>
                     </td>
                   </tr>
                 </template>
@@ -897,6 +942,7 @@ export default {
             @close="paymentDialog = false"
             :editMode="this.editMode"
             @makePayment="updateRentalPaymentDetails($event)"
+            @updated="updateRentalPaymentDetails($event)"
           ></rental-payment-form>
         </v-dialog>
       </v-container>

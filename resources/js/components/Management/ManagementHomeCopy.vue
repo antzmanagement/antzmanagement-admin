@@ -432,7 +432,7 @@ export default {
 <template>
   <v-app id="inspire">
     <loading></loading>
-    <navbar></navbar>
+    <navbar  :returnRole="(role) => { this.role = role}"></navbar>
     <v-content class="grey lighten-2">
       <div class="pb-5"></div>
 

@@ -62,10 +62,15 @@ export default {
   },
   mounted() {
     this.getRentalPayment();
+    this.authenticateAction().then((res) => {
+      console.log(res);
+    });
   },
   methods: {
     ...mapActions({
+      authenticateAction: "authenticate",
       makePaymentAction: "makePayment",
+      updateRentalPaymentAction: "updateRentalPayment",
       getRentalPaymentAction: "getRentalPayment",
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction",
@@ -79,14 +84,12 @@ export default {
       this.getRentalPaymentAction({ uid: this.uid })
         .then((data) => {
           this.data = data.data;
-          this.data.processing_fees = 3;
-          this.data.service_fees = 0;
           this.origPrice = data.data.price;
           if (!this.editMode) {
             this.data.penalty = this.calculatePenalty(data.data);
             this.data.paymentdate = moment().format("YYYY-MM-DD");
-          } else {
-            this.data.penalty = data.data.penalty;
+            this.data.processing_fees = 3;
+            this.data.service_fees = 0;
           }
           this.$Progress.finish();
           this.endLoadingAction();
@@ -156,6 +159,31 @@ export default {
           this.close();
         });
     },
+    updateRentalPayment() {
+      this.showLoadingAction();
+      this.$Progress.start();
+      console.log(this.data);
+      this.updateRentalPaymentAction(this.data)
+        .then((data) => {
+          Toast.fire({
+            icon: "success",
+            title: "Successful Updated. ",
+          });
+          this.$Progress.finish();
+          this.endLoadingAction();
+          this.$emit("updated", data.data);
+          this.close();
+        })
+        .catch((error) => {
+          Toast.fire({
+            icon: "warning",
+            title: "Something went wrong!!!!! ",
+          });
+          this.$Progress.finish();
+          this.endLoadingAction();
+          this.close();
+        });
+    },
   },
 };
 </script>
@@ -169,6 +197,24 @@ export default {
             <v-text-field
               label="Reference No"
               v-model="data.referenceno"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12">
+            <v-text-field
+              label="Receive From"
+              v-model="data.receive_from"
+            ></v-text-field>
+          </v-col>
+          <!-- <v-col cols="12">
+            <v-text-field
+              label="Issue By"
+              v-model="data.issue_by"
+            ></v-text-field>
+          </v-col> -->
+          <v-col cols="12">
+            <v-text-field
+              label="Payment Method"
+              v-model="data.paymentmethod"
             ></v-text-field>
           </v-col>
           <v-col cols="12">
@@ -231,6 +277,16 @@ export default {
               v-model="data.penalty"
             ></v-text-field>
           </v-col>
+          <v-col cols="12">
+            <v-text-field label="Remark" v-model="data.remark"></v-text-field>
+          </v-col>
+          <v-col cols="12" v-if="editMode">
+            <div>Paid Status</div>
+            <v-radio-group v-model="data.paid" row>
+              <v-radio label="Paid" :value="1"></v-radio>
+              <v-radio label="Unpaid" :value="0"></v-radio>
+            </v-radio-group>
+          </v-col>
         </v-row>
       </v-container>
     </v-card-text>
@@ -249,7 +305,12 @@ export default {
       </services-dialog> -->
       <v-spacer></v-spacer>
       <v-btn color="blue darken-1" text @click="close()">Close</v-btn>
-      <v-btn color="blue darken-1" text @click="makePayment()">Save</v-btn>
+      <v-btn
+        color="blue darken-1"
+        text
+        @click="() => (editMode ? updateRentalPayment() : makePayment())"
+        >Save</v-btn
+      >
     </v-card-actions>
   </v-card>
 </template>

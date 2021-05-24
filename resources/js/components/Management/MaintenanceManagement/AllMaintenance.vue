@@ -243,12 +243,27 @@ export default {
 
 <template>
   <v-app>
-    <navbar></navbar>
+    <navbar
+      :returnRole="
+        (role) => {
+          this.role = role;
+        }
+      "
+    ></navbar>
     <v-content :class="helpers.managementStyles().backgroundClass">
       <v-container class="fill-height" fluid>
         <loading></loading>
         <v-row justify="center" align="center" class="ma-3">
-          <v-col cols="12">
+          <v-col
+            cols="12"
+            v-if="
+              helpers.isAccessible(
+                _.get(role, ['name']),
+                'roomMaintenance',
+                'create'
+              )
+            "
+          >
             <maintenance-form
               :editMode="false"
               :buttonStyle="maintenanceFormDialogConfig.buttonStyle"
@@ -307,7 +322,18 @@ export default {
             </v-card>
           </v-col>
         </v-row>
-        <v-row justify="center" align="center" class="ma-3">
+        <v-row
+          justify="center"
+          align="center"
+          class="ma-3"
+          v-if="
+            helpers.isAccessible(
+              _.get(role, ['name']),
+              'roomMaintenance',
+              'read'
+            )
+          "
+        >
           <v-col cols="12">
             <v-card class="pa-8" raised>
               <v-data-table
@@ -326,26 +352,26 @@ export default {
                       @submitFilter="initMaintenanceFilter($event)"
                     ></maintenance-filter-dialog>
                   </v-toolbar>
-                    <v-toolbar
-                      flat
-                      class="mb-5 justify-end d-flex"
-                      v-if="_.isArray(excelData) && !_.isEmpty(excelData)"
+                  <v-toolbar
+                    flat
+                    class="mb-5 justify-end d-flex"
+                    v-if="_.isArray(excelData) && !_.isEmpty(excelData)"
+                  >
+                    <download-excel
+                      :header="`All_Maintenance_${moment().format(
+                        'YYYY_MM_DD'
+                      )}`"
+                      :name="`All_Maintenance_${moment().format(
+                        'YYYY_MM_DD'
+                      )}.csv`"
+                      type="csv"
+                      :data="excelData || []"
+                      :fields="excelFields || {}"
+                      ><v-btn text color="primary"
+                        >Download as Excel</v-btn
+                      ></download-excel
                     >
-                      <download-excel
-                        :header="`All_Maintenance_${moment().format(
-                          'YYYY_MM_DD'
-                        )}`"
-                        :name="`All_Maintenance_${moment().format(
-                          'YYYY_MM_DD'
-                        )}.csv`"
-                        type="csv"
-                        :data="excelData || []"
-                        :fields="excelFields || {}"
-                        ><v-btn text color="primary"
-                          >Download as Excel</v-btn
-                        ></download-excel
-                      >
-                    </v-toolbar>
+                  </v-toolbar>
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showMaintenance(props.item)">

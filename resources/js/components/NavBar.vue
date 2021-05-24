@@ -2,9 +2,11 @@
 
 <script>
 import { mapActions } from "vuex";
+import { checkIsAccessible, _ } from "../common/common-function";
 export default {
   props: {
     source: String,
+    returnRole: Function,
   },
   data: () => ({
     drawer: null,
@@ -14,85 +16,85 @@ export default {
       //   icon: "mdi-home-outline",
       //   text: "Home",
       //   name: "home",
-      //   modulename: "home"
+      //   module: "home"
       // },
       {
         icon: "mdi-view-dashboard-outline",
         text: "Dashboard",
         name: "management",
-        modulename: "management",
+        module: "management",
       },
       {
         icon: "mdi-account-cog",
         text: "Staff",
         name: "staffs",
-        modulename: "staff",
+        module: "staff",
       },
       {
         icon: "mdi-account-tie",
         text: "Owner",
         name: "owners",
-        modulename: "owner",
+        module: "owner",
       },
       {
         icon: "mdi-account-group",
         text: "Tenant",
         name: "tenants",
-        modulename: "tenant",
+        module: "tenant",
       },
       {
         icon: "mdi-home-group",
         text: "Room Type",
         name: "roomtypes",
-        modulename: "roomtype",
+        module: "roomType",
       },
       {
         icon: "mdi-washing-machine",
         text: "Service",
         name: "services",
-        modulename: "service",
+        module: "service",
       },
       {
         icon: "mdi-home-city-outline",
         text: "Room",
         name: "rooms",
-        modulename: "room",
+        module: "room",
       },
       {
         icon: "mdi-bank-plus",
         text: "Room Contract",
         name: "roomcontracts",
-        modulename: "roomcontract",
+        module: "roomContract",
       },
       {
         icon: "mdi-home-currency-usd",
         text: "Rental Payment",
         name: "rentalpayments",
-        modulename: "rentalpayment",
+        module: "rentalPayment",
       },
       // {
       //   icon: "mdi-home-currency-usd",
       //   text: "Claim",
       //   name: "claims",
-      //   modulename: "claim",
+      //   module: "claim",
       // },
       {
         icon: "mdi-screwdriver",
         text: "Room Maintenance",
         name: "maintenances",
-        modulename: "maintenance",
+        module: "roomMaintenance",
       },
       // {
       //   icon: "mdi-chair-rolling",
       //   text: "Property",
       //   name: "properties",
-      //   modulename: "property",
+      //   module: "property",
       // },
       // {
       //   icon: "mdi-file-document-edit-outline",
       //   text: "Contract",
       //   name: "contracts",
-      //   modulename: "contract",
+      //   module: "contract",
       // },
     ],
   }),
@@ -104,36 +106,16 @@ export default {
       return this.$store.getters.userModules;
     },
     roleNavItems() {
-      switch (this.role.name) {
-        case "superadmin":
-          return this.items;
-          break;
-        case "admin":
-          return this.items;
-          break;
-        case "manager":
-          return this.items.filter(function (item) {
-            return item.modulename != "user";
-          });
-          break;
-        case "cashier":
-          return this.items.filter(function (item) {
-            return (
-              item.modulename == "rentalpayment" ||
-              item.modulename == "management"
-            );
-          });
-          break;
-        case "tenant":
-          return [];
-          break;
-        case "owner":
-          return [];
-          break;
-        default:
-          return [];
-          break;
-      }
+      let roleItems = [];
+      let self = this;
+      _.forEach(this.items, function (item) {
+        if (checkIsAccessible(self.role.name, item.module, "nav") == true) {
+          roleItems.push(item);
+        }
+      });
+      console.log("roleItems");
+      console.log(roleItems);
+      return roleItems;
     },
   },
   created() {
@@ -142,6 +124,13 @@ export default {
       .then((res) => {
         this.role = res.data.data.role;
         this.endLoadingAction();
+        try {
+          if (this.returnRole) {
+            this.returnRole(this.role);
+          }
+        } catch (error) {
+          console.log(error);
+        }
       })
       .catch((error) => {
         console.log("error");

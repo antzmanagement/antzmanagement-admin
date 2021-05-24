@@ -140,8 +140,17 @@ export default {
 
 <template>
   <v-app>
-    <navbar></navbar>
-    <v-content :class="helpers.managementStyles().backgroundClass">
+    <navbar
+      :returnRole="
+        (role) => {
+          this.role = role;
+        }
+      "
+    ></navbar>
+    <v-content
+      :class="helpers.managementStyles().backgroundClass"
+      v-if="helpers.isAccessible(_.get(role, ['name']), 'room', 'read')"
+    >
       <v-container>
         <loading></loading>
         <v-card
@@ -339,7 +348,7 @@ export default {
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Unit</label>
                   <div class="form-control-plaintext">
-                    <h4>{{ data.name }}</h4>
+                    <h4>{{ data.unit }}</h4>
                   </div>
                 </div>
               </v-col>
@@ -392,7 +401,11 @@ export default {
                   </div>
                 </div>
               </v-col>
-              <v-col cols="12" md="4" v-if="_.isArray(data.owners) && !_.isEmpty(data.owners)">
+              <v-col
+                cols="12"
+                md="4"
+                v-if="_.isArray(data.owners) && !_.isEmpty(data.owners)"
+              >
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Is Sublet</label>
                   <div class="form-control-plaintext">
@@ -400,7 +413,11 @@ export default {
                   </div>
                 </div>
               </v-col>
-              <v-col cols="12" md="4"  v-if="_.isArray(data.owners) && !_.isEmpty(data.owners)">
+              <v-col
+                cols="12"
+                md="4"
+                v-if="_.isArray(data.owners) && !_.isEmpty(data.owners)"
+              >
                 <div class="form-group mb-0">
                   <label
                     class="form-label mb-0"
@@ -462,7 +479,16 @@ export default {
                             </div>
                           </v-col>
                           <v-spacer></v-spacer>
-                          <v-col cols="auto">
+                          <v-col
+                            cols="auto"
+                            v-if="
+                              helpers.isAccessible(
+                                _.get(role, ['name']),
+                                'roomMaintenance',
+                                'create'
+                              )
+                            "
+                          >
                             <maintenance-form
                               :editMode="false"
                               :buttonStyle="
@@ -494,7 +520,12 @@ export default {
               :color="helpers.managementStyles().dividerColor"
             ></v-divider>
             <v-row class="pa-2" justify="end" align="center">
-              <v-col cols="auto">
+              <v-col
+                cols="auto"
+                v-if="
+                  helpers.isAccessible(_.get(role, ['name']), 'room', 'edit')
+                "
+              >
                 <room-form
                   :editMode="true"
                   :buttonStyle="editButtonStyle"
@@ -502,7 +533,12 @@ export default {
                   @updated="refreshPage()"
                 ></room-form>
               </v-col>
-              <v-col cols="auto">
+              <v-col
+                cols="auto"
+                v-if="
+                  helpers.isAccessible(_.get(role, ['name']), 'room', 'delete')
+                "
+              >
                 <confirm-dialog
                   :activatorStyle="deleteButtonConfig.buttonStyle"
                   @confirmed="deleteRoom($event, data.uid)"

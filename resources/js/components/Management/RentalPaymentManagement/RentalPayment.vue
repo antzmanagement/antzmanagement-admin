@@ -94,7 +94,13 @@ export default {
 
 <template>
   <v-app>
-    <navbar></navbar>
+    <navbar
+      :returnRole="
+        (role) => {
+          this.role = role;
+        }
+      "
+    ></navbar>
     <v-content :class="helpers.managementStyles().backgroundClass">
       <v-container>
         <loading></loading>
@@ -176,7 +182,16 @@ export default {
               :color="helpers.managementStyles().dividerColor"
             ></v-divider>
             <v-row class="pa-2" justify="end" align="center">
-              <v-col cols="auto">
+              <v-col
+                cols="auto"
+                v-if="
+                  helpers.isAccessible(
+                    _.get(role, ['name']),
+                    'rentalPayment',
+                    'edit'
+                  )
+                "
+              >
                 <rental-payment-form
                   :editMode="true"
                   :buttonStyle="editButtonStyle"
@@ -184,7 +199,14 @@ export default {
                   @updated="refreshPage()"
                 ></rental-payment-form>
               </v-col>
-              <v-col cols="auto">
+              <v-col cols="auto" 
+                v-if="
+                  helpers.isAccessible(
+                    _.get(role, ['name']),
+                    'rentalPayment',
+                    'delete'
+                  )
+                ">
                 <confirm-dialog
                   :activatorStyle="deleteButtonConfig.buttonStyle"
                   @confirmed="deleteRentalPayment($event, data.uid)"

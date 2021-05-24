@@ -244,40 +244,40 @@ export default {
         id: "id",
         sequence: "sequence",
         room: {
-          field : 'room',
-          callback : (value) => {
-            return _.get(value , `name`) || 'N/A';
-          }
+          field: "room",
+          callback: (value) => {
+            return _.get(value, `name`) || "N/A";
+          },
         },
         room_id: {
-          field : 'room',
-          callback : (value) => {
-            return _.get(value , `id`) || 'N/A';
-          }
+          field: "room",
+          callback: (value) => {
+            return _.get(value, `id`) || "N/A";
+          },
         },
         contract: {
-          field : 'contract',
-          callback : (value) => {
-            return _.get(value , `name`) || 'N/A';
-          }
+          field: "contract",
+          callback: (value) => {
+            return _.get(value, `name`) || "N/A";
+          },
         },
         contract_id: {
-          field : 'contract',
-          callback : (value) => {
-            return _.get(value , `id`) || 'N/A';
-          }
+          field: "contract",
+          callback: (value) => {
+            return _.get(value, `id`) || "N/A";
+          },
         },
         tenant: {
-          field : 'tenant',
-          callback : (value) => {
-            return _.get(value , `name`) || 'N/A';
-          }
+          field: "tenant",
+          callback: (value) => {
+            return _.get(value, `name`) || "N/A";
+          },
         },
         tenant_id: {
-          field : 'tenant',
-          callback : (value) => {
-            return _.get(value , `id`) || 'N/A';
-          }
+          field: "tenant",
+          callback: (value) => {
+            return _.get(value, `id`) || "N/A";
+          },
         },
         startdate: "startdate",
         enddate: "enddate",
@@ -289,13 +289,13 @@ export default {
         agreement_fees: "agreement_fees",
         outstanding_deposit: "outstanding_deposit",
         checkedout: {
-          field : 'sublet',
-          callback : (value) => value ? 'Yes' : 'No',
+          field: "sublet",
+          callback: (value) => (value ? "Yes" : "No"),
         },
         checkout_date: "checkout_date",
         checkout_charges: "checkout_charges",
         checkout_remark: "checkout_remark",
-        remark : 'remark',
+        remark: "remark",
         created_at: "created_at",
         updated_at: "updated_at",
       },
@@ -494,7 +494,13 @@ export default {
 <template>
   <v-app id="inspire">
     <loading></loading>
-    <navbar></navbar>
+    <navbar
+      :returnRole="
+        (role) => {
+          this.role = role;
+        }
+      "
+    ></navbar>
     <v-content class="grey lighten-2">
       <div class="pb-5"></div>
 
@@ -556,7 +562,9 @@ export default {
                 <download-excel
                   :data="unpaidrentals"
                   type="csv"
-                  :header="`Unpaid_Rental_Tenant_Data_${moment().format('YYYY_MM_DD')}`"
+                  :header="`Unpaid_Rental_Tenant_Data_${moment().format(
+                    'YYYY_MM_DD'
+                  )}`"
                   :name="`Unpaid_Rental_Tenant_Data_${moment().format(
                     'YYYY_MM_DD'
                   )}.csv`"
@@ -700,11 +708,17 @@ export default {
                         :rentalpayment="selectedRental"
                       >mdi-pencil</rental-print>-->
                       <v-icon
+                        v-else-if="
+                          helpers.isAccessible(
+                            _.get(role, ['name']),
+                            'rentalPayment',
+                            'makePayment'
+                          )
+                        "
                         small
                         class="mr-2"
                         @click="openPaymentDialog(props.item.uid, false)"
                         color="warning"
-                        v-else
                         >mdi-currency-usd</v-icon
                       >
 
@@ -734,7 +748,9 @@ export default {
                 <download-excel
                   :data="roomContractAlmostEnd"
                   type="csv"
-                  :header="`Room_Contract_End_In_3_Months_${moment().format('YYYY_MM_DD')}`"
+                  :header="`Room_Contract_End_In_3_Months_${moment().format(
+                    'YYYY_MM_DD'
+                  )}`"
                   :name="`Room_Contract_End_In_3_Months_${moment().format(
                     'YYYY_MM_DD'
                   )}.csv`"

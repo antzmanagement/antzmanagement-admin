@@ -42,6 +42,7 @@ trait RoomContractServices
         }, 'rentalpayments' => function ($q) {
             // Query the name field in status table
             $q->where('status', true);
+            $q->with('issueby');
         }, 'childrenroomcontracts' => function ($q) {
             // Query the name field in status table
             $q->where('status', true);
@@ -196,6 +197,7 @@ trait RoomContractServices
         }, 'rentalpayments' => function ($q) {
             // Query the name field in status table
             $q->where('status', true);
+            $q->with('issueby');
         }, 'childrenroomcontracts' => function ($q) {
             // Query the name field in status table
             $q->where('status', true);
@@ -258,8 +260,8 @@ trait RoomContractServices
         $data->uid = Carbon::now()->timestamp . RoomContract::count();
         $data->name = $params->name;
         $data->duration = $this->toInt($params->duration);
-        $data->left = $data->duration;
-        $data->latest = 0;
+        $data->latest = $this->toInt($params->latest);
+        $data->left = $data->duration - $data->latest;
         $data->expired = false;
         $data->terms  = $params->terms;
         // $data->autorenew  = $params->autorenew;
@@ -268,6 +270,7 @@ trait RoomContractServices
         $data->penalty  = $this->toDouble($params->penalty);
         $data->startdate  = $this->toDate($params->startdate);
         $data->enddate  = $this->toDate($params->enddate);
+        $data->rental_payment_start_date  = $this->toDate($params->rental_payment_start_date);
         $data->rental_type  = $params->rental_type;
         $data->booking_fees  = $this->toDouble($params->booking_fees);
         $data->agreement_fees  = $this->toDouble($params->agreement_fees);
@@ -470,12 +473,22 @@ trait RoomContractServices
         $rentalpayments = $data->rentalpayments()->where('status', true)->get();
 
         $duration = $data->duration;
-        $data->left = $data->duration - $rentalpayments->count();
-
-
-        $startdate = $data->startdate;
         $latest = 0;
-        for ($x = 0; $x < $duration; $x++) {
+        $startdate = $data->startdate;
+        $rental_payment_start_date = $data->rental_payment_start_date;
+        if($data->rental_type == 'day'){
+            if($rental_payment_start_date){
+                $latest = Carbon::parse($startdate)->diffInDays(Carbon::parse($rental_payment_start_date));
+            }
+        }else{
+            if($rental_payment_start_date){
+                $latest = Carbon::parse($startdate)->diffInMonths(Carbon::parse($rental_payment_start_date));
+            }
+        }
+        error_log('before');
+        error_log($latest);
+        $data->left = $data->duration - $latest - $rentalpayments->count();
+        for ($x = $latest; $x < $duration; $x++) {
 
             if($data->rental_type == 'day'){
                 $latestdate = Carbon::parse($startdate)->addDay($latest);
@@ -498,66 +511,71 @@ trait RoomContractServices
             $latest++;
         }
 
+        error_log('after');
+        error_log($latest);
+        error_log('left');
+        error_log($data->left);
+
         if ($data->left <= 0) {
             $data->expired = true;
-            if ($data->autorenew) {
+            // if ($data->autorenew) {
 
-                $contract = $data->contract;
-                if ($this->isEmpty($contract)) {
-                    DB::rollBack();
-                    return $this->notFoundResponse('Contract');
-                }
+            //     $contract = $data->contract;
+            //     if ($this->isEmpty($contract)) {
+            //         DB::rollBack();
+            //         return $this->notFoundResponse('Contract');
+            //     }
         
 
-                if($contract->rental_type == 'day'){
-                    $startdate = Carbon::parse($data->startdate)->addDay($duration + 1)->format('Y-m-d');
-                    $enddate = Carbon::parse($startdate)->addDay($duration)->format('Y-m-d');
-                }else{
-                    $startdate = Carbon::parse($data->startdate)->addMonth($duration + 1)->format('Y-m-d');
-                    $enddate = Carbon::parse($startdate)->addMonth($duration)->format('Y-m-d');
-                }
+            //     if($contract->rental_type == 'day'){
+            //         $startdate = Carbon::parse($data->startdate)->addDay($duration + 1)->format('Y-m-d');
+            //         $enddate = Carbon::parse($startdate)->addDay($duration)->format('Y-m-d');
+            //     }else{
+            //         $startdate = Carbon::parse($data->startdate)->addMonth($duration + 1)->format('Y-m-d');
+            //         $enddate = Carbon::parse($startdate)->addMonth($duration)->format('Y-m-d');
+            //     }
 
-                $origServiceIds = $data->origservices()->wherePivot('status', true)->get();
-                $origServiceIds = $origServiceIds->pluck('id');
-                $addOnServicesIds = $data->addonservices()->wherePivot('status', true)->get();
-                $addOnServicesIds = $addOnServicesIds->pluck('id');
+            //     $origServiceIds = $data->origservices()->wherePivot('status', true)->get();
+            //     $origServiceIds = $origServiceIds->pluck('id');
+            //     $addOnServicesIds = $data->addonservices()->wherePivot('status', true)->get();
+            //     $addOnServicesIds = $addOnServicesIds->pluck('id');
 
-                if($data->room_contract_id){
-                    $parentId = $data->room_contract_id;
-                }else{
-                    $parentId = $data->id;
-                }
-                $params = collect([
-                    'room_id' => $data->room_id,
-                    'tenant_id' => $data->tenant_id,
-                    'contract_id' => $data->contract_id,
-                    'room_contract_id' => $parentId,
-                    'orig_service_ids' => $origServiceIds,
-                    'add_on_service_ids' => $addOnServicesIds,
-                    'name' => $data->room->unit . '_' . $startdate. '_' . $contract->name,
-                    'duration' => $duration,
-                    'terms' => $data->terms,
-                    'penalty' => $contract->penalty,
-                    'penalty_day' => $contract->penalty_day,
-                    'rental_type' => $contract->rental_type,
-                    'autorenew' => $contract->autorenew,
-                    'startdate' => $startdate,
-                    'enddate' => $enddate,
-                    'rental' => $data->rental,
-                    'deposit' => $data->deposit,
-                    'agreement_fees' => $data->agreement_fees,
-                    'booking_fees' => $data->booking_fees,
-                    'agreement_fees' => $data->agreement_fees,
-                    'outstanding_deposit' => $data->outstanding_deposit,
-                ]);
+            //     if($data->room_contract_id){
+            //         $parentId = $data->room_contract_id;
+            //     }else{
+            //         $parentId = $data->id;
+            //     }
+            //     $params = collect([
+            //         'room_id' => $data->room_id,
+            //         'tenant_id' => $data->tenant_id,
+            //         'contract_id' => $data->contract_id,
+            //         'room_contract_id' => $parentId,
+            //         'orig_service_ids' => $origServiceIds,
+            //         'add_on_service_ids' => $addOnServicesIds,
+            //         'name' => $data->room->unit . '_' . $startdate. '_' . $contract->name,
+            //         'duration' => $duration,
+            //         'terms' => $data->terms,
+            //         'penalty' => $contract->penalty,
+            //         'penalty_day' => $contract->penalty_day,
+            //         'rental_type' => $contract->rental_type,
+            //         'autorenew' => $contract->autorenew,
+            //         'startdate' => $startdate,
+            //         'enddate' => $enddate,
+            //         'rental' => $data->rental,
+            //         'deposit' => $data->deposit,
+            //         'agreement_fees' => $data->agreement_fees,
+            //         'booking_fees' => $data->booking_fees,
+            //         'agreement_fees' => $data->agreement_fees,
+            //         'outstanding_deposit' => $data->outstanding_deposit,
+            //     ]);
 
-                //Convert To Json Object
-                $params = json_decode(json_encode($params));
-                $roomContract = $this->createRoomContract($params);
-                if($this->isEmpty($roomContract)){
-                    return null;
-                }
-             }
+            //     //Convert To Json Object
+            //     $params = json_decode(json_encode($params));
+            //     $roomContract = $this->createRoomContract($params);
+            //     if($this->isEmpty($roomContract)){
+            //         return null;
+            //     }
+            //  }
         }else{
            $data->expired = false; 
         }
@@ -692,7 +710,7 @@ trait RoomContractServices
         return ['id', 'uid', 'name', 'room_id', 'tenant_id','duration', 'left' ,
         'latest', 'expired', 'terms', 'autorenew', 'startdate',
         'booking_fees','deposit','rental', 'outstanding_deposit',
-         'orig_service_ids', 'add_on_service_ids', 'room_contract_id'];
+         'orig_service_ids', 'add_on_service_ids', 'room_contract_id', 'rental_payment_start_date'];
     }
 
     public function roomContractDefaultCols()

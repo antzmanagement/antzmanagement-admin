@@ -220,8 +220,6 @@ export default {
                 data.data.addonservices
               );
               data.data.room.contract_id = data.data.contract.id;
-              data.data.startdate = data.data.startdate;
-              data.data.enddate = data.data.enddate;
               data.data.autorenew = data.data.autorenew;
 
               data.data.room.deposit = parseFloat(data.data.deposit);
@@ -236,6 +234,8 @@ export default {
               data.data.room.price = parseFloat(data.data.rental);
               data.data.room.startdate = data.data.startdate;
               data.data.room.enddate = data.data.enddate;
+              data.data.room.rental_payment_start_date =
+                data.data.rental_payment_start_date;
               data.data.room.autorenew = data.data.autorenew;
               this.data = new Form(data.data);
 
@@ -628,6 +628,7 @@ export default {
                         <th class="text-left">Contract</th>
                         <th class="text-left">Contract Start Date</th>
                         <th class="text-left">Contract End Date</th>
+                        <th class="text-left">Rental Start Date</th>
                         <!-- <th class="text-left">Auto Renew</th> -->
                         <th class="text-left">Services</th>
                       </tr>
@@ -773,6 +774,32 @@ export default {
                             </template>
                             <v-date-picker
                               v-model="data.room.enddate"
+                              no-title
+                              scrollable
+                            ></v-date-picker>
+                          </v-menu>
+                        </td>
+                        <td>
+                          <v-menu
+                            ref="menu"
+                            v-model="data.room.rentalstartdatemenu"
+                            :close-on-content-click="true"
+                            transition="scale-transition"
+                            :disabled="editMode"
+                            offset-y
+                          >
+                            <template v-slot:activator="{ on }">
+                              <v-text-field
+                                v-model="data.room.rental_payment_start_date"
+                                label="Rental Start Date"
+                                prepend-icon="event"
+                                readonly
+                                :disabled="editMode"
+                                v-on="on"
+                              ></v-text-field>
+                            </template>
+                            <v-date-picker
+                              v-model="data.room.rental_payment_start_date"
                               no-title
                               scrollable
                             ></v-date-picker>

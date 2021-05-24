@@ -1,5 +1,7 @@
 
 import moment from "moment"; //Import Moment
+import _ from 'lodash';
+import { checkIsAccessible } from "./common/common-function";
 
 const helpers = {
     toDouble(data) {
@@ -65,28 +67,28 @@ const helpers = {
     },
 
     sortBy(data, col) {
-        if(this.isEmpty(data) || this.isEmpty(col)){
+        if (this.isEmpty(data) || this.isEmpty(col)) {
             return null;
         }
 
-        data = data.sort(function(a, b){
+        data = data.sort(function (a, b) {
             return a[col] - b[col];
         })
 
     },
-    
+
 
     sortByDate(data, col) {
-        if(this.isEmpty(data) || this.isEmpty(col)){
+        if (this.isEmpty(data) || this.isEmpty(col)) {
             return [];
         }
 
-        data = data.sort(function(a, b){
-            if(moment(a[col]).isSame(moment(b[col]), 'year') && moment(a[col]).isSame(moment(b[col]), 'month')){
+        data = data.sort(function (a, b) {
+            if (moment(a[col]).isSame(moment(b[col]), 'year') && moment(a[col]).isSame(moment(b[col]), 'month')) {
                 return 0;
-            }else if(moment(a[col]).isSameOrBefore(moment(b[col]), 'year') && moment(a[col]).isBefore(moment(b[col]), 'month')){
+            } else if (moment(a[col]).isSameOrBefore(moment(b[col]), 'year') && moment(a[col]).isBefore(moment(b[col]), 'month')) {
                 return -1;
-            }else{
+            } else {
                 return 1;
             }
         })
@@ -96,11 +98,11 @@ const helpers = {
     },
 
     includedInArray(value, array, col) {
-        if(this.isEmpty(value) || this.isEmpty(array) || this.isEmpty(col)){
+        if (this.isEmpty(value) || this.isEmpty(array) || this.isEmpty(col)) {
             return [];
         }
 
-       return array.includes(function(item){
+        return array.includes(function (item) {
             return item[col] == value;
         })
 
@@ -130,17 +132,22 @@ const helpers = {
             formCardColor: '#FAFAFA',
             dividerColor: '#ffffff',
             mainButtonColor: 'blue lighten-3',
-            titleClass : 'font-weight-black display-1 d-inline-block',
-            subtitleClass : 'font-weight-bold title d-inline-block',
-            lightSubtitleClass : 'font-weight-regular title d-inline-block ',
-            textClass : 'font-weight-regular title-1 d-inline-block',
-            centerWrapperClass : 'd-flex flex-wrap justify-center align-center',
+            titleClass: 'font-weight-black display-1 d-inline-block',
+            subtitleClass: 'font-weight-bold title d-inline-block',
+            lightSubtitleClass: 'font-weight-regular title d-inline-block ',
+            textClass: 'font-weight-regular title-1 d-inline-block',
+            centerWrapperClass: 'd-flex flex-wrap justify-center align-center',
 
         }
 
         return styles;
 
     },
+
+    isAccessible(role, module, action) {
+        return checkIsAccessible(role, module, action)
+    }
+
 
 };
 

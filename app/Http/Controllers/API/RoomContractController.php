@@ -99,6 +99,11 @@ class RoomContractController extends Controller
 
         $startdate = Carbon::parse($request->room->startdate)->format('Y-m-d');
         $enddate = Carbon::parse($request->room->enddate)->format('Y-m-d');
+        if(isset($request->room->rental_payment_start_date)){
+            $rental_payment_start_date = Carbon::parse($request->room->rental_payment_start_date)->format('Y-m-d');
+        }else{
+            $rental_payment_start_date = $startdate;
+        }
 
         $duration = $contract->duration;
         if($contract->rental_type == 'day'){
@@ -106,6 +111,18 @@ class RoomContractController extends Controller
         }else{
             $duration = Carbon::parse($startdate)->diffInMonths(Carbon::parse($enddate)) + 1;
         }
+
+        $latest = 0;
+        if($contract->rental_type == 'day'){
+            if(isset($request->room->rental_payment_start_date)){
+                $latest = Carbon::parse($startdate)->diffInDays(Carbon::parse($rental_payment_start_date));
+            }
+        }else{
+            if(isset($request->room->rental_payment_start_date)){
+                $latest = Carbon::parse($startdate)->diffInMonths(Carbon::parse($rental_payment_start_date));
+            }
+        }
+
 
         $servicesIds = collect($request->room->services)->pluck('id');
         $origServiceIds = collect($request->room->origServices)->pluck('id');
@@ -120,6 +137,7 @@ class RoomContractController extends Controller
             'add_on_service_ids' => $addOnServicesIds,
             'name' => $startdate. ' - ' . $enddate,
             'duration' => $duration,
+            'latest' => $latest,
             'penalty' => $contract->penalty,
             'penalty_day' => $contract->penalty_day,
             'rental_type' => $contract->rental_type,
@@ -127,6 +145,7 @@ class RoomContractController extends Controller
             'autorenew' => $request->room->autorenew,
             'startdate' => $startdate,
             'enddate' => $enddate,
+            'rental_payment_start_date' => $rental_payment_start_date,
             'rental' => $request->room->price,
             'deposit' => $request->room->deposit,
             'agreement_fees' => $request->room->agreement_fees,

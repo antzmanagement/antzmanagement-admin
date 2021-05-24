@@ -85,8 +85,17 @@ export default {
 
 <template>
   <v-app>
-    <navbar></navbar>
-    <v-content :class="helpers.managementStyles().backgroundClass">
+    <navbar
+      :returnRole="
+        (role) => {
+          this.role = role;
+        }
+      "
+    ></navbar>
+    <v-content
+      :class="helpers.managementStyles().backgroundClass"
+      v-if="helpers.isAccessible(_.get(role, ['name']), 'service', 'read')"
+    >
       <v-container>
         <loading></loading>
         <v-card
@@ -116,7 +125,7 @@ export default {
                     </v-chip>
                   </div>
                 </div>
-              </v-col>  
+              </v-col>
               <v-col cols="6">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Price</label>
@@ -157,7 +166,12 @@ export default {
               :color="helpers.managementStyles().dividerColor"
             ></v-divider>
             <v-row class="pa-2" justify="end" align="center">
-              <v-col cols="auto">
+              <v-col
+                cols="auto"
+                v-if="
+                  helpers.isAccessible(_.get(role, ['name']), 'service', 'edit')
+                "
+              >
                 <v-btn
                   color="success"
                   class="ma-3"
@@ -166,7 +180,16 @@ export default {
                   <v-icon left>mdi-pencil</v-icon>Edit
                 </v-btn>
               </v-col>
-              <v-col cols="auto">
+              <v-col
+                cols="auto"
+                v-if="
+                  helpers.isAccessible(
+                    _.get(role, ['name']),
+                    'service',
+                    'delete'
+                  )
+                "
+              >
                 <confirm-dialog
                   :activatorStyle="deleteButtonConfig.buttonStyle"
                   @confirmed="deleteService($event, data.uid)"

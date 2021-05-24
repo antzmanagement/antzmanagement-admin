@@ -96,8 +96,19 @@ export default {
 
 <template>
   <v-app>
-    <navbar></navbar>
-    <v-content :class="helpers.managementStyles().backgroundClass">
+    <navbar
+      :returnRole="
+        (role) => {
+          this.role = role;
+        }
+      "
+    ></navbar>
+    <v-content
+      :class="helpers.managementStyles().backgroundClass"
+      v-if="
+        helpers.isAccessible(_.get(role, ['name']), 'roomMaintenance', 'read')
+      "
+    >
       <v-container>
         <loading></loading>
         <v-card
@@ -219,7 +230,16 @@ export default {
               :color="helpers.managementStyles().dividerColor"
             ></v-divider>
             <v-row class="pa-2" justify="end" align="center">
-              <v-col cols="auto">
+              <v-col
+                cols="auto"
+                v-if="
+                  helpers.isAccessible(
+                    _.get(role, ['name']),
+                    'roomMaintenance',
+                    'edit'
+                  )
+                "
+              >
                 <maintenance-form
                   :editMode="true"
                   :buttonStyle="editButtonStyle"
@@ -227,7 +247,16 @@ export default {
                   @updated="refreshPage()"
                 ></maintenance-form>
               </v-col>
-              <v-col cols="auto">
+              <v-col
+                cols="auto"
+                v-if="
+                  helpers.isAccessible(
+                    _.get(role, ['name']),
+                    'roomMaintenance',
+                    'delete'
+                  )
+                "
+              >
                 <confirm-dialog
                   :activatorStyle="deleteButtonConfig.buttonStyle"
                   @confirmed="deleteMaintenance($event, data.uid)"

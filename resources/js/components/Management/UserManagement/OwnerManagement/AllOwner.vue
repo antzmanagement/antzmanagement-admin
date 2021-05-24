@@ -7,6 +7,7 @@ import { _ } from "../../../../common/common-function";
 export default {
   data() {
     return {
+      role : '',
       moment: moment,
       _: _,
       totalDataLength: 0,
@@ -214,7 +215,13 @@ export default {
 
 <template>
   <v-app>
-    <navbar></navbar>
+    <navbar
+      :returnRole="
+        (role) => {
+          this.role = role;
+        }
+      "
+    ></navbar>
     <v-content :class="helpers.managementStyles().backgroundClass">
       <v-container class="fill-height" fluid>
         <loading></loading>
@@ -224,6 +231,9 @@ export default {
               :editMode="false"
               :buttonStyle="ownerFormDialogConfig.buttonStyle"
               @created="showOwner($event)"
+              v-if="
+                helpers.isAccessible(_.get(role, ['name']), 'owner', 'create')
+              "
             ></owner-form>
           </v-col>
         </v-row>
@@ -256,7 +266,10 @@ export default {
             </v-card>
           </v-col>
         </v-row>
-        <v-row justify="center" align="center" class="ma-3">
+        <v-row justify="center" align="center" class="ma-3" 
+              v-if="
+                helpers.isAccessible(_.get(role, ['name']), 'owner', 'read')
+              ">
           <v-col cols="12">
             <v-card class="pa-8" raised>
               <v-data-table
