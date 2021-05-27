@@ -81,13 +81,10 @@ export default {
       },
       headers: [
         {
-          text: "Id",
+          text: "Unit No.",
         },
         {
           text: "Name",
-        },
-        {
-          text: "Age",
         },
         {
           text: "Birthday",
@@ -95,11 +92,9 @@ export default {
         {
           text: "Gender",
         },
-        { text: "Ic No", value: "icno" },
-        { text: "Phone", value: "tel1" },
-        { text: "Email", value: "email" },
-        { text: "Religion" },
-        { text: "Occupation" },
+        { text: "Ic No" },
+        { text: "Phone" },
+        { text: "Emergency Contact" },
         {
           text: "Approach Methods",
         },
@@ -174,6 +169,10 @@ export default {
       }
       if (filterGroup.birthdaytodate) {
         this.tenantFilterGroup.birthdaytodate = filterGroup.birthdaytodate;
+      }
+      if (filterGroup.room) {
+        this.tenantFilterGroup.room_id = filterGroup.room.id;
+        this.tenantFilterGroup.room = filterGroup.room;
       }
       console.log(this.tenantFilterGroup);
       this.options.page = 1;
@@ -313,6 +312,12 @@ export default {
                   _.get(tenantFilterGroup, ["picObj", "name"]) || "N/A"
                 }}</v-chip>
               </v-card-subtitle>
+              <v-card-subtitle v-show="tenantFilterGroup.room">
+                Room :
+                <v-chip class="mx-2">{{
+                  _.get(tenantFilterGroup, ["room", "unit"]) || "N/A"
+                }}</v-chip>
+              </v-card-subtitle>
             </v-card>
           </v-col>
         </v-row>
@@ -359,18 +364,15 @@ export default {
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showTenant(props.item)">
-                    <td>{{ props.item.id }}</td>
-                    <td>{{ props.item.name }}</td>
-                    <td>{{ props.item.age }}</td>
-                    <td>{{ props.item.birthday | formatDate }}</td>
-                    <td>{{ props.item.gender }}</td>
-                    <td>{{ props.item.icno }}</td>
-                    <td>{{ props.item.tel1 }}</td>
-                    <td>{{ props.item.email }}</td>
-                    <td>{{ props.item.religion }}</td>
-                    <td>{{ props.item.occupation }}</td>
-                    <td>{{ props.item.approach_method }}</td>
-                    <td>
+                    <td class="text-truncate">{{ _.map(_.get(props.item, `roomcontracts`), 'room.unit') || [] | getArrayValues }}</td>
+                    <td class="text-truncate">{{ props.item.name }}</td>
+                    <td class="text-truncate">{{ props.item.birthday | formatDate }}</td>
+                    <td class="text-truncate">{{ props.item.gender }}</td>
+                    <td class="text-truncate">{{ props.item.icno }}</td>
+                    <td class="text-truncate">{{ props.item.tel1 }}</td>
+                    <td class="text-truncate">{{ props.item.emergency_contact }}</td>
+                    <td class="text-truncate">{{ props.item.approach_method }}</td>
+                    <td class="text-truncate">
                       {{ _.get(props.item, ["creator", "name"]) || "N/A" }}
                     </td>
                   </tr>

@@ -344,16 +344,16 @@ export default {
               </template>
               <template v-slot:item="props">
                 <tr>
-                  <td>{{ props.item.rentaldate | formatDate }}</td>
-                  <td>{{ props.item.price | toDouble }}</td>
-                  <td v-if="props.item.paid">
+                  <td class="text-truncate">{{ props.item.rentaldate | formatDate }}</td>
+                  <td class="text-truncate">{{ props.item.price | toDouble }}</td>
+                  <td class="text-truncate" v-if="props.item.paid">
                     <v-icon small color="success">mdi-check</v-icon>
                   </td>
-                  <td v-else>
+                  <td class="text-truncate" v-else>
                     <v-icon small color="danger">mdi-close</v-icon>
                   </td>
-                  <td>{{ props.item.paymentdate | formatDate }}</td>
-                  <td>
+                  <td class="text-truncate">{{ props.item.paymentdate | formatDate }}</td>
+                  <td class="text-truncate">
                     <v-icon
                       small
                       class="mr-2"

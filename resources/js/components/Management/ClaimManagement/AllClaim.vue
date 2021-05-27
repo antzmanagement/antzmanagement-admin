@@ -180,12 +180,12 @@ export default {
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showClaim(props.item)">
-                    <td>{{props.item.uid}}</td>
-                    <td>{{props.item.owner.name}}</td>
-                    <td>{{props.item.rental_fees}}</td>
-                    <td>{{props.item.maintenance_fees}}</td>
-                    <td>{{props.item.admin_fees}}</td>
-                    <td>{{props.item.other_fees}}</td>
+                    <td class="text-truncate">{{props.item.uid}}</td>
+                    <td class="text-truncate">{{props.item.owner.name}}</td>
+                    <td class="text-truncate">{{props.item.rental_fees}}</td>
+                    <td class="text-truncate">{{props.item.maintenance_fees}}</td>
+                    <td class="text-truncate">{{props.item.admin_fees}}</td>
+                    <td class="text-truncate">{{props.item.other_fees}}</td>
                   </tr>
                 </template>
               </v-data-table>

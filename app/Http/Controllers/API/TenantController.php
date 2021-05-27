@@ -74,6 +74,7 @@ class TenantController extends Controller
             'pic' => $request->pic,
             'birthdayfromdate' => $request->birthdayfromdate,
             'birthdaytodate' => $request->birthdaytodate,
+            'room_id' => $request->room_id,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

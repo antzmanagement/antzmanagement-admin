@@ -280,16 +280,16 @@ export default {
                     >
                       <template v-slot:item="props">
                         <tr>
-                          <td>{{ props.item.sequence }}</td>
-                          <td>{{ props.item.roomcontract.tenant.name }}</td>
-                          <td>{{ props.item.roomcontract.name }}</td>
-                          <td>{{ props.item.roomcontract.room.name }}</td>
-                          <td>{{ props.item.rentaldate | formatDate }}</td>
-                          <td>{{ props.item.price | toDouble }}</td>
-                          <td>{{ props.item.penalty | toDouble }}</td>
-                          <td>{{ props.item.processing_fees | toDouble }}</td>
-                          <td>{{ props.item.claim_amount | toDouble }}</td>
-                          <td>{{ props.item.paymentdate | formatDate }}</td>
+                          <td class="text-truncate">{{ props.item.sequence }}</td>
+                          <td class="text-truncate">{{ props.item.roomcontract.tenant.name }}</td>
+                          <td class="text-truncate">{{ props.item.roomcontract.name }}</td>
+                          <td class="text-truncate">{{ props.item.roomcontract.room.name }}</td>
+                          <td class="text-truncate">{{ props.item.rentaldate | formatDate }}</td>
+                          <td class="text-truncate">{{ props.item.price | toDouble }}</td>
+                          <td class="text-truncate">{{ props.item.penalty | toDouble }}</td>
+                          <td class="text-truncate">{{ props.item.processing_fees | toDouble }}</td>
+                          <td class="text-truncate">{{ props.item.claim_amount | toDouble }}</td>
+                          <td class="text-truncate">{{ props.item.paymentdate | formatDate }}</td>
                         </tr>
                       </template>
                       <template v-slot:footer>
@@ -336,14 +336,14 @@ export default {
                     >
                       <template v-slot:item="props">
                         <tr>
-                          <td>{{ props.item.id }}</td>
-                          <td>{{ props.item.room.name }}</td>
-                          <td>{{ props.item.property.name }}</td>
-                          <td>{{ props.item.maintenance_type }}</td>
-                          <td>{{ props.item.maintenance_status }}</td>
-                          <td>{{ props.item.price }}</td>
-                          <td>{{ props.item.claim_amount }}</td>
-                          <td>{{ props.item.created_at | formatDate }}</td>
+                          <td class="text-truncate">{{ props.item.id }}</td>
+                          <td class="text-truncate">{{ props.item.room.name }}</td>
+                          <td class="text-truncate">{{ props.item.property.name }}</td>
+                          <td class="text-truncate">{{ props.item.maintenance_type }}</td>
+                          <td class="text-truncate">{{ props.item.maintenance_status }}</td>
+                          <td class="text-truncate">{{ props.item.price }}</td>
+                          <td class="text-truncate">{{ props.item.claim_amount }}</td>
+                          <td class="text-truncate">{{ props.item.created_at | formatDate }}</td>
                         </tr>
                       </template>
                       <template v-slot:footer>

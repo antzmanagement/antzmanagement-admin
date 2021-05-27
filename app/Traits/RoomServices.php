@@ -29,7 +29,7 @@ trait RoomServices
             $q->wherePivot('status', true);
         }])->where('status', true)->get();
 
-        $data = $data->unique('id')->sortByDesc('id')->flatten(1);
+        $data = $data->unique('id')->sortBy('unit')->flatten(1);
 
         return $data;
     }
@@ -44,15 +44,23 @@ trait RoomServices
             $unit = $params->unit;
             $data = collect($data);
             $data = $data->filter(function ($item) use ($unit) {
-                return $item->unit == $unit;
+                if ( stristr($item->unit, $unit) == TRUE ) {
+                    return true;
+                } else {
+                    return false;
+                }
             })->values();
         }
 
-        if ($params->block) {
-            $block = $params->block;
+        if ($params->lot) {
+            $lot = $params->lot;
             $data = collect($data);
-            $data = $data->filter(function ($item) use ($block) {
-                return $item->block == $block;
+            $data = $data->filter(function ($item) use ($lot) {
+                if ( stristr($item->lot, $lot) == TRUE ) {
+                    return true;
+                } else {
+                    return false;
+                }
             })->values();
         }
 
@@ -60,7 +68,11 @@ trait RoomServices
             $floor = $params->floor;
             $data = collect($data);
             $data = $data->filter(function ($item) use ($floor) {
-                return $item->floor == $floor;
+                if ( stristr($item->floor, $floor) == TRUE ) {
+                    return true;
+                } else {
+                    return false;
+                }
             })->values();
         }
 
@@ -68,7 +80,11 @@ trait RoomServices
             $jalan = $params->jalan;
             $data = collect($data);
             $data = $data->filter(function ($item) use ($jalan) {
-                return $item->jalan == $jalan;
+                if ( stristr($item->jalan, $jalan) == TRUE ) {
+                    return true;
+                } else {
+                    return false;
+                }
             })->values();
         }
 
@@ -309,6 +325,6 @@ trait RoomServices
     public function roomFilterCols()
     {
 
-        return ['unit', 'jalan','block', 'floor','room_type_id', 'owner_id','room_status'];
+        return ['unit', 'jalan','lot', 'floor','room_type_id', 'owner_id','room_status'];
     }
 }

@@ -16,9 +16,16 @@ trait TenantServices
         $data = collect([]);
         //Role Based Retrieve Done in Store
         $userType = $this->getUserTypeById($this->tenantType);
-        $data = $data->merge($userType->users()->with('creator')->wherePivot('status', true)->where('users.status', true)->get());
+        $data = $data->merge($userType->users()->with('creator')->with('roomcontracts.room')->wherePivot('status', true)->where('users.status', true)->get());
 
-        $data = $data->unique('id')->sortByDesc('id')->flatten(1);
+        $data = $data->unique('id')->sortBy(function ($item) {
+            $unit = '';
+            try {
+                $unit = $item->roomcontracts[0]->room->unit;
+            } catch (\Throwable $th) {
+            }
+            return $unit;
+        })->flatten(1);
 
         return $data;
     }
@@ -33,7 +40,7 @@ trait TenantServices
             $data = collect($data);
             $data = $data->filter(function ($item) use ($keyword) {
                 //check string exist inside or not
-                if ( stristr($item->name, $keyword) == TRUE || stristr($item->icno, $keyword) == TRUE || stristr($item->occupation, $keyword) == TRUE) {
+                if ( stristr($item->name, $keyword) == TRUE || stristr($item->icno, $keyword) == TRUE) {
                     return true;
                 } else {
                     return false;
@@ -96,6 +103,23 @@ trait TenantServices
                 }else{
                     return false;
                 }
+            })->values();
+        }
+
+        if($params->room_id){
+            $room_id = $params->room_id;
+            $data = $data->filter(function ($item) use($room_id) {
+                if($item->roomcontracts){
+                    return $item->roomcontracts->contains(function($roomcontract)use($room_id) {
+                        $room = collect();
+                        try {
+                            $room = $roomcontract->room;
+                        } catch (\Throwable $th) {
+                        }
+                        return $room->id == $room_id;
+                    });
+                }
+                return false;
             })->values();
         }
 
@@ -195,7 +219,7 @@ trait TenantServices
     public function tenantFilterCols()
     {
 
-        return ['keyword', 'religion', 'approach_method', 'gender', 'birthdayfromdate', 'birthdaytodate', 'pic'];
+        return ['keyword', 'religion', 'approach_method', 'gender', 'birthdayfromdate', 'birthdaytodate', 'pic', 'room_id'];
     }
 
 }

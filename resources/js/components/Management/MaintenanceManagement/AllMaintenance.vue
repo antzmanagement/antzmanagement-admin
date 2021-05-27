@@ -375,14 +375,14 @@ export default {
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showMaintenance(props.item)">
-                    <td>{{ props.item.id }}</td>
-                    <td>{{ props.item.room.name }}</td>
-                    <td>{{ props.item.property.name }}</td>
-                    <td>{{ props.item.maintenance_type }}</td>
-                    <td>{{ props.item.maintenance_status }}</td>
-                    <td>{{ props.item.price }}</td>
-                    <td>{{ _.get(props.item, ["owner", "name"]) || "N/A" }}</td>
-                    <td>{{ props.item.created_at | formatDate }}</td>
+                    <td class="text-truncate">{{ props.item.id }}</td>
+                    <td class="text-truncate">{{ props.item.room.name }}</td>
+                    <td class="text-truncate">{{ props.item.property.name }}</td>
+                    <td class="text-truncate">{{ props.item.maintenance_type }}</td>
+                    <td class="text-truncate">{{ props.item.maintenance_status }}</td>
+                    <td class="text-truncate">{{ props.item.price }}</td>
+                    <td class="text-truncate">{{ _.get(props.item, ["owner", "name"]) || "N/A" }}</td>
+                    <td class="text-truncate">{{ props.item.created_at | formatDate }}</td>
                   </tr>
                 </template>
               </v-data-table>

@@ -46,6 +46,7 @@ export default {
       todatemenu: false,
       dialog: false,
       roomTypes: [],
+      rooms : [],
       staffs: [],
       approachmethods: ["fb", "friend", "banner", "others"],
       genders: ["male", "female"],
@@ -84,22 +85,29 @@ export default {
   },
   mounted() {
     this.showLoadingAction();
-    this.getStaffsAction({ pageNumber: -1, pageSize: -1 })
-      .then((data) => {
-        this.staffs = data.data;
+    let promises = [];
+    promises.push(this.getStaffsAction({ pageNumber: -1, pageSize: -1 }))
+    promises.push(this.getRoomsAction({ pageNumber: -1, pageSize: -1 }));
+
+    Promise.all(promises)
+      .then(([staffRes, roomRes]) => {
+        this.staffs = _.get(staffRes, ["data"]) || [];
+        this.rooms = _.get(roomRes, ["data"]) || [];
         this.endLoadingAction();
       })
-      .catch((error) => {
-        this.endLoadingAction();
+      .catch((err) => {
+        console.log(err);
         Toast.fire({
           icon: "warning",
-          title: "Something went wrong... ",
+          title: "Something went wrong...",
         });
+        this.endLoadingAction();
       });
   },
   methods: {
     ...mapActions({
       getStaffsAction: "getStaffs",
+      getRoomsAction: "getRooms",
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction",
     }),
@@ -223,7 +231,7 @@ export default {
             </v-col>
             <v-col cols="12">
               <v-text-field
-                label="Keyword"
+                label="Keyword Search(Name, IcNo)"
                 :maxlength="300"
                 v-model="data.keyword"
               ></v-text-field>
@@ -235,13 +243,13 @@ export default {
                 label="Gender"
               ></v-autocomplete>
             </v-col>
-            <v-col cols="12" md="12">
+            <!-- <v-col cols="12" md="12">
               <v-autocomplete
                 v-model="data.religion"
                 :items="religions || []"
                 label="Religion"
               ></v-autocomplete>
-            </v-col>
+            </v-col> -->
             <v-col cols="12" md="12">
               <v-autocomplete
                 v-model="data.approach_method"
@@ -268,6 +276,17 @@ export default {
                   ></room-type-form>
                 </template>-->
               </v-autocomplete>
+            </v-col>
+            <v-col cols="12">
+              <v-autocomplete
+                v-model="data.room"
+                :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
+                :items="rooms || []"
+                label="Room"
+                chips
+                deletable-chips
+                :return-object="true"
+              ></v-autocomplete>
             </v-col>
           </v-row>
         </v-container>

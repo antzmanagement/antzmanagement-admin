@@ -216,8 +216,8 @@ export default {
                 </template> -->
                 <template v-slot:item="props">
                   <tr @click="showService(props.item)">
-                    <td>{{ props.item.id }}</td>
-                    <td>{{ props.item.name }}</td>
+                    <td class="text-truncate">{{ props.item.id }}</td>
+                    <td class="text-truncate">{{ props.item.name }}</td>
                   </tr>
                 </template>
               </v-data-table>

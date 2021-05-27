@@ -296,13 +296,13 @@ export default {
                   </template>
                   <template v-slot:item="props">
                     <tr>
-                      <td>
+                      <td class="text-truncate">
                         <v-text-field
                           label="Item Name"
                           v-model="props.item.name"
                         ></v-text-field>
                       </td>
-                      <td>
+                      <td class="text-truncate">
                         <v-text-field
                           label="Item Price"
                           type="number"
@@ -310,7 +310,7 @@ export default {
                           v-model="props.item.price"
                         ></v-text-field>
                       </td>
-                      <td>
+                      <td class="text-truncate">
                         <v-btn
                           icon
                           color="red"

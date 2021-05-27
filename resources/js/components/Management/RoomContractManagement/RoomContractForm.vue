@@ -635,8 +635,8 @@ export default {
                     </thead>
                     <tbody>
                       <tr v-if="!isEmpty(data.room)">
-                        <td>{{ data.room.name }}</td>
-                        <td>
+                        <td class="text-truncate">{{ data.room.name }}</td>
+                        <td class="text-truncate">
                           <v-text-field
                             v-model="data.room.price"
                             prefix="RM"
@@ -649,7 +649,7 @@ export default {
                             "
                           ></v-text-field>
                         </td>
-                        <td v-if="!isSubContract">
+                        <td class="text-truncate" v-if="!isSubContract">
                           <v-text-field
                             v-model="data.room.deposit"
                             prefix="RM"
@@ -662,7 +662,7 @@ export default {
                             "
                           ></v-text-field>
                         </td>
-                        <td v-if="!isSubContract">
+                        <td class="text-truncate" v-if="!isSubContract">
                           <v-text-field
                             v-model="data.room.agreement_fees"
                             prefix="RM"
@@ -675,7 +675,7 @@ export default {
                             "
                           ></v-text-field>
                         </td>
-                        <td v-if="!isSubContract">
+                        <td class="text-truncate" v-if="!isSubContract">
                           <v-text-field
                             v-model="data.room.booking_fees"
                             prefix="RM"
@@ -688,7 +688,7 @@ export default {
                             "
                           ></v-text-field>
                         </td>
-                        <td v-if="editMode">
+                        <td class="text-truncate" v-if="editMode">
                           <v-text-field
                             v-model="data.room.outstanding_deposit"
                             prefix="RM"
@@ -701,7 +701,7 @@ export default {
                             "
                           ></v-text-field>
                         </td>
-                        <td>
+                        <td class="text-truncate">
                           <v-autocomplete
                             v-model="data.room.contract_id"
                             :items="contracts || []"
@@ -717,7 +717,7 @@ export default {
                             :disabled="editMode"
                           ></v-autocomplete>
                         </td>
-                        <td>
+                        <td class="text-truncate">
                           <v-menu
                             ref="menu"
                             v-model="data.room.menu"
@@ -748,7 +748,7 @@ export default {
                             ></v-date-picker>
                           </v-menu>
                         </td>
-                        <td>
+                        <td class="text-truncate">
                           <v-menu
                             ref="menu"
                             v-model="data.room.enddatemenu"
@@ -779,7 +779,7 @@ export default {
                             ></v-date-picker>
                           </v-menu>
                         </td>
-                        <td>
+                        <td class="text-truncate">
                           <v-menu
                             ref="menu"
                             v-model="data.room.rentalstartdatemenu"
@@ -806,10 +806,10 @@ export default {
                           </v-menu>
                         </td>
 
-                        <!-- <td>
+                        <!-- <td class="text-truncate">
                           <v-switch v-model="data.room.autorenew"></v-switch>
                         </td> -->
-                        <td>
+                        <td class="text-truncate">
                           <services-dialog
                             :dialogStyle="servicesDialogConfig.dialogStyle"
                             :services="

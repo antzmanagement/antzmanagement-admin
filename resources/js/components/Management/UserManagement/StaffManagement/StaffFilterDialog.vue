@@ -114,7 +114,7 @@ export default {
         <v-container>
           <v-row>
             <v-col cols="12">
-              <v-text-field label="Keyword" :maxlength="300" v-model="data.keyword"></v-text-field>
+              <v-text-field label="Keyword Search (Name, Ic)" :maxlength="300" v-model="data.keyword"></v-text-field>
             </v-col>
           </v-row>
         </v-container>

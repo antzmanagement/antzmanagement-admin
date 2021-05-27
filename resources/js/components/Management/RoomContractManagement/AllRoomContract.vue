@@ -52,9 +52,6 @@ export default {
           text: "Room",
         },
         {
-          text: "Sequence No",
-        },
-        {
           text: "Tenant",
         },
         {
@@ -64,7 +61,7 @@ export default {
           text: "End date",
         },
         {
-          text: "Deposit",
+          text: "Deposit (RM)",
         },
         {
           text: "Rental (RM)",
@@ -407,7 +404,9 @@ export default {
           justify="center"
           align="center"
           class="ma-3"
-          v-if="helpers.isAccessible(_.get(role, ['name']), 'roomContract', 'read')"
+          v-if="
+            helpers.isAccessible(_.get(role, ['name']), 'roomContract', 'read')
+          "
         >
           <v-col cols="12">
             <v-card class="pa-8" raised>
@@ -455,18 +454,29 @@ export default {
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showRoomContract(props.item)">
-                    <td>{{ props.item.room.name }}</td>
-                    <td>{{ props.item.sequence }}</td>
-                    <td>{{ props.item.tenant.name }}</td>
-                    <td>{{ props.item.startdate }}</td>
-                    <td>{{ props.item.enddate }}</td>
-                    <td>RM {{ props.item.deposit | toDouble }}</td>
-                    <td>RM {{ props.item.rental | toDouble }}</td>
-                    <td>
+                    <td class="text-truncate">
+                      {{ _.get(props.item, ["room", "name"]) || "N/A" }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ _.get(props.item, ["tenant", "name"]) || "N/A" }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.startdate | formatDate }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.enddate | formatDate }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.deposit | toDouble }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.rental | toDouble }}
+                    </td>
+                    <td class="text-truncate">
                       {{ props.item.duration }}
                       {{ props.item.rental_type || "day" }}
                     </td>
-                    <td>
+                    <td class="text-truncate">
                       {{
                         _.compact(
                           _.map(
@@ -481,7 +491,7 @@ export default {
                         ) | getArrayValues
                       }}
                     </td>
-                    <td>
+                    <td class="text-truncate">
                       {{ props.item.checkout_date | formatDate }}
                     </td>
                   </tr>

@@ -37,7 +37,7 @@ class RoomController extends Controller
         $params = collect([
             'unit' => $request->unit,
             'floor' => $request->floor,
-            'block' => $request->block,
+            'lot' => $request->lot,
             'jalan' => $request->jalan,
             'owner_id' => $request->owner_id,
             'room_type_id' => $request->room_type_id,

@@ -67,7 +67,7 @@ class OwnerController extends Controller
             'keyword' => $request->keyword,
             'fromdate' => $request->fromdate,
             'todate' => $request->todate,
-            'roomTypes' => $request->roomTypes,
+            'room_id' => $request->room_id,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

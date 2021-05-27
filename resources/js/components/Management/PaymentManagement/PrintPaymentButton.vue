@@ -161,17 +161,17 @@ export default {
     <div class="invoice-box d-none" :id="`printPayment${uid}`">
       <table cellpadding="0" cellspacing="0">
         <tr class="top">
-          <td colspan="2">
+          <td class="text-truncate" colspan="2">
             <table>
               <tr>
-                <td class="title">
+                <td class="text-truncate title">
                   <img
                     src="https://res.cloudinary.com/dwslzbgaa/image/upload/v1612187469/90207330_3196874863870897_574629034651025408_n_h5scz9.jpg"
                     style="width: 100px; height: 100px"
                   />
                 </td>
 
-                <td>
+                <td class="text-truncate">
                   Official Receipt No #: {{ _.get(data, ["sequence"]) || "N/A" }}<br />
                   Reference No #: {{ _.get(data, ["referenceno"]) || "N/A" }}<br />
                   Room Unit No #: {{ _.get(roomcontract, ['room', 'unit']) || "N/A" }}<br />
@@ -184,16 +184,16 @@ export default {
         </tr>
 
         <tr class="information">
-          <td colspan="2">
+          <td class="text-truncate" colspan="2">
             <table>
               <tr>
-                <td>
+                <td class="text-truncate">
                   47G Jalan Kampar Barat 1,<br />
                   Taman Kampar Barat 1,<br />
                   31900 Kampar, Perak, Malaysia
                 </td>
 
-                <td>
+                <td class="text-truncate">
                   010-289 8012<br />
                   antz.customerservice@gmail.com<br />
                 </td>
@@ -203,9 +203,9 @@ export default {
         </tr>
 
         <tr class="heading">
-          <td>Item</td>
+          <td class="text-truncate">Item</td>
 
-          <td>Price</td>
+          <td class="text-truncate">Price</td>
         </tr>
 
         <tr
@@ -213,24 +213,24 @@ export default {
           v-for="service in data.services"
           :key="service.uid"
         >
-          <td>{{_.get(service , ['text']) || 'N/A'}}</td>
+          <td class="text-truncate">{{_.get(service , ['text']) || 'N/A'}}</td>
 
-          <td>RM {{_.get(service , ['pivot', 'price']) || 'N/A' | toDouble}}</td>
+          <td class="text-truncate">RM {{_.get(service , ['pivot', 'price']) || 'N/A' | toDouble}}</td>
         </tr>
         <tr
           class="item"
           v-for="otherpayment in data.otherpayments"
           :key="otherpayment.uid"
         >
-          <td>{{_.get(otherpayment , ['name']) || 'N/A'}}</td>
+          <td class="text-truncate">{{_.get(otherpayment , ['name']) || 'N/A'}}</td>
 
-          <td>RM {{_.get(otherpayment , ['pivot', 'price']) || 'N/A' | toDouble}}</td>
+          <td class="text-truncate">RM {{_.get(otherpayment , ['pivot', 'price']) || 'N/A' | toDouble}}</td>
         </tr>
 
         <tr class="total">
-          <td></td>
+          <td class="text-truncate"></td>
 
-          <td>Total: RM {{_.get(data , ['totalpayment']) || 'N/A' | toDouble}}</td>
+          <td class="text-truncate">Total: RM {{_.get(data , ['totalpayment']) || 'N/A' | toDouble}}</td>
         </tr>
       </table>
     </div>

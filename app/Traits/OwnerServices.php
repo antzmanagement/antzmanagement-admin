@@ -21,7 +21,7 @@ trait OwnerServices
             // Query the name field in status table
         }])->get());
 
-        $data = $data->unique('id')->sortByDesc('id')->flatten(1);
+        $data = $data->unique('id')->sortBy('name')->flatten(1);
 
         return $data;
     }
@@ -35,11 +35,21 @@ trait OwnerServices
             $keyword = $params->keyword;
             $data = $data->filter(function ($item) use ($keyword) {
                 //check string exist inside or not
-                if (stristr($item->name, $keyword) == TRUE || stristr($item->icno, $keyword) == TRUE || stristr($item->referenceno, $keyword) == TRUE) {
+                if (stristr($item->name, $keyword) == TRUE || stristr($item->icno, $keyword) == TRUE) {
                     return true;
                 } else {
                     return false;
                 }
+            })->values();
+        }
+
+        if($params->room_id){
+            $room_id = $params->room_id;
+            $data = $data->filter(function ($item) use($room_id) {
+                if($item->ownrooms){
+                    return $item->ownrooms->contains('id' , $room_id);
+                }
+                return false;
             })->values();
         }
 
@@ -163,6 +173,6 @@ trait OwnerServices
     public function ownerFilterCols()
     {
 
-        return ['keyword', 'roomTypes'];
+        return ['keyword', 'roomTypes', 'room_id'];
     }
 }

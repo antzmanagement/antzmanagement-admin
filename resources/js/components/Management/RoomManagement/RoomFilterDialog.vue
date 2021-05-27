@@ -41,14 +41,14 @@ export default {
   },
   data() {
     return {
-      roomStatusOptions: ["empty", "maintaining", "occupied", 'vacant', 'defect'],
+      roomStatusOptions: ["maintaining", "occupied", 'vacant', 'defect'],
       dialog: false,
       roomTypes: [],
       owners: [],
       data: new Form({
         unit: "",
         jalan: "",
-        block: "",
+        lot: "",
         floor: "",
         room_status: "",
         roomType: "",
@@ -165,9 +165,9 @@ export default {
             </v-col>
             <v-col cols="6">
               <v-text-field
-                label="Block"
+                label="Lot"
                 :maxlength="300"
-                v-model="data.block"
+                v-model="data.lot"
               ></v-text-field>
             </v-col>
             <v-col cols="6">
@@ -177,7 +177,7 @@ export default {
                 v-model="data.floor"
               ></v-text-field>
             </v-col>
-            <v-col cols="12">
+            <!-- <v-col cols="12">
               <v-autocomplete
                 v-model="data.owner"
                 :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
@@ -188,7 +188,7 @@ export default {
                 deletable-chips
               >
               </v-autocomplete>
-            </v-col>
+            </v-col> -->
             <v-col cols="12">
               <v-autocomplete
                 v-model="data.roomType"

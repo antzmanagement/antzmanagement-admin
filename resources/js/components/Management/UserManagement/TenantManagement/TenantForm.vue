@@ -962,8 +962,8 @@ export default {
                     </thead>
                     <tbody>
                       <tr v-for="room in data.rooms" :key="room.uid">
-                        <td>{{ room.name }}</td>
-                        <td>
+                        <td class="text-truncate">{{ room.name }}</td>
+                        <td class="text-truncate">
                           <v-text-field
                             v-model="room.price"
                             prefix="RM"
@@ -976,7 +976,7 @@ export default {
                             "
                           ></v-text-field>
                         </td>
-                        <td>
+                        <td class="text-truncate">
                           <v-text-field
                             v-model="room.deposit"
                             prefix="RM"
@@ -989,7 +989,7 @@ export default {
                             "
                           ></v-text-field>
                         </td>
-                        <td>
+                        <td class="text-truncate">
                           <v-text-field
                             v-model="room.agreement_fees"
                             prefix="RM"
@@ -1002,7 +1002,7 @@ export default {
                             "
                           ></v-text-field>
                         </td>
-                        <td>
+                        <td class="text-truncate">
                           <v-text-field
                             v-model="room.booking_fees"
                             prefix="RM"
@@ -1015,7 +1015,7 @@ export default {
                             "
                           ></v-text-field>
                         </td>
-                        <td v-if="editMode">
+                        <td class="text-truncate" v-if="editMode">
                           <v-text-field
                             v-model="room.outstanding_deposit"
                             prefix="RM"
@@ -1028,7 +1028,7 @@ export default {
                             "
                           ></v-text-field>
                         </td>
-                        <td>
+                        <td class="text-truncate">
                           <v-autocomplete
                             v-model="room.contract_id"
                             :items="contracts || []"
@@ -1044,7 +1044,7 @@ export default {
                             :disabled="editMode"
                           ></v-autocomplete>
                         </td>
-                        <td>
+                        <td class="text-truncate">
                           <v-menu
                             ref="menu"
                             v-model="room.menu"
@@ -1075,7 +1075,7 @@ export default {
                             ></v-date-picker>
                           </v-menu>
                         </td>
-                        <td>
+                        <td class="text-truncate">
                           <v-menu
                             ref="menu"
                             v-model="room.enddatemenu"
@@ -1107,10 +1107,10 @@ export default {
                           </v-menu>
                         </td>
 
-                        <!-- <td>
+                        <!-- <td class="text-truncate">
                           <v-switch v-model="room.autorenew"></v-switch>
                         </td> -->
-                        <td>
+                        <td class="text-truncate">
                           <services-dialog
                             :dialogStyle="servicesDialogConfig.dialogStyle"
                             :services="

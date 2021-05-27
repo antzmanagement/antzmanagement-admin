@@ -10,4 +10,3 @@ export let commonConfig = {
     cloudinary_cloud_name : "dwslzbgaa",
 };
 
-export default commonConfig;

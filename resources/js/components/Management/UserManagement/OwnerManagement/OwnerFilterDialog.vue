@@ -44,6 +44,7 @@ export default {
     return {
       dialog: false,
       roomTypes: [],
+      rooms: [],
       data: new Form({
         keyword: "",
         roomTypes: [],
@@ -65,22 +66,27 @@ export default {
   },
   mounted() {
     this.showLoadingAction();
-    this.getRoomTypesAction({ pageNumber: -1, pageSize: -1 })
-      .then((data) => {
-        this.roomTypes = data.data;
+    let promises = [];
+    promises.push(this.getRoomsAction({ pageNumber: -1, pageSize: -1 }));
+
+    Promise.all(promises)
+      .then(([roomRes]) => {
+        this.rooms = _.get(roomRes, ["data"]) || [];
         this.endLoadingAction();
       })
-      .catch((error) => {
-        this.endLoadingAction();
+      .catch((err) => {
+        console.log(err);
         Toast.fire({
           icon: "warning",
-          title: "Something went wrong... ",
+          title: "Something went wrong...",
         });
+        this.endLoadingAction();
       });
   },
   methods: {
     ...mapActions({
       getRoomTypesAction: "getRoomTypes",
+      getRoomsAction: "getRooms",
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction",
     }),
@@ -120,7 +126,7 @@ export default {
         <v-btn icon dark @click="dialog = false">
           <v-icon>mdi-close</v-icon>
         </v-btn>
-        <v-toolbar-title >Owner Filter</v-toolbar-title>
+        <v-toolbar-title>Owner Filter</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-toolbar-items>
           <v-btn dark text :disabled="isLoading" @click="submitFilter()"
@@ -133,12 +139,23 @@ export default {
           <v-row>
             <v-col cols="12">
               <v-text-field
-                label="Keyword"
+                label="Keyword Search (Name, IcNo)"
                 :maxlength="300"
                 v-model="data.keyword"
               ></v-text-field>
             </v-col>
           </v-row>
+          <v-col cols="12">
+            <v-autocomplete
+              v-model="data.room"
+              :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
+              :items="rooms || []"
+              label="Room"
+              chips
+              deletable-chips
+              :return-object="true"
+            ></v-autocomplete>
+          </v-col>
         </v-container>
       </v-card-text>
     </v-card>

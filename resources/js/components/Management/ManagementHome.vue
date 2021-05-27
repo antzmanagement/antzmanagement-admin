@@ -583,23 +583,23 @@ export default {
               >
                 <template v-slot:item="props">
                   <tr>
-                    <td>{{ props.item.sequence }}</td>
-                    <td>{{ props.item.roomcontract.tenant.name }}</td>
-                    <td>{{ props.item.roomcontract.name }}</td>
-                    <td>{{ props.item.roomcontract.room.name }}</td>
-                    <td>{{ props.item.rentaldate | formatDate }}</td>
-                    <td>{{ props.item.price | toDouble }}</td>
-                    <td>{{ props.item.penalty | toDouble }}</td>
-                    <td>{{ props.item.processing_fees | toDouble }}</td>
-                    <td>{{ props.item.service_fees | toDouble }}</td>
-                    <td v-if="props.item.paid">
+                    <td class="text-truncate">{{ props.item.sequence }}</td>
+                    <td class="text-truncate">{{ props.item.roomcontract.tenant.name }}</td>
+                    <td class="text-truncate">{{ props.item.roomcontract.name }}</td>
+                    <td class="text-truncate">{{ props.item.roomcontract.room.name }}</td>
+                    <td class="text-truncate">{{ props.item.rentaldate | formatDate }}</td>
+                    <td class="text-truncate">{{ props.item.price | toDouble }}</td>
+                    <td class="text-truncate">{{ props.item.penalty | toDouble }}</td>
+                    <td class="text-truncate">{{ props.item.processing_fees | toDouble }}</td>
+                    <td class="text-truncate">{{ props.item.service_fees | toDouble }}</td>
+                    <td class="text-truncate" v-if="props.item.paid">
                       <v-icon small color="success">mdi-check</v-icon>
                     </td>
-                    <td v-else>
+                    <td class="text-truncate" v-else>
                       <v-icon small color="danger">mdi-close</v-icon>
                     </td>
-                    <td>{{ props.item.paymentdate | formatDate }}</td>
-                    <td>
+                    <td class="text-truncate">{{ props.item.paymentdate | formatDate }}</td>
+                    <td class="text-truncate">
                       <print-rental-payment-button
                         :item="props.item"
                         :roomcontract="props.item.roomcontract"
@@ -671,23 +671,23 @@ export default {
               >
                 <template v-slot:item="props">
                   <tr>
-                    <td>{{ props.item.sequence }}</td>
-                    <td>{{ props.item.roomcontract.tenant.name }}</td>
-                    <td>{{ props.item.roomcontract.name }}</td>
-                    <td>{{ props.item.roomcontract.room.name }}</td>
-                    <td>{{ props.item.rentaldate | formatDate }}</td>
-                    <td>{{ props.item.price | toDouble }}</td>
-                    <td>{{ props.item.penalty | toDouble }}</td>
-                    <td>{{ props.item.processing_fees | toDouble }}</td>
-                    <td>{{ props.item.service_fees | toDouble }}</td>
-                    <td v-if="props.item.paid">
+                    <td class="text-truncate">{{ props.item.sequence }}</td>
+                    <td class="text-truncate">{{ props.item.roomcontract.tenant.name }}</td>
+                    <td class="text-truncate">{{ props.item.roomcontract.name }}</td>
+                    <td class="text-truncate">{{ props.item.roomcontract.room.name }}</td>
+                    <td class="text-truncate">{{ props.item.rentaldate | formatDate }}</td>
+                    <td class="text-truncate">{{ props.item.price | toDouble }}</td>
+                    <td class="text-truncate">{{ props.item.penalty | toDouble }}</td>
+                    <td class="text-truncate">{{ props.item.processing_fees | toDouble }}</td>
+                    <td class="text-truncate">{{ props.item.service_fees | toDouble }}</td>
+                    <td class="text-truncate" v-if="props.item.paid">
                       <v-icon small color="success">mdi-check</v-icon>
                     </td>
-                    <td v-else>
+                    <td class="text-truncate" v-else>
                       <v-icon small color="danger">mdi-close</v-icon>
                     </td>
-                    <td>{{ props.item.paymentdate | formatDate }}</td>
-                    <td>
+                    <td class="text-truncate">{{ props.item.paymentdate | formatDate }}</td>
+                    <td class="text-truncate">
                       <print-rental-payment-button
                         :item="props.item"
                         :roomcontract="props.item.roomcontract"
@@ -769,26 +769,26 @@ export default {
               >
                 <template v-slot:item="props">
                   <tr @click="showRoomContract(props.item)">
-                    <td>{{ props.item.sequence }}</td>
-                    <td>{{ props.item.contract.name }}</td>
-                    <td>{{ props.item.room.name }}</td>
-                    <td>
+                    <td class="text-truncate">{{ props.item.sequence }}</td>
+                    <td class="text-truncate">{{ props.item.contract.name }}</td>
+                    <td class="text-truncate">{{ props.item.room.name }}</td>
+                    <td class="text-truncate">
                       {{
                         _.get(props.item, ["room", "owners", 0, "name"]) ||
                         "N/A"
                       }}
                     </td>
-                    <td>{{ props.item.tenant.name }}</td>
-                    <td>{{ props.item.startdate }}</td>
-                    <td>{{ props.item.enddate }}</td>
-                    <td>RM {{ props.item.deposit | toDouble }}</td>
-                    <td>RM {{ props.item.outstanding_deposit | toDouble }}</td>
-                    <td>RM {{ props.item.rental | toDouble }}</td>
-                    <td>
+                    <td class="text-truncate">{{ props.item.tenant.name }}</td>
+                    <td class="text-truncate">{{ props.item.startdate }}</td>
+                    <td class="text-truncate">{{ props.item.enddate }}</td>
+                    <td class="text-truncate">RM {{ props.item.deposit | toDouble }}</td>
+                    <td class="text-truncate">RM {{ props.item.outstanding_deposit | toDouble }}</td>
+                    <td class="text-truncate">RM {{ props.item.rental | toDouble }}</td>
+                    <td class="text-truncate">
                       {{ props.item.duration }}
                       {{ props.item.rental_type || "day" }}
                     </td>
-                    <td>
+                    <td class="text-truncate">
                       {{
                         _.compact(
                           _.map(
@@ -803,13 +803,13 @@ export default {
                         ) | getArrayValues
                       }}
                     </td>
-                    <td class="text-center" v-if="props.item.checkedout">
+                    <td class="text-truncate text-center" v-if="props.item.checkedout">
                       <v-icon small color="success">mdi-check</v-icon>
                     </td>
-                    <td class="text-center" v-else>
+                    <td class="text-truncate text-center" v-else>
                       <v-icon small color="danger">mdi-close</v-icon>
                     </td>
-                    <td>
+                    <td class="text-truncate">
                       {{ props.item.checkout_date | formatDate }}
                     </td>
                   </tr>

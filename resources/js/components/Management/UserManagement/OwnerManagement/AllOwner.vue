@@ -7,7 +7,7 @@ import { _ } from "../../../../common/common-function";
 export default {
   data() {
     return {
-      role : '',
+      role: "",
       moment: moment,
       _: _,
       totalDataLength: 0,
@@ -53,21 +53,26 @@ export default {
           text: "Name",
           align: "start",
           value: "name",
+          width: 200,
         },
         {
           text: "Unit",
+          width: 200,
         },
-        { text: "Ic No", value: "icno" },
-        { text: "Phone", value: "tel1" },
-        { text: "Email", value: "email" },
+        { text: "Ic No", value: "icno", width: 200 },
+        { text: "Phone", value: "tel1", width: 200 },
+        { text: "Email", value: "email", width: 200 },
         {
           text: "Benificiary Name",
+          width: 200,
         },
         {
           text: "Benificiary Bank",
+          width: 200,
         },
         {
           text: "Bank A/C No",
+          width: 200,
         },
       ],
       excelData: [],
@@ -143,6 +148,10 @@ export default {
       if (filterGroup) {
         this.ownerFilterGroup.keyword = filterGroup.keyword;
       }
+      if (filterGroup.room) {
+        this.ownerFilterGroup.room_id = filterGroup.room.id;
+        this.ownerFilterGroup.room = filterGroup.room;
+      }
       this.options.page = 1;
       this.getOwners();
     },
@@ -165,6 +174,7 @@ export default {
 
       this.filterOwnersAction(this.ownerFilterGroup)
         .then((data) => {
+          console.log(data);
           if (data.data) {
             this.data = data.data;
           } else {
@@ -253,6 +263,12 @@ export default {
                 To Date :
                 <v-chip class="mx-2">{{ ownerFilterGroup.todate }}</v-chip>
               </v-card-subtitle>
+              <v-card-subtitle v-show="ownerFilterGroup.room">
+                Room :
+                <v-chip class="mx-2">{{
+                  _.get(ownerFilterGroup, ["room", "unit"]) || "N/A"
+                }}</v-chip>
+              </v-card-subtitle>
 
               <v-card-subtitle v-show="!roomTypesEmpty">
                 Room Types :
@@ -266,10 +282,12 @@ export default {
             </v-card>
           </v-col>
         </v-row>
-        <v-row justify="center" align="center" class="ma-3" 
-              v-if="
-                helpers.isAccessible(_.get(role, ['name']), 'owner', 'read')
-              ">
+        <v-row
+          justify="center"
+          align="center"
+          class="ma-3"
+          v-if="helpers.isAccessible(_.get(role, ['name']), 'owner', 'read')"
+        >
           <v-col cols="12">
             <v-card class="pa-8" raised>
               <v-data-table
@@ -279,6 +297,7 @@ export default {
                 :server-items-length="totalDataLength"
                 :loading="loading"
                 disable-sort
+                calculate-widths
               >
                 <template v-slot:top>
                   <v-toolbar flat class="mb-5">
@@ -307,16 +326,20 @@ export default {
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showOwner(props.item)">
-                    <td>{{ props.item.name }}</td>
-                    <td>
+                    <td class="text-truncate small">{{ props.item.name }}</td>
+                    <td class="text-truncate fs-5">
                       {{ _.map(props.item.ownrooms, "unit") | getArrayValues }}
                     </td>
-                    <td>{{ props.item.icno }}</td>
-                    <td>{{ props.item.tel1 }}</td>
-                    <td>{{ props.item.email }}</td>
-                    <td>{{ props.item.bankaccountname }}</td>
-                    <td>{{ props.item.banktype }}</td>
-                    <td>{{ props.item.bankaccount }}</td>
+                    <td class="text-truncate fs-normal">
+                      {{ props.item.icno }}
+                    </td>
+                    <td class="text-truncate">{{ props.item.tel1 }}</td>
+                    <td class="text-truncate">{{ props.item.email }}</td>
+                    <td class="text-truncate">
+                      {{ props.item.bankaccountname }}
+                    </td>
+                    <td class="text-truncate">{{ props.item.banktype }}</td>
+                    <td class="text-truncate">{{ props.item.bankaccount }}</td>
                   </tr>
                 </template>
               </v-data-table>

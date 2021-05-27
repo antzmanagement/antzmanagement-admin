@@ -200,9 +200,9 @@ export default {
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showProperty(props.item)">
-                    <td>{{props.item.uid}}</td>
-                    <td>{{props.item.name}}</td>
-                    <td>{{props.item.price}}</td>
+                    <td class="text-truncate">{{props.item.uid}}</td>
+                    <td class="text-truncate">{{props.item.name}}</td>
+                    <td class="text-truncate">{{props.item.price}}</td>
                   </tr>
                 </template>
               </v-data-table>

@@ -235,11 +235,11 @@ export default {
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showStaff(props.item)">
-                    <td>{{ props.item.id }}</td>
-                    <td>{{ props.item.name }}</td>
-                    <td>{{ props.item.icno }}</td>
-                    <td>{{ props.item.tel1 }}</td>
-                    <td>{{ props.item.email }}</td>
+                    <td class="text-truncate">{{ props.item.id }}</td>
+                    <td class="text-truncate">{{ props.item.name }}</td>
+                    <td class="text-truncate">{{ props.item.icno }}</td>
+                    <td class="text-truncate">{{ props.item.tel1 }}</td>
+                    <td class="text-truncate">{{ props.item.email }}</td>
                   </tr>
                 </template>
               </v-data-table>

@@ -49,12 +49,6 @@ export default {
       },
       headers: [
         {
-          text: "Id",
-        },
-        {
-          text: "Room Types",
-        },
-        {
           text: "Unit No",
         },
         {
@@ -65,6 +59,9 @@ export default {
         },
         {
           text: "Floor",
+        },
+        {
+          text: "Room Type",
         },
         { text: "Rental (RM)" },
         {
@@ -182,8 +179,8 @@ export default {
       if (filterGroup.floor) {
         this.roomFilterGroup.floor = filterGroup.floor;
       }
-      if (filterGroup.block) {
-        this.roomFilterGroup.block = filterGroup.block;
+      if (filterGroup.lot) {
+        this.roomFilterGroup.lot = filterGroup.lot;
       }
       if (filterGroup.room_status) {
         this.roomFilterGroup.room_status = filterGroup.room_status;
@@ -305,9 +302,9 @@ export default {
                 Jalan :
                 <v-chip class="mx-2">{{ roomFilterGroup.jalan }}</v-chip>
               </v-card-subtitle>
-              <v-card-subtitle v-show="roomFilterGroup.block">
-                Block :
-                <v-chip class="mx-2">{{ roomFilterGroup.block }}</v-chip>
+              <v-card-subtitle v-show="roomFilterGroup.lot">
+                Lot :
+                <v-chip class="mx-2">{{ roomFilterGroup.lot }}</v-chip>
               </v-card-subtitle>
               <v-card-subtitle v-show="roomFilterGroup.floor">
                 Floor :
@@ -375,16 +372,15 @@ export default {
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showRoom(props.item)">
-                    <td>{{ props.item.id }}</td>
-                    <td>{{ props.item.room_types[0].name }}</td>
-                    <td>{{ props.item.unit }}</td>
-                    <td>{{ props.item.jalan }}</td>
-                    <td>{{ props.item.lot }}</td>
-                    <td>{{ props.item.floor }}</td>
-                    <td>{{ props.item.price | toDouble }}</td>
-                    <td>{{ props.item.room_status }}</td>
-                    <td>{{ props.item.tnb_account_no }}</td>
-                    <!-- <td>
+                    <td class="text-truncate">{{ props.item.unit }}</td>
+                    <td class="text-truncate">{{ props.item.jalan }}</td>
+                    <td class="text-truncate">{{ props.item.lot }}</td>
+                    <td class="text-truncate">{{ props.item.floor }}</td>
+                    <td class="text-truncate">{{ _.get(props.item , ['room_types', 0, 'name'])  || 'N/A'}}</td>
+                    <td class="text-truncate">{{ props.item.price | toDouble }}</td>
+                    <td class="text-truncate">{{ props.item.room_status }}</td>
+                    <td class="text-truncate">{{ props.item.tnb_account_no }}</td>
+                    <!-- <td class="text-truncate">
                       {{ _.get(props.item, ["owners", 0, "name"]) || "N/A" }}
                     </td> -->
                   </tr>

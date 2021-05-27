@@ -173,27 +173,27 @@ export default {
     <div class="invoice-box d-none" :id="`printRentalPayment${uid}`">
       <table cellpadding="0" cellspacing="0">
         <tr class="top">
-          <td colspan="2">
+          <td class="text-truncate" colspan="2">
             <table>
               <tr>
-                <td class="title">
+                <td class="text-truncate title">
                   <img
                     src="https://res.cloudinary.com/dwslzbgaa/image/upload/v1612187469/90207330_3196874863870897_574629034651025408_n_h5scz9.jpg"
                     style="width: 100px; height: 100px"
                   />
                 </td> 
-                <td>
+                <td class="text-truncate">
                   47G Jalan Kampar Barat 1,<br />
                   Taman Kampar Barat 1,<br />
                   31900 Kampar, Perak, Malaysia
                 </td>
 
-                <td>
+                <td class="text-truncate">
                   010-289 8012<br />
                   antz.customerservice@gmail.com<br />
                 </td>
 
-                <td>
+                <td class="text-truncate">
                   Receipt No #: {{ _.get(data, ["sequence"]) || "N/A" }}<br />
                   Payment Method #: {{ _.get(data, ["paymentmethod"]) || "N/A" }}<br />
                   Reference No #: {{ _.get(data, ["referenceno"]) || "N/A" }}<br />
@@ -206,10 +206,10 @@ export default {
         </tr>
 
         <tr class="information">
-          <td colspan="2">
+          <td class="text-truncate" colspan="2">
             <table>
               <tr>
-                <td>
+                <td class="text-truncate">
                   Receive From #: {{ _.get(data, ["receive_from"]) || "N/A" }}<br />
                   Room Unit No #: {{ _.get(roomcontract, ['room', 'unit']) || "N/A" }}<br />
                 </td>
@@ -219,36 +219,36 @@ export default {
         </tr>
 
         <tr class="heading">
-          <td>Item</td>
-          <td>Price</td>
+          <td class="text-truncate">Item</td>
+          <td class="text-truncate">Price</td>
         </tr>
 
         <tr class="item subtitle">
-          <td >
+          <td class="text-truncate" >
             Rental {{ _.get(data, ["rentaldate"]) || "N/A" | formatDate }}
           </td>
-          <td>RM {{ _.get(data, ["price"]) || "N/A" | toDouble }}</td>
+          <td class="text-truncate">RM {{ _.get(data, ["price"]) || "N/A" | toDouble }}</td>
         </tr>
         <tr class="item subtitle">
-          <td>Penalty</td>
-          <td>RM {{ _.get(data, ["penalty"]) || "N/A" | toDouble }}</td>
+          <td class="text-truncate">Penalty</td>
+          <td class="text-truncate">RM {{ _.get(data, ["penalty"]) || "N/A" | toDouble }}</td>
         </tr>
         <tr class="item subtitle">
-          <td>Processing Fees</td>
-          <td>RM {{ _.get(data, ["processing_fees"]) || "N/A" | toDouble }}</td>
+          <td class="text-truncate">Processing Fees</td>
+          <td class="text-truncate">RM {{ _.get(data, ["processing_fees"]) || "N/A" | toDouble }}</td>
         </tr>
 
         <tr class="total subtitle">
-          <td></td>
+          <td class="text-truncate"></td>
 
-          <td>Total: RM {{ totalPayment || "N/A" | toDouble }}</td>
+          <td class="text-truncate">Total: RM {{ totalPayment || "N/A" | toDouble }}</td>
         </tr>
         
         <tr class="information">
-          <td colspan="2">
+          <td class="text-truncate" colspan="2">
             <table>
               <tr>
-                <td>
+                <td class="text-truncate">
                   Issue By #: {{ _.get(data, ["issueby", 'name']) || "N/A" }}<br />
                 </td>
               </tr>
