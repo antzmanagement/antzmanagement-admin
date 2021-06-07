@@ -161,7 +161,8 @@ class RentalPaymentController extends Controller
             'room_contract_id' => $rentalPayment->roomcontract->id,
             'referenceno' => $request->referenceno,
             'paymentmethod' => $request->paymentmethod,
-            'receive_from' => $request->receive_from,
+            // 'receive_from' => $request->receive_from,
+            'receive_from' => $rentalPayment->roomcontract->tenant->name,
             'issue_by' => $request->user()->id,
         ]);
         //Convert To Json Object
@@ -241,7 +242,8 @@ class RentalPaymentController extends Controller
             'room_contract_id' => $rentalPayment->roomcontract->id,
             'referenceno' => $request->referenceno,
             'paymentmethod' => $request->paymentmethod,
-            'receive_from' => $request->receive_from,
+            // 'receive_from' => $request->receive_from,
+            'receive_from' => $rentalPayment->roomcontract->tenant->name,
             'issue_by' => $request->user()->id,
         ]);
         //Convert To Json Object

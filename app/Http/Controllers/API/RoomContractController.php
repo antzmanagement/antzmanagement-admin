@@ -160,6 +160,35 @@ class RoomContractController extends Controller
             return $this->errorResponse();
         }
 
+        if($roomContract->outstanding_deposit > 0){
+            $params = collect([
+                'room_contract_id' => $roomContract->id,
+                'other_charges' => $roomContract->outstanding_deposit,
+            ]);
+            //Convert To Json Object
+            $params = json_decode(json_encode($params));
+            $payment = $this->createPayment($params);
+            $data = $this->getOtherPaymentTitleByName('Deposit');
+            if (!$this->isEmpty($data)) {
+                $data->price = $this->toDouble($roomContract->outstanding_deposit);
+                $payment->otherpayments->push($data);
+                $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
+            }else{
+                $params = collect([
+                    'name' => 'Deposit',
+                ]);
+                //Convert To Json Object
+                $params = json_decode(json_encode($params));
+                $data = $this->createOtherPaymentTitle($params);
+                if (!$this->isEmpty($data)) {
+                    $data->price = $this->toDouble($roomContract->outstanding_deposit);
+                    $payment->otherpayments->push($data);
+                    $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
+                }
+
+            }
+        }
+
         DB::commit();
         return $this->successResponse('RoomContract', $roomContract, 'create');
     }

@@ -151,6 +151,9 @@ trait GlobalFunctions
     //Get Maximun Pages
     public function isEmpty($collection)
     {
+        if($collection == null || $collection == ''){
+            return true;
+        }
 
         $collection = collect($collection);
         if ($collection == null  || empty($collection) || $collection->count() == 0) {
@@ -216,6 +219,8 @@ trait GlobalFunctions
     //convert string to double
     public function toDate($data)
     {
+        error_log($data);
+        error_log($this->isEmpty($data) ? 'true' : 'false');
         if ($this->isEmpty($data)) {
             return null;
         } else {

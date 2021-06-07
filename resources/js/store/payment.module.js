@@ -35,6 +35,10 @@ export const actions = {
         const { data } = await PaymentServices.payDeposit(payload);
         return data;
     },
+    async makeAddOnPayment(context, payload) {
+        const { data } = await PaymentServices.makeAddOnPayment(payload);
+        return data;
+    },
 };
 
 // export const mutations = {

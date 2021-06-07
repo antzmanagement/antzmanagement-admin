@@ -58,6 +58,15 @@ const PaymentServices = {
     const clonedata = Object.assign({}, data);
     return Vue.axios.post('/api/paydeposit', clonedata)
   },
+  makeAddOnPayment(data) {
+
+    //Init axios with oauth headers
+    PassportServices.AuthenticationServices.setHeader();
+    //The data is pass by reference, any modified data will reflected to front end view.
+    //In practice way, we must clone it to prevent any error that caused by manipulation stage.
+    const clonedata = Object.assign({}, data);
+    return Vue.axios.post('/api/payment/'+ data.uid + '/makepayment', clonedata);
+  },
 };
 
 export default PaymentServices;

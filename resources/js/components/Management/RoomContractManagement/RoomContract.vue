@@ -9,11 +9,16 @@ export default {
   data: () => ({
     _: _,
     editMode: false,
+    addOnPaymentEditMode : false,
     checkoutDialog: false,
     paymentDialog: false,
     addOnPaymentDialog: false,
+    paymentPayDialog: false,
     depositPaymentDialog: false,
     selectedPayment: {
+      uid: "",
+    },
+    selectedAddOnPayment: {
       uid: "",
     },
     selectedRental: {
@@ -56,7 +61,7 @@ export default {
     ],
     paymentHeaders: [
       {
-        text: "Sequence No",
+        text: "Receipt No",
       },
       {
         text: "Reference No",
@@ -113,6 +118,13 @@ export default {
         };
       }
     },
+    addOnPaymentDialog: function (val) {
+      if (!val) {
+        this.selectedAddOnPayment = {
+          uid: "",
+        };
+      }
+    },
   },
   computed: {
     isLoading() {
@@ -162,7 +174,15 @@ export default {
       this.editMode = mode;
       this.selectedPayment.uid = uid;
     },
-
+    openAddOnPaymentDialog(uid, mode) {
+      this.addOnPaymentDialog = true;
+      this.selectedAddOnPayment.uid = uid;
+      this.addOnPaymentEditMode = mode;
+    },
+    openPaymentPayDialog(uid, mode) {
+      this.paymentPayDialog = true;
+      this.selectedAddOnPayment.uid = uid;
+    },
     showRoom($data) {
       this.$router.push("/room/" + $data.uid);
     },
@@ -211,8 +231,6 @@ export default {
     updatePaymentDetails(data) {
       var id = data.id;
       var payment = data;
-      console.log("payment");
-      console.log(payment);
       if (
         _.isArray(_.get(payment, ["services"])) &&
         !_.isEmpty(_.get(payment, ["services"]))
@@ -224,8 +242,6 @@ export default {
           return service;
         });
       }
-      this.data.payments = this.data.payments.concat([data]);
-
       if (
         _.isArray(_.get(payment, ["otherpayments"])) &&
         !_.isEmpty(_.get(payment, ["otherpayments"]))
@@ -240,7 +256,17 @@ export default {
           }
         );
       }
-      this.data.otherpayments = this.data.otherpayments.concat([data]);
+
+      if(_.some(this.data.payments, ['id', id])){
+        this.data.payments = _.map(this.data.payments, function(item) { 
+         if(item.id == id){
+           return payment;
+         } 
+         return item;
+        })
+      }else{
+        this.data.payments = _.concat(this.data.payments, [data])
+      }
     },
     deleteRoomContract($isConfirmed, $uid) {
       if ($isConfirmed) {
@@ -781,19 +807,33 @@ export default {
                     <template v-slot:item="props">
                       <tr>
                         <td class="text-truncate">{{ props.item.sequence }}</td>
-                        <td class="text-truncate">{{ props.item.referenceno }}</td>
-                        <td class="text-truncate">{{ props.item.rentaldate | formatDate }}</td>
-                        <td class="text-truncate">{{ props.item.price | toDouble }}</td>
-                        <td class="text-truncate">{{ props.item.penalty | toDouble }}</td>
-                        <td class="text-truncate">{{ props.item.processing_fees | toDouble }}</td>
-                        <td class="text-truncate">{{ props.item.service_fees | toDouble }}</td>
+                        <td class="text-truncate">
+                          {{ props.item.referenceno }}
+                        </td>
+                        <td class="text-truncate">
+                          {{ props.item.rentaldate | formatDate }}
+                        </td>
+                        <td class="text-truncate">
+                          {{ props.item.price | toDouble }}
+                        </td>
+                        <td class="text-truncate">
+                          {{ props.item.penalty | toDouble }}
+                        </td>
+                        <td class="text-truncate">
+                          {{ props.item.processing_fees | toDouble }}
+                        </td>
+                        <td class="text-truncate">
+                          {{ props.item.service_fees | toDouble }}
+                        </td>
                         <td class="text-truncate" v-if="props.item.paid">
                           <v-icon small color="success">mdi-check</v-icon>
                         </td>
                         <td class="text-truncate" v-else>
                           <v-icon small color="danger">mdi-close</v-icon>
                         </td>
-                        <td class="text-truncate">{{ props.item.paymentdate | formatDate }}</td>
+                        <td class="text-truncate">
+                          {{ props.item.paymentdate | formatDate }}
+                        </td>
                         <td class="text-truncate">
                           <print-rental-payment-button
                             :item="props.item"
@@ -846,6 +886,13 @@ export default {
                             :activatorStyle="
                               deleteRentalButtonConfig.activatorStyle
                             "
+                            v-if="
+                              helpers.isAccessible(
+                                _.get(role, ['name']),
+                                'rentalPayment',
+                                'delete'
+                              )
+                            "
                             @confirmed="
                               $event
                                 ? deleteRentalPayment(props.item.uid)
@@ -881,33 +928,41 @@ export default {
                       <v-toolbar flat color="white">
                         <v-toolbar-title
                           :class="helpers.managementStyles().subtitleClass"
-                          >Add On Payment</v-toolbar-title
+                          >Pending Payment</v-toolbar-title
                         >
                         <v-spacer></v-spacer>
-                        <v-btn
+                        <!-- <v-btn
                           v-if="data.outstanding_deposit > 0"
                           color="success"
                           dark
                           class="mb-2 mr-2"
                           @click="depositPaymentDialog = true"
                           >Deposit Payment</v-btn
-                        >
+                        > -->
                         <v-btn
                           v-if="!data.checkedout"
                           color="success"
                           dark
                           class="mb-2 mr-2"
-                          @click="addOnPaymentDialog = true"
-                          >New Add On Payment</v-btn
+                          @click="openAddOnPaymentDialog(null, false)"
+                          >New Pending Payment</v-btn
                         >
                       </v-toolbar>
                     </template>
                     <template v-slot:item="props">
                       <tr>
-                        <td class="text-truncate">{{ props.item.sequence }}</td>
-                        <td class="text-truncate">{{ props.item.referenceno }}</td>
-                        <td class="text-truncate">{{ props.item.paymentdate | formatDate }}</td>
-                        <td class="text-truncate">{{ props.item.other_charges | toDouble }}</td>
+                        <td class="text-truncate">
+                          {{ props.item.receiptno }}
+                        </td>
+                        <td class="text-truncate">
+                          {{ props.item.referenceno }}
+                        </td>
+                        <td class="text-truncate">
+                          {{ props.item.paymentdate | formatDate }}
+                        </td>
+                        <td class="text-truncate">
+                          {{ props.item.other_charges | toDouble }}
+                        </td>
                         <td class="text-truncate">
                           {{
                             _.compact(
@@ -920,7 +975,9 @@ export default {
                             ) | getArrayValues
                           }}
                         </td>
-                        <td class="text-truncate">{{ props.item.price | toDouble }}</td>
+                        <td class="text-truncate">
+                          {{ props.item.price | toDouble }}
+                        </td>
                         <td class="text-truncate">
                           {{
                             _.compact(
@@ -931,18 +988,66 @@ export default {
                           }}
                         </td>
                         <td class="text-truncate">{{ props.item.remark }}</td>
-                        <td class="text-truncate">{{ props.item.totalpayment | toDouble }}</td>
+                        <td class="text-truncate">
+                          {{ props.item.totalpayment | toDouble }}
+                        </td>
                         <td class="text-truncate">
                           <print-payment-button
                             :item="props.item"
                             :roomcontract="data"
+                            v-if="props.item.paid"
                           >
                             <v-icon small class="mr-2" color="success"
                               >mdi-printer</v-icon
                             >
                           </print-payment-button>
 
-                          <span
+                          <!-- <v-icon
+                            small
+                            class="mr-2"
+                            @click="openPaymentDialog(props.item.uid, true)"
+                            v-if="props.item.paid"
+                            color="success"
+                          >mdi-pencil</v-icon>-->
+                          <v-icon
+                            small
+                            class="mr-2"
+                            @click="openPaymentPayDialog(props.item.uid)"
+                            color="warning"
+                            v-else-if="
+                              helpers.isAccessible(
+                                _.get(role, ['name']),
+                                'rentalPayment',
+                                'makePayment'
+                              )
+                            "
+                            >mdi-currency-usd</v-icon
+                          >
+                          <v-icon
+                            small
+                            class="mr-2"
+                            @click="
+                              openAddOnPaymentDialog(props.item.uid, true)
+                            "
+                            color="success"
+                            v-if="
+                              props.item.paid == true &&
+                              helpers.isAccessible(
+                                _.get(role, ['name']),
+                                'rentalPayment',
+                                'edit'
+                              )
+                            "
+                            >mdi-pencil</v-icon
+                          >
+
+                          <confirm-dialog
+                            :activatorStyle="
+                              deleteRentalButtonConfig.activatorStyle
+                            "
+                            @confirmed="
+                              $event ? deletePayment(props.item.uid) : null
+                            "
                             v-if="
                               helpers.isAccessible(
                                 _.get(role, ['name']),
@@ -950,16 +1055,7 @@ export default {
                                 'delete'
                               )
                             "
-                          >
-                            <confirm-dialog
-                              :activatorStyle="
-                                deleteRentalButtonConfig.activatorStyle
-                              "
-                              @confirmed="
-                                $event ? deletePayment(props.item.uid) : null
-                              "
-                            ></confirm-dialog>
-                          </span>
+                          ></confirm-dialog>
                         </td>
                       </tr>
                     </template>
@@ -1056,16 +1152,47 @@ export default {
           :maxWidth="'50%'"
           :fullscreen="false"
           hideOverlay
+          v-model="paymentPayDialog"
+          transition="dialog-bottom-transition"
+        >
+          <payment-pay-form
+            :uid="selectedAddOnPayment.uid"
+            :roomcontractid="this.data.id ? `${this.data.id || ''}` : ''"
+            @close="paymentPayDialog = false"
+            @makePayment="updatePaymentDetails($event)"
+          ></payment-pay-form>
+        </v-dialog>
+
+        <v-dialog
+          persistent
+          :maxWidth="'50%'"
+          :fullscreen="false"
+          hideOverlay
           v-model="addOnPaymentDialog"
           transition="dialog-bottom-transition"
         >
           <payment-form
-            :uid="selectedPayment.uid"
+            :uid="selectedAddOnPayment.uid || ''"
             :roomcontractid="this.data.id ? `${this.data.id || ''}` : ''"
             @close="addOnPaymentDialog = false"
-            :editMode="this.editMode"
+            :editMode="this.addOnPaymentEditMode"
             @createPayment="updatePaymentDetails($event)"
+            @updated="updatePaymentDetails($event)"
           ></payment-form>
+        </v-dialog>
+
+        <v-dialog
+          persistent
+          :maxWidth="'30%'"
+          :fullscreen="false"
+          hideOverlay
+          v-model="checkoutDialog"
+          transition="dialog-bottom-transition"
+        >
+          <room-contract-check-out-form
+            :uid="data.uid"
+            @close="checkoutDialog = false"
+          ></room-contract-check-out-form>
         </v-dialog>
 
         <v-dialog
@@ -1098,278 +1225,6 @@ export default {
             @close="checkoutDialog = false"
           ></room-contract-check-out-form>
         </v-dialog>
-
-        <div class="d-none" id="printMe">
-          <v-container>
-            <v-row>
-              <v-col
-                cols="12"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div class="h5 my-5 font-weight-bold">Payment Receipt</div>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="3"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">
-                  Payment Id
-                </div>
-              </v-col>
-              <v-col
-                cols="1"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">:</div>
-              </v-col>
-              <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">
-                  {{ selectedRental.uid }}
-                </div>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="3"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">
-                  Tenant
-                </div>
-              </v-col>
-              <v-col
-                cols="1"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">:</div>
-              </v-col>
-              <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">
-                  {{ selectedRental.roomcontract.tenant.name }}
-                </div>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="3"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">
-                  Room
-                </div>
-              </v-col>
-              <v-col
-                cols="1"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">:</div>
-              </v-col>
-              <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">
-                  {{ selectedRental.roomcontract.room.name }}
-                </div>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="3"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">
-                  Contract
-                </div>
-              </v-col>
-              <v-col
-                cols="1"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">:</div>
-              </v-col>
-              <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">
-                  {{ selectedRental.roomcontract.name }}
-                </div>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="3"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">
-                  Contract Start Date
-                </div>
-              </v-col>
-              <v-col
-                cols="1"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">:</div>
-              </v-col>
-              <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">
-                  {{ selectedRental.roomcontract.startdate | formatDate }}
-                </div>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="3"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">
-                  Rental
-                </div>
-              </v-col>
-              <v-col
-                cols="1"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">:</div>
-              </v-col>
-              <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">
-                  {{ selectedRental.rentaldate | formatDate }}
-                </div>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="3"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">
-                  Payment Date
-                </div>
-              </v-col>
-              <v-col
-                cols="1"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">:</div>
-              </v-col>
-              <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">
-                  {{ selectedRental.paymentdate | formatDate }}
-                </div>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="3"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">
-                  Price
-                </div>
-              </v-col>
-              <v-col
-                cols="1"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">:</div>
-              </v-col>
-              <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">
-                  RM {{ selectedRental.price | toDouble }}
-                </div>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="3"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">
-                  Penalty
-                </div>
-              </v-col>
-              <v-col
-                cols="1"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">:</div>
-              </v-col>
-              <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">
-                  RM {{ selectedRental.penalty | toDouble }}
-                </div>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="3"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">
-                  Processing Fees
-                </div>
-              </v-col>
-              <v-col
-                cols="1"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">:</div>
-              </v-col>
-              <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">
-                  RM {{ selectedRental.processing_fees | toDouble }}
-                </div>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="3"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">
-                  Service Fees
-                </div>
-              </v-col>
-              <v-col
-                cols="1"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">:</div>
-              </v-col>
-              <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">
-                  RM {{ selectedRental.service_fees | toDouble }}
-                </div>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col
-                cols="3"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">
-                  Total Paid
-                </div>
-              </v-col>
-              <v-col
-                cols="1"
-                :class="helpers.managementStyles().centerWrapperClass"
-              >
-                <div :class="helpers.managementStyles().subtitleClass">:</div>
-              </v-col>
-              <v-col cols="8">
-                <div :class="helpers.managementStyles().lightSubtitleClass">
-                  RM
-                  {{
-                    (parseFloat(selectedRental.penalty) +
-                      parseFloat(selectedRental.price) +
-                      parseFloat(selectedRental.processing_fees) +
-                      parseFloat(selectedRental.service_fees))
-                      | toDouble
-                  }}
-                </div>
-              </v-col>
-            </v-row>
-          </v-container>
-        </div>
       </v-container>
     </v-content>
   </v-app>

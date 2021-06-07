@@ -81,17 +81,14 @@ class PaymentController extends Controller
         ]);
         error_log($this->controllerName . 'Creating payment.');
 
-        $max = Payment::where('status', true)->max('sequence') + 1;
         $params = collect([
             'room_contract_id' => $request->room_contract_id,
             'price' => $request->price,
             'other_charges' => $request->other_charges,
             'remark' => $request->remark,
-            'sequence' => $max,
             'paymentdate' => $request->paymentdate,
             'referenceno' => $request->referenceno,
         ]);
-        error_log(collect($request->otherpayments));
         //Convert To Json Object
         $params = json_decode(json_encode($params));
         $payment = $this->createPayment($params);
@@ -151,27 +148,27 @@ class PaymentController extends Controller
         error_log($this->controllerName . 'Updating payment of uid: ' . $uid);
         $payment = $this->getPayment($uid);
         $this->validate($request, [
-            'name' => 'required|string|max:300',
-            'address' => 'nullable|string|max:300',
-            'postcode' => 'nullable|string|max:300',
-            'state' => 'nullable|string|max:300',
-            'city' => 'nullable|string|max:300',
-            'country' => 'nullable|string|max:300',
+            'room_contract_id' => 'required',
             'price' => 'required|numeric',
-            'paymentTypes' => 'required',
+            'services' => 'array',
+            'otherpayments' => 'array',
         ]);
         if ($this->isEmpty($payment)) {
             DB::rollBack();
             return $this->notFoundResponse('Payment');
         }
         $params = collect([
-            'name' => $request->name,
-            'address' => $request->address,
-            'postcode' => $request->postcode,
-            'state' => $request->state,
-            'city' => $request->city,
-            'country' => $request->country,
             'price' => $request->price,
+            'paid' => $request->paid,
+            'other_charges' => $request->other_charges,
+            'paymentdate' => $request->paymentdate,
+            'remark' => $request->remark,
+            'room_contract_id' => $payment->roomcontract->id,
+            'referenceno' => $request->referenceno,
+            'paymentmethod' => $request->paymentmethod,
+            // 'receive_from' => $request->receive_from,
+            'receive_from' => $payment->roomcontract->tenant->name,
+            'issue_by' => $request->user()->id,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
@@ -181,19 +178,46 @@ class PaymentController extends Controller
             DB::rollBack();
             return $this->errorResponse();
         }
+        //For front end view
 
-        $paymentTypes = PaymentType::find($request->paymentTypes);
-        if ($this->isEmpty($paymentTypes)) {
-            DB::rollBack();
-            return $this->notFoundResponse('PaymentType');
+        if($request->services){
+            $services = collect(json_decode(json_encode($request->services)));
+            $finalservices = collect();
+            foreach ($services as $service) {
+                $service = $this->getService($service);
+                if (!$this->isEmpty($service)) {
+                    $finalservices[$service->id] = ['status' => true, 'price' => $this->toDouble($service->price)];
+                }
+            }
+            $payment->services()->sync($finalservices);
         }
+        
+        if($request->otherpayments){
+            $otherpayments = collect(json_decode(json_encode($request->otherpayments)));
+            $finalotherpayments = collect();
+            foreach ($otherpayments as $otherpayment) {
+                $data = $this->getOtherPaymentTitleByName($otherpayment->name);
+                if (!$this->isEmpty($data)) {
+                    $price = $this->toDouble($otherpayment->price);
+                    $finalservices[$data->id] = ['status' => true, 'price' => $price];
+                }else{
+                    $params = collect([
+                        'name' => $otherpayment->name,
+                    ]);
+                    //Convert To Json Object
+                    $params = json_decode(json_encode($params));
+                    $data = $this->createOtherPaymentTitle($params);
+                    if (!$this->isEmpty($data)) {
+                        $price = $this->toDouble($otherpayment->price);
+                        $finalservices[$data->id] = ['status' => true, 'price' => $price];
+                    }
 
-        try {
-            $payment->paymentTypes()->sync($paymentTypes->pluck('id'));
-        } catch (Exception $e) {
-            DB::rollBack();
-            return $this->errorResponse();
+                }
+            }
+            $payment->otherpayments()->sync($finalotherpayments);
         }
+        
+
         $payment = $this->getPaymentById($payment->id);
         if ($this->isEmpty($payment)) {
             DB::rollBack();
@@ -237,17 +261,23 @@ class PaymentController extends Controller
             return $this->notFoundResponse('Payment');
         }
 
+        $max = Payment::where('status', true)->max('sequence') + 1;
         $params = collect([
             'price' => $request->price,
-            'payment' => $request->price,
+            'totalpayment' => $request->price,
             'paid' => true,
             'penalty' => $this->toDouble($request->penalty),
             'processing_fees' => $this->toDouble($request->processing_fees),
-            'service_fees' => $this->toDouble($request->service_fees),
+            'other_charges' => $request->other_charges,
             'paymentdate' => Carbon::now()->format('Y-m-d'),
-            'rentaldate' => $payment->rentaldate,
             'remark' => $payment->remark,
-            'payment_contract_id' => $payment->paymentcontract->id,
+            'sequence' => $max,
+            'room_contract_id' => $payment->roomcontract->id,
+            'referenceno' => $request->referenceno,
+            'paymentmethod' => $request->paymentmethod,
+            // 'receive_from' => $request->receive_from,
+            'receive_from' => $payment->roomcontract->tenant->name,
+            'issue_by' => $request->user()->id,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
@@ -258,6 +288,24 @@ class PaymentController extends Controller
             return $this->errorResponse();
         }
 
+        if(collect($payment->otherpayments)->contains('name', 'Deposit')){
+            error_log('here');
+            $roomcontract = $this->getRoomContractById($payment->room_contract_id);
+            if ($this->isEmpty($roomcontract)) {
+                DB::rollBack();
+                return $this->errorResponse();
+            }
+            $depositPayment = collect($payment->otherpayments)->where('name', 'Deposit')->first();
+            if($depositPayment){
+                try {
+                    $depositPayment = $depositPayment->pivot->price;
+                } catch (\Throwable $th) {
+                    //throw $th;
+                    $depositPayment = 0;
+                }
+                $roomcontract = $this->payRoomContractDeposit($roomcontract, $depositPayment);
+            }
+        }
         $payment = $this->getPaymentById($payment->id);
         if ($this->isEmpty($payment)) {
             DB::rollBack();
@@ -290,6 +338,10 @@ class PaymentController extends Controller
             'sequence' => $max,
             'paymentdate' => $request->paymentdate,
             'referenceno' => $request->referenceno,
+            'paymentmethod' => $request->paymentmethod,
+            // 'receive_from' => $request->receive_from,
+            'receive_from' => $rentalPayment->roomcontract->tenant->name,
+            'issue_by' => $request->user()->id,
         ]);
         error_log(collect($request->otherpayments));
         //Convert To Json Object

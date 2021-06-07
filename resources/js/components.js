@@ -62,3 +62,5 @@ Vue.component('payment-form', require('./components/Management/PaymentManagement
 Vue.component('deposit-payment-form', require('./components/Management/PaymentManagement/DepositPaymentForm.vue').default);
 Vue.component('payment-filter-dialog', require('./components/Management/PaymentManagement/PaymentFilterDialog.vue').default);
 Vue.component('print-payment-button', require('./components/Management/PaymentManagement/PrintPaymentButton.vue').default);
+Vue.component('payment-pay-form', require('./components/Management/PaymentManagement/PaymentPayForm.vue').default);
+Vue.component('other-payment-dialog', require('./components/Management/PaymentManagement/OtherPaymentDialog.vue').default);

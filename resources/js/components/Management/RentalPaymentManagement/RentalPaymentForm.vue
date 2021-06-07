@@ -140,6 +140,7 @@ export default {
       this.$Progress.start();
       this.makePaymentAction(this.data)
         .then((data) => {
+          
           Toast.fire({
             icon: "success",
             title: "Successful Paid. ",
@@ -199,12 +200,12 @@ export default {
               v-model="data.referenceno"
             ></v-text-field>
           </v-col>
-          <v-col cols="12">
+          <!-- <v-col cols="12">
             <v-text-field
               label="Receive From"
               v-model="data.receive_from"
             ></v-text-field>
-          </v-col>
+          </v-col> -->
           <!-- <v-col cols="12">
             <v-text-field
               label="Issue By"

@@ -15,7 +15,7 @@ Vue.filter("capitalizeFirstLetter", function (text) {
 Vue.filter("formatDate", function (date) {
 
 	if (date) {
-		return moment(date).format('MMMM Do YYYY');
+		return moment(date).format('DD/MM/YYYY');
 	} else {
 		return 'N/A'
 	}

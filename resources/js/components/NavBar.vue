@@ -113,8 +113,6 @@ export default {
           roleItems.push(item);
         }
       });
-      console.log("roleItems");
-      console.log(roleItems);
       return roleItems;
     },
   },

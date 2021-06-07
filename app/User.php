@@ -129,5 +129,10 @@ class User extends Authenticatable
     {
         return $this->hasMany('App\RentalPayment', 'issueby');
     }
+
+    public function issuepayments()
+    {
+        return $this->hasMany('App\Payment', 'issueby');
+    }
     
 }

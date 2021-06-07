@@ -123,7 +123,7 @@ trait PaymentServices
             $q->where('status', true);
         }, 'services' => function ($q) {
         },'otherpayments' => function ($q) {
-        }])->where('status', true)->first();
+        }, 'issueby'])->where('status', true)->first();
         return $data;
     }
 
@@ -142,7 +142,7 @@ trait PaymentServices
             $q->where('status', true);
         }, 'services' => function ($q) {
         },'otherpayments' => function ($q) {
-        }])->where('status', true)->first();
+        }, 'issueby'])->where('status', true)->first();
         return $data;
     }
 
@@ -157,9 +157,11 @@ trait PaymentServices
         $data->other_charges = $this->toDouble($params->other_charges);
         $data->totalpayment = $data->price + $data->other_charges;
         $data->paymentdate = $this->toDate($params->paymentdate);
-        $data->sequence = $this->toInt($params->sequence);
+        if($params->sequence){
+            $data->sequence = $this->toInt($params->sequence);
+            $data->receiptno = 'ap-'. $data->sequence;
+        }
         $data->remark = $params->remark;
-        $data->sequence = Payment::where('status', true)->count() + 1;
         $data->referenceno = $params->referenceno;
         
         $roomContract = $this->getRoomContractById($params->room_contract_id);
@@ -167,7 +169,6 @@ trait PaymentServices
             return false;
         }
         $data->roomcontract()->associate($roomContract);
-
 
         if (!$this->saveModel($data)) {
             return null;
@@ -182,22 +183,30 @@ trait PaymentServices
 
         $params = $this->checkUndefinedProperty($params, $this->paymentAllCols());
         $data->price = $this->toDouble($params->price);
-        $data->payment = $this->toDouble($params->payment);
-        $data->penalty =  $this->toDouble($params->penalty);
-        $data->processing_fees =  $this->toDouble($params->processing_fees);
-        $data->service_fees =  $this->toDouble($params->service_fees);
-        $data->outstanding = $this->toDouble($data->price + $data->penalty  - $data->payment);
+        $data->other_charges = $this->toDouble($params->other_charges);
+        $data->totalpayment = $data->price + $data->other_charges;
         $data->paid = $params->paid;
-        $data->rentaldate = $this->toDate($params->rentaldate);
         $data->paymentdate = $this->toDate($params->paymentdate);
         $data->remark = $params->remark;
         $data->referenceno = $params->referenceno;
+        if($params->sequence){
+            $data->sequence = $this->toInt($params->sequence);
+            $data->receiptno = 'ap-'. $data->sequence;
+        }
+        $data->receive_from = $params->receive_from;
+        $data->paymentmethod = $params->paymentmethod;
         
         $roomContract = $this->getRoomContractById($params->room_contract_id);
         if ($this->isEmpty($roomContract)) {
             return false;
         }
         $data->roomcontract()->associate($roomContract);
+
+        $issueBy = $this->getUserById($params->issue_by);
+        if ($this->isEmpty($issueBy)) {
+            return false;
+        }
+        $data->issueby()->associate($issueBy);
 
         if (!$this->saveModel($data)) {
             return null;
@@ -227,7 +236,7 @@ trait PaymentServices
     public function paymentAllCols()
     {
 
-        return ['id', 'uid', 'price', 'remark'];
+        return ['id', 'uid', 'price', 'remark', 'referenceno' ,'receive_from', 'issue_by', 'sequence', 'paymentdate', 'other_charges', 'room_contract_id'];
     }
 
     public function paymentDefaultCols()

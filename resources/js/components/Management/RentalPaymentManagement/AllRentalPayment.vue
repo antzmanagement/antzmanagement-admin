@@ -9,8 +9,14 @@ export default {
       moment: moment,
       _: _,
       editMode: false,
+      paymentPayDialog : false,
+      addOnPaymentEditMode: false,
+      addOnPaymentDialog: false,
       paymentDialog: false,
       selectedPayment: {
+        uid: "",
+      },
+      selectedAddOnPayment: {
         uid: "",
       },
       selectedRental: {
@@ -109,10 +115,13 @@ export default {
           text: "Tenant",
         },
         {
-          text: "Room Contract",
+          text: "Room",
         },
         {
-          text: "Room",
+          text: "Contract Start Date",
+        },
+        {
+          text: "Contract End Date",
         },
         {
           text: "Rental Date",
@@ -141,8 +150,8 @@ export default {
       ],
       paymentHeaders: [
         {
-          text: "Sequence No",
-          value: "sequence",
+          text: "Receipt No",
+          value: "receiptno",
         },
         {
           text: "Reference No",
@@ -151,10 +160,13 @@ export default {
           text: "Tenant",
         },
         {
-          text: "Room Contract",
+          text: "Room",
         },
         {
-          text: "Room",
+          text: "Contract Start Date",
+        },
+        {
+          text: "Contract End Date",
         },
         { text: "Payment Date", value: "paymentdate" },
         { text: "Price", value: "price" },
@@ -172,7 +184,7 @@ export default {
         id: "id",
         uid: "uid",
         referenceno: "referenceno",
-        sequence: "sequence",
+        receiptno: "receiptno",
         room: {
           field: "roomcontract",
           callback: (value) => {
@@ -339,6 +351,15 @@ export default {
       this.editMode = mode;
       this.selectedPayment.uid = uid;
     },
+    openAddOnPaymentDialog(uid, mode) {
+      this.addOnPaymentDialog = true;
+      this.selectedAddOnPayment.uid = uid;
+      this.addOnPaymentEditMode = mode;
+    },
+    openPaymentPayDialog(uid, mode) {
+      this.paymentPayDialog = true;
+      this.selectedAddOnPayment.uid = uid;
+    },
     initRentalPaymentFilter(filterGroup) {
       this.rentalPaymentFilterGroup.reset();
       if (filterGroup.tenant) {
@@ -386,8 +407,8 @@ export default {
           _.map(filterGroup.services, "id") || [];
         this.paymentFilterGroup.services = filterGroup.services;
       }
-      if (filterGroup.sequence) {
-        this.paymentFilterGroup.sequence = filterGroup.sequence;
+      if (filterGroup.receiptno) {
+        this.paymentFilterGroup.receiptno = filterGroup.receiptno;
       }
       if (filterGroup.todate) {
         this.paymentFilterGroup.todate = filterGroup.todate;
@@ -415,6 +436,46 @@ export default {
           return item;
         }
       });
+    },
+    updatePaymentDetails(data) {
+      var id = data.id;
+      var payment = data;
+      if (
+        _.isArray(_.get(payment, ["services"])) &&
+        !_.isEmpty(_.get(payment, ["services"]))
+      ) {
+        payment.services = _.map(payment.services, function (service) {
+          service.pivot = {
+            price: service.price,
+          };
+          return service;
+        });
+      }
+      if (
+        _.isArray(_.get(payment, ["otherpayments"])) &&
+        !_.isEmpty(_.get(payment, ["otherpayments"]))
+      ) {
+        payment.otherpayments = _.map(
+          payment.otherpayments,
+          function (otherpayment) {
+            otherpayment.pivot = {
+              price: otherpayment.price,
+            };
+            return otherpayment;
+          }
+        );
+      }
+
+      if(_.some(this.paymentData, ['id', id])){
+        this.paymentData = _.map(this.paymentData, function(item) { 
+         if(item.id == id){
+           return payment;
+         } 
+         return item;
+        })
+      }else{
+        this.paymentData = _.concat(this.paymentData, [data])
+      }
     },
     deletePaymentDetails(data) {
       var id = data.id;
@@ -734,21 +795,42 @@ export default {
                   <tr>
                     <td class="text-truncate">{{ props.item.sequence }}</td>
                     <td class="text-truncate">{{ props.item.referenceno }}</td>
-                    <td class="text-truncate">{{ props.item.roomcontract.tenant.name }}</td>
-                    <td class="text-truncate">{{ props.item.roomcontract.name }}</td>
-                    <td class="text-truncate">{{ props.item.roomcontract.room.name }}</td>
-                    <td class="text-truncate">{{ props.item.rentaldate | formatDate }}</td>
-                    <td class="text-truncate">{{ props.item.price | toDouble }}</td>
-                    <td class="text-truncate">{{ props.item.penalty | toDouble }}</td>
-                    <td class="text-truncate">{{ props.item.processing_fees | toDouble }}</td>
-                    <td class="text-truncate">{{ props.item.service_fees | toDouble }}</td>
+                    <td class="text-truncate">
+                      {{ props.item.roomcontract.tenant.name }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.roomcontract.room.name }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.roomcontract.startdate | formatDate }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.roomcontract.enddate | formatDate }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.rentaldate | formatDate }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.price | toDouble }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.penalty | toDouble }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.processing_fees | toDouble }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.service_fees | toDouble }}
+                    </td>
                     <td class="text-truncate" v-if="props.item.paid">
                       <v-icon small color="success">mdi-check</v-icon>
                     </td>
                     <td class="text-truncate" v-else>
                       <v-icon small color="danger">mdi-close</v-icon>
                     </td>
-                    <td class="text-truncate">{{ props.item.paymentdate | formatDate }}</td>
+                    <td class="text-truncate">
+                      {{ props.item.paymentdate | formatDate }}
+                    </td>
                     <td class="text-truncate">
                       <print-rental-payment-button
                         :item="props.item"
@@ -837,7 +919,7 @@ export default {
                   <v-toolbar flat color="white">
                     <v-toolbar-title
                       :class="helpers.managementStyles().subtitleClass"
-                      >Add On Payment</v-toolbar-title
+                      >Pending Payment</v-toolbar-title
                     >
                     <v-spacer></v-spacer>
                     <download-excel
@@ -867,14 +949,29 @@ export default {
                 </template>
                 <template v-slot:item="props">
                   <tr>
-                    <td class="text-truncate">{{ props.item.sequence }}</td>
+                    <td class="text-truncate">{{ props.item.receiptno }}</td>
                     <td class="text-truncate">{{ props.item.referenceno }}</td>
-                    <td class="text-truncate">{{ props.item.roomcontract.tenant.name }}</td>
-                    <td class="text-truncate">{{ props.item.roomcontract.name }}</td>
-                    <td class="text-truncate">{{ props.item.roomcontract.room.name }}</td>
-                    <td class="text-truncate">{{ props.item.paymentdate | formatDate }}</td>
-                    <td class="text-truncate">{{ props.item.totalpayment | toDouble }}</td>
-                    <td class="text-truncate">{{ props.item.other_charges | toDouble }}</td>
+                    <td class="text-truncate">
+                      {{ props.item.roomcontract.tenant.name }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.roomcontract.room.name }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.roomcontract.startdate | formatDate }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.roomcontract.enddate | formatDate }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.paymentdate | formatDate }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.totalpayment | toDouble }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.other_charges | toDouble }}
+                    </td>
                     <td class="text-truncate">
                       {{
                         _.compact(
@@ -901,13 +998,49 @@ export default {
                       <print-payment-button
                         :item="props.item"
                         :roomcontract="props.item.roomcontract"
+                        v-if="props.item.paid"
                       >
                         <v-icon small class="mr-2" color="success"
                           >mdi-printer</v-icon
                         >
                       </print-payment-button>
+                      <v-icon
+                        small
+                        class="mr-2"
+                        @click="openPaymentPayDialog(props.item.uid)"
+                        color="warning"
+                        v-else-if="
+                          helpers.isAccessible(
+                            _.get(role, ['name']),
+                            'rentalPayment',
+                            'makePayment'
+                          )
+                        "
+                        >mdi-currency-usd</v-icon
+                      >
+                      <v-icon
+                        small
+                        class="mr-2"
+                        @click="openAddOnPaymentDialog(props.item.uid, true)"
+                        color="success"
+                        v-if="
+                          props.item.paid == true &&
+                          helpers.isAccessible(
+                            _.get(role, ['name']),
+                            'rentalPayment',
+                            'edit'
+                          )
+                        "
+                        >mdi-pencil</v-icon
+                      >
 
-                        <confirm-dialog
+                      <confirm-dialog
+                        :activatorStyle="
+                          deleteRentalButtonConfig.activatorStyle
+                        "
+                        @confirmed="
+                          $event ? deletePayment(props.item.uid) : null
+                        "
                         v-if="
                           helpers.isAccessible(
                             _.get(role, ['name']),
@@ -915,13 +1048,7 @@ export default {
                             'delete'
                           )
                         "
-                          :activatorStyle="
-                            deleteRentalButtonConfig.activatorStyle
-                          "
-                          @confirmed="
-                            $event ? deletePayment(props.item.uid) : null
-                          "
-                        ></confirm-dialog>
+                      ></confirm-dialog>
                     </td>
                   </tr>
                 </template>
@@ -929,6 +1056,40 @@ export default {
             </v-card>
           </v-col>
         </v-row>
+
+
+
+        <v-dialog
+          persistent
+          :maxWidth="'50%'"
+          :fullscreen="false"
+          hideOverlay
+          v-model="paymentPayDialog"
+          transition="dialog-bottom-transition"
+        >
+          <payment-pay-form
+            :uid="selectedAddOnPayment.uid"
+            @close="paymentPayDialog = false"
+            @makePayment="updatePaymentDetails($event)"
+          ></payment-pay-form>
+        </v-dialog>
+
+        <v-dialog
+          persistent
+          :maxWidth="'50%'"
+          :fullscreen="false"
+          hideOverlay
+          v-model="addOnPaymentDialog"
+          transition="dialog-bottom-transition"
+        >
+          <payment-form
+            :uid="selectedAddOnPayment.uid || ''"
+            @close="addOnPaymentDialog = false"
+            :editMode="this.addOnPaymentEditMode"
+            @createPayment="updatePaymentDetails($event)"
+            @updated="updatePaymentDetails($event)"
+          ></payment-form>
+        </v-dialog>
         <v-dialog
           persistent
           :maxWidth="'30%'"

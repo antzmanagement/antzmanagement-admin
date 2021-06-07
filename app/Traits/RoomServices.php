@@ -275,7 +275,7 @@ trait RoomServices
             if($contracts > 0){
                 $status = 'occupied';
             }else{
-                $status = 'empty';
+                $status = 'vacant';
             }
     
             $maintenances = $room->maintenances()->where('status', true)->where('maintenance_status', 'inprogress')->count();

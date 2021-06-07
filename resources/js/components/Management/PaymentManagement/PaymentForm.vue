@@ -28,12 +28,12 @@ export default {
   },
   data() {
     return {
-      moment : moment,
+      moment: moment,
       _: _,
       menu: false,
       otherPaymentDialog: false,
       penaltyRate: 3,
-      otherpayments : [],
+      otherpayments: [],
       expiredDays: 9,
       origPrice: 0,
       data: new Form({
@@ -41,7 +41,6 @@ export default {
         other_charges: 0,
         remark: "",
         services: [],
-        paymentdate: moment().format("YYYY-MM-DD"),
         room_contract_id: "",
         otherpayments: [],
       }),
@@ -63,32 +62,68 @@ export default {
   },
   watch: {
     uid: function (val) {
-      console.log("room contract changed");
-      console.log(val);
+      if (val) {
+        this.getPayment();
+      }
     },
     roomcontractid: function (val) {
-      console.log("room contract changed");
-      console.log(val);
     },
     otherPaymentDialog: function (val) {
-      if(val){
+      if (val) {
         this.otherpayments = this.data.otherpayments || [];
-      }else{
+      } else {
         this.otherpayments = [];
       }
-      console.log('dialog', val);
     },
   },
-  mounted() {},
+  mounted() {
+    if (this.uid) {
+      this.getPayment();
+    }
+  },
   methods: {
     ...mapActions({
       createPaymentAction: "createPayment",
+      updatePaymentAction: "updatePayment",
+      getPaymentAction: "getPayment",
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction",
     }),
     close() {
       this.$emit("close");
-      this.data.reset();
+    },
+    getPayment() {
+      this.showLoadingAction();
+      this.$Progress.start();
+      this.getPaymentAction({ uid: this.uid })
+        .then((data) => {
+          this.data = data.data;
+          console.log(data.data);
+          this.data.services =
+            this.pluckUid(_.get(data, `data.services`)) || [];
+          if (
+            _.isArray(_.get(this.data, ["otherpayments"])) &&
+            !_.isEmpty(_.get(this.data, ["otherpayments"]))
+          ) {
+            this.data.otherpayments = _.map(
+              this.data.otherpayments,
+              function (otherpayment) {
+                otherpayment.price = _.get(otherpayment , `pivot.price`) || 0;
+                return otherpayment;
+              }
+            );
+          }
+          this.$Progress.finish();
+          this.endLoadingAction();
+        })
+        .catch((error) => {
+          Toast.fire({
+            icon: "warning",
+            title: "Fail to retrieve the payment!!!!! ",
+          });
+          this.$Progress.finish();
+          this.endLoadingAction();
+        });
     },
     pluckUid(data) {
       if (data.length > 0) {
@@ -117,7 +152,6 @@ export default {
       this.data.other_charges = parseFloat(price);
     },
     createPayment() {
-      console.log(this.data);
       if (!this.roomcontractid) {
         Toast.fire({
           icon: "warning",
@@ -149,6 +183,30 @@ export default {
           this.close();
         });
     },
+    updatePayment() {
+      this.showLoadingAction();
+      this.$Progress.start();
+      this.updatePaymentAction(this.data)
+        .then((data) => {
+          Toast.fire({
+            icon: "success",
+            title: "Successful Updated. ",
+          });
+          this.$Progress.finish();
+          this.endLoadingAction();
+          this.$emit("updated", data.data);
+          this.close();
+        })
+        .catch((error) => {
+          Toast.fire({
+            icon: "warning",
+            title: "Something went wrong!!!!! ",
+          });
+          this.$Progress.finish();
+          this.endLoadingAction();
+          this.close();
+        });
+    },
   },
 };
 </script>
@@ -158,13 +216,13 @@ export default {
     <v-card-text>
       <v-container>
         <v-row>
-          <v-col cols="12">
+          <v-col cols="12" v-if="editMode">
             <v-text-field
               label="Reference No"
               v-model="data.referenceno"
             ></v-text-field>
           </v-col>
-          <v-col cols="12">
+          <v-col cols="12" v-if="editMode">
             <v-menu
               ref="menu"
               v-model="menu"
@@ -192,6 +250,12 @@ export default {
               ></v-date-picker>
             </v-menu>
           </v-col>
+          <v-col cols="12" v-if="editMode">
+            <v-text-field
+              label="Payment Method"
+              v-model="data.paymentmethod"
+            ></v-text-field>
+          </v-col>
           <v-col cols="12">
             <v-text-field
               label="Service Fees"
@@ -209,6 +273,13 @@ export default {
               v-model="data.other_charges"
               readonly
             ></v-text-field>
+          </v-col>
+          <v-col cols="12" v-if="editMode">
+            <div>Paid Status</div>
+            <v-radio-group v-model="data.paid" row>
+              <v-radio label="Paid" :value="1"></v-radio>
+              <v-radio label="Unpaid" :value="0"></v-radio>
+            </v-radio-group>
           </v-col>
           <v-col cols="12">
             <v-textarea
@@ -238,10 +309,15 @@ export default {
       >
       <v-spacer></v-spacer>
       <v-btn color="blue darken-1" text @click="close()">Close</v-btn>
-      <v-btn color="blue darken-1" text @click="createPayment()">Save</v-btn>
+      <v-btn
+        color="blue darken-1"
+        text
+        @click="editMode ? updatePayment() : createPayment()"
+        >Save</v-btn
+      >
     </v-card-actions>
 
-    <v-dialog v-model="otherPaymentDialog" >
+    <v-dialog v-model="otherPaymentDialog">
       <v-card>
         <v-toolbar dark color="primary">
           <v-btn icon dark @click="otherPaymentDialog = false">
@@ -250,11 +326,17 @@ export default {
           <v-toolbar-title>Other Payment</v-toolbar-title>
           <v-spacer></v-spacer>
           <v-toolbar-items>
-            <v-btn dark text :disabled="isLoading" @click="() => {
-              data.otherpayments = otherpayments;
-              otherPaymentDialog = false;
-              otherPaymentUpdated();
-              }"
+            <v-btn
+              dark
+              text
+              :disabled="isLoading"
+              @click="
+                () => {
+                  data.otherpayments = otherpayments;
+                  otherPaymentDialog = false;
+                  otherPaymentUpdated();
+                }
+              "
               >Save</v-btn
             >
           </v-toolbar-items>
@@ -316,11 +398,11 @@ export default {
                           color="red"
                           @click="
                             () => {
-                              otherpayments = (
-                                otherpayments || []
-                              ).filter(function (item) {
-                                return item.id != props.item.id;
-                              });
+                              otherpayments = (otherpayments || []).filter(
+                                function (item) {
+                                  return item.id != props.item.id;
+                                }
+                              );
                             }
                           "
                           ><v-icon>mdi-trash-can-outline</v-icon></v-btn

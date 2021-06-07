@@ -364,7 +364,13 @@ export default {
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showTenant(props.item)">
-                    <td class="text-truncate">{{ _.map(_.get(props.item, `roomcontracts`), 'room.unit') || [] | getArrayValues }}</td>
+                    <td class="text-truncate">
+                      <div
+                        v-for="roomContract in props.item.roomcontracts"
+                        :key="roomContract.id"
+                      >
+                      {{ _.get(roomContract , 'room.unit') || 'N/A' }}
+                      </div></td>
                     <td class="text-truncate">{{ props.item.name }}</td>
                     <td class="text-truncate">{{ props.item.birthday | formatDate }}</td>
                     <td class="text-truncate">{{ props.item.gender }}</td>

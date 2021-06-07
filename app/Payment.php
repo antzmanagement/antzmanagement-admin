@@ -20,4 +20,9 @@ class Payment extends Model
     {
         return $this->belongsToMany('App\OtherPaymentTitle','other_payment_titles_payments', 'payment_id', 'other_payment_title_id')->withPivot('price','status','created_at','updated_at');
     }
+
+    public function issueby()
+    {
+        return $this->belongsTo('App\User', 'issueby');
+    }
 }
