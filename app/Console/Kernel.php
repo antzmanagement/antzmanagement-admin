@@ -15,6 +15,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         Commands\WordOfTheDay::class,
         Commands\CreateRental::class,
+        Commands\PatchRoomStatus::class,
         //
     ];
 
@@ -29,8 +30,7 @@ class Kernel extends ConsoleKernel
         // $schedule->command('inspire')
         //          ->hourly();
         
-        $schedule->command('word:day')
-            ->everyMinute();
+        $schedule->command('word:day')->cron('* * * * *');
     }
 
     /**

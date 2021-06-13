@@ -464,7 +464,7 @@ export default {
                   <v-data-table
                     :headers="maintenanceHeaders"
                     :items="data.maintenances"
-                    items-per-page="5"
+                    :items-per-page="5"
                     item-key="uid"
                     disable-sort
                   >

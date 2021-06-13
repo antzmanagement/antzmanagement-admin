@@ -126,14 +126,36 @@ export default {
   },
   watch: {
     dialog: function (val) {
-      if (val) {
+      if (!val) {
         this.data.reset();
         this.$v.$reset();
+      } else {
+        let selectedRoom = _.find(this.rooms, (room) => {
+          return room.id == this.roomId;
+        });
+
+        this.data.room = selectedRoom;
+      }
+    },
+    roomId: function (val) {
+      if (val) {
+        let selectedRoom = _.find(this.rooms, (room) => {
+          return room.id == val;
+        });
+        this.data.room = selectedRoom;
+      }
+    },
+    rooms: function (val) {
+      if (this.roomId) {
+        let selectedRoom = _.find(this.rooms, (room) => {
+          return room.id == this.roomId;
+        });
+
+        this.data.room = selectedRoom;
       }
     },
   },
   mounted() {
-    console.log("call");
     this.showLoadingAction();
     let promises = [];
     promises.push(this.getRoomsAction({ pageNumber: -1, pageSize: -1 }));
@@ -141,7 +163,6 @@ export default {
     promises.push(this.getOwnersAction({ pageNumber: -1, pageSize: -1 }));
 
     if (this.editMode) {
-      console.log(this.uid);
       promises.push(this.getMaintenanceAction({ uid: this.uid }));
     }
 
@@ -152,12 +173,11 @@ export default {
         this.properties = propertyRes.data || [];
 
         if (maintenanceRes) {
-          console.log(maintenanceRes);
-          let maintenanceRoom = _.get(maintenanceRes, [
-            "data",
-            "room",
-          ]) || {};
-          maintenanceRes.data.room = _.find(this.rooms, ['id', maintenanceRoom.id]);
+          let maintenanceRoom = _.get(maintenanceRes, ["data", "room"]) || {};
+          maintenanceRes.data.room = _.find(this.rooms, [
+            "id",
+            maintenanceRoom.id,
+          ]);
           maintenanceRes.data.property = _.get(maintenanceRes, [
             "data",
             "property",
@@ -169,10 +189,7 @@ export default {
             "id",
           ]);
 
-          console.log(maintenanceRes);
           this.data = new Form(maintenanceRes.data);
-          console.log("this");
-          console.log(this.data);
         }
         this.endLoadingAction();
       })
@@ -208,7 +225,7 @@ export default {
       } else {
         this.$Progress.start();
         this.showLoadingAction();
-        this.data.room = _.get(this.data, 'room.id') || null;
+        this.data.room = _.get(this.data, "room.id") || null;
         this.createMaintenanceAction(this.data)
           .then((data) => {
             Toast.fire({
@@ -242,7 +259,7 @@ export default {
       } else {
         this.$Progress.start();
         this.showLoadingAction();
-        this.data.room = _.get(this.data, 'room.id') || null;
+        this.data.room = _.get(this.data, "room.id") || null;
         this.updateMaintenanceAction(this.data)
           .then((data) => {
             Toast.fire({
@@ -324,8 +341,20 @@ export default {
               >
               </v-autocomplete>
             </v-col>
-            <v-col cols="12" md="12" v-if="_.isArray(_.get(data , ['room', 'owners'])) && !_.isEmpty(_.get(data , ['room', 'owners']))">
-              <v-switch v-model="data.claim_by_owner" :label="`Claimed By Owner (${_.get(data, ['room', 'owners',0 ,'name']) || 'N/A'})`"></v-switch>
+            <v-col
+              cols="12"
+              md="12"
+              v-if="
+                _.isArray(_.get(data, ['room', 'owners'])) &&
+                !_.isEmpty(_.get(data, ['room', 'owners']))
+              "
+            >
+              <v-switch
+                v-model="data.claim_by_owner"
+                :label="`Claimed By Owner (${
+                  _.get(data, ['room', 'owners', 0, 'name']) || 'N/A'
+                })`"
+              ></v-switch>
             </v-col>
             <v-col cols="12">
               <v-autocomplete
