@@ -56,10 +56,55 @@ export default {
       contracts: [],
       properties: [],
       isSubContract: false,
+      roomContractHeaders: [
+        {
+          text: "Room",
+        },
+        {
+          text: "Rental",
+          width : '150px',
+        },
+        {
+          text: "Deposit",
+          width : '150px',
+        },
+        {
+          text: "Agreement Fees",
+          width : '150px',
+        },
+        {
+          text: "Booking Fees",
+          width : '150px',
+        },
+        {
+          text: "Outstanding Deposit",
+          width : '150px',
+        },
+        {
+          text: "Contract",
+          width : '150px',
+        },
+        {
+          text: "Contract Start Date",
+          width : '150px',
+        },
+        {
+          text: "Contract End Date",
+          width : '150px',
+        },
+        {
+          text: "Rental Start Date",
+          width : '150px',
+        },
+        {
+          text: "Services",
+          width : '150px',
+        },
+      ],
       data: new Form({
         tenant: "",
         remark: "",
-        room: {},
+        room: null,
       }),
       roomFormDialogConfig: {
         dialogStyle: {
@@ -276,13 +321,13 @@ export default {
     },
     customValidate() {
       return (
-        !this._.isEmpty(this.data.room) ||
-        !this._.isEmpty(this.data.room.contract_id) ||
-        !this.data.room.startdate ||
-        !this.data.room.enddate ||
-        !this.data.room.deposit ||
-        !this.data.room.agreement_fees ||
-        !this.data.room.booking_fees
+        !this._.isEmpty(this.data.room) &&
+        this.data.room.contract_id &&
+        this.data.room.startdate &&
+        this.data.room.enddate &&
+        this.data.room.deposit &&
+        this.data.room.agreement_fees &&
+        this.data.room.booking_fees
       );
     },
     createRoomContract() {
@@ -609,235 +654,214 @@ export default {
             </v-col>
             <v-col cols="12">
               <v-card>
-                <v-simple-table fixed-header height="300px">
-                  <template v-slot:default>
-                    <thead>
-                      <tr>
-                        <th class="text-left">Room</th>
-                        <th class="text-left">Rental</th>
-                        <th class="text-left" v-if="!isSubContract">Deposit</th>
-                        <th class="text-left" v-if="!isSubContract">
-                          Agreement Fees
-                        </th>
-                        <th class="text-left" v-if="!isSubContract">
-                          Booking Fees
-                        </th>
-                        <th class="text-left" v-if="editMode">
-                          Outstanding Deposit
-                        </th>
-                        <th class="text-left">Contract</th>
-                        <th class="text-left">Contract Start Date</th>
-                        <th class="text-left">Contract End Date</th>
-                        <th class="text-left">Rental Start Date</th>
-                        <!-- <th class="text-left">Auto Renew</th> -->
-                        <th class="text-left">Services</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-if="!isEmpty(data.room)">
-                        <td class="text-truncate">{{ data.room.name }}</td>
-                        <td class="text-truncate">
-                          <v-text-field
-                            v-model="data.room.price"
-                            prefix="RM"
-                            type="number"
-                            step="0.01"
-                            :error-messages="
-                              helpers.isEmpty(data.room.price)
-                                ? 'Rental is required'
-                                : ''
-                            "
-                          ></v-text-field>
-                        </td>
-                        <td class="text-truncate" v-if="!isSubContract">
-                          <v-text-field
-                            v-model="data.room.deposit"
-                            prefix="RM"
-                            type="number"
-                            step="0.01"
-                            :error-messages="
-                              helpers.isEmpty(data.room.deposit)
-                                ? 'Deposit is required'
-                                : ''
-                            "
-                          ></v-text-field>
-                        </td>
-                        <td class="text-truncate" v-if="!isSubContract">
-                          <v-text-field
-                            v-model="data.room.agreement_fees"
-                            prefix="RM"
-                            type="number"
-                            step="0.01"
-                            :error-messages="
-                              helpers.isEmpty(data.room.agreement_fees)
-                                ? 'Agreement is required'
-                                : ''
-                            "
-                          ></v-text-field>
-                        </td>
-                        <td class="text-truncate" v-if="!isSubContract">
-                          <v-text-field
-                            v-model="data.room.booking_fees"
-                            prefix="RM"
-                            type="number"
-                            step="0.01"
-                            :error-messages="
-                              helpers.isEmpty(data.room.booking_fees)
-                                ? 'Booking fees is required'
-                                : ''
-                            "
-                          ></v-text-field>
-                        </td>
-                        <td class="text-truncate" v-if="editMode">
-                          <v-text-field
-                            v-model="data.room.outstanding_deposit"
-                            prefix="RM"
-                            type="number"
-                            step="0.01"
-                            :error-messages="
-                              helpers.isEmpty(data.room.outstanding_deposit)
-                                ? 'Outstanding deposit is required'
-                                : ''
-                            "
-                          ></v-text-field>
-                        </td>
-                        <td class="text-truncate">
-                          <v-autocomplete
-                            v-model="data.room.contract_id"
-                            :items="contracts || []"
-                            item-text="name"
-                            item-value="id"
-                            label="Contract"
-                            :error-messages="
-                              helpers.isEmpty(data.room.contract_id)
-                                ? 'Contract is required'
-                                : ''
-                            "
-                            @change="updateContractInfo"
-                            :disabled="editMode"
-                          ></v-autocomplete>
-                        </td>
-                        <td class="text-truncate">
-                          <v-menu
-                            ref="menu"
-                            v-model="data.room.menu"
-                            :close-on-content-click="true"
-                            transition="scale-transition"
-                            :disabled="editMode"
-                            offset-y
-                          >
-                            <template v-slot:activator="{ on }">
-                              <v-text-field
-                                v-model="data.room.startdate"
-                                label="Start Date"
-                                prepend-icon="event"
-                                readonly
-                                :disabled="editMode"
-                                v-on="on"
-                                :error-messages="
-                                  helpers.isEmpty(data.room.startdate)
-                                    ? 'Date is required'
-                                    : ''
-                                "
-                              ></v-text-field>
-                            </template>
-                            <v-date-picker
-                              v-model="data.room.startdate"
-                              no-title
-                              scrollable
-                            ></v-date-picker>
-                          </v-menu>
-                        </td>
-                        <td class="text-truncate">
-                          <v-menu
-                            ref="menu"
-                            v-model="data.room.enddatemenu"
-                            :close-on-content-click="true"
-                            transition="scale-transition"
-                            :disabled="editMode"
-                            offset-y
-                          >
-                            <template v-slot:activator="{ on }">
-                              <v-text-field
-                                v-model="data.room.enddate"
-                                label="End Date"
-                                prepend-icon="event"
-                                readonly
-                                v-on="on"
-                                :disabled="editMode"
-                                :error-messages="
-                                  helpers.isEmpty(data.room.enddate)
-                                    ? 'Date is required'
-                                    : ''
-                                "
-                              ></v-text-field>
-                            </template>
-                            <v-date-picker
-                              v-model="data.room.enddate"
-                              no-title
-                              scrollable
-                            ></v-date-picker>
-                          </v-menu>
-                        </td>
-                        <td class="text-truncate">
-                          <v-menu
-                            ref="menu"
-                            v-model="data.room.rentalstartdatemenu"
-                            :close-on-content-click="true"
-                            transition="scale-transition"
-                            :disabled="editMode"
-                            offset-y
-                          >
-                            <template v-slot:activator="{ on }">
-                              <v-text-field
-                                v-model="data.room.rental_payment_start_date"
-                                label="Rental Start Date"
-                                prepend-icon="event"
-                                readonly
-                                :disabled="editMode"
-                                v-on="on"
-                              ></v-text-field>
-                            </template>
-                            <v-date-picker
-                              v-model="data.room.rental_payment_start_date"
-                              no-title
-                              scrollable
-                            ></v-date-picker>
-                          </v-menu>
-                        </td>
+                <v-data-table
+                  :headers="roomContractHeaders"
+                  :items="data.room ? [data.room] : []"
+                  fixed-header
+                  height="300px"
+                  disable-sort
+                  hide-default-footer
+                >
+                  <template v-slot:item="props">
+                    <tr>
+                      <td class="text-truncate">
+                        {{ props.item.name }}
+                      </td>
+                      <td class="text-truncate">
+                        <v-text-field
+                          v-model="props.item.price"
+                          prefix="RM"
+                          type="number"
+                          step="0.01"
+                          :error-messages="
+                            helpers.isEmpty(props.item.price)
+                              ? 'Rental is required'
+                              : ''
+                          "
+                        ></v-text-field>
+                      </td>
+                      <td class="text-truncate" >
+                        <v-text-field
+                          v-model="props.item.deposit"
+                          prefix="RM"
+                          type="number"
+                          step="0.01"
+                          :error-messages="
+                            helpers.isEmpty(props.item.deposit)
+                              ? 'Deposit is required'
+                              : ''
+                          "
+                        ></v-text-field>
+                      </td>
+                      <td class="text-truncate" >
+                        <v-text-field
+                          v-model="props.item.agreement_fees"
+                          prefix="RM"
+                          type="number"
+                          step="0.01"
+                          :error-messages="
+                            helpers.isEmpty(props.item.agreement_fees)
+                              ? 'Agreement is required'
+                              : ''
+                          "
+                        ></v-text-field>
+                      </td>
+                      <td class="text-truncate" >
+                        <v-text-field
+                          v-model="props.item.booking_fees"
+                          prefix="RM"
+                          type="number"
+                          step="0.01"
+                          :error-messages="
+                            helpers.isEmpty(props.item.booking_fees)
+                              ? 'Booking fees is required'
+                              : ''
+                          "
+                        ></v-text-field>
+                      </td>
+                      <td class="text-truncate">
+                        <v-text-field
+                          v-model="props.item.outstanding_deposit"
+                          prefix="RM"
+                          type="number"
+                          step="0.01"
+                          :error-messages="
+                            helpers.isEmpty(props.item.outstanding_deposit)
+                              ? 'Outstanding deposit is required'
+                              : ''
+                          "
+                        ></v-text-field>
+                      </td>
+                      <td class="text-truncate">
+                        <v-autocomplete
+                          v-model="props.item.contract_id"
+                          :items="contracts || []"
+                          item-text="name"
+                          item-value="id"
+                          label="Contract"
+                          :error-messages="
+                            helpers.isEmpty(props.item.contract_id)
+                              ? 'Contract is required'
+                              : ''
+                          "
+                          @change="updateContractInfo"
+                          :disabled="editMode"
+                        ></v-autocomplete>
+                      </td>
+                      <td class="text-truncate">
+                        <v-menu
+                          ref="menu"
+                          v-model="props.item.menu"
+                          :close-on-content-click="true"
+                          transition="scale-transition"
+                          offset-y
+                        >
+                          <template v-slot:activator="{ on }">
+                            <v-text-field
+                              v-model="props.item.startdate"
+                              label="Start Date"
+                              prepend-icon="event"
+                              readonly
+                              v-on="on"
+                              :error-messages="
+                                helpers.isEmpty(props.item.startdate)
+                                  ? 'Date is required'
+                                  : ''
+                              "
+                            ></v-text-field>
+                          </template>
+                          <v-date-picker
+                            v-model="props.item.startdate"
+                            no-title
+                            scrollable
+                          ></v-date-picker>
+                        </v-menu>
+                      </td>
+                      <td class="text-truncate">
+                        <v-menu
+                          ref="menu"
+                          v-model="props.item.enddatemenu"
+                          :close-on-content-click="true"
+                          transition="scale-transition"
+                          offset-y
+                        >
+                          <template v-slot:activator="{ on }">
+                            <v-text-field
+                              v-model="props.item.enddate"
+                              label="End Date"
+                              prepend-icon="event"
+                              readonly
+                              v-on="on"
+                              :error-messages="
+                                helpers.isEmpty(props.item.enddate)
+                                  ? 'Date is required'
+                                  : ''
+                              "
+                            ></v-text-field>
+                          </template>
+                          <v-date-picker
+                            v-model="props.item.enddate"
+                            no-title
+                            scrollable
+                          ></v-date-picker>
+                        </v-menu>
+                      </td>
+                      <td class="text-truncate">
+                        <v-menu
+                          ref="menu"
+                          v-model="props.item.rentalstartdatemenu"
+                          :close-on-content-click="true"
+                          transition="scale-transition"
+                          offset-y
+                        >
+                          <template v-slot:activator="{ on }">
+                            <v-text-field
+                              v-model="props.item.rental_payment_start_date"
+                              label="Rental Start Date"
+                              prepend-icon="event"
+                              readonly
+                              v-on="on"
+                            ></v-text-field>
+                          </template>
+                          <v-date-picker
+                            v-model="props.item.rental_payment_start_date"
+                            no-title
+                            scrollable
+                          ></v-date-picker>
+                        </v-menu>
+                      </td>
 
-                        <!-- <td class="text-truncate">
-                          <v-switch v-model="data.room.autorenew"></v-switch>
+                      <!-- <td class="text-truncate">
+                          <v-switch v-model="props.item.autorenew"></v-switch>
                         </td> -->
-                        <td class="text-truncate">
-                          <services-dialog
-                            :dialogStyle="servicesDialogConfig.dialogStyle"
-                            :services="
-                              pluckUid(
-                                !isEmpty(data.room.services)
-                                  ? data.room.services
-                                  : []
-                              )
-                            "
-                            :origServices="
-                              pluckUid(
-                                !isEmpty(data.room.origServices)
-                                  ? data.room.origServices
-                                  : []
-                              )
-                            "
-                            editMode
-                            @submit="
-                              (e) => {
-                                roomServiceUpdated(data.room, e);
-                              }
-                            "
-                          ></services-dialog>
-                        </td>
-                      </tr>
-                    </tbody>
+                      <td class="text-truncate">
+                        <services-dialog
+                          :dialogStyle="servicesDialogConfig.dialogStyle"
+                          :services="
+                            pluckUid(
+                              !isEmpty(props.item.services)
+                                ? props.item.services
+                                : []
+                            )
+                          "
+                          :origServices="
+                            pluckUid(
+                              !isEmpty(props.item.origServices)
+                                ? props.item.origServices
+                                : []
+                            )
+                          "
+                          editMode
+                          @submit="
+                            (e) => {
+                              roomServiceUpdated(props.item, e);
+                            }
+                          "
+                        ></services-dialog>
+                      </td>
+                    </tr>
                   </template>
-                </v-simple-table>
+                </v-data-table>
               </v-card>
             </v-col>
           </v-row>

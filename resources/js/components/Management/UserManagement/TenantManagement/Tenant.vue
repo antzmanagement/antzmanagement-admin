@@ -345,7 +345,7 @@ export default {
                       @click="showRoomContract(roomcontract)"
                     >
                       <div class="text-center ma-2 title">
-                        {{ roomcontract.startdate }} {{ roomcontract.name }}
+                        {{ roomcontract.name }}
                       </div>
                     </v-chip>
                   </div>

@@ -74,7 +74,7 @@ const styles = `.invoice-box {
     font-weight: bold;
 }
 .small-text {
-    font-size: 0.50rem;
+    font-size: 0.55rem;
     letter-spacing: 0.01em;
 }
 .overline {
@@ -316,6 +316,9 @@ export default {
             </div>
             <div class="small-text">
               Issue By : {{ _.get(data, ["issueby", "name"]) || "N/A" }}
+            </div>
+            <div class="small-text" v-if="_.get(data , ['remark'])">
+              Remark : {{ _.get(data, ["remark"]) || "N/A" }}
             </div>
           </td>
         </tr>

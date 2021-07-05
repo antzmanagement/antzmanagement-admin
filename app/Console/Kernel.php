@@ -16,6 +16,8 @@ class Kernel extends ConsoleKernel
         Commands\WordOfTheDay::class,
         Commands\CreateRental::class,
         Commands\PatchRoomStatus::class,
+        Commands\PatchRoomContractName::class,
+        Commands\PatchRoomContractDuration::class,
         //
     ];
 

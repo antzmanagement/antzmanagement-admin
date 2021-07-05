@@ -101,12 +101,10 @@ trait RoomContractServices
 
         if($params->service_ids){
             $service_ids = collect($params->service_ids);
-            error_log($service_ids);
             $data = $data->filter(function ($item) use($service_ids) {
                 $existed = false;
                 if($item->origservices || $item->addonservices ){
                     $services = collect($item->origservices)->concat($item->addonservices);
-                    error_log($services->pluck('id'));
                     foreach ($services as $service) {
                         if($service_ids->contains($service->id)){
                             $existed = true;
@@ -114,7 +112,6 @@ trait RoomContractServices
                         }
                     }
                 }
-                error_log($existed. ' ');
                 return $existed;
             })->values();
         }
@@ -129,7 +126,6 @@ trait RoomContractServices
 
 
         if (property_exists($params, 'outstanding_deposit') && $params->outstanding_deposit != null) {
-            error_log('filter outstanding_deposit');
             $outstanding_deposit = $params->outstanding_deposit;
             $data = collect($data);
             $data = $data->filter(function ($item) use ($outstanding_deposit) {
@@ -138,7 +134,6 @@ trait RoomContractServices
         }
         
         if (property_exists($params, 'checkedout') && $params->checkedout != null) {
-            error_log('filter checkedout');
             $checkedout = $params->checkedout;
             $data = collect($data);
             $data = $data->filter(function ($item) use ($checkedout) {
@@ -276,7 +271,7 @@ trait RoomContractServices
         $data->agreement_fees  = $this->toDouble($params->agreement_fees);
         $data->deposit  = $this->toDouble($params->deposit);
         $data->agreement_fees  = $this->toDouble($params->agreement_fees);
-        $data->outstanding_deposit  = $this->toDouble($data->deposit - $data->booking_fees);
+        $data->outstanding_deposit  = $this->toDouble($params->outstanding_deposit);
         $data->rental  = $this->toDouble($params->rental);
         $data->sequence = $this->toInt($params->sequence);
 
@@ -313,29 +308,6 @@ trait RoomContractServices
 
 
         $data = $data->refresh();
-        foreach ($params->add_on_service_ids as $id) {
-            $service = $this->getServiceById($id);
-            if ($this->isEmpty($service)) {
-                return null;
-            }
-            try {
-                $data->addonservices()->syncWithoutDetaching([$id => ['status' => true]]);
-            } catch (Exception $e) {
-                return null;
-            }
-        }
-        foreach ($params->orig_service_ids as $id) {
-            $service = $this->getServiceById($id);
-            if ($this->isEmpty($service)) {
-                return null;
-            }
-            try {
-                $data->origservices()->syncWithoutDetaching([$id => ['status' => true]]);
-            } catch (Exception $e) {
-                return null;
-            }
-        }
-
         $this->syncRoomStatus($data->room);
 
         return $data->refresh();
@@ -346,12 +318,24 @@ trait RoomContractServices
     {
 
         $params = $this->checkUndefinedProperty($params, $this->roomContractAllCols());
+        $data->name = $params->name;
+        $data->duration = $this->toInt($params->duration);
+        $data->latest = $this->toInt($params->latest);
+        $data->left = $data->duration - $data->latest;
+        $data->terms  = $params->terms;
         // $data->autorenew  = $params->autorenew;
         $data->autorenew  = false;
+        $data->penalty_day  = $this->toInt($params->penalty_day);
+        $data->penalty  = $this->toDouble($params->penalty);
+        $data->startdate  = $this->toDate($params->startdate);
+        $data->enddate  = $this->toDate($params->enddate);
+        $data->rental_payment_start_date  = $this->toDate($params->rental_payment_start_date);
+        $data->rental_type  = $params->rental_type;
         $data->booking_fees  = $this->toDouble($params->booking_fees);
         $data->agreement_fees  = $this->toDouble($params->agreement_fees);
-        $data->outstanding_deposit  = $this->toDouble($params->outstanding_deposit);
         $data->deposit  = $this->toDouble($params->deposit);
+        $data->agreement_fees  = $this->toDouble($params->agreement_fees);
+        $data->outstanding_deposit  = $this->toDouble($params->outstanding_deposit);
         $data->rental  = $this->toDouble($params->rental);
 
         $room = $this->getRoomById($params->room_id);
@@ -366,47 +350,12 @@ trait RoomContractServices
         }
         $data->tenant()->associate($tenant);
 
-        $subcontracts = $data->childrenroomcontracts;
-        foreach ($subcontracts as $subcontract) {
-            $subcontract->booking_fees  = $this->toDouble($params->booking_fees);
-            $subcontract->agreement_fees  = $this->toDouble($params->agreement_fees);
-            $subcontract->deposit  = $this->toDouble($params->deposit);
-            $subcontract->outstanding_deposit  = $this->toDouble($params->outstanding_deposit);
-            $subcontract->rental  = $this->toDouble($params->rental);
-            if (!$this->saveModel($subcontract)) {
-                return null;
-            }
-
-        }
-
         if (!$this->saveModel($data)) {
             return null;
         }
 
 
         $data = $data->refresh();
-        foreach ($params->add_on_service_ids as $id) {
-            $service = $this->getServiceById($id);
-            if ($this->isEmpty($service)) {
-                return null;
-            }
-            try {
-                $data->addonservices()->syncWithoutDetaching([$id => ['status' => true]]);
-            } catch (Exception $e) {
-                return null;
-            }
-        }
-        foreach ($params->orig_service_ids as $id) {
-            $service = $this->getServiceById($id);
-            if ($this->isEmpty($service)) {
-                return null;
-            }
-            try {
-                $data->origservices()->syncWithoutDetaching([$id => ['status' => true]]);
-            } catch (Exception $e) {
-                return null;
-            }
-        }
 
 
         $this->syncRoomStatus($data->room);
@@ -485,8 +434,6 @@ trait RoomContractServices
                 $latest = Carbon::parse($startdate)->diffInMonths(Carbon::parse($rental_payment_start_date));
             }
         }
-        error_log('before');
-        error_log($latest);
         $data->left = $data->duration - $latest - $rentalpayments->count();
         for ($x = $latest; $x < $duration; $x++) {
 
@@ -510,11 +457,6 @@ trait RoomContractServices
 
             $latest++;
         }
-
-        error_log('after');
-        error_log($latest);
-        error_log('left');
-        error_log($data->left);
 
         if ($data->left <= 0) {
             $data->expired = true;
@@ -601,14 +543,12 @@ trait RoomContractServices
             return null;
         }
 
-        error_log($roomContract->tenant_id);
         $roomContract->tenant()->associate($tenant);
 
         if (!$this->saveModel($roomContract)) {
             return null;
         }
 
-        error_log($roomContract->refresh()->tenant_id);
 
         return $roomContract->refresh();
     }
@@ -710,7 +650,7 @@ trait RoomContractServices
         return ['id', 'uid', 'name', 'room_id', 'tenant_id','duration', 'left' ,
         'latest', 'expired', 'terms', 'autorenew', 'startdate',
         'booking_fees','deposit','rental', 'outstanding_deposit',
-         'orig_service_ids', 'add_on_service_ids', 'room_contract_id', 'rental_payment_start_date'];
+        'room_contract_id', 'rental_payment_start_date'];
     }
 
     public function roomContractDefaultCols()

@@ -264,64 +264,115 @@ class TenantController extends Controller
             return $this->errorResponse();
         }
 
-        if (!$this->isEmpty($request->rooms)) {
+        if (!$this->isEmpty($request->room)) {
 
-            foreach ($request->rooms as $room) {
-                $room = json_decode(json_encode($room));
-                $contract = $this->getContractById($room->contract_id);
-                if ($this->isEmpty($contract)) {
-                    DB::rollBack();
-                    return $this->notFoundResponse('Contract');
+            
+            $request->room = json_decode(json_encode($request->room));
+            $room = $this->getRoomById($request->room->id);
+            if ($this->isEmpty($room)) {
+                DB::rollBack();
+                return $this->notFoundResponse('Room');
+            }
+    
+            $contract = $this->getContractById($request->room->contract_id);
+            if ($this->isEmpty($contract)) {
+                DB::rollBack();
+                return $this->notFoundResponse('Contract');
+            }
+    
+            $startdate = Carbon::parse($request->room->startdate)->format('Y-m-d');
+            $enddate = Carbon::parse($request->room->enddate)->format('Y-m-d');
+            if(isset($request->room->rental_payment_start_date)){
+                $rental_payment_start_date = Carbon::parse($request->room->rental_payment_start_date)->format('Y-m-d');
+            }else{
+                $rental_payment_start_date = $startdate;
+            }
+    
+            $duration = $contract->duration;
+            if($contract->rental_type == 'day'){
+                $duration = Carbon::parse($startdate)->diffInDays(Carbon::parse($enddate)) + 1;
+            }else{
+                $duration = Carbon::parse($startdate)->diffInMonths(Carbon::parse($enddate)) + 1;
+            }
+    
+            $latest = 0;
+            if($contract->rental_type == 'day'){
+                if(isset($request->room->rental_payment_start_date)){
+                    $latest = Carbon::parse($startdate)->diffInDays(Carbon::parse($rental_payment_start_date));
                 }
-                $startdate = Carbon::parse($room->startdate)->format('Y-m-d');
-                $enddate = Carbon::parse($room->enddate)->format('Y-m-d');
-
-                $duration = $contract->duration;
-                if($contract->rental_type == 'day'){
-                    $duration = Carbon::parse($startdate)->diffInDays(Carbon::parse($enddate)) + 1;
-                }else{
-                    $duration = Carbon::parse($startdate)->diffInMonths(Carbon::parse($enddate)) + 1;
-                }        
-                $origRoom = $this->getRoomById($room->id);
-                if ($this->isEmpty($origRoom)) {
-                    DB::rollBack();
-                    return $this->notFoundResponse('Room');
+            }else{
+                if(isset($request->room->rental_payment_start_date)){
+                    $latest = Carbon::parse($startdate)->diffInMonths(Carbon::parse($rental_payment_start_date));
                 }
-
-                $servicesIds = collect($room->services)->pluck('id');
-                $origServiceIds = collect($room->origServices)->pluck('id');
-                $addOnServicesIds = $servicesIds->diff($origServiceIds);        
-                $max = RoomContract::where('status', true)->max('sequence') + 1;
-
+            }
+    
+    
+            $servicesIds = collect($request->room->services)->pluck('id');
+            $origServiceIds = collect($request->room->origServices)->pluck('id');
+            $addOnServicesIds = $servicesIds->diff($origServiceIds);
+    
+            $max = RoomContract::where('status', true)->max('sequence') + 1;
+            $params = collect([
+                'tenant_id' => $tenant->id,
+                'room_id' => $room->id,
+                'contract_id' => $contract->id,
+                'orig_service_ids' => $origServiceIds,
+                'add_on_service_ids' => $addOnServicesIds,
+                'name' => $startdate. ' - ' . $enddate,
+                'duration' => $duration,
+                'latest' => $latest,
+                'penalty' => $contract->penalty,
+                'penalty_day' => $contract->penalty_day,
+                'rental_type' => $contract->rental_type,
+                'terms' => $contract->terms,
+                'autorenew' => $request->room->autorenew,
+                'startdate' => $startdate,
+                'enddate' => $enddate,
+                'rental_payment_start_date' => $rental_payment_start_date,
+                'rental' => $request->room->price,
+                'deposit' => $request->room->deposit,
+                'agreement_fees' => $request->room->agreement_fees,
+                'outstanding_deposit' => $request->room->outstanding_deposit,
+                'booking_fees' => $request->room->booking_fees,
+                'sequence' => $max,
+            ]);
+            //Convert To Json Object
+            $params = json_decode(json_encode($params));
+            $roomContract = $this->createRoomContract($params);
+            if ($this->isEmpty($roomContract)) {
+                DB::rollBack();
+                return $this->errorResponse();
+            }
+    
+            if($roomContract->outstanding_deposit > 0){
                 $params = collect([
-                    'tenant_id' => $tenant->id,
-                    'room_id' => $origRoom->id,
-                    'contract_id' => $contract->id,
-                    'orig_service_ids' => $origServiceIds,
-                    'add_on_service_ids' => $addOnServicesIds,
-                    'name' => $room->unit . '_' . $startdate. '_' . $contract->name,
-                    'duration' => $duration,
-                    'penalty' => $contract->penalty,
-                    'penalty_day' => $contract->penalty_day,
-                    'rental_type' => $contract->rental_type,
-                    'terms' => $contract->terms,
-                    'autorenew' => $room->autorenew,
-                    'startdate' => $startdate,
-                    'enddate' => $enddate,
-                    'rental' => $room->price,
-                    'deposit' => $room->deposit,
-                    'agreement_fees' => $room->agreement_fees,
-                    'booking_fees' => $room->booking_fees,
-                    'sequence' => $max,
+                    'room_contract_id' => $roomContract->id,
+                    'other_charges' => $roomContract->outstanding_deposit,
                 ]);
                 //Convert To Json Object
                 $params = json_decode(json_encode($params));
-                $roomContract = $this->createRoomContract($params);
-                if ($this->isEmpty($roomContract)) {
-                    DB::rollBack();
-                    return $this->errorResponse();
+                $payment = $this->createPayment($params);
+                $data = $this->getOtherPaymentTitleByName('Deposit');
+                if (!$this->isEmpty($data)) {
+                    $data->price = $this->toDouble($roomContract->outstanding_deposit);
+                    $payment->otherpayments->push($data);
+                    $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
+                }else{
+                    $params = collect([
+                        'name' => 'Deposit',
+                    ]);
+                    //Convert To Json Object
+                    $params = json_decode(json_encode($params));
+                    $data = $this->createOtherPaymentTitle($params);
+                    if (!$this->isEmpty($data)) {
+                        $data->price = $this->toDouble($roomContract->outstanding_deposit);
+                        $payment->otherpayments->push($data);
+                        $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
+                    }
+    
                 }
             }
+    
         }
 
         DB::commit();
