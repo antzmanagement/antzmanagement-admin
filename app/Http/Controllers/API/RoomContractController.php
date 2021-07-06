@@ -130,6 +130,20 @@ class RoomContractController extends Controller
         $origServiceIds = collect($request->room->origServices)->pluck('id');
         $addOnServicesIds = $servicesIds->diff($origServiceIds);
 
+
+        $latest = 0;
+        if($contract->rental_type == 'day'){
+            if(isset($request->room->rental_payment_start_date)){
+                $latest = Carbon::parse($startdate)->diffInDays(Carbon::parse($rental_payment_start_date));
+            }
+        }else{
+            if(isset($request->room->rental_payment_start_date)){
+                $date1 = Carbon::parse($startdate)->firstOfMonth();
+                $date2 = Carbon::parse($rental_payment_start_date)->firstOfMonth();
+                $latest = $date1->diffInMonths($date2, false);
+            }
+        }
+
         $max = RoomContract::where('status', true)->max('sequence') + 1;
         $params = collect([
             'tenant_id' => $tenant->id,
