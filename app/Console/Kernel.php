@@ -18,6 +18,7 @@ class Kernel extends ConsoleKernel
         Commands\PatchRoomStatus::class,
         Commands\PatchRoomContractName::class,
         Commands\PatchRoomContractDuration::class,
+        Commands\DeleteRoomContractWithoutTenant::class,
         //
     ];
 

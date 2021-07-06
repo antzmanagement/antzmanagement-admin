@@ -211,10 +211,10 @@ trait UserServices
             $ids = $ids->pluck('id');
             $data->ownrooms()->updateExistingPivot($ids, ['status' => false]);
 
-            $roomcontracts = $data->roomcontracts()->where('status', true)->get();
-            foreach ($roomcontracts as $roomcontract) {
-                $this->deleteRoomContract($roomcontract);
-            }
+            // $roomcontracts = $data->roomcontracts()->where('status', true)->get();
+            // foreach ($roomcontracts as $roomcontract) {
+            //     $this->deleteRoomContract($roomcontract);
+            // }
 
         } catch (Exception $e) {
             DB::rollBack();
