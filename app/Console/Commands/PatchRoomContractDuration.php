@@ -75,7 +75,7 @@ class PatchRoomContractDuration extends Command
                 if($date1->greaterThan($date2)){
                     $duration = 0;
                 }else{
-                    $duration = $date1->diffInMonths($date2, false) + 1;
+                    $duration = $date1->floatDiffInMonths($date2) + 1;
                 }
             }
 

@@ -122,7 +122,7 @@ class RoomContractController extends Controller
             if($date1->greaterThan($date2)){
                 $duration = 0;
             }else{
-                $duration = $date1->diffInMonths($date2, false) + 1;
+                $duration = $date1->floatDiffInMonths($date2) + 1;
             }
         }
 
@@ -140,7 +140,7 @@ class RoomContractController extends Controller
             if(isset($request->room->rental_payment_start_date)){
                 $date1 = Carbon::parse($startdate)->firstOfMonth();
                 $date2 = Carbon::parse($rental_payment_start_date)->firstOfMonth();
-                $latest = $date1->diffInMonths($date2, false);
+                $latest = $date1->floatDiffInMonths($date2, false);
             }
         }
 
@@ -281,12 +281,12 @@ class RoomContractController extends Controller
         if($contract->rental_type == 'day'){
             $duration = Carbon::parse($startdate)->diffInDays(Carbon::parse($enddate)) + 1;
         }else{
-            $date1 = Carbon::parse($startdate)->firstOfMonth();
-            $date2 = Carbon::parse($enddate)->firstOfMonth();
+            $date1 = Carbon::parse($startdate)->startOfMonth()->tz('Asia/Kuala_Lumpur');
+            $date2 = Carbon::parse($enddate)->startOfMonth()->tz('Asia/Kuala_Lumpur');
             if($date1->greaterThan($date2)){
                 $duration = 0;
             }else{
-                $duration = $date1->diffInMonths($date2, false) + 1;
+                $duration = $date1->floatDiffInMonths($date2) + 1;
             }
         }
 
