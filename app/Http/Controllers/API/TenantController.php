@@ -74,6 +74,12 @@ class TenantController extends Controller
             'pic' => $request->pic,
             'birthdayfromdate' => $request->birthdayfromdate,
             'birthdaytodate' => $request->birthdaytodate,
+            'birthdayFromMonth' => $request->birthdayFromMonth,
+            'birthdayFromDay' => $request->birthdayFromDay,
+            'birthdayToMonth' => $request->birthdayToMonth,
+            'birthdayToDay' => $request->birthdayToDay,
+            'occupation' => $request->occupation,
+            'state' => $request->state,
             'room_id' => $request->room_id,
         ]);
         //Convert To Json Object
@@ -371,6 +377,41 @@ class TenantController extends Controller
                     }
     
                 }
+            }
+            
+            if($roomContract->booking_fees > 0){
+                $params = collect([
+                    'room_contract_id' => $roomContract->id,
+                    'other_charges' => $roomContract->booking_fees,
+                    'paid' => true,
+                    'paymentdate' => Carbon::now(),
+                    'issue_by' => $request->user()->id,
+                ]);
+                //Convert To Json Object
+                $params = json_decode(json_encode($params));
+                $payment = $this->createPayment($params);
+                error_log($payment);
+                $payment = $this->updatePayment($payment, $params);
+                error_log($payment);
+                $data = $this->getOtherPaymentTitleByName('Booking Fees');
+                if (!$this->isEmpty($data)) {
+                    $data->price = $this->toDouble($roomContract->booking_fees);
+                    $payment->otherpayments->push($data);
+                    $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
+                }else{
+                    $params = collect([
+                        'name' => 'Booking Fees',
+                    ]);
+                    //Convert To Json Object
+                    $params = json_decode(json_encode($params));
+                    $data = $this->createOtherPaymentTitle($params);
+                    if (!$this->isEmpty($data)) {
+                        $data->price = $this->toDouble($roomContract->booking_fees);
+                        $payment->otherpayments->push($data);
+                        $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
+                    }
+                }
+    
             }
     
         }

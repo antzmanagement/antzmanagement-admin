@@ -149,7 +149,7 @@ export default {
                   <v-menu
                     ref="menu"
                     v-model="fromdatemenu"
-                    :close-on-content-click="true"
+                    :close-on-content-click="false"
                     transition="scale-transition"
                     offset-y
                   >
@@ -185,7 +185,7 @@ export default {
                   <v-menu
                     ref="menu"
                     v-model="todatemenu"
-                    :close-on-content-click="true"
+                    :close-on-content-click="false"
                     transition="scale-transition"
                     offset-y
                   >

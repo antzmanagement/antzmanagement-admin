@@ -30,7 +30,7 @@ trait PaymentServices
         }])->get();
 
         $data = $data->unique('id')->sortByDesc('id')->flatten(1);
-
+        error_log($data->count());
         return $data;
     }
 
@@ -155,6 +155,7 @@ trait PaymentServices
         $data->uid = Carbon::now()->timestamp . Payment::count();
         $data->price = $this->toDouble($params->price);
         $data->other_charges = $this->toDouble($params->other_charges);
+        $data->processing_fees = $this->toDouble($params->processing_fees);
         $data->totalpayment = $data->price + $data->other_charges;
         $data->paymentdate = $this->toDate($params->paymentdate);
         if($params->sequence){
@@ -184,6 +185,7 @@ trait PaymentServices
         $params = $this->checkUndefinedProperty($params, $this->paymentAllCols());
         $data->price = $this->toDouble($params->price);
         $data->other_charges = $this->toDouble($params->other_charges);
+        $data->processing_fees = $this->toDouble($params->processing_fees);
         $data->totalpayment = $data->price + $data->other_charges;
         $data->paid = $params->paid;
         $data->paymentdate = $this->toDate($params->paymentdate);
@@ -236,7 +238,7 @@ trait PaymentServices
     public function paymentAllCols()
     {
 
-        return ['id', 'uid', 'price', 'remark', 'referenceno' ,'receive_from', 'issue_by', 'sequence', 'paymentdate', 'other_charges', 'room_contract_id'];
+        return ['id', 'uid', 'price', 'remark', 'referenceno' ,'receive_from', 'issue_by', 'sequence', 'paymentdate', 'other_charges', 'room_contract_id', 'paymentmethod', 'processing_fees'];
     }
 
     public function paymentDefaultCols()

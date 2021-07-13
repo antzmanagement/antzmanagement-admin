@@ -26,6 +26,7 @@ export default {
     return {
       _: _,
       menu: false,
+      paymentMethods: ["cash", "online_transfer", "credit"],
       penaltyRate: 3,
       expiredDays: 9,
       origPrice: 0,
@@ -36,6 +37,7 @@ export default {
         service_fees: 0,
         processing_fees: 0,
         referenceno: 0,
+        paymentmethod: "cash",
       }),
       servicesDialogConfig: {
         dialogStyle: {
@@ -56,14 +58,12 @@ export default {
   },
   watch: {
     uid: function (val) {
-      console.log("changed");
       this.getRentalPayment();
     },
   },
   mounted() {
     this.getRentalPayment();
     this.authenticateAction().then((res) => {
-      console.log(res);
     });
   },
   methods: {
@@ -90,6 +90,7 @@ export default {
             this.data.paymentdate = moment().format("YYYY-MM-DD");
             this.data.processing_fees = 3;
             this.data.service_fees = 0;
+            this.data.paymentmethod = this.paymentMethods[0];
           }
           this.$Progress.finish();
           this.endLoadingAction();
@@ -115,8 +116,6 @@ export default {
     calculatePenalty(data) {
       let rentaldate = moment(data.rentaldate);
       let diff = moment().diff(rentaldate, "days", false);
-      console.log("diff");
-      console.log(diff);
       let overDays = diff - parseInt(this.expiredDays);
       if (overDays > 0) {
         return overDays * this.penaltyRate;
@@ -126,8 +125,6 @@ export default {
     },
     roomServiceUpdated(event) {
       this.services = event.services;
-      console.log("services");
-      console.log(this.services);
       let price = 0;
       this.services.forEach((service) => {
         price += parseFloat(service.price);
@@ -140,7 +137,6 @@ export default {
       this.$Progress.start();
       this.makePaymentAction(this.data)
         .then((data) => {
-          
           Toast.fire({
             icon: "success",
             title: "Successful Paid. ",
@@ -163,7 +159,6 @@ export default {
     updateRentalPayment() {
       this.showLoadingAction();
       this.$Progress.start();
-      console.log(this.data);
       this.updateRentalPaymentAction(this.data)
         .then((data) => {
           Toast.fire({
@@ -184,6 +179,25 @@ export default {
           this.endLoadingAction();
           this.close();
         });
+    },
+    updateProcessingFees() {
+      let price = !_.isNaN(parseFloat(this.data.price)) ? parseFloat(this.data.price) : 0;
+      let penalty = !_.isNaN(parseFloat(this.data.penalty)) ? parseFloat(this.data.penalty) : 0;
+      switch (this.data.paymentmethod) {
+        case 'cash':
+          this.data.processing_fees = 3;
+          break;
+        case 'online_transfer':
+          this.data.processing_fees = 0;
+          break;
+        case 'credit':
+          this.data.processing_fees = parseFloat(((price + penalty) * 0.02).toFixed(2));
+          break;
+      
+        default:
+          this.data.processing_fees = 0;
+          break;
+      }
     },
   },
 };
@@ -213,16 +227,18 @@ export default {
             ></v-text-field>
           </v-col> -->
           <v-col cols="12">
-            <v-text-field
-              label="Payment Method"
+            <v-select
+              :items="paymentMethods"
               v-model="data.paymentmethod"
-            ></v-text-field>
+              label="Payment Method"
+              @change="updateProcessingFees"
+            ></v-select>
           </v-col>
           <v-col cols="12">
             <v-menu
               ref="menu"
               v-model="menu"
-              :close-on-content-click="true"
+              :close-on-content-click="false"
               transition="scale-transition"
               offset-y
             >
@@ -252,6 +268,7 @@ export default {
               type="number"
               step="0.01"
               v-model="data.price"
+              @change="updateProcessingFees"
             ></v-text-field>
           </v-col>
           <!-- <v-col cols="12">
@@ -276,6 +293,7 @@ export default {
               type="number"
               step="0.01"
               v-model="data.penalty"
+              @change="updateProcessingFees"
             ></v-text-field>
           </v-col>
           <v-col cols="12">

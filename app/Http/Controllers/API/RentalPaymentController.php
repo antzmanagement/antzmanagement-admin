@@ -225,6 +225,12 @@ class RentalPaymentController extends Controller
             DB::rollBack();
             return $this->notFoundResponse('RentalPayment');
         }
+
+        $roomContract = $rentalPayment->roomcontract;
+        if ($this->isEmpty($roomContract)) {
+            DB::rollBack();
+            return $this->notFoundResponse('RoomContract');
+        }
         
         $max = RentalPayment::where('status', true)->max('sequence') + 1;
 
@@ -260,6 +266,39 @@ class RentalPaymentController extends Controller
             DB::rollBack();
             return $this->errorResponse();
         }
+
+        if($rentalPayment->price < $roomContract->rental){
+            $balance = $roomContract->rental - $rentalPayment->price;
+            $params = collect([
+                'room_contract_id' => $roomContract->id,
+                'other_charges' => $balance,
+            ]);
+            //Convert To Json Object
+            $params = json_decode(json_encode($params));
+            $payment = $this->createPayment($params);
+            $data = $this->getOtherPaymentTitleByName($rentalPayment->rentaldate . ' Rental Balance');
+            if (!$this->isEmpty($data)) {
+                $data->price = $this->toDouble($balance);
+                $payment->otherpayments->push($data);
+                $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
+            }else{
+                $params = collect([
+                    'name' => $rentalPayment->rentaldate . ' Rental Balance',
+                ]);
+                //Convert To Json Object
+                $params = json_decode(json_encode($params));
+                $data = $this->createOtherPaymentTitle($params);
+                if (!$this->isEmpty($data)) {
+                    $data->price = $this->toDouble($balance);
+                    $payment->otherpayments->push($data);
+                    $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
+                }
+            }
+
+            $payment = $this->getPaymentById($payment->id);
+            $rentalPayment->addOnPayment = $payment;
+        }
+
         
         DB::commit();
         return $this->successResponse('RentalPayment', $rentalPayment, 'update');

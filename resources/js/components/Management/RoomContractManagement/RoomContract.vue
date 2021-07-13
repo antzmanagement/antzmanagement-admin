@@ -110,22 +110,6 @@ export default {
     }),
   }),
 
-  watch: {
-    paymentDialog: function (val) {
-      if (!val) {
-        this.selectedPayment = {
-          uid: "",
-        };
-      }
-    },
-    addOnPaymentDialog: function (val) {
-      if (!val) {
-        this.selectedAddOnPayment = {
-          uid: "",
-        };
-      }
-    },
-  },
   computed: {
     isLoading() {
       return this.$store.getters.isLoading;
@@ -135,6 +119,23 @@ export default {
     },
     sortedPayments() {
       return this.helpers.sortByDate(this.data.payments, "paymentdate");
+    },
+  },
+  watch: {
+    paymentDialog: function (val) {
+      if (!val) {
+        this.selectedPayment = {
+          uid: "",
+        };
+      }
+    },
+    addOnPaymentDialog: function (val) {
+      console.log('dialog', val);
+      if (!val) {
+        this.selectedAddOnPayment = {
+          uid: "",
+        };
+      }
     },
   },
   created() {
@@ -220,6 +221,7 @@ export default {
     updateRentalPaymentDetails(data) {
       var id = data.id;
       var rentalpayment = data;
+      console.log(data.addOnPayment);
       this.data.rentalpayments = this.data.rentalpayments.map(function (item) {
         if (item.id == id) {
           return rentalpayment;
@@ -227,6 +229,10 @@ export default {
           return item;
         }
       });
+
+      if(_.isPlainObject(data.addOnPayment) && !_.isEmpty(data.addOnPayment)){
+        this.updatePaymentDetails(data.addOnPayment)
+      }
     },
     updatePaymentDetails(data) {
       var id = data.id;
@@ -1173,6 +1179,7 @@ export default {
         >
           <payment-form
             :uid="selectedAddOnPayment.uid || ''"
+            :resetIndicator="addOnPaymentDialog"
             :roomcontractid="this.data.id ? `${this.data.id || ''}` : ''"
             @close="addOnPaymentDialog = false"
             :editMode="this.addOnPaymentEditMode"

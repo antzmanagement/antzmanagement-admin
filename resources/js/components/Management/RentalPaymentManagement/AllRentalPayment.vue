@@ -952,16 +952,16 @@ export default {
                     <td class="text-truncate">{{ props.item.receiptno }}</td>
                     <td class="text-truncate">{{ props.item.referenceno }}</td>
                     <td class="text-truncate">
-                      {{ props.item.roomcontract.tenant.name }}
+                      {{ _.get(props.item, 'roomcontract.tenant.name') || 'N/A' }}
                     </td>
                     <td class="text-truncate">
-                      {{ props.item.roomcontract.room.name }}
+                      {{ _.get(props.item, 'roomcontract.room.name') || 'N/A' }}
                     </td>
                     <td class="text-truncate">
-                      {{ props.item.roomcontract.startdate | formatDate }}
+                      {{ _.get(props.item, 'roomcontract.startdate') || 'N/A' | formatDate}}
                     </td>
                     <td class="text-truncate">
-                      {{ props.item.roomcontract.enddate | formatDate }}
+                      {{ _.get(props.item, 'roomcontract.enddate') || 'N/A' | formatDate}}
                     </td>
                     <td class="text-truncate">
                       {{ props.item.paymentdate | formatDate }}

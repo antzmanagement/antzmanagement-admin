@@ -309,6 +309,9 @@ export default {
             <div class="small-text">
               Issue By : {{ _.get(data, ["issueby", "name"]) || "N/A" }}
             </div>
+            <div class="small-text" v-if="_.get(data , ['remark'])">
+              Remark : {{ _.get(data, ["remark"]) || "N/A" }}
+            </div>
           </td>
         </tr>
       </table>

@@ -25,6 +25,7 @@ export default {
   },
   data() {
     return {
+      paymentMethods: ["cash", "online_transfer", "credit"],
       _: _,
       menu: false,
       otherPaymentDialog: false,
@@ -38,6 +39,7 @@ export default {
         price: 0,
         service_fees: 0,
         processing_fees: 0,
+        paymentmethod: "cash",
         referenceno: 0,
       }),
       servicesDialogConfig: {
@@ -60,15 +62,11 @@ export default {
   watch: {
     uid: function (val) {
       console.log("changed");
-      this.getPayment();
-    },
-    otherPaymentDialog: function (val) {
       if (val) {
-        this.otherpayments = this.data.otherpayments || [];
+        this.getPayment();
       } else {
-        this.otherpayments = [];
+        this.data.reset();
       }
-      console.log("dialog", val);
     },
   },
   mounted() {
@@ -110,6 +108,10 @@ export default {
               return otherpayment;
             }
           );
+          if (!this.data.paymentmethod) {
+            this.data.paymentmethod = this.paymentMethods[0];
+            this.updateProcessingFees();
+          }
 
           console.log(data);
           this.$Progress.finish();
@@ -144,6 +146,7 @@ export default {
       });
 
       this.data.service_fees = parseFloat(price);
+      this.updateProcessingFees();
     },
     makePayment() {
       this.showLoadingAction();
@@ -169,6 +172,31 @@ export default {
           this.endLoadingAction();
           this.close();
         });
+    },
+    updateProcessingFees() {
+      let price = !_.isNaN(parseFloat(this.data.price))
+        ? parseFloat(this.data.price)
+        : 0;
+      let other_charges = !_.isNaN(parseFloat(this.data.other_charges))
+        ? parseFloat(this.data.other_charges)
+        : 0;
+      switch (this.data.paymentmethod) {
+        case "cash":
+          this.data.processing_fees = 3;
+          break;
+        case "online_transfer":
+          this.data.processing_fees = 0;
+          break;
+        case "credit":
+          this.data.processing_fees = parseFloat(
+            ((price + other_charges) * 0.02).toFixed(2)
+          );
+          break;
+
+        default:
+          this.data.processing_fees = 0;
+          break;
+      }
     },
   },
 };
@@ -198,16 +226,18 @@ export default {
             ></v-text-field>
           </v-col> -->
           <v-col cols="12">
-            <v-text-field
-              label="Payment Method"
+            <v-select
+              :items="paymentMethods"
               v-model="data.paymentmethod"
-            ></v-text-field>
+              label="Payment Method"
+              @change="updateProcessingFees"
+            ></v-select>
           </v-col>
           <v-col cols="12">
             <v-menu
               ref="menu"
               v-model="menu"
-              :close-on-content-click="true"
+              :close-on-content-click="false"
               transition="scale-transition"
               offset-y
             >
@@ -250,6 +280,14 @@ export default {
             ></v-text-field>
           </v-col>
           <v-col cols="12">
+            <v-text-field
+              label="Processing Fees"
+              type="number"
+              step="0.01"
+              v-model="data.processing_fees"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12">
             <v-text-field label="Remark" v-model="data.remark"></v-text-field>
           </v-col>
           <v-col cols="12" v-if="editMode">
@@ -274,10 +312,12 @@ export default {
       >
         <v-btn color="green darken-1" text>Add On Services</v-btn>
       </services-dialog>
-      <other-payment-dialog :otherpayments="data.otherpayments"></other-payment-dialog>
+      <other-payment-dialog
+        :otherpayments="data.otherpayments"
+      ></other-payment-dialog>
       <v-spacer></v-spacer>
       <v-btn color="blue darken-1" text @click="close()">Close</v-btn>
-      <v-btn color="blue darken-1" text @click="makePayment()">Save</v-btn>
+      <v-btn color="blue darken-1" text @click="makePayment()">Pay</v-btn>
     </v-card-actions>
   </v-card>
 </template>

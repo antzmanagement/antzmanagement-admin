@@ -9,6 +9,8 @@ import {
   decimal,
 } from "vuelidate/lib/validators";
 import { mapActions } from "vuex";
+import { getDaysInMonth } from "../../../../common/common-function";
+
 export default {
   props: {
     editMode: {
@@ -46,7 +48,7 @@ export default {
       todatemenu: false,
       dialog: false,
       roomTypes: [],
-      rooms : [],
+      rooms: [],
       staffs: [],
       approachmethods: ["fb", "friend", "banner", "others"],
       genders: ["male", "female"],
@@ -65,6 +67,10 @@ export default {
         approach_method: "",
         religion: "",
         pic: "",
+        birthdayFromMonth: "",
+        birthdayFromDay: "",
+        birthdayToMonth: "",
+        birthdayToDay: "",
         birthdayfromdate: "",
         birthdaytodate: "",
       }),
@@ -74,6 +80,22 @@ export default {
   computed: {
     isLoading() {
       return this.$store.getters.isLoading;
+    },
+    fromDays() {
+      return (
+        _.map(
+          _.range(getDaysInMonth(this.data.birthdayFromMonth)),
+          (i) => i + 1
+        ) || []
+      );
+    },
+    toDays() {
+      return (
+        _.map(
+          _.range(getDaysInMonth(this.data.birthdayToMonth)),
+          (i) => i + 1
+        ) || []
+      );
     },
   },
   watch: {
@@ -86,7 +108,7 @@ export default {
   mounted() {
     this.showLoadingAction();
     let promises = [];
-    promises.push(this.getStaffsAction({ pageNumber: -1, pageSize: -1 }))
+    promises.push(this.getStaffsAction({ pageNumber: -1, pageSize: -1 }));
     promises.push(this.getRoomsAction({ pageNumber: -1, pageSize: -1 }));
 
     Promise.all(promises)
@@ -158,75 +180,37 @@ export default {
         <v-container>
           <v-row>
             <v-col cols="6">
-              <div class="d-flex align-center">
-                <span className=" d-inline-block half-width">
-                  <v-menu
-                    ref="menu"
-                    v-model="fromdatemenu"
-                    :close-on-content-click="true"
-                    transition="scale-transition"
-                    offset-y
-                  >
-                    <template v-slot:activator="{ on }">
-                      <v-text-field
-                        v-model="data.birthdayfromdate"
-                        label="Birthday From Date"
-                        readonly
-                        v-on="on"
-                      ></v-text-field>
-                    </template>
-                    <v-date-picker
-                      v-model="data.birthdayfromdate"
-                      no-title
-                      scrollable
-                      :max="data.birthdaytodate"
-                    ></v-date-picker>
-                  </v-menu>
-                </span>
-                <span className="d-inline-block">
-                  <v-icon
-                    class="btn"
-                    v-if="data.birthdayfromdate"
-                    @click="data.birthdayfromdate = ''"
-                    >mdi-close</v-icon
-                  >
-                </span>
+
+              <div>Birthday From Date</div>
+              <div class="d-flex justify-start align-center">
+                <v-select
+                  v-model="data.birthdayFromMonth"
+                  :items="_.map(_.range(12), (i) => i + 1)"
+                  label="Month"
+                  class="mr-2"
+                ></v-select>
+                <v-select
+                  v-model="data.birthdayFromDay"
+                  :items="fromDays"
+                  label="Day"
+                ></v-select>
               </div>
             </v-col>
             <v-col cols="6">
-              <div class="d-flex align-center">
-                <span className=" d-inline-block half-width">
-                  <v-menu
-                    ref="menu"
-                    v-model="todatemenu"
-                    :close-on-content-click="true"
-                    transition="scale-transition"
-                    offset-y
-                  >
-                    <template v-slot:activator="{ on }">
-                      <v-text-field
-                        v-model="data.birthdaytodate"
-                        label="Birthday To Date"
-                        readonly
-                        v-on="on"
-                      ></v-text-field>
-                    </template>
-                    <v-date-picker
-                      v-model="data.birthdaytodate"
-                      no-title
-                      scrollable
-                      :min="data.birthdayfromdate"
-                    ></v-date-picker>
-                  </v-menu>
-                </span>
-                <span className="d-inline-block">
-                  <v-icon
-                    class="btn"
-                    v-if="data.birthdaytodate"
-                    @click="data.birthdaytodate = ''"
-                    >mdi-close</v-icon
-                  >
-                </span>
+
+              <div>Birthday To Date</div>
+              <div class="d-flex justify-start align-center">
+                <v-select
+                  v-model="data.birthdayToMonth"
+                  :items="_.map(_.range(12), (i) => i + 1)"
+                  label="Month"
+                  class="mr-2"
+                ></v-select>
+                <v-select
+                  v-model="data.birthdayToDay"
+                  :items="toDays"
+                  label="Day"
+                ></v-select>
               </div>
             </v-col>
             <v-col cols="12">
@@ -234,6 +218,20 @@ export default {
                 label="Keyword Search(Name, IcNo)"
                 :maxlength="300"
                 v-model="data.keyword"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="Occupation"
+                :maxlength="300"
+                v-model="data.occupation"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="State"
+                :maxlength="300"
+                v-model="data.state"
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="12">

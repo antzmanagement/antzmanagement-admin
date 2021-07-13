@@ -1071,19 +1071,19 @@ export const _ = lodash;
 export const accessRule = {
     all: {
         all: true,
-        nav : true,
+        nav: true,
     },
     noAccess: {
         all: false,
-        nav : false,
+        nav: false,
     },
     modify: {
         all: true,
-        nav : true,
+        nav: true,
     },
     view: {
         all: false,
-        nav : true,
+        nav: true,
         read: true,
         create: false,
         edit: false,
@@ -1091,7 +1091,7 @@ export const accessRule = {
     },
     access: {
         all: false,
-        nav : true,
+        nav: true,
         read: true,
         create: true,
         edit: false,
@@ -1099,7 +1099,7 @@ export const accessRule = {
     },
     accessPayment: {
         all: false,
-        nav : true,
+        nav: true,
         read: true,
         create: true,
         edit: false,
@@ -1451,12 +1451,30 @@ export const roleAccess = {
     },
 }
 
-export function checkIsAccessible(role, module, action){
+export function checkIsAccessible(role, module, action) {
 
-    if(!role || !module){
+    if (!role || !module) {
         return false;
     }
 
-    return _.get(roleAccess, `${role}.modules.${module}.${action}`) || _.get(roleAccess, `${role}.modules.${module}.all`) 
-    
+    return _.get(roleAccess, `${role}.modules.${module}.${action}`) || _.get(roleAccess, `${role}.modules.${module}.all`)
+
+}
+
+export function getDaysInMonth(month, year = 2012) {
+    // Here January is 1 based
+    //Day 0 is the last day in the previous month
+    if(month > 0 && month < 13){
+        return new Date(year, month, 0).getDate();
+    }
+
+    return 0;
+    // Here January is 0 based
+    // return new Date(year, month+1, 0).getDate();
+};
+
+export function calculateAge(birthday) { // birthday is a date
+    var ageDifMs = Date.now() - birthday.getTime();
+    var ageDate = new Date(ageDifMs); // miliseconds from epoch
+    return Math.abs(ageDate.getUTCFullYear() - 1970);
 }

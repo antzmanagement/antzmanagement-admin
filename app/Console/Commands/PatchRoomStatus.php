@@ -44,10 +44,23 @@ class PatchRoomStatus extends Command
     public function handle()
     {
         DB::beginTransaction();
-        $rooms = Room::where('room_status', 'empty')->get();
+        $rooms = Room::where('status', true)->get();
 
-        foreach ($rooms as $room) {
-            $room->room_status = 'vacant';
+        foreach ($rooms as $room) {  
+            $status = $room->room_status;
+            $contracts = $room->roomcontracts()->where('status', true)->where('checkedout', false)->count();
+            if($contracts > 0){
+                $status = 'occupied';
+            }else{
+                $status = 'vacant';
+            }
+    
+            $maintenances = $room->maintenances()->where('status', true)->where('maintenance_status', 'inprogress')->count();
+            if($maintenances > 0){
+                $status = 'maintaining';
+            }
+
+            $room->room_status = $status;
             $room = $this->updateRoom($room, $room);
         }
 

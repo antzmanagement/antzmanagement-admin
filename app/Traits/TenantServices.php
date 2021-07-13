@@ -48,6 +48,32 @@ trait TenantServices
             })->values();
         }
 
+        if ($params->occupation) {
+            $keyword = $params->occupation;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($keyword) {
+                //check string exist inside or not
+                if ( stristr($item->occupation, $keyword) == TRUE) {
+                    return true;
+                } else {
+                    return false;
+                }
+            })->values();
+        }
+
+        if ($params->state) {
+            $keyword = $params->state;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($keyword) {
+                //check string exist inside or not
+                if ( stristr($item->state, $keyword) == TRUE) {
+                    return true;
+                } else {
+                    return false;
+                }
+            })->values();
+        }
+
         if ($params->religion) {
             $religion = $params->religion;
             $data = collect($data);
@@ -105,6 +131,46 @@ trait TenantServices
                 }
             })->values();
         }
+
+
+        if ($params->birthdayFromMonth) {
+            if($params->birthdayFromDay){
+                $date = Carbon::createFromDate(2012, $params->birthdayFromMonth, $params->birthdayFromDay)->startOfDay();
+            }else{
+                $date = Carbon::createFromDate(2012, $params->birthdayFromMonth, 1)->startOfDay();
+            }
+            
+            $data = $data->filter(function ($item) use ($date) {
+                if(data_get($item, 'birthday')){
+                    $birthday = Carbon::parse(data_get($item, 'birthday'));
+                    $birthday->setYear(2012);
+                    return $birthday->gte($date);
+                }else{
+                    return false;
+                }
+            })->values();
+        }
+
+        if ($params->birthdayToMonth) {
+            if($params->birthdayToDay){
+                
+                $date = Carbon::createFromDate(2012, $params->birthdayToMonth, $params->birthdayToDay)->endOfDay();
+            }else{
+                $date = Carbon::createFromDate(2012, $params->birthdayToMonth, 1)->endOfMonth();
+                error_log($date);
+            }
+            
+            $data = $data->filter(function ($item) use ($date) {
+                if(data_get($item, 'birthday')){
+                    $birthday = Carbon::parse(data_get($item, 'birthday'));
+                    $birthday->setYear(2012);
+                    return $birthday->lte($date);
+                }else{
+                    return false;
+                }
+            })->values();
+        }
+
 
         if($params->room_id){
             $room_id = $params->room_id;
@@ -219,7 +285,7 @@ trait TenantServices
     public function tenantFilterCols()
     {
 
-        return ['keyword', 'religion', 'approach_method', 'gender', 'birthdayfromdate', 'birthdaytodate', 'pic', 'room_id'];
+        return ['keyword', 'religion', 'approach_method', 'gender', 'birthdayfromdate', 'birthdaytodate', 'pic', 'room_id','birthdayFromMonth','birthdayFromDay', 'birthdayToMonth', 'birthdayToDay', 'occupation', 'state'];
     }
 
 }

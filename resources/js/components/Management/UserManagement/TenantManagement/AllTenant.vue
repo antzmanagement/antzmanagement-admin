@@ -3,7 +3,7 @@
 
 <script>
 import { mapActions } from "vuex";
-import { _ } from "../../../../common/common-function";
+import { getDaysInMonth, _ } from "../../../../common/common-function";
 import ExportExcelButton from "../../../ExportExcelButton.vue";
 import moment from "moment";
 export default {
@@ -11,7 +11,7 @@ export default {
   data() {
     return {
       _: _,
-      role : '',
+      role: "",
       moment: moment,
       totalDataLength: 0,
       data: [],
@@ -98,6 +98,8 @@ export default {
         {
           text: "Approach Methods",
         },
+        { text: "Occupation" },
+        { text: "State" },
         { text: "Person In Charge" },
       ],
     };
@@ -169,6 +171,31 @@ export default {
       }
       if (filterGroup.birthdaytodate) {
         this.tenantFilterGroup.birthdaytodate = filterGroup.birthdaytodate;
+      }
+      if (filterGroup.birthdayFromMonth) {
+        this.tenantFilterGroup.birthdayFromMonth =
+          filterGroup.birthdayFromMonth;
+        if (filterGroup.birthdayFromDay) {
+          this.tenantFilterGroup.birthdayFromDay = filterGroup.birthdayFromDay;
+        } else {
+          this.tenantFilterGroup.birthdayFromDay = 1
+        }
+      }
+      if (filterGroup.birthdayToMonth) {
+        this.tenantFilterGroup.birthdayToMonth = filterGroup.birthdayToMonth;
+        if (filterGroup.birthdayToDay) {
+          this.tenantFilterGroup.birthdayToDay = filterGroup.birthdayToDay;
+        } else {
+          this.tenantFilterGroup.birthdayToDay = getDaysInMonth(
+            filterGroup.birthdayToMonth
+          );
+        }
+      }
+      if (filterGroup.occupation) {
+        this.tenantFilterGroup.occupation = filterGroup.occupation;
+      }
+      if (filterGroup.state) {
+        this.tenantFilterGroup.state = filterGroup.state;
       }
       if (filterGroup.room) {
         this.tenantFilterGroup.room_id = filterGroup.room.id;
@@ -280,16 +307,31 @@ export default {
                 Keyword :
                 <v-chip class="mx-2">{{ tenantFilterGroup.keyword }}</v-chip>
               </v-card-subtitle>
-              <v-card-subtitle v-show="tenantFilterGroup.birthdayfromdate">
+              <v-card-subtitle
+                v-show="
+                  tenantFilterGroup.birthdayfromdate ||
+                  tenantFilterGroup.birthdayFromMonth
+                "
+              >
                 Birthday From Date :
                 <v-chip class="mx-2">{{
-                  tenantFilterGroup.birthdayfromdate | formatDate
+                  tenantFilterGroup.birthdayfromdate ||
+                  `${tenantFilterGroup.birthdayFromDay || 1}/${
+                    tenantFilterGroup.birthdayFromMonth
+                  }`
                 }}</v-chip>
               </v-card-subtitle>
-              <v-card-subtitle v-show="tenantFilterGroup.birthdaytodate">
+              <v-card-subtitle
+                v-show="
+                  tenantFilterGroup.birthdaytodate ||
+                  tenantFilterGroup.birthdayToMonth
+                "
+              >
                 Birthday To Date :
                 <v-chip class="mx-2">{{
-                  tenantFilterGroup.birthdaytodate | formatDate
+                  tenantFilterGroup.birthdaytodate ||
+                  `${tenantFilterGroup.birthdayToDay}/${tenantFilterGroup.birthdayToMonth}`
+                  
                 }}</v-chip>
               </v-card-subtitle>
               <v-card-subtitle v-show="tenantFilterGroup.religion">
@@ -369,15 +411,28 @@ export default {
                         v-for="roomContract in props.item.roomcontracts"
                         :key="roomContract.id"
                       >
-                      {{ _.get(roomContract , 'room.unit') || 'N/A' }}
-                      </div></td>
+                        {{ _.get(roomContract, "room.unit") || "N/A" }}
+                      </div>
+                    </td>
                     <td class="text-truncate">{{ props.item.name }}</td>
-                    <td class="text-truncate">{{ props.item.birthday | formatDate }}</td>
+                    <td class="text-truncate">
+                      {{ props.item.birthday | formatDate }}
+                    </td>
                     <td class="text-truncate">{{ props.item.gender }}</td>
                     <td class="text-truncate">{{ props.item.icno }}</td>
                     <td class="text-truncate">{{ props.item.tel1 }}</td>
-                    <td class="text-truncate">{{ props.item.emergency_contact }}</td>
-                    <td class="text-truncate">{{ props.item.approach_method }}</td>
+                    <td class="text-truncate">
+                      {{ props.item.emergency_contact }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.approach_method }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.occupation }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.state }}
+                    </td>
                     <td class="text-truncate">
                       {{ _.get(props.item, ["creator", "name"]) || "N/A" }}
                     </td>

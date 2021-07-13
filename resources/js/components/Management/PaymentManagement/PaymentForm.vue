@@ -25,9 +25,14 @@ export default {
       type: String,
       default: "",
     },
+    resetIndicator: {
+      type: Boolean,
+      default: "",
+    },
   },
   data() {
     return {
+      paymentMethods: ["cash", "online_transfer", "credit"],
       moment: moment,
       _: _,
       menu: false,
@@ -42,6 +47,7 @@ export default {
         remark: "",
         services: [],
         room_contract_id: "",
+        paymentmethod: "cash",
         otherpayments: [],
       }),
       servicesDialogConfig: {
@@ -54,29 +60,29 @@ export default {
       },
     };
   },
-
+  watch: {
+    uid: function (val) {
+      if (val) {
+        this.getPayment();
+      } else {
+        this.data.reset();
+      }
+    },
+    resetIndicator: function (val) {
+      if (val) {
+      console.log('reset');
+        this.data.reset();
+        this.otherpayments = []
+      }
+    },
+  },
   computed: {
     isLoading() {
       return this.$store.getters.isLoading;
     },
   },
-  watch: {
-    uid: function (val) {
-      if (val) {
-        this.getPayment();
-      }
-    },
-    roomcontractid: function (val) {
-    },
-    otherPaymentDialog: function (val) {
-      if (val) {
-        this.otherpayments = this.data.otherpayments || [];
-      } else {
-        this.otherpayments = [];
-      }
-    },
-  },
   mounted() {
+    console.log(this.uid);
     if (this.uid) {
       this.getPayment();
     }
@@ -98,6 +104,7 @@ export default {
       this.getPaymentAction({ uid: this.uid })
         .then((data) => {
           this.data = data.data;
+
           console.log(data.data);
           this.data.services =
             this.pluckUid(_.get(data, `data.services`)) || [];
@@ -108,10 +115,14 @@ export default {
             this.data.otherpayments = _.map(
               this.data.otherpayments,
               function (otherpayment) {
-                otherpayment.price = _.get(otherpayment , `pivot.price`) || 0;
+                otherpayment.price = _.get(otherpayment, `pivot.price`) || 0;
                 return otherpayment;
               }
             );
+          }
+          if(!this.data.paymentmethod){
+            this.data.paymentmethod = this.paymentMethods[0];
+            this.updateProcessingFees();
           }
           this.$Progress.finish();
           this.endLoadingAction();
@@ -142,6 +153,7 @@ export default {
 
       this.data.price = parseFloat(price);
       this.data.services = this.pluckUid(event.services);
+      this.updateProcessingFees();
     },
     otherPaymentUpdated() {
       let price = 0;
@@ -150,6 +162,7 @@ export default {
       });
 
       this.data.other_charges = parseFloat(price);
+      this.updateProcessingFees();
     },
     createPayment() {
       if (!this.roomcontractid) {
@@ -207,6 +220,31 @@ export default {
           this.close();
         });
     },
+    updateProcessingFees() {
+      let price = !_.isNaN(parseFloat(this.data.price))
+        ? parseFloat(this.data.price)
+        : 0;
+      let other_charges = !_.isNaN(parseFloat(this.data.other_charges))
+        ? parseFloat(this.data.other_charges)
+        : 0;
+      switch (this.data.paymentmethod) {
+        case "cash":
+          this.data.processing_fees = 3;
+          break;
+        case "online_transfer":
+          this.data.processing_fees = 0;
+          break;
+        case "credit":
+          this.data.processing_fees = parseFloat(
+            ((price + other_charges) * 0.02).toFixed(2)
+          );
+          break;
+
+        default:
+          this.data.processing_fees = 0;
+          break;
+      }
+    },
   },
 };
 </script>
@@ -226,7 +264,7 @@ export default {
             <v-menu
               ref="menu"
               v-model="menu"
-              :close-on-content-click="true"
+              :close-on-content-click="false"
               transition="scale-transition"
               offset-y
             >
@@ -251,10 +289,12 @@ export default {
             </v-menu>
           </v-col>
           <v-col cols="12" v-if="editMode">
-            <v-text-field
-              label="Payment Method"
+            <v-select
+              :items="paymentMethods"
               v-model="data.paymentmethod"
-            ></v-text-field>
+              label="Payment Method"
+              @change="updateProcessingFees"
+            ></v-select>
           </v-col>
           <v-col cols="12">
             <v-text-field
@@ -272,6 +312,14 @@ export default {
               step="0.01"
               v-model="data.other_charges"
               readonly
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" v-if="editMode">
+            <v-text-field
+              label="Processing Fees"
+              type="number"
+              step="0.01"
+              v-model="data.processing_fees"
             ></v-text-field>
           </v-col>
           <v-col cols="12" v-if="editMode">

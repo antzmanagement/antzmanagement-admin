@@ -11,7 +11,7 @@ import {
   email,
 } from "vuelidate/lib/validators";
 import { mapActions } from "vuex";
-import { _ } from "../../../../common/common-function";
+import { calculateAge, _ } from "../../../../common/common-function";
 export default {
   props: {
     editMode: {
@@ -624,6 +624,32 @@ export default {
         }
       }
     },
+    updateOutstanding() {
+      let deposit = !_.isNaN(parseFloat(_.get(this.data.room, `deposit`)))
+        ? parseFloat(_.get(this.data.room, `deposit`))
+        : 0;
+      let agreement_fees = !_.isNaN(
+        parseFloat(_.get(this.data.room, `agreement_fees`))
+      )
+        ? parseFloat(_.get(this.data.room, `agreement_fees`))
+        : 0;
+      let booking_fees = !_.isNaN(parseFloat(_.get(this.data.room, `booking_fees`)))
+        ? parseFloat(_.get(this.data.room, `booking_fees`))
+        : 0;
+      let outstanding_deposit = deposit + agreement_fees - booking_fees;
+      this.data.room = {
+        ...this.data.room,
+        deposit,
+        agreement_fees,
+        booking_fees,
+        outstanding_deposit,
+      };
+    },
+    updateAge(){
+      console.log(new Date(this.data.birthday));
+      console.log(calculateAge(new Date(this.data.birthday)));
+      this.data.age = calculateAge(new Date(this.data.birthday))
+    }
   },
 };
 </script>
@@ -715,18 +741,10 @@ export default {
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="6">
-              <v-text-field
-                label="Age"
-                v-model="data.age"
-                type="number"
-                step="1"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" md="6">
               <v-menu
                 ref="birthdayMenu"
                 v-model="birthdayMenu"
-                :close-on-content-click="true"
+                :close-on-content-click="false"
                 transition="scale-transition"
                 offset-y
                 min-width="290px"
@@ -741,9 +759,17 @@ export default {
                     v-on="on"
                   ></v-text-field>
                 </template>
-                <v-date-picker v-model="data.birthday" no-title scrollable>
+                <v-date-picker v-model="data.birthday" no-title scrollable @change="updateAge">
                 </v-date-picker>
               </v-menu>
+            </v-col>
+            <v-col cols="12" md="6">
+              <v-text-field
+                label="Age"
+                v-model="data.age"
+                type="number"
+                step="1"
+              ></v-text-field>
             </v-col>
             <v-col cols="12" md="6">
               <v-autocomplete
@@ -984,7 +1010,7 @@ export default {
                           type="number"
                           step="0.01"
                           :error-messages="
-                            helpers.isEmpty(props.item.price)
+                            !_.isNumber(props.item.price)
                               ? 'Rental is required'
                               : ''
                           "
@@ -997,10 +1023,11 @@ export default {
                           type="number"
                           step="0.01"
                           :error-messages="
-                            helpers.isEmpty(props.item.deposit)
+                            !_.isNumber(props.item.deposit)
                               ? 'Deposit is required'
                               : ''
                           "
+                          @change="updateOutstanding"
                         ></v-text-field>
                       </td>
                       <td class="text-truncate">
@@ -1010,10 +1037,11 @@ export default {
                           type="number"
                           step="0.01"
                           :error-messages="
-                            helpers.isEmpty(props.item.agreement_fees)
+                            !_.isNumber(props.item.agreement_fees)
                               ? 'Agreement is required'
                               : ''
                           "
+                          @change="updateOutstanding"
                         ></v-text-field>
                       </td>
                       <td class="text-truncate">
@@ -1023,10 +1051,11 @@ export default {
                           type="number"
                           step="0.01"
                           :error-messages="
-                            helpers.isEmpty(props.item.booking_fees)
+                            !_.isNumber(props.item.booking_fees)
                               ? 'Booking fees is required'
                               : ''
                           "
+                          @change="updateOutstanding"
                         ></v-text-field>
                       </td>
                       <td class="text-truncate">
@@ -1062,9 +1091,8 @@ export default {
                         <v-menu
                           ref="menu"
                           v-model="props.item.menu"
-                          :close-on-content-click="true"
+                          :close-on-content-click="false"
                           transition="scale-transition"
-                          :disabled="editMode"
                           offset-y
                         >
                           <template v-slot:activator="{ on }">
@@ -1073,7 +1101,6 @@ export default {
                               label="Start Date"
                               prepend-icon="event"
                               readonly
-                              :disabled="editMode"
                               v-on="on"
                               :error-messages="
                                 helpers.isEmpty(props.item.startdate)
@@ -1093,9 +1120,8 @@ export default {
                         <v-menu
                           ref="menu"
                           v-model="props.item.enddatemenu"
-                          :close-on-content-click="true"
+                          :close-on-content-click="false"
                           transition="scale-transition"
-                          :disabled="editMode"
                           offset-y
                         >
                           <template v-slot:activator="{ on }">
@@ -1105,7 +1131,6 @@ export default {
                               prepend-icon="event"
                               readonly
                               v-on="on"
-                              :disabled="editMode"
                               :error-messages="
                                 helpers.isEmpty(props.item.enddate)
                                   ? 'Date is required'
@@ -1124,9 +1149,8 @@ export default {
                         <v-menu
                           ref="menu"
                           v-model="props.item.rentalstartdatemenu"
-                          :close-on-content-click="true"
+                          :close-on-content-click="false"
                           transition="scale-transition"
-                          :disabled="editMode"
                           offset-y
                         >
                           <template v-slot:activator="{ on }">
@@ -1135,7 +1159,6 @@ export default {
                               label="Rental Start Date"
                               prepend-icon="event"
                               readonly
-                              :disabled="editMode"
                               v-on="on"
                             ></v-text-field>
                           </template>

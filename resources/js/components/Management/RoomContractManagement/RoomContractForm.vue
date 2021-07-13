@@ -62,43 +62,43 @@ export default {
         },
         {
           text: "Rental",
-          width : '150px',
+          width: "150px",
         },
         {
           text: "Deposit",
-          width : '150px',
+          width: "150px",
         },
         {
           text: "Agreement Fees",
-          width : '150px',
+          width: "150px",
         },
         {
           text: "Booking Fees",
-          width : '150px',
+          width: "150px",
         },
         {
           text: "Outstanding Deposit",
-          width : '150px',
+          width: "150px",
         },
         {
           text: "Contract",
-          width : '150px',
+          width: "150px",
         },
         {
           text: "Contract Start Date",
-          width : '150px',
+          width: "150px",
         },
         {
           text: "Contract End Date",
-          width : '150px',
+          width: "150px",
         },
         {
           text: "Rental Start Date",
-          width : '150px',
+          width: "150px",
         },
         {
           text: "Services",
-          width : '150px',
+          width: "150px",
         },
       ],
       data: new Form({
@@ -238,8 +238,8 @@ export default {
           room.price = parseFloat(room.price);
           room.deposit = 700;
           room.booking_fees = 200;
-          room.outstanding_deposit = room.deposit - room.booking_fees;
           room.agreement_fees = 50;
+          room.outstanding_deposit = room.deposit + room.agreement_fees - room.booking_fees;
           room.autorenew = false;
           return room;
         });
@@ -548,6 +548,27 @@ export default {
         }
       }
     },
+    updateOutstanding() {
+      let deposit = !_.isNaN(parseFloat(_.get(this.data.room, `deposit`)))
+        ? parseFloat(_.get(this.data.room, `deposit`))
+        : 0;
+      let agreement_fees = !_.isNaN(
+        parseFloat(_.get(this.data.room, `agreement_fees`))
+      )
+        ? parseFloat(_.get(this.data.room, `agreement_fees`))
+        : 0;
+      let booking_fees = !_.isNaN(parseFloat(_.get(this.data.room, `booking_fees`)))
+        ? parseFloat(_.get(this.data.room, `booking_fees`))
+        : 0;
+      let outstanding_deposit = deposit + agreement_fees - booking_fees;
+      this.data.room = {
+        ...this.data.room,
+        deposit,
+        agreement_fees,
+        booking_fees,
+        outstanding_deposit,
+      };
+    },
   },
 };
 </script>
@@ -674,49 +695,52 @@ export default {
                           type="number"
                           step="0.01"
                           :error-messages="
-                            helpers.isEmpty(props.item.price)
+                            !_.isNumber(props.item.price)
                               ? 'Rental is required'
                               : ''
                           "
                         ></v-text-field>
                       </td>
-                      <td class="text-truncate" >
+                      <td class="text-truncate">
                         <v-text-field
                           v-model="props.item.deposit"
                           prefix="RM"
                           type="number"
                           step="0.01"
                           :error-messages="
-                            helpers.isEmpty(props.item.deposit)
+                            !_.isNumber(props.item.deposit)
                               ? 'Deposit is required'
                               : ''
                           "
+                          @change="updateOutstanding"
                         ></v-text-field>
                       </td>
-                      <td class="text-truncate" >
+                      <td class="text-truncate">
                         <v-text-field
                           v-model="props.item.agreement_fees"
                           prefix="RM"
                           type="number"
                           step="0.01"
                           :error-messages="
-                            helpers.isEmpty(props.item.agreement_fees)
+                            !_.isNumber(props.item.agreement_fees)
                               ? 'Agreement is required'
                               : ''
                           "
+                          @change="updateOutstanding"
                         ></v-text-field>
                       </td>
-                      <td class="text-truncate" >
+                      <td class="text-truncate">
                         <v-text-field
                           v-model="props.item.booking_fees"
                           prefix="RM"
                           type="number"
                           step="0.01"
                           :error-messages="
-                            helpers.isEmpty(props.item.booking_fees)
+                            !_.isNumber(props.item.booking_fees)
                               ? 'Booking fees is required'
                               : ''
                           "
+                          @change="updateOutstanding"
                         ></v-text-field>
                       </td>
                       <td class="text-truncate">
@@ -752,7 +776,7 @@ export default {
                         <v-menu
                           ref="menu"
                           v-model="props.item.menu"
-                          :close-on-content-click="true"
+                          :close-on-content-click="false"
                           transition="scale-transition"
                           offset-y
                         >
@@ -781,7 +805,7 @@ export default {
                         <v-menu
                           ref="menu"
                           v-model="props.item.enddatemenu"
-                          :close-on-content-click="true"
+                          :close-on-content-click="false"
                           transition="scale-transition"
                           offset-y
                         >
@@ -810,7 +834,7 @@ export default {
                         <v-menu
                           ref="menu"
                           v-model="props.item.rentalstartdatemenu"
-                          :close-on-content-click="true"
+                          :close-on-content-click="false"
                           transition="scale-transition"
                           offset-y
                         >
@@ -839,14 +863,14 @@ export default {
                           :dialogStyle="servicesDialogConfig.dialogStyle"
                           :services="
                             pluckUid(
-                              !isEmpty(props.item.services)
+                              !_.isEmpty(props.item.services)
                                 ? props.item.services
                                 : []
                             )
                           "
                           :origServices="
                             pluckUid(
-                              !isEmpty(props.item.origServices)
+                              !_.isEmpty(props.item.origServices)
                                 ? props.item.origServices
                                 : []
                             )

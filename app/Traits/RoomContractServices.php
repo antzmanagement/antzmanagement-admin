@@ -382,6 +382,10 @@ trait RoomContractServices
         foreach ($rentalpayments as $rentalpayment) {
             $this->deleteRentalPayment($rentalpayment);
         }
+        $payments = $data->payments()->where('status', true)->get();
+        foreach ($payments as $payment) {
+            $this->deletePayment($payment);
+        }
         $data = $this->syncWithRentalPayment($data);
 
 
@@ -406,13 +410,12 @@ trait RoomContractServices
 
         $data->status = false;
         if ($this->saveModel($data)) {
+            $this->syncRoomStatus($data->room);
             return $data->refresh();
         } else {
             return null;
         }
-
-        $this->syncRoomStatus($data->room);
-        return $data->refresh();
+        
     }
 
 
