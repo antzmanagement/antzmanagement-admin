@@ -364,11 +364,11 @@ export default {
       this.rentalPaymentFilterGroup.reset();
       if (filterGroup.tenant) {
         this.rentalPaymentFilterGroup.tenant_id = filterGroup.tenant.id;
-        this.rentalPaymentFilterGroup.tenant = filterGroup.tenant;
+        this.rentalPaymentFilterGroup.tenant = filterGroup.tenant.name;
       }
       if (filterGroup.room) {
         this.rentalPaymentFilterGroup.room_id = filterGroup.room.id;
-        this.rentalPaymentFilterGroup.room = filterGroup.room;
+        this.rentalPaymentFilterGroup.room = filterGroup.room.unit;
       }
       if (filterGroup.fromdate) {
         this.rentalPaymentFilterGroup.fromdate = filterGroup.fromdate;
@@ -393,11 +393,11 @@ export default {
       this.paymentFilterGroup.reset();
       if (filterGroup.tenant) {
         this.paymentFilterGroup.tenant_id = filterGroup.tenant.id;
-        this.paymentFilterGroup.tenant = filterGroup.tenant;
+        this.paymentFilterGroup.tenant = filterGroup.tenant.name;
       }
       if (filterGroup.room) {
         this.paymentFilterGroup.room_id = filterGroup.room.id;
-        this.paymentFilterGroup.room = filterGroup.room;
+        this.paymentFilterGroup.room = filterGroup.room.unit;
       }
       if (filterGroup.fromdate) {
         this.paymentFilterGroup.fromdate = filterGroup.fromdate;
@@ -407,17 +407,14 @@ export default {
           _.map(filterGroup.services, "id") || [];
         this.paymentFilterGroup.services = filterGroup.services;
       }
-      if (filterGroup.receiptno) {
-        this.paymentFilterGroup.receiptno = filterGroup.receiptno;
-      }
       if (filterGroup.todate) {
         this.paymentFilterGroup.todate = filterGroup.todate;
       }
-      if (filterGroup.penalty === 1 || filterGroup.penalty === 0) {
-        this.paymentFilterGroup.penalty = filterGroup.penalty;
-      }
       if (filterGroup.paid === 1 || filterGroup.paid === 0) {
         this.paymentFilterGroup.paid = filterGroup.paid;
+      }
+      if (filterGroup.otherPaymentTitle) {
+        this.paymentFilterGroup.otherPaymentTitle = filterGroup.otherPaymentTitle;
       }
 
       this.paymentOptions.page = 1;
@@ -547,7 +544,6 @@ export default {
         this.rentalPaymentFilterGroup.pageSize = itemsPerPage;
       }
 
-      console.log(this.rentalPaymentFilterGroup);
       this.filterRentalPaymentsAction(this.rentalPaymentFilterGroup)
         .then((data) => {
           if (data.data) {
@@ -580,7 +576,6 @@ export default {
         this.paymentFilterGroup.pageSize = itemsPerPage;
       }
 
-      console.log(this.paymentFilterGroup);
       this.filterPaymentsAction(this.paymentFilterGroup)
         .then((data) => {
           if (data.data) {
@@ -683,7 +678,7 @@ export default {
     <v-content :class="helpers.managementStyles().backgroundClass">
       <v-container class="fill-height" fluid>
         <loading></loading>
-        <v-row justify="center" align="center" class="mx-3">
+        <!-- <v-row justify="center" align="center" class="mx-3">
           <v-col cols="12">
             <v-card raised>
               <v-card-subtitle v-show="rentalPaymentFilterGroup.fromdate">
@@ -707,13 +702,13 @@ export default {
               <v-card-subtitle v-show="rentalPaymentFilterGroup.tenant">
                 Tenant :
                 <v-chip class="mx-2">{{
-                  _.get(rentalPaymentFilterGroup, ["tenant", "name"]) || "N/A"
+                  _.get(rentalPaymentFilterGroup, ["tenant"]) || "N/A"
                 }}</v-chip>
               </v-card-subtitle>
               <v-card-subtitle v-show="rentalPaymentFilterGroup.room">
                 Room :
                 <v-chip class="mx-2">{{
-                  _.get(rentalPaymentFilterGroup, ["room", "unit"]) || "N/A"
+                  _.get(rentalPaymentFilterGroup, ["room"]) || "N/A"
                 }}</v-chip>
               </v-card-subtitle>
               <v-card-subtitle
@@ -740,7 +735,7 @@ export default {
               </v-card-subtitle>
             </v-card>
           </v-col>
-        </v-row>
+        </v-row> -->
         <v-row
           justify="center"
           align="center"

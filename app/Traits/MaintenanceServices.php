@@ -153,10 +153,13 @@ trait MaintenanceServices
         $data = new Maintenance();
         $data->uid = Carbon::now()->timestamp . Maintenance::count();
         $data->price  = $this->toDouble($params->price);
+        $data->maintenance_date  = $this->toDate($params->maintenance_date);
         $data->remark = $params->remark;
         $data->maintenance_type = $params->maintenance_type;
         $data->maintenance_status = $params->maintenance_status;
         $data->claim_by_owner = $params->claim_by_owner;
+        $data->claim_by_tenant = $params->claim_by_tenant;
+
 
         $room = $this->getRoomById($params->room_id);
         if ($this->isEmpty($room)) {
@@ -170,11 +173,9 @@ trait MaintenanceServices
         }
         $data->property()->associate($property);
 
-        $data->name = $room->name. '-'. $property->name. '-' .Carbon::now()->format('Y-m-d');
         if ($params->claim_by_owner) {
-            $owners = $room->owners;
-            if(collect($owners)->count() > 0){
-                $owner = $this->getOwnerById($owners[0]->id);
+            if($params->owner_id){
+                $owner = $this->getOwnerById($params->owner_id);
                 if ($this->isEmpty($owner)) {
                     return null;
                 }
@@ -184,6 +185,30 @@ trait MaintenanceServices
             $data->owner()->associate($owner);
         }else{
             $data->owner_id = null;
+        }
+
+        if ($params->claim_by_tenant) {
+            if($params->tenant_id){
+                $tenant = $this->getTenantById($params->tenant_id);
+                if ($this->isEmpty($tenant)) {
+                    return null;
+                }
+            }else{
+                return null;
+            }
+            $data->tenant()->associate($tenant);
+        }else{
+            $data->tenant_id = null;
+        }
+
+        if ($params->room_check_id) {
+            $roomCheck = $this->getRoomCheckById($params->room_check_id);
+            if ($this->isEmpty($roomCheck)) {
+                return null;
+            }
+            $data->roomcheck()->associate($roomCheck);
+        }else{
+            $data->room_check_id = null;
         }
 
         if (!$this->saveModel($data)) {
@@ -201,10 +226,15 @@ trait MaintenanceServices
 
         $params = $this->checkUndefinedProperty($params, $this->maintenanceAllCols());
         $data->price  = $this->toDouble($params->price);
+        $data->maintenance_date  = $this->toDate($params->maintenance_date);
         $data->remark = $params->remark;
         $data->maintenance_type = $params->maintenance_type;
         $data->maintenance_status = $params->maintenance_status;
         $data->claim_by_owner = $params->claim_by_owner;
+        $data->claim_by_tenant = $params->claim_by_tenant;
+
+        $data->paid = $params->paid == true;
+        $data->paymentdate = $this->toDate($params->paymentdate);
 
 
         $room = $this->getRoomById($params->room_id);
@@ -219,12 +249,9 @@ trait MaintenanceServices
         }
         $data->property()->associate($property);
 
-
-        $data->name = $room->name. '-'. $property->name. '-' .Carbon::now()->format('Y-m-d');
         if ($params->claim_by_owner) {
-            $owners = $room->owners;
-            if(collect($owners)->count() > 0){
-                $owner = $this->getOwnerById($owners[0]->id);
+            if($params->owner_id){
+                $owner = $this->getOwnerById($params->owner_id);
                 if ($this->isEmpty($owner)) {
                     return null;
                 }
@@ -235,6 +262,53 @@ trait MaintenanceServices
         }else{
             $data->owner_id = null;
         }
+
+        if ($params->claim_by_tenant) {
+            if($params->tenant_id){
+                $tenant = $this->getTenantById($params->tenant_id);
+                if ($this->isEmpty($tenant)) {
+                    return null;
+                }
+            }else{
+                return null;
+            }
+            $data->tenant()->associate($tenant);
+        }else{
+            $data->tenant_id = null;
+        }
+
+        if ($params->room_check_id) {
+            $roomCheck = $this->getRoomCheckById($params->room_check_id);
+            if ($this->isEmpty($roomCheck)) {
+                return null;
+            }
+            $data->roomcheck()->associate($roomCheck);
+        }else{
+            $data->room_check_id = null;
+        }
+
+        if($data->paid){
+            $data->payment = $this->toDouble($params->price);
+            $data->processing_fees =  $this->toDouble($params->processing_fees);
+            $data->paymentmethod = $params->paymentmethod;
+            $data->receiptno = $params->receiptno;
+            $data->receive_from = $params->receive_from;
+
+            $issueBy = $this->getUserById($params->issue_by);
+            if ($this->isEmpty($issueBy)) {
+                $data->issue_by = null;
+            }else{
+                $data->issueby()->associate($issueBy);
+            }
+        }else{
+            $data->payment = 0;
+            $data->processing_fees =  0;
+            $data->paymentmethod = null;
+            $data->receiptno = null;
+            $data->receive_from = null;
+            $data->issue_by = null;
+        }
+
         if (!$this->saveModel($data)) {
             return null;
         }
@@ -263,7 +337,9 @@ trait MaintenanceServices
     public function maintenanceAllCols()
     {
 
-        return ['id', 'uid', 'price', 'remark'];
+        return ['id', 'uid', 'price', 'remark', 'owner_id','room_check_id', 'property_id',
+        'room_id', 'tenant_id', 'claim_by_owner', 'claim_by_tenant', 'claim_id', 'maintenance_type', 
+        'maintenance_status', 'maintenance_date', 'price', 'paid', 'receive_from', 'issue_by', 'receiptno', 'paymentmethod', 'processing_fees', 'paymentdate'];
     }
 
     public function maintenanceDefaultCols()

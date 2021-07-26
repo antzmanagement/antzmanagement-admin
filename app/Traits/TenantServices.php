@@ -222,7 +222,6 @@ trait TenantServices
         $data = $userType->users()->where('users.id', $id)->wherePivot('status', 1)->with(['roomcontracts' => function ($q) {
             // Query the name field in status table
             $q->where('status', true);
-            $q->where('expired', false);
             $q->with(['room', 'contract', 'rentalpayments', 'tenant']);
         }, 'creator'])->where('users.status', true)->first();
         return $data;

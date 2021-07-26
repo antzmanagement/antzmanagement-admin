@@ -393,14 +393,14 @@ class TenantController extends Controller
                 error_log($payment);
                 $payment = $this->updatePayment($payment, $params);
                 error_log($payment);
-                $data = $this->getOtherPaymentTitleByName('Booking Fees');
+                $data = $this->getOtherPaymentTitleByName('Partial Payment (Deposit)');
                 if (!$this->isEmpty($data)) {
                     $data->price = $this->toDouble($roomContract->booking_fees);
                     $payment->otherpayments->push($data);
                     $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
                 }else{
                     $params = collect([
-                        'name' => 'Booking Fees',
+                        'name' => 'Partial Payment (Deposit)',
                     ]);
                     //Convert To Json Object
                     $params = json_decode(json_encode($params));

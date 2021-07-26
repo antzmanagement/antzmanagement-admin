@@ -19,6 +19,9 @@ import roomType from "./roomType.module";
 import service from "./service.module";
 import claim from "./claim.module";
 import payment from "./payment.module";
+import roomCheck from "./roomCheck.module";
+import cleaning from "./cleaning.module";
+
 
 Vue.use(Vuex);
 
@@ -42,5 +45,7 @@ export default new Vuex.Store({
     auth,
     loading,
     payment,
+    roomCheck,
+    cleaning,
   }
 });

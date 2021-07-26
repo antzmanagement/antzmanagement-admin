@@ -71,7 +71,7 @@ export default {
           width: "150px",
         },
         {
-          text: "Booking Fees",
+          text: "Partial Payment (Deposit)",
           width: "150px",
         },
         {

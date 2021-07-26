@@ -1141,6 +1141,9 @@ export const roleAccess = {
             roomMaintenance: {
                 ...(_.get(accessRule, `modify`) || {})
             },
+            roomCheck: {
+                ...(_.get(accessRule, `modify`) || {})
+            },
         }
     },
     admin: {
@@ -1173,6 +1176,9 @@ export const roleAccess = {
                 ...(_.get(accessRule, `modify`) || {})
             },
             roomMaintenance: {
+                ...(_.get(accessRule, `modify`) || {})
+            },
+            roomCheck: {
                 ...(_.get(accessRule, `modify`) || {})
             },
         }
@@ -1211,7 +1217,7 @@ export const roleAccess = {
             },
         }
     },
-    manager: {
+    maintenance_department: {
         modules: {
             management: {
                 ...(_.get(accessRule, `modify`) || {})
@@ -1347,7 +1353,7 @@ export const roleAccess = {
             },
         }
     },
-    hr_and_account_assistance: {
+    asset_management: {
         modules: {
             management: {
                 ...(_.get(accessRule, `modify`) || {})

@@ -31,7 +31,6 @@ export default {
       _: _,
       menu: false,
       penaltyRate: 3,
-      expiredDays: 9,
       origPrice: 0,
       data: new Form({
         price: 0,

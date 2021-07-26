@@ -1,5 +1,6 @@
 
 <script>
+import moment from 'moment';
 import { mapActions } from "vuex";
 import { _ } from "../../../common/common-function";
 import PrintPaymentButton from "../PaymentManagement/PrintPaymentButton.vue";
@@ -9,7 +10,7 @@ export default {
   data: () => ({
     _: _,
     editMode: false,
-    addOnPaymentEditMode : false,
+    addOnPaymentEditMode: false,
     checkoutDialog: false,
     paymentDialog: false,
     addOnPaymentDialog: false,
@@ -114,6 +115,9 @@ export default {
     isLoading() {
       return this.$store.getters.isLoading;
     },
+    isExpired() {
+      return moment().isAfter(moment(this.data.enddate));
+    },
     sortedRentalPayments() {
       return this.helpers.sortByDate(this.data.rentalpayments, "rentaldate");
     },
@@ -130,7 +134,7 @@ export default {
       }
     },
     addOnPaymentDialog: function (val) {
-      console.log('dialog', val);
+      console.log("dialog", val);
       if (!val) {
         this.selectedAddOnPayment = {
           uid: "",
@@ -230,11 +234,12 @@ export default {
         }
       });
 
-      if(_.isPlainObject(data.addOnPayment) && !_.isEmpty(data.addOnPayment)){
-        this.updatePaymentDetails(data.addOnPayment)
+      if (_.isPlainObject(data.addOnPayment) && !_.isEmpty(data.addOnPayment)) {
+        this.updatePaymentDetails(data.addOnPayment);
       }
     },
     updatePaymentDetails(data) {
+      console.log(data);
       var id = data.id;
       var payment = data;
       if (
@@ -252,26 +257,39 @@ export default {
         _.isArray(_.get(payment, ["otherpayments"])) &&
         !_.isEmpty(_.get(payment, ["otherpayments"]))
       ) {
-        payment.otherpayments = _.map(
-          payment.otherpayments,
-          function (otherpayment) {
-            otherpayment.pivot = {
-              price: otherpayment.price,
-            };
-            return otherpayment;
+        payment.otherpayments = _.map(payment.otherpayments, (otherpayment) => {
+          if (otherpayment.name == "Deposit") {
+            if (payment.paid) {
+              console.log(parseFloat(this.data.outstanding_deposit));
+              console.log(parseFloat(otherpayment.pivot.price));
+              this.data.outstanding_deposit =
+                (parseFloat(this.data.outstanding_deposit) || 0) -
+                parseFloat(otherpayment.pivot.price);
+
+              console.log(this.data.outstanding_deposit);
+            } else {
+              this.data.outstanding_deposit =
+                parseFloat(this.data.outstanding_deposit) ||
+                0 + parseFloat(otherpayment.price) ||
+                0;
+            }
           }
-        );
+          otherpayment.pivot = {
+            price: otherpayment.other_charges,
+          };
+          return otherpayment;
+        });
       }
 
-      if(_.some(this.data.payments, ['id', id])){
-        this.data.payments = _.map(this.data.payments, function(item) { 
-         if(item.id == id){
-           return payment;
-         } 
-         return item;
-        })
-      }else{
-        this.data.payments = _.concat(this.data.payments, [data])
+      if (_.some(this.data.payments, ["id", id])) {
+        this.data.payments = _.map(this.data.payments, function (item) {
+          if (item.id == id) {
+            return payment;
+          }
+          return item;
+        });
+      } else {
+        this.data.payments = _.concat(this.data.payments, [data]);
       }
     },
     deleteRoomContract($isConfirmed, $uid) {
@@ -308,6 +326,16 @@ export default {
     },
     deletePaymentDetails(data) {
       var id = data.id;
+      if (
+        _.isArray(_.get(data, ["otherpayments"])) &&
+        !_.isEmpty(_.get(data, ["otherpayments"]))
+      ) {
+        _.forEach(data.otherpayments, (otherpayment) => {
+          if (otherpayment.name == "Deposit") {
+            this.data.outstanding_deposit = 0;
+          }
+        });
+      }
       this.data.payments = this.data.payments.filter(function (item) {
         return item.id != id;
       });
@@ -655,7 +683,7 @@ export default {
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Expired</label>
                   <div class="form-control-plaintext">
-                    <h4>{{ data.expired ? "Yes" : "No" }}</h4>
+                    <h4>{{ isExpired ? "Yes" : "No" }}</h4>
                   </div>
                 </div>
               </v-col>

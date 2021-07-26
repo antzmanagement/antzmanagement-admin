@@ -60,6 +60,12 @@ Route::group(['middleware' => ['auth:api']], function (){
     Route::resource('maintenance', 'API\MaintenanceController');
     Route::get('/filter/maintenance', 'API\MaintenanceController@filter');
 
+    Route::resource('cleaning', 'API\CleaningController');
+    Route::get('/filter/cleaning', 'API\CleaningController@filter');
+
+    Route::resource('roomcheck', 'API\RoomCheckController');
+    Route::get('/filter/roomcheck', 'API\RoomCheckController@filter');
+
     Route::resource('contract', 'API\ContractController');
     Route::get('/filter/contract', 'API\ContractController@filter');
 

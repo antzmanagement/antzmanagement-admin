@@ -24,6 +24,9 @@ import RoomType from './components/Management/RoomTypeManagement/RoomType.vue';
 import AllMaintenance from './components/Management/MaintenanceManagement/AllMaintenance.vue';
 import Maintenance from './components/Management/MaintenanceManagement/Maintenance.vue';
 
+import AllRoomCheck from './components/Management/RoomCheckManagement/AllRoomCheck.vue';
+import RoomCheck from './components/Management/RoomCheckManagement/RoomCheck.vue';
+
 import AllProperty from './components/Management/PropertyManagement/AllProperty.vue';
 import Property from './components/Management/PropertyManagement/Property.vue';
 
@@ -161,6 +164,17 @@ export const routes = [
         path:'/room/:uid',
         component:Room,
         name : 'room',
+    },
+    //Room Check
+    { 
+        path:'/roomchecks',
+        component:AllRoomCheck,
+        name : 'roomchecks',
+    },
+    { 
+        path:'/roomcheck/:uid',
+        component:RoomCheck,
+        name : 'roomcheck',
     },
  
     //Maintenance

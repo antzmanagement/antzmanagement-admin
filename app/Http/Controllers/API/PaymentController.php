@@ -41,6 +41,7 @@ class PaymentController extends Controller
             'penalty' => $request->penalty,
             'paid' => $request->paid,
             'sequence' => $request->sequence,
+            'otherPaymentTitle' => $request->otherPaymentTitle,
             'service_ids' => $request->service_ids,
         ]);
         //Convert To Json Object
@@ -132,10 +133,20 @@ class PaymentController extends Controller
                         $payment->otherpayments->push($data);
                         $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
                     }
-
                 }
             }
         }
+
+        if(collect($payment->otherpayments)->contains('name', 'Deposit')){
+            $roomcontract = $this->getRoomContractById($payment->room_contract_id);
+            if ($this->isEmpty($roomcontract)) {
+                DB::rollBack();
+                return $this->errorResponse();
+            }
+            $roomcontract->outstanding_deposit = $payment->other_charges;
+            $roomcontract = $this->updateRoomContract($roomcontract, $roomcontract);
+        }
+        
         
 
         DB::commit();
@@ -213,13 +224,21 @@ class PaymentController extends Controller
                         $price = $this->toDouble($otherpayment->price);
                         $finalservices[$data->id] = ['status' => true, 'price' => $price];
                     }
-
                 }
             }
             $payment->otherpayments()->sync($finalotherpayments);
         }
         
-
+        if(collect($payment->otherpayments)->contains('name', 'Deposit')){
+            $roomcontract = $this->getRoomContractById($payment->room_contract_id);
+            if ($this->isEmpty($roomcontract)) {
+                DB::rollBack();
+                return $this->errorResponse();
+            }
+            $roomcontract->outstanding_deposit -= $payment->other_charges;
+            $roomcontract = $this->updateRoomContract($roomcontract, $roomcontract);
+        }
+        
         $payment = $this->getPaymentById($payment->id);
         if ($this->isEmpty($payment)) {
             DB::rollBack();
@@ -240,7 +259,18 @@ class PaymentController extends Controller
             DB::rollBack();
             return $this->notFoundResponse('Payment');
         }
+
         $payment = $this->deletePayment($payment);
+        if(collect($payment->otherpayments)->contains('name', 'Deposit')){
+            $roomcontract = $this->getRoomContractById($payment->room_contract_id);
+            if ($this->isEmpty($roomcontract)) {
+                DB::rollBack();
+                return $this->errorResponse();
+            }
+            $roomcontract->outstanding_deposit = 0;
+            $roomcontract = $this->updateRoomContract($roomcontract, $roomcontract);
+        }
+
         if ($this->isEmpty($payment)) {
             DB::rollBack();
             return $this->errorResponse();
@@ -345,7 +375,6 @@ class PaymentController extends Controller
             'receive_from' => $rentalPayment->roomcontract->tenant->name,
             'issue_by' => $request->user()->id,
         ]);
-        error_log(collect($request->otherpayments));
         //Convert To Json Object
         $params = json_decode(json_encode($params));
         $payment = $this->createPayment($params);

@@ -142,21 +142,37 @@ trait RoomContractServices
         }
 
 
-        if ($params->fromdate) {
-            $date = Carbon::parse($params->fromdate);
+        if ($params->startDateFromDate) {
+            $date = Carbon::parse($params->startDateFromDate);
             $data = collect($data);
             $data = $data->filter(function ($item) use ($date) {
                 return Carbon::parse(data_get($item, 'startdate'))->gte($date);
             })->values();
         }
         
-        if ($params->todate) {
-            $date = Carbon::parse($params->todate)->endOfDay();
+        if ($params->startDateToDate) {
+            $date = Carbon::parse($params->startDateToDate)->endOfDay();
             $data = $data->filter(function ($item) use ($date) {
                 return Carbon::parse(data_get($item, 'startdate'))->lte($date);
             })->values();
         }
 
+
+
+        if ($params->endDateFromDate) {
+            $date = Carbon::parse($params->endDateFromDate);
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($date) {
+                return Carbon::parse(data_get($item, 'enddate'))->gte($date);
+            })->values();
+        }
+        
+        if ($params->endDateToDate) {
+            $date = Carbon::parse($params->endDateToDate)->endOfDay();
+            $data = $data->filter(function ($item) use ($date) {
+                return Carbon::parse(data_get($item, 'enddate'))->lte($date);
+            })->values();
+        }
 
 
 
@@ -257,7 +273,6 @@ trait RoomContractServices
         $data->duration = $this->toInt($params->duration);
         $data->latest = $this->toInt($params->latest);
         $data->left = $data->duration - $data->latest;
-        $data->expired = false;
         $data->terms  = $params->terms;
         // $data->autorenew  = $params->autorenew;
         $data->autorenew  = false;
@@ -427,23 +442,36 @@ trait RoomContractServices
         $duration = $data->duration;
         $latest = 0;
         $startdate = $data->startdate;
-        $rental_payment_start_date = $data->rental_payment_start_date;
+        if(!$data->rental_payment_start_date){
+            $rental_payment_start_date = $data->startdate;
+        }else{
+            $rental_payment_start_date = $data->rental_payment_start_date;
+        }
         if($data->rental_type == 'day'){
             if($rental_payment_start_date){
                 $latest = Carbon::parse($startdate)->diffInDays(Carbon::parse($rental_payment_start_date));
             }
         }else{
-            if($rental_payment_start_date){
-                $latest = Carbon::parse($startdate)->diffInMonths(Carbon::parse($rental_payment_start_date));
+            $date1 = Carbon::parse($startdate)->startOfMonth()->tz('Asia/Kuala_Lumpur');
+            $date2 = Carbon::parse($rental_payment_start_date)->startOfMonth()->tz('Asia/Kuala_Lumpur');
+            if($date1->greaterThan($date2)){
+                $date2 = $date1;
+                $data->rental_payment_start_date = $startdate;
+                $latest = $date1->floatDiffInMonths($date2);
+            }else{
+                $latest = $date1->floatDiffInMonths($date2);
             }
         }
+        error_log('$latest');
+        error_log($latest);
         $data->left = $data->duration - $latest - $rentalpayments->count();
         for ($x = $latest; $x < $duration; $x++) {
 
             if($data->rental_type == 'day'){
-                $latestdate = Carbon::parse($startdate)->addDay($latest);
+                $latestdate = Carbon::parse($date1)->addDay($latest);
             }else{
-                $latestdate = Carbon::parse($startdate)->addMonth($latest);
+                $date1 = Carbon::parse($startdate)->startOfMonth()->tz('Asia/Kuala_Lumpur');
+                $latestdate = Carbon::parse($date1)->addMonth($latest);
             }
 
             $isLatest = true;
@@ -460,9 +488,9 @@ trait RoomContractServices
 
             $latest++;
         }
+        error_log($latest);
 
         if ($data->left <= 0) {
-            $data->expired = true;
             // if ($data->autorenew) {
 
             //     $contract = $data->contract;
@@ -522,7 +550,6 @@ trait RoomContractServices
             //     }
             //  }
         }else{
-           $data->expired = false; 
         }
 
 
@@ -668,6 +695,6 @@ trait RoomContractServices
     }
     public function roomContractFilterCols()
     {
-        return ['keyword', 'fromdate', 'todate', 'tenant_id', 'owner_id', 'service_ids', 'room_id', 'checkedout', 'outstanding_deposit', 'sequence'];
+        return ['keyword', 'startDateFromDate', 'startDateToDate', 'endDateFromDate', 'endDateToDate', 'tenant_id', 'owner_id', 'service_ids', 'room_id', 'checkedout', 'outstanding_deposit', 'sequence'];
     }
 }

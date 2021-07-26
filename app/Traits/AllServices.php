@@ -8,6 +8,7 @@ use App\Traits\NotificationFunctions;
 use App\Traits\ImageHostingServices;
 
 //Model Services
+use App\Traits\CleaningServices;
 use App\Traits\ContractServices;
 use App\Traits\OwnerClaimServices;
 use App\Traits\MaintenanceServices;
@@ -17,6 +18,7 @@ use App\Traits\TenantServices;
 use App\Traits\UserServices;
 use App\Traits\UserTypeServices;
 use App\Traits\RentalPaymentServices;
+use App\Traits\RoomCheckServices;
 use App\Traits\RoomContractServices;
 use App\Traits\ReportServices;
 use App\Traits\RoleServices;
@@ -36,11 +38,13 @@ trait AllServices {
     ImageHostingServices,
 
     OwnerClaimServices,
+    CleaningServices,
     ContractServices,
     MaintenanceServices,
     OwnerServices,
     PropertyServices,
     RentalPaymentServices,
+    RoomCheckServices,
     RoomContractServices,
     RoomServices,
     ReportServices,

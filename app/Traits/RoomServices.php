@@ -270,12 +270,9 @@ trait RoomServices
     private function syncRoomStatus($room)
     {
 
-        error_log($room);
         if($room){
             $status = $room->room_status;
             $contracts = $room->roomcontracts()->where('status', true)->where('checkedout', false)->count();
-            error_log('$contracts');
-            error_log($contracts);
             if($contracts > 0){
                 $status = 'occupied';
             }else{

@@ -31,8 +31,20 @@ Vue.component('room-type-sliders', require('./components/RoomPages/RoomTypeSlide
 Vue.component('room-details', require('./components/RoomPages/RoomDetails.vue').default);
 Vue.component('room-type-listing', require('./components/RoomPages/RoomTypeListing.vue').default);
 
+Vue.component('maintenance-table', require('./components/Management/MaintenanceManagement/MaintenanceTable.vue').default);
 Vue.component('maintenance-form', require('./components/Management/MaintenanceManagement/MaintenanceForm.vue').default);
+Vue.component('maintenance-form-1', require('./components/Management/MaintenanceManagement/MaintenanceForm1.vue').default);
 Vue.component('maintenance-filter-dialog', require('./components/Management/MaintenanceManagement/MaintenanceFilterDialog.vue').default);
+Vue.component('maintenance-pay-form', require('./components/Management/MaintenanceManagement/MaintenancePayForm.vue').default);
+Vue.component('print-maintenance-button', require('./components/Management/MaintenanceManagement/PrintMaintenanceButton.vue').default);
+
+
+Vue.component('cleaning-form-1', require('./components/Management/CleaningManagement/CleaningForm1.vue').default);
+Vue.component('cleaning-pay-form', require('./components/Management/CleaningManagement/CleaningPayForm.vue').default);
+Vue.component('print-cleaning-button', require('./components/Management/CleaningManagement/PrintCleaningButton.vue').default);
+
+Vue.component('room-check-form', require('./components/Management/RoomCheckManagement/RoomCheckForm.vue').default);
+Vue.component('room-check-filter-dialog', require('./components/Management/RoomCheckManagement/RoomCheckFilterDialog.vue').default);
 
 Vue.component('property-form', require('./components/Management/PropertyManagement/PropertyForm.vue').default);
 Vue.component('property-filter-form', require('./components/Management/PropertyManagement/PropertyFilterForm.vue').default);

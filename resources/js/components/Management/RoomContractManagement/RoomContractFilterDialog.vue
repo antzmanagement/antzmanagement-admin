@@ -8,7 +8,7 @@ import {
   decimal,
 } from "vuelidate/lib/validators";
 import { mapActions } from "vuex";
-import { _ } from '../../../common/common-function';
+import { _ } from "../../../common/common-function";
 export default {
   props: {
     editMode: {
@@ -42,16 +42,18 @@ export default {
   },
   data() {
     return {
-      fromdatemenu : false,
-      todatemenu : false,
+      startDateFromMenu: false,
+      startDateToMenu: false,
+      endDateFromMenu: false,
+      endDateToMenu: false,
       dialog: false,
-      tenants : [],
-      services : [],
-      owners : [],
-      rooms : [],
+      tenants: [],
+      services: [],
+      owners: [],
+      rooms: [],
       data: new Form({
-        fromdate: null,
-        todate: null,
+        startDateFromDate: null,
+        startDateToDate: null,
         services: [],
         room: "",
         owner: "",
@@ -84,10 +86,10 @@ export default {
 
     Promise.all(promises)
       .then(([tenantRes, serviceRes, roomRes, ownerRes]) => {
-        this.tenants = _.get(tenantRes, ['data']) || [];
-        this.services = _.get(serviceRes, ['data']) || [];
-        this.rooms = _.get(roomRes, ['data']) || [];
-        this.owners = _.get(ownerRes, ['data']) || [];
+        this.tenants = _.get(tenantRes, ["data"]) || [];
+        this.services = _.get(serviceRes, ["data"]) || [];
+        this.rooms = _.get(roomRes, ["data"]) || [];
+        this.owners = _.get(ownerRes, ["data"]) || [];
         this.endLoadingAction();
       })
       .catch((err) => {
@@ -156,74 +158,156 @@ export default {
         <v-container>
           <v-row>
             <v-col cols="6">
-              <div class="d-flex align-center">
-                <span className=" d-inline-block half-width">
-                  <v-menu
-                    ref="menu"
-                    v-model="fromdatemenu"
-                    :close-on-content-click="false"
-                    transition="scale-transition"
-                    offset-y
-                  >
-                    <template v-slot:activator="{ on }">
-                      <v-text-field
-                        v-model="data.fromdate"
-                        label="From Date"
-                        readonly
-                        v-on="on"
-                      ></v-text-field>
-                    </template>
-                    <v-date-picker
-                      v-model="data.fromdate"
-                      no-title
-                      scrollable
-                      :max="data.todate"
-                    ></v-date-picker>
-                  </v-menu>
+              <div>Room Contract Start Date</div>
+              <div class="d-flex justify-start">
+                <span class="d-inline-block mr-5">
+                  <div class="d-flex align-center">
+                    <span class="d-inline-block half-width">
+                      <v-menu
+                        ref="menu"
+                        v-model="startDateFromMenu"
+                        :close-on-content-click="false"
+                        transition="scale-transition"
+                        offset-y
+                      >
+                        <template v-slot:activator="{ on }">
+                          <v-text-field
+                            v-model="data.startDateFromDate"
+                            label="From Date"
+                            readonly
+                            v-on="on"
+                          ></v-text-field>
+                        </template>
+                        <v-date-picker
+                          v-model="data.startDateFromDate"
+                          no-title
+                          scrollable
+                          :max="data.startDateToDate"
+                        ></v-date-picker>
+                      </v-menu>
+                    </span>
+                    <span class="d-inline-block">
+                      <v-icon
+                        class="btn"
+                        v-if="data.startDateFromDate"
+                        @click="data.startDateFromDate = ''"
+                        >mdi-close</v-icon
+                      >
+                    </span>
+                  </div>
                 </span>
-                <span className="d-inline-block">
-                  <v-icon
-                    class="btn"
-                    v-if="data.fromdate"
-                    @click="data.fromdate = ''"
-                    >mdi-close</v-icon
-                  >
+                <span class="d-inline-block">
+                  <div class="d-flex align-center">
+                    <span class="d-inline-block half-width">
+                      <v-menu
+                        ref="menu"
+                        v-model="startDateToMenu"
+                        :close-on-content-click="false"
+                        transition="scale-transition"
+                        offset-y
+                      >
+                        <template v-slot:activator="{ on }">
+                          <v-text-field
+                            v-model="data.startDateToDate"
+                            label="To Date"
+                            readonly
+                            v-on="on"
+                          ></v-text-field>
+                        </template>
+                        <v-date-picker
+                          v-model="data.startDateToDate"
+                          no-title
+                          scrollable
+                          :min="data.startDateFromDate"
+                        ></v-date-picker>
+                      </v-menu>
+                    </span>
+                    <span class="d-inline-block">
+                      <v-icon
+                        class="btn"
+                        v-if="data.startDateToDate"
+                        @click="data.startDateToDate = ''"
+                        >mdi-close</v-icon
+                      >
+                    </span>
+                  </div>
                 </span>
               </div>
             </v-col>
             <v-col cols="6">
-              <div class="d-flex align-center">
-                <span className=" d-inline-block half-width">
-                  <v-menu
-                    ref="menu"
-                    v-model="todatemenu"
-                    :close-on-content-click="false"
-                    transition="scale-transition"
-                    offset-y
-                  >
-                    <template v-slot:activator="{ on }">
-                      <v-text-field
-                        v-model="data.todate"
-                        label="To Date"
-                        readonly
-                        v-on="on"
-                      ></v-text-field>
-                    </template>
-                    <v-date-picker
-                      v-model="data.todate"
-                      no-title
-                      scrollable
-                      :min="data.fromdate"
-                    ></v-date-picker>
-                  </v-menu>
+              <div>Room Contract End Date</div>
+              <div class="d-flex justify-start">
+                <span class="d-inline-block mr-5">
+                  <div class="d-flex align-center">
+                    <span class="d-inline-block half-width">
+                      <v-menu
+                        ref="menu"
+                        v-model="endDateFromMenu"
+                        :close-on-content-click="false"
+                        transition="scale-transition"
+                        offset-y
+                      >
+                        <template v-slot:activator="{ on }">
+                          <v-text-field
+                            v-model="data.endDateFromDate"
+                            label="From Date"
+                            readonly
+                            v-on="on"
+                          ></v-text-field>
+                        </template>
+                        <v-date-picker
+                          v-model="data.endDateFromDate"
+                          no-title
+                          scrollable
+                          :max="data.endDateToDate"
+                        ></v-date-picker>
+                      </v-menu>
+                    </span>
+                    <span class="d-inline-block">
+                      <v-icon
+                        class="btn"
+                        v-if="data.endDateFromDate"
+                        @click="data.endDateFromDate = ''"
+                        >mdi-close</v-icon
+                      >
+                    </span>
+                  </div>
                 </span>
-                <span className="d-inline-block">
-                  <v-icon
-                    class="btn"
-                    v-if="data.todate"
-                    @click="data.todate = ''"
-                    >mdi-close</v-icon
-                  >
+                <span class="d-inline-block">
+                  <div class="d-flex align-center">
+                    <span class="d-inline-block half-width">
+                      <v-menu
+                        ref="menu"
+                        v-model="endDateToMenu"
+                        :close-on-content-click="false"
+                        transition="scale-transition"
+                        offset-y
+                      >
+                        <template v-slot:activator="{ on }">
+                          <v-text-field
+                            v-model="data.endDateToDate"
+                            label="To Date"
+                            readonly
+                            v-on="on"
+                          ></v-text-field>
+                        </template>
+                        <v-date-picker
+                          v-model="data.endDateToDate"
+                          no-title
+                          scrollable
+                          :min="data.endDateFromDate"
+                        ></v-date-picker>
+                      </v-menu>
+                    </span>
+                    <span class="d-inline-block">
+                      <v-icon
+                        class="btn"
+                        v-if="data.endDateToDate"
+                        @click="data.endDateToDate = ''"
+                        >mdi-close</v-icon
+                      >
+                    </span>
+                  </div>
                 </span>
               </div>
             </v-col>
@@ -235,18 +319,14 @@ export default {
               ></v-text-field>
             </v-col>
             <v-col cols="6">
-              <div>
-               Checked out 
-              </div>
+              <div>Checked out</div>
               <v-radio-group v-model="data.checkedout" row>
                 <v-radio label="Yes" :value="1"></v-radio>
                 <v-radio label="No" :value="0"></v-radio>
               </v-radio-group>
             </v-col>
             <v-col cols="6">
-              <div>
-               Outstanding Deposit 
-              </div>
+              <div>Outstanding Deposit</div>
               <v-radio-group v-model="data.outstanding_deposit" row>
                 <v-radio label="Yes" :value="1"></v-radio>
                 <v-radio label="No" :value="0"></v-radio>
@@ -255,7 +335,7 @@ export default {
             <v-col cols="12">
               <v-autocomplete
                 v-model="data.tenant"
-                :item-text="item => helpers.capitalizeFirstLetter(item.name)"
+                :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
                 :items="tenants || []"
                 label="Tenant"
                 chips
@@ -266,7 +346,7 @@ export default {
             <v-col cols="12">
               <v-autocomplete
                 v-model="data.room"
-                :item-text="item => helpers.capitalizeFirstLetter(item.name)"
+                :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
                 :items="rooms || []"
                 label="Room"
                 chips
@@ -277,7 +357,7 @@ export default {
             <v-col cols="12">
               <v-autocomplete
                 v-model="data.owner"
-                :item-text="item => helpers.capitalizeFirstLetter(item.name)"
+                :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
                 :items="owners || []"
                 label="Owner"
                 chips
@@ -288,7 +368,7 @@ export default {
             <v-col cols="12">
               <v-autocomplete
                 v-model="data.services"
-                :item-text="item => helpers.capitalizeFirstLetter(item.name)"
+                :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
                 :items="services || []"
                 label="Service"
                 chips

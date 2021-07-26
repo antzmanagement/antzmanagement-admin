@@ -226,6 +226,13 @@ export default {
                 v-model="data.sequence"
               ></v-text-field>
             </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="Other Payment Title"
+                :maxlength="300"
+                v-model="data.otherPaymentTitle"
+              ></v-text-field>
+            </v-col>
           </v-row>
           <v-row>
             <v-col cols="12">
@@ -261,6 +268,13 @@ export default {
                 deletable-chips
                 :return-object="true"
               ></v-autocomplete>
+            </v-col>
+            <v-col cols="6">
+              <div>Paid Status</div>
+              <v-radio-group v-model="data.paid" row>
+                <v-radio label="Paid" :value="1"></v-radio>
+                <v-radio label="Unpaid" :value="0"></v-radio>
+              </v-radio-group>
             </v-col>
           </v-row>
         </v-container>

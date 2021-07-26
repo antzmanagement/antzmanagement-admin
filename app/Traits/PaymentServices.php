@@ -102,6 +102,31 @@ trait PaymentServices
                 return $existed;
             })->values();
         }
+        
+        if (property_exists($params, 'paid') && $params->paid != null) {
+            error_log('$check paid');
+            $paid = $params->paid;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($paid) {
+                return $item->paid == $paid;
+            })->values();
+        }
+
+        if($params->otherPaymentTitle){
+            $keyword = $params->otherPaymentTitle;
+            $data = $data->filter(function ($item) use($keyword) {
+                $otherpayments = collect($item->otherpayments);
+                $existed = false;
+                foreach($otherpayments as $otherpayment){
+                    if ( stristr($otherpayment->name, $keyword) == TRUE) {
+                        $existed = true;
+                        break;
+                    }
+                }
+                return $existed;
+            })->values();
+        }
+
         $data = $data->unique('id');
 
         return $data;
@@ -253,6 +278,6 @@ trait PaymentServices
     }
     public function paymentFilterCols()
     {
-        return ['fromdate', 'todate', 'tenant_id', 'room_id', 'sequence', 'service_ids'];
+        return ['fromdate', 'todate', 'tenant_id', 'room_id', 'sequence', 'service_ids', 'otherPaymentTitle'];
     }
 }

@@ -6,8 +6,8 @@ export default {
       type: Object,
       default: () => ({
         persistent: false,
-        maxWidth: "600px"
-      })
+        maxWidth: "600px",
+      }),
     },
     activatorStyle: {
       type: Object,
@@ -18,24 +18,24 @@ export default {
         text: "Are you sure?",
         icon: "",
         isIcon: false,
-        smallIcon: false
-      })
+        smallIcon: false,
+      }),
     },
 
     titleStyle: {
       type: Object,
       default: () => ({
         text: "Are you sure?",
-        class: "ma-1"
-      })
+        class: "ma-1",
+      }),
     },
 
     contentStyle: {
       type: Object,
       default: () => ({
         text: "This action will not be able to undo. Do you want to continue?",
-        class: ""
-      })
+        class: "",
+      }),
     },
 
     yesButtonStyle: {
@@ -45,8 +45,8 @@ export default {
         color: "green darken-1",
         class: "",
         text: "Yes",
-        icon: ""
-      })
+        icon: "",
+      }),
     },
 
     noButtonStyle: {
@@ -56,55 +56,63 @@ export default {
         color: "red darken-1",
         class: "",
         text: "No",
-        icon: ""
-      })
-    }
+        icon: "",
+      }),
+    },
   },
   data() {
     return {
-      dialog: false
+      dialog: false,
     };
   },
 
   computed: {
     isLoading() {
       return this.$store.getters.isLoading;
-    }
+    },
   },
   created() {},
   methods: {
     clicked($isConfirmed) {
       this.$emit("confirmed", $isConfirmed);
       this.dialog = false;
-    }
-  }
+    },
+  },
 };
 </script>
 
 <template>
-  <v-dialog v-model="dialog" :persistent="dialogStyle.persistent" :max-width="dialogStyle.maxWidth">
+  <v-dialog
+    v-model="dialog"
+    :persistent="dialogStyle.persistent"
+    :max-width="dialogStyle.maxWidth"
+  >
     <template v-slot:activator="{ on }">
-      <v-btn
-        :class="activatorStyle.class"
-        tile
-        :color="activatorStyle.color"
-        :block="activatorStyle.block"
-        v-on="on"
-        :icon="activatorStyle.isIcon"
-        :disabled="isLoading"
-      >
-        <v-icon left :small="activatorStyle.smallIcon">{{activatorStyle.icon}}</v-icon>
-        {{activatorStyle.text}}
-      </v-btn>
+      <slot :on="on">
+        <v-btn
+          :class="activatorStyle.class"
+          tile
+          :color="activatorStyle.color"
+          :block="activatorStyle.block"
+          v-on="on"
+          :icon="activatorStyle.isIcon"
+          :disabled="isLoading"
+        >
+          <v-icon left :small="activatorStyle.smallIcon">{{
+            activatorStyle.icon
+          }}</v-icon>
+          {{ activatorStyle.text }}
+        </v-btn>
+      </slot>
     </template>
 
     <v-card>
       <v-card-title :class="titleStyle.class">
-        <slot name="header">{{titleStyle.text}}</slot>
+        <slot name="header">{{ titleStyle.text }}</slot>
       </v-card-title>
 
       <v-card-text :class="contentStyle.class">
-        <slot name="body">{{contentStyle.text}}</slot>
+        <slot name="body">{{ contentStyle.text }}</slot>
       </v-card-text>
 
       <v-card-actions>
@@ -118,8 +126,8 @@ export default {
             :disabled="isLoading"
             @click="clicked(true)"
           >
-            <v-icon left>{{yesButtonStyle.icon}}</v-icon>
-            {{yesButtonStyle.text}}
+            <v-icon left>{{ yesButtonStyle.icon }}</v-icon>
+            {{ yesButtonStyle.text }}
           </v-btn>
           <v-btn
             :class="noButtonStyle.class"
@@ -129,8 +137,8 @@ export default {
             :disabled="isLoading"
             @click="clicked(false)"
           >
-            <v-icon left>{{noButtonStyle.icon}}</v-icon>
-            {{noButtonStyle.text}}
+            <v-icon left>{{ noButtonStyle.icon }}</v-icon>
+            {{ noButtonStyle.text }}
           </v-btn>
         </slot>
       </v-card-actions>

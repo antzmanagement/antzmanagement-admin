@@ -86,7 +86,7 @@ class RentalPaymentController extends Controller
             return $this->errorResponse();
         }
 
-        if ($roomContract->left > 0 && !$roomContract->expired ) {
+        if ($roomContract->left > 0 ) {
 
             $room = $roomContract->room;
             if ($this->isEmpty($room)) {

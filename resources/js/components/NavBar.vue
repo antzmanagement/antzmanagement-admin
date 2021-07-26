@@ -61,6 +61,12 @@ export default {
         module: "room",
       },
       {
+        icon: "mdi-map-search-outline",
+        text: "Room Check",
+        name: "roomchecks",
+        module: "roomCheck",
+      },
+      {
         icon: "mdi-bank-plus",
         text: "Room Contract",
         name: "roomcontracts",

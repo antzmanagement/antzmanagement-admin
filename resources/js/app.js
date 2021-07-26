@@ -41,8 +41,9 @@ import JsonExcel from 'vue-json-excel'
 import VueHtmlToPaper from 'vue-html-to-paper';
 import VueLodash from 'vue-lodash'
 import lodash from 'lodash'
-import Cloudinary,{ CldImage, CldTransformation } from "cloudinary-vue";
+import Cloudinary, { CldImage, CldTransformation } from "cloudinary-vue";
 import { _ } from './common/common-function';
+import moment from 'moment';
 
 const options = {
   name: '_blank',
@@ -59,7 +60,7 @@ const options = {
 }
 
 Vue.use(VueHtmlToPaper, options);
- 
+
 Vue.component('download-excel', JsonExcel)
 Vue.use(VueApexCharts)
 Vue.component('apexchart', VueApexCharts)
@@ -105,31 +106,31 @@ window.Form = Form;
 
 //Register Routes
 const router = new VueRouter({
-    routes,
-    mode: 'hash',
+  routes,
+  mode: 'hash',
 
 })
 
 
 
 Vue.mixin({
-    data: function () {
-        return {
-            hi: "hi",
-            helpers,
-            _ : _,
-            role : '',
-        }
-    },
+  data: function () {
+    return {
+      hi: "hi",
+      helpers,
+      _: _,
+      role: '',
+    }
+  },
 })
 
 const app = new Vue({
-    el: '#app',
-    vuetify: Vuetify,
-    router,
-    store,
-    icons: {
-        iconfont: 'md' || 'fa'
-    },
+  el: '#app',
+  vuetify: Vuetify,
+  router,
+  store,
+  icons: {
+    iconfont: 'md' || 'fa'
+  },
 
 });

@@ -71,8 +71,8 @@ class MaintenanceController extends Controller
         $this->validate($request, [
             'remark' => 'nullable|string',
             'price' => 'required|numeric|min:0',
-            'room' => 'required',
-            'property' => 'required',
+            'room_id' => 'required',
+            'property_id' => 'required',
             'maintenance_status' => 'required',
             'maintenance_type' => 'required',
         ]);
@@ -81,9 +81,9 @@ class MaintenanceController extends Controller
         $params = collect([
             'remark' => $request->remark,
             'price' => $request->price,
-            'room_id' => $request->room,
-            'property_id' => $request->property,
-            'owner_id' => $request->owner,
+            'room_id' => $request->room_id,
+            'property_id' => $request->property_id,
+            'owner_id' => $request->owner_id,
             'maintenance_status' => $request->maintenance_status,
             'maintenance_type' => $request->maintenance_type,
             'claim_by_owner' => $request->claim_by_owner,
@@ -95,9 +95,6 @@ class MaintenanceController extends Controller
             DB::rollBack();
             return $this->errorResponse();
         }
-
-
-        error_log($maintenance);
 
         DB::commit();
         return $this->successResponse('Maintenance', $maintenance, 'create');
@@ -112,8 +109,8 @@ class MaintenanceController extends Controller
         $this->validate($request, [
             'remark' => 'nullable|string',
             'price' => 'required|numeric|min:0',
-            'room' => 'required',
-            'property' => 'required',
+            'room_id' => 'required',
+            'property_id' => 'required',
             'maintenance_status' => 'required',
             'maintenance_type' => 'required',
         ]);
@@ -122,25 +119,22 @@ class MaintenanceController extends Controller
             DB::rollBack();
             return $this->notFoundResponse('Maintenance');
         }
-        $params = collect([
-            'remark' => $request->remark,
-            'price' => $request->price,
-            'room_id' => $request->room,
-            'property_id' => $request->property,
-            'owner_id' => $request->owner,
-            'maintenance_status' => $request->maintenance_status,
-            'maintenance_type' => $request->maintenance_type,
-            'claim_by_owner' => $request->claim_by_owner,
-        ]);
-        //Convert To Json Object
-        $params = json_decode(json_encode($params));
-        $maintenance = $this->updateMaintenance($maintenance, $params);
+        if($maintenance->claim_by_tenant && $request->paid){
+            $request->receive_from = $maintenance->tenant->name;
+            $request->issue_by = $request->user()->id;
+        }else if($maintenance->claim_by_owner && $request->paid){
+            $request->receive_from = $maintenance->owner->name;
+            $request->issue_by = $request->user()->id;
+        }else if(!$maintenance->claim_by_owner && !$maintenance->claim_by_tenant){
+            $request->issue_by = $request->user()->id;
+            $request->paid = true;
+        }
+        $maintenance = $this->updateMaintenance($maintenance, $request);
 
         if ($this->isEmpty($maintenance)) {
             DB::rollBack();
             return $this->errorResponse();
         }
-
         DB::commit();
         return $this->successResponse('Maintenance', $maintenance, 'update');
     }

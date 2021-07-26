@@ -73,7 +73,7 @@ export default {
           width: "150px",
         },
         {
-          text: "Booking Fees",
+          text: "Partial Payment (Deposit)",
           width: "150px",
         },
         {
@@ -210,6 +210,53 @@ export default {
 
         if (this.roomId) {
           this.data.room.push(this.roomId);
+        }
+
+        if (this.editMode && this.uid) {
+          this.showLoadingAction();
+          this.getRoomContractAction({ uid: this.uid })
+            .then((data) => {
+              if (
+                _.isPlainObject(data.data.parentroomcontract) &&
+                !_.isEmpty(data.data.parentroomcontract)
+              ) {
+                this.isSubContract = true;
+              }
+              data.data.tenant = data.data.tenant.id;
+              data.data.room.origServices = data.data.origservices;
+              data.data.room.services = this._.concat(
+                data.data.origservices,
+                data.data.addonservices
+              );
+              data.data.room.contract_id = data.data.contract.id;
+              data.data.autorenew = data.data.autorenew;
+
+              data.data.room.deposit = parseFloat(data.data.deposit);
+              data.data.room.agreement_fees = parseFloat(
+                data.data.agreement_fees
+              );
+              data.data.room.booking_fees = parseFloat(data.data.booking_fees) || 0;
+              data.data.room.outstanding_deposit = parseFloat(
+                data.data.outstanding_deposit
+              )|| 0;
+              data.data.room.origPrice = parseFloat(data.data.room.price);
+              data.data.room.price = parseFloat(data.data.rental);
+              data.data.room.startdate = data.data.startdate;
+              data.data.room.enddate = data.data.enddate;
+              data.data.room.rental_payment_start_date =
+                data.data.rental_payment_start_date;
+              data.data.room.autorenew = data.data.autorenew;
+              this.data = new Form(data.data);
+
+              this.endLoadingAction();
+            })
+            .catch((error) => {
+              Toast.fire({
+                icon: "warning",
+                title: "Something went wrong... ",
+              });
+              this.endLoadingAction();
+            });
         }
       }
     },
@@ -569,6 +616,9 @@ export default {
         outstanding_deposit,
       };
     },
+    console(){
+      console.log(this.data.room);
+    }
   },
 };
 </script>
@@ -750,10 +800,11 @@ export default {
                           type="number"
                           step="0.01"
                           :error-messages="
-                            helpers.isEmpty(props.item.outstanding_deposit)
+                            (props.item.outstanding_deposit == null || props.item.outstanding_deposit == '') && props.item.outstanding_deposit != 0
                               ? 'Outstanding deposit is required'
                               : ''
                           "
+                          @change="console"
                         ></v-text-field>
                       </td>
                       <td class="text-truncate">

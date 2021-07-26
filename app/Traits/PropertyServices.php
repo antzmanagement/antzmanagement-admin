@@ -68,6 +68,7 @@ trait PropertyServices
         $data->name  = $params->name;
         $data->text = $params->text;
         $data->desc = $params->desc;
+        $data->category = $params->category;
         $data->price = $this->toDouble($params->price);
 
         if (!$this->saveModel($data)) {
@@ -85,6 +86,7 @@ trait PropertyServices
         $data->name  = $params->name;
         $data->text = $params->text;
         $data->desc = $params->desc;
+        $data->category = $params->category;
         $data->price = $this->toDouble($params->price);
 
         if (!$this->saveModel($data)) {
@@ -97,7 +99,6 @@ trait PropertyServices
     private function deleteProperty($data)
     {
 
-        $data->propertyTypes()->detach();
         $data->status = false;
         if ($this->saveModel($data)) {
             return $data->refresh();
@@ -114,7 +115,7 @@ trait PropertyServices
     public function propertyAllCols()
     {
 
-        return ['id', 'uid', 'name', 'address', 'postcode', 'state', 'city', 'country', 'price', 'status'];
+        return ['id', 'uid', 'name', 'address', 'postcode', 'state', 'city', 'country', 'price', 'status', 'desc', 'category'];
     }
 
     public function propertyDefaultCols()

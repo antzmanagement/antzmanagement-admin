@@ -32,6 +32,11 @@ class Room extends Model
         return $this->hasMany('App\RoomContract');
     }
 
+    public function roomchecks()
+    {
+        return $this->hasMany('App\RoomCheck');
+    }
+
     public function properties()
     {
         return $this->belongsToMany('App\Property','rooms_properties', 'room_id', 'property_id')->withPivot('remark','status','created_at','updated_at');

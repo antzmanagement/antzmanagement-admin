@@ -199,11 +199,17 @@ export default {
           _.map(filterGroup.services, "id") || [];
         this.roomContractFilterGroup.services = filterGroup.services;
       }
-      if (filterGroup.fromdate) {
-        this.roomContractFilterGroup.fromdate = filterGroup.fromdate;
+      if (filterGroup.startDateFromDate) {
+        this.roomContractFilterGroup.startDateFromDate = filterGroup.startDateFromDate;
       }
-      if (filterGroup.todate) {
-        this.roomContractFilterGroup.todate = filterGroup.todate;
+      if (filterGroup.startDateToDate) {
+        this.roomContractFilterGroup.startDateToDate = filterGroup.startDateToDate;
+      }
+      if (filterGroup.endDateFromDate) {
+        this.roomContractFilterGroup.endDateFromDate = filterGroup.endDateFromDate;
+      }
+      if (filterGroup.endDateToDate) {
+        this.roomContractFilterGroup.endDateToDate = filterGroup.endDateToDate;
       }
       if (filterGroup.sequence) {
         this.roomContractFilterGroup.sequence = filterGroup.sequence;

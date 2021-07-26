@@ -12,6 +12,11 @@ class Maintenance extends Model
         return $this->belongsTo('App\Room');
     }
 
+    public function roomcheck()
+    {
+        return $this->belongsTo('App\RoomCheck', 'room_check_id');
+    }
+
     public function property()
     {
         return $this->belongsTo('App\Property');
@@ -22,8 +27,19 @@ class Maintenance extends Model
         return $this->belongsTo('App\User');
     }
 
+    public function tenant()
+    {
+        return $this->belongsTo('App\User');
+    }
+
     public function claim()
     {
         return $this->belongsTo('App\Claim');
     }
+
+    public function issueby()
+    {
+        return $this->belongsTo('App\User', 'issueby');
+    }
+
 }

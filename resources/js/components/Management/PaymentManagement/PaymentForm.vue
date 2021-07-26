@@ -39,7 +39,6 @@ export default {
       otherPaymentDialog: false,
       penaltyRate: 3,
       otherpayments: [],
-      expiredDays: 9,
       origPrice: 0,
       data: new Form({
         price: 0,
@@ -61,18 +60,18 @@ export default {
     };
   },
   watch: {
-    uid: function (val) {
+    uid: (val) => {
       if (val) {
         this.getPayment();
       } else {
         this.data.reset();
       }
     },
-    resetIndicator: function (val) {
+    resetIndicator: (val) => {
       if (val) {
-      console.log('reset');
+        console.log("reset");
         this.data.reset();
-        this.otherpayments = []
+        this.otherpayments = [];
       }
     },
   },
@@ -120,7 +119,7 @@ export default {
               }
             );
           }
-          if(!this.data.paymentmethod){
+          if (!this.data.paymentmethod) {
             this.data.paymentmethod = this.paymentMethods[0];
             this.updateProcessingFees();
           }

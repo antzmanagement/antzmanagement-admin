@@ -49,15 +49,12 @@ export default {
       },
       headers: [
         {
-          text: "id",
-        },
-        {
           text: "Unit No",
         },
         {
           text: "Property",
         },
-        { text: "Repair Type" },
+        { text: "Maintenance Type" },
         { text: "Maintenance Status" },
         { text: "Price (RM)" },
         { text: "Claimed By" },
@@ -108,7 +105,6 @@ export default {
       deep: true,
     },
     totalDataLength(v) {
-      console.log(v);
       if (v > 0) {
         this.fetchExcelData();
       }
@@ -170,7 +166,6 @@ export default {
         this.maintenanceFilterGroup.maintenance_type =
           filterGroup.maintenance_type;
       }
-      console.log(this.maintenanceFilterGroup);
       this.options.page = 1;
       this.getMaintenances();
     },
@@ -216,7 +211,6 @@ export default {
       let promises = [];
       let self = this;
       _.forEach(_.range(maxPage), function (index) {
-        console.log(index);
         promises.push(
           self.filterMaintenancesAction({
             pageSize: size,
@@ -226,14 +220,12 @@ export default {
       });
 
       let responses = await Promise.all(promises);
-      console.log(responses);
       let finalData = [];
       _.forEach(responses, function (response) {
         finalData = _.compact(
           _.concat(finalData, _.get(response, `data`) || [])
         );
       });
-      console.log(finalData);
       this.excelData = finalData;
       return finalData;
     },
@@ -375,9 +367,8 @@ export default {
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showMaintenance(props.item)">
-                    <td class="text-truncate">{{ props.item.id }}</td>
-                    <td class="text-truncate">{{ props.item.room.name }}</td>
-                    <td class="text-truncate">{{ props.item.property.name }}</td>
+                    <td class="text-truncate">{{ _.get(props.item , `room.name`) || 'N/A' }}</td>
+                    <td class="text-truncate">{{ _.get(props.item , `property.text`) || 'N/A' }}</td>
                     <td class="text-truncate">{{ props.item.maintenance_type }}</td>
                     <td class="text-truncate">{{ props.item.maintenance_status }}</td>
                     <td class="text-truncate">{{ props.item.price }}</td>

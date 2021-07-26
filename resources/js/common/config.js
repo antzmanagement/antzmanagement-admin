@@ -5,7 +5,7 @@ export let commonConfig = {
     client_id : "2",
     //develop
     // API_URL: 'http://localhost:8000/api',
-    // client_secret : "UHDIwCfH3efYLfpoPp3mBHPX0Y8PKvu7OJ9Josvl",
+    // client_secret : "howZyDft28J7tckn7EEqLFlmr2vaBHzSzk75XxyV",
     google_maps_api_key : "8WnW78jHuT0ZynxzuOa5BA32Sc0hKaZIRqZ2cxDm",
     cloudinary_cloud_name : "dwslzbgaa",
 };

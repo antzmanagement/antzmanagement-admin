@@ -20,6 +20,7 @@ class Kernel extends ConsoleKernel
         Commands\PatchRoomContractDuration::class,
         Commands\DeleteRoomContractWithoutTenant::class,
         Commands\DeletePaymentWithoutRoomContract::class,
+        Commands\UpdatePropertyList::class,
         //
     ];
 

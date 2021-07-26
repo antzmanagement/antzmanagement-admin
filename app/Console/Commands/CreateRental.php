@@ -44,10 +44,10 @@ class CreateRental extends Command
     public function handle()
     {
         DB::beginTransaction();
-        $roomContracts = RoomContract::where('status', true)->where('expired', false)->get();
+        $roomContracts = RoomContract::where('status', true)->get();
 
         foreach ($roomContracts as $roomContract) {
-            if ($roomContract->left > 0 && !$roomContract->expired) {
+            if ($roomContract->left > 0 ) {
 
                 $room = $roomContract->room;
                 if ($this->isEmpty($room)) {
