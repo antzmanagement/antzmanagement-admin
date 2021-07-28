@@ -103,17 +103,12 @@ export default {
     }),
     initRoomCheckFilter(filterGroup) {
       this.roomCheckFilterGroup.reset();
-      if (filterGroup.owner) {
-        this.roomCheckFilterGroup.owner_id = filterGroup.owner.id;
-        this.roomCheckFilterGroup.owner = filterGroup.owner;
-      }
-      if (filterGroup.room) {
+      if (_.get(filterGroup , `room.id`)) {
         this.roomCheckFilterGroup.room_id = filterGroup.room.id;
         this.roomCheckFilterGroup.room = filterGroup.room;
       }
-      if (filterGroup.property) {
-        this.roomCheckFilterGroup.property_id = filterGroup.property.id;
-        this.roomCheckFilterGroup.property = filterGroup.property;
+      if (filterGroup.category) {
+        this.roomCheckFilterGroup.category = filterGroup.category;
       }
       if (filterGroup.fromdate) {
         this.roomCheckFilterGroup.fromdate = filterGroup.fromdate;
@@ -141,7 +136,10 @@ export default {
         this.roomCheckFilterGroup.pageSize = itemsPerPage;
       }
 
-      this.filterRoomChecksAction(this.roomCheckFilterGroup)
+      let filterGroup = _.cloneDeep(this.roomCheckFilterGroup);
+      delete filterGroup.room;
+
+      this.filterRoomChecksAction(filterGroup)
         .then((data) => {
           if (data.data) {
             this.data = data.data;
@@ -204,11 +202,7 @@ export default {
           <v-col
             cols="12"
             v-if="
-              helpers.isAccessible(
-                _.get(role, ['name']),
-                'roomCheck',
-                'create'
-              )
+              helpers.isAccessible(_.get(role, ['name']), 'roomCheck', 'create')
             "
           >
             <room-check-form
@@ -224,11 +218,7 @@ export default {
           align="center"
           class="ma-3"
           v-if="
-            helpers.isAccessible(
-              _.get(role, ['name']),
-              'roomCheck',
-              'read'
-            )
+            helpers.isAccessible(_.get(role, ['name']), 'roomCheck', 'read')
           "
         >
           <v-col cols="12">
@@ -241,13 +231,40 @@ export default {
                 :loading="loading"
                 disable-sort
               >
+                <template v-slot:top>
+                  <v-toolbar flat class="mb-5">
+                    <room-check-filter-dialog
+                      :buttonStyle="roomCheckFilterDialogConfig.buttonStyle"
+                      :dialogStyle="roomCheckFilterDialogConfig.dialogStyle"
+                      @submitFilter="initRoomCheckFilter($event)"
+                    ></room-check-filter-dialog>
+                  </v-toolbar>
+                  <!-- <v-toolbar
+                    flat
+                    class="mb-5 justify-end d-flex"
+                    v-if="_.isArray(excelData) && !_.isEmpty(excelData)"
+                  >
+                    <download-excel
+                      :header="`All_Room_${moment().format('YYYY_MM_DD')}`"
+                      :name="`All_Room_${moment().format('YYYY_MM_DD')}.csv`"
+                      type="csv"
+                      :fields="excelFields || {}"
+                      :data="excelData || []"
+                      ><v-btn text color="primary"
+                        >Download as Excel</v-btn
+                      ></download-excel
+                    >
+                  </v-toolbar> -->
+                </template>
                 <template v-slot:item="props">
-                  <tr @click="showRoomCheck(props.item)"> 
+                  <tr @click="showRoomCheck(props.item)">
                     <td class="text-truncate">
                       {{ _.get(props.item, ["room", "name"]) || "N/A" }}
-                    </td> <td class="text-truncate">
+                    </td>
+                    <td class="text-truncate">
                       {{ _.get(props.item, ["checked_date"]) || "N/A" }}
-                    </td> <td class="text-truncate">
+                    </td>
+                    <td class="text-truncate">
                       {{ _.get(props.item, ["category"]) || "N/A" }}
                     </td>
                   </tr>

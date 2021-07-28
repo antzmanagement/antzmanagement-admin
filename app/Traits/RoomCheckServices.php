@@ -63,6 +63,30 @@ trait RoomCheckServices
             })->values();
         }
 
+        if ($params->category) {
+            $category = $params->category;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($category) {
+                return $item->category== $category;
+            })->values();
+        }
+
+        if ($params->fromdate) {
+            $date = Carbon::parse($params->fromdate);
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($date) {
+                return Carbon::parse(data_get($item, 'checked_date'))->gte($date);
+            })->values();
+        }
+        
+        if ($params->todate) {
+            $date = Carbon::parse($params->todate)->endOfDay();
+            $data = $data->filter(function ($item) use ($date) {
+                return Carbon::parse(data_get($item, 'checked_date'))->lte($date);
+            })->values();
+        }
+
+
         $data = $data->unique('id')->sortBy(function ($item, $key) {
             return $item->checked_date;
         })->flatten(1);
@@ -242,6 +266,6 @@ trait RoomCheckServices
     }
     public function roomCheckFilterCols()
     {
-        return ['keyword', 'startDateFromDate', 'startDateToDate', 'endDateFromDate', 'endDateToDate', 'tenant_id', 'owner_id', 'service_ids', 'room_id', 'checkedout', 'outstanding_deposit', 'sequence'];
+        return ['fromdate', 'todate', 'category', 'room_id'];
     }
 }

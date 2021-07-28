@@ -1077,9 +1077,21 @@ export const accessRule = {
         all: false,
         nav: false,
     },
-    modify: {
-        all: true,
+    edit: {
+        all: false,
         nav: true,
+        read: true,
+        create: false,
+        edit: true,
+        delete: false,
+    },
+    modify: {
+        all: false,
+        nav: true,
+        read: true,
+        create: true,
+        edit: true,
+        delete: false,
     },
     view: {
         all: false,
@@ -1105,54 +1117,203 @@ export const accessRule = {
         edit: false,
         delete: false,
         makePayment: true,
+        printReceipt: true,
     },
 }
 
 export const roleAccess = {
     superadmin: {
         modules: {
-            management: {
-                ...(_.get(accessRule, `modify`) || {})
+            dashboard: {
+                ...(_.get(accessRule, `all`) || {})
             },
             staff: {
-                ...(_.get(accessRule, `modify`) || {})
+                ...(_.get(accessRule, `all`) || {})
             },
             owner: {
-                ...(_.get(accessRule, `modify`) || {})
+                ...(_.get(accessRule, `all`) || {})
             },
             tenant: {
-                ...(_.get(accessRule, `modify`) || {})
+                ...(_.get(accessRule, `all`) || {})
             },
             roomType: {
-                ...(_.get(accessRule, `modify`) || {})
+                ...(_.get(accessRule, `all`) || {})
             },
             service: {
-                ...(_.get(accessRule, `modify`) || {})
+                ...(_.get(accessRule, `all`) || {})
             },
             room: {
-                ...(_.get(accessRule, `modify`) || {})
+                ...(_.get(accessRule, `all`) || {})
             },
             roomContract: {
-                ...(_.get(accessRule, `modify`) || {})
+                ...(_.get(accessRule, `all`) || {})
             },
             rentalPayment: {
-                ...(_.get(accessRule, `modify`) || {})
+                ...(_.get(accessRule, `all`) || {})
             },
             roomMaintenance: {
-                ...(_.get(accessRule, `modify`) || {})
+                ...(_.get(accessRule, `all`) || {})
             },
             roomCheck: {
-                ...(_.get(accessRule, `modify`) || {})
+                ...(_.get(accessRule, `all`) || {})
             },
         }
     },
     admin: {
         modules: {
-            management: {
+            dashboard: {
+                ...(_.get(accessRule, `all`) || {})
+            },
+            staff: {
+                ...(_.get(accessRule, `all`) || {})
+            },
+            owner: {
+                ...(_.get(accessRule, `all`) || {})
+            },
+            tenant: {
+                ...(_.get(accessRule, `all`) || {})
+            },
+            roomType: {
+                ...(_.get(accessRule, `all`) || {})
+            },
+            service: {
+                ...(_.get(accessRule, `all`) || {})
+            },
+            room: {
+                ...(_.get(accessRule, `all`) || {})
+            },
+            roomContract: {
+                ...(_.get(accessRule, `all`) || {})
+            },
+            rentalPayment: {
+                ...(_.get(accessRule, `all`) || {})
+            },
+            roomMaintenance: {
+                ...(_.get(accessRule, `all`) || {})
+            },
+            roomCheck: {
+                ...(_.get(accessRule, `all`) || {})
+            },
+        }
+    },
+    maintenance_department: {
+        modules: {
+            dashboard: {
+                ...(_.get(accessRule, `noAccess`) || {})
+            },
+            staff: {
+                ...(_.get(accessRule, `noAccess`) || {})
+            },
+            owner: {
+                ...(_.get(accessRule, `noAccess`) || {})
+            },
+            tenant: {
+                ...(_.get(accessRule, `noAccess`) || {})
+            },
+            roomType: {
+                ...(_.get(accessRule, `view`) || {})
+            },
+            service: {
+                ...(_.get(accessRule, `view`) || {})
+            },
+            room: {
+                ...(_.get(accessRule, `view`) || {})
+            },
+            roomContract: {
+                ...(_.get(accessRule, `noAccess`) || {})
+            },
+            rentalPayment: {
+                ...(_.get(accessRule, `edit`) || {})
+            },
+            roomMaintenance: {
+                ...(_.get(accessRule, `edit`) || {})
+            },
+            roomCheck: {
+                ...(_.get(accessRule, `edit`) || {})
+            },
+        }
+    },
+    sale_and_marketing: {
+        modules: {
+            dashboard: {
+                ...(_.get(accessRule, `noAccess`) || {})
+            },
+            staff: {
+                ...(_.get(accessRule, `noAccess`) || {})
+            },
+            owner: {
+                ...(_.get(accessRule, `noAccess`) || {})
+            },
+            tenant: {
+                ...(_.get(accessRule, `noAccess`) || {})
+            },
+            roomType: {
+                ...(_.get(accessRule, `view`) || {})
+            },
+            service: {
+                ...(_.get(accessRule, `view`) || {})
+            },
+            room: {
+                ...(_.get(accessRule, `view`) || {})
+            },
+            roomContract: {
+                ...(_.get(accessRule, `noAccess`) || {})
+            },
+            rentalPayment: {
+                ...(_.get(accessRule, `noAccess`) || {})
+            },
+            roomMaintenance: {
+                ...(_.get(accessRule, `noAccess`) || {})
+            },
+            roomCheck: {
+                ...(_.get(accessRule, `noAccess`) || {})
+            },
+        },
+    },
+    customer_service: {
+        modules: {
+            dashboard: {
                 ...(_.get(accessRule, `modify`) || {})
             },
             staff: {
+                ...(_.get(accessRule, `noAccess`) || {})
+            },
+            owner: {
+                ...(_.get(accessRule, `noAccess`) || {})
+            },
+            tenant: {
+                ...(_.get(accessRule, `access`) || {})
+            },
+            roomType: {
+                ...(_.get(accessRule, `view`) || {})
+            },
+            service: {
+                ...(_.get(accessRule, `view`) || {})
+            },
+            room: {
+                ...(_.get(accessRule, `view`) || {})
+            },
+            roomContract: {
+                ...(_.get(accessRule, `access`) || {})
+            },
+            rentalPayment: {
+                ...(_.get(accessRule, `accessPayment`) || {})
+            },
+            roomMaintenance: {
+                ...(_.get(accessRule, `noAccess`) || {})
+            },
+            roomCheck: {
+                ...(_.get(accessRule, `noAccess`) || {})
+            },
+        }
+    },
+    account_clerk: {
+        modules: {
+            dashboard: {
                 ...(_.get(accessRule, `modify`) || {})
+            },
+            staff: {
+                ...(_.get(accessRule, `noAccess`) || {})
             },
             owner: {
                 ...(_.get(accessRule, `modify`) || {})
@@ -1161,10 +1322,10 @@ export const roleAccess = {
                 ...(_.get(accessRule, `modify`) || {})
             },
             roomType: {
-                ...(_.get(accessRule, `modify`) || {})
+                ...(_.get(accessRule, `view`) || {})
             },
             service: {
-                ...(_.get(accessRule, `modify`) || {})
+                ...(_.get(accessRule, `view`) || {})
             },
             room: {
                 ...(_.get(accessRule, `modify`) || {})
@@ -1183,254 +1344,16 @@ export const roleAccess = {
             },
         }
     },
-    director: {
-        modules: {
-            management: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            staff: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            owner: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            tenant: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            roomType: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            service: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            room: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            roomContract: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            rentalPayment: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            roomMaintenance: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-        }
-    },
-    maintenance_department: {
-        modules: {
-            management: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            staff: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            owner: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            tenant: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            roomType: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            service: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            room: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            roomContract: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            rentalPayment: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            roomMaintenance: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-        }
-    },
-    sale_and_marketing: {
-        modules: {
-            management: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            staff: {
-                ...(_.get(accessRule, `noAccess`) || {})
-            },
-            owner: {
-                ...(_.get(accessRule, `noAccess`) || {})
-            },
-            tenant: {
-                ...(_.get(accessRule, `view`) || {})
-            },
-            roomType: {
-                ...(_.get(accessRule, `view`) || {})
-            },
-            service: {
-                ...(_.get(accessRule, `view`) || {})
-            },
-            room: {
-                ...(_.get(accessRule, `view`) || {})
-            },
-            roomContract: {
-                ...(_.get(accessRule, `view`) || {})
-            },
-            rentalPayment: {
-                ...(_.get(accessRule, `accessPayment`) || {})
-            },
-            roomMaintenance: {
-                ...(_.get(accessRule, `access`) || {})
-            },
-        },
-    },
-    customer_service: {
-        modules: {
-            management: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            staff: {
-                ...(_.get(accessRule, `noAccess`) || {})
-            },
-            owner: {
-                ...(_.get(accessRule, `noAccess`) || {})
-            },
-            tenant: {
-                ...(_.get(accessRule, `view`) || {})
-            },
-            roomType: {
-                ...(_.get(accessRule, `view`) || {})
-            },
-            service: {
-                ...(_.get(accessRule, `view`) || {})
-            },
-            room: {
-                ...(_.get(accessRule, `view`) || {})
-            },
-            roomContract: {
-                ...(_.get(accessRule, `view`) || {})
-            },
-            rentalPayment: {
-                ...(_.get(accessRule, `accessPayment`) || {})
-            },
-            roomMaintenance: {
-                ...(_.get(accessRule, `access`) || {})
-            },
-        }
-    },
-    account_clerk: {
-        modules: {
-            management: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            staff: {
-                ...(_.get(accessRule, `noAccess`) || {})
-            },
-            owner: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            tenant: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            roomType: {
-                ...(_.get(accessRule, `view`) || {})
-            },
-            service: {
-                ...(_.get(accessRule, `view`) || {})
-            },
-            room: {
-                ...(_.get(accessRule, `view`) || {})
-            },
-            roomContract: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            rentalPayment: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            roomMaintenance: {
-                ...(_.get(accessRule, `view`) || {})
-            },
-        }
-    },
     asset_management: {
         modules: {
-            management: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            staff: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            owner: {
-                ...(_.get(accessRule, `noAccess`) || {})
-            },
-            tenant: {
-                ...(_.get(accessRule, `noAccess`) || {})
-            },
-            roomType: {
-                ...(_.get(accessRule, `view`) || {})
-            },
-            service: {
-                ...(_.get(accessRule, `view`) || {})
-            },
-            room: {
-                ...(_.get(accessRule, `view`) || {})
-            },
-            roomContract: {
-                ...(_.get(accessRule, `view`) || {})
-            },
-            rentalPayment: {
-                ...(_.get(accessRule, `view`) || {})
-            },
-            roomMaintenance: {
-                ...(_.get(accessRule, `view`) || {})
-            },
-        }
-    },
-    administrator: {
-        modules: {
-            management: {
+            dashboard: {
                 ...(_.get(accessRule, `modify`) || {})
             },
             staff: {
                 ...(_.get(accessRule, `noAccess`) || {})
             },
             owner: {
-                ...(_.get(accessRule, `access`) || {})
-            },
-            tenant: {
-                ...(_.get(accessRule, `access`) || {})
-            },
-            roomType: {
                 ...(_.get(accessRule, `modify`) || {})
-            },
-            service: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            room: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            roomContract: {
-                ...(_.get(accessRule, `access`) || {})
-            },
-            rentalPayment: {
-                ...(_.get(accessRule, `noAccess`) || {})
-            },
-            roomMaintenance: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-        },
-    },
-    temporary_role_siti: {
-        modules: {
-            management: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            staff: {
-                ...(_.get(accessRule, `noAccess`) || {})
-            },
-            owner: {
-                ...(_.get(accessRule, `noAccess`) || {})
             },
             tenant: {
                 ...(_.get(accessRule, `modify`) || {})
@@ -1445,13 +1368,16 @@ export const roleAccess = {
                 ...(_.get(accessRule, `modify`) || {})
             },
             roomContract: {
-                ...(_.get(accessRule, `modify`) || {})
+                ...(_.get(accessRule, `access`) || {})
             },
             rentalPayment: {
-                ...(_.get(accessRule, `modify`) || {})
+                ...(_.get(accessRule, `view`) || {})
             },
             roomMaintenance: {
-                ...(_.get(accessRule, `access`) || {})
+                ...(_.get(accessRule, `modify`) || {})
+            },
+            roomCheck: {
+                ...(_.get(accessRule, `modify`) || {})
             },
         }
     },

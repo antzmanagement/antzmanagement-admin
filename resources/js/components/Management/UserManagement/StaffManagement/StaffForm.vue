@@ -12,6 +12,7 @@ import {
 import { mapActions } from "vuex";
 
 import { commonConfig } from "../../../../common/config";
+import { roleAccess } from '../../../../common/common-function';
 
 export default {
   props: {
@@ -203,8 +204,14 @@ export default {
     })
       .then((res) => {
         this.endLoadingAction();
+
+        let setRole = _.cloneDeep(roleAccess);
+        delete setRole.superadmin;
+        setRole = _.keys(setRole);
+        console.log(setRole);
+          console.log(res);
         this.roles = res.data.filter(function (role) {
-          return role.name != "tenant" && role.name != "owner" && role.name != "superadmin" && role.name != "admin" && role.name != "cashier";
+          return _.indexOf(setRole, role.name) != -1;
         });
       })
       .catch((err) => {

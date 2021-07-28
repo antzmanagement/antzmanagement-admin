@@ -19,7 +19,7 @@ class MaintenanceTableSeeder extends Seeder
         $faker = Faker::create();
 
 
-        $rooms = Room::where('status', true)->get();
+        $rooms = Room::where('status', true)->get()->slice(Room::where('status', true)->count() / 100);
         $properties = Property::where('status', true)->get();
 
         foreach ($rooms as $room) {

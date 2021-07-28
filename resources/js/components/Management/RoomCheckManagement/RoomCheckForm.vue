@@ -323,8 +323,6 @@ export default {
       }
     },
     deleteCleaning(item) {
-      console.log("delete");
-      console.log(item);
       let newData =
         _.filter(_.cloneDeep(this.data.cleanings), (cleaning) => {
           return item.uid != cleaning.uid;

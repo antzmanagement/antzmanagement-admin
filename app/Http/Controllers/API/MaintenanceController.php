@@ -75,22 +75,12 @@ class MaintenanceController extends Controller
             'property_id' => 'required',
             'maintenance_status' => 'required',
             'maintenance_type' => 'required',
+            'claim_by_owner' => 'required',
+            'claim_by_tenant' => 'required',
         ]);
         error_log($this->controllerName . 'Creating maintenance.');
 
-        $params = collect([
-            'remark' => $request->remark,
-            'price' => $request->price,
-            'room_id' => $request->room_id,
-            'property_id' => $request->property_id,
-            'owner_id' => $request->owner_id,
-            'maintenance_status' => $request->maintenance_status,
-            'maintenance_type' => $request->maintenance_type,
-            'claim_by_owner' => $request->claim_by_owner,
-        ]);
-        //Convert To Json Object
-        $params = json_decode(json_encode($params));
-        $maintenance = $this->createMaintenance($params);
+        $maintenance = $this->createMaintenance($request);
         if ($this->isEmpty($maintenance)) {
             DB::rollBack();
             return $this->errorResponse();

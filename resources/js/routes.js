@@ -78,9 +78,9 @@ export const routes = [
         name : 'profile ',
     },
     { 
-        path:'/management',
+        path:'/dashboard',
         component:ManagementHome,
-        name : 'management',
+        name : 'dashboard',
     },
     { 
         path:'/example',

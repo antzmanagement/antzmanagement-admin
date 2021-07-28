@@ -35,13 +35,10 @@ class RoomCheckController extends Controller
         error_log($this->controllerName . 'Retrieving list of filtered roomChecks.');
         // api/roomCheck/filter (GET)
         $params = collect([
-            'unit' => $request->unit,
-            'floor' => $request->floor,
-            'lot' => $request->lot,
-            'jalan' => $request->jalan,
-            'owner_id' => $request->owner_id,
-            'roomCheck_type_id' => $request->roomCheck_type_id,
-            'roomCheck_status' => $request->roomCheck_status,
+            'fromdate' => $request->fromdate,
+            'todate' => $request->todate,
+            'category' => $request->category,
+            'room_id' => $request->room_id,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

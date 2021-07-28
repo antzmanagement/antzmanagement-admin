@@ -63,6 +63,35 @@ class RoleTableSeeder extends Seeder
         $role->name = 'owner';
         $role->desc = $faker->paragraph();
         $role->save();
+
+        $role = new Role();
+        $role->uid = Carbon::now()->timestamp . Role::count();
+        $role->name = 'maintenance_department';
+        $role->desc = $faker->paragraph();
+        $role->save();
     
+        $role = new Role();
+        $role->uid = Carbon::now()->timestamp . Role::count();
+        $role->name = 'sale_and_marketing';
+        $role->desc = $faker->paragraph();
+        $role->save();
+
+        $role = new Role();
+        $role->uid = Carbon::now()->timestamp . Role::count();
+        $role->name = 'customer_service';
+        $role->desc = $faker->paragraph();
+        $role->save();
+
+        $role = new Role();
+        $role->uid = Carbon::now()->timestamp . Role::count();
+        $role->name = 'account_clerk';
+        $role->desc = $faker->paragraph();
+        $role->save();
+
+        $role = new Role();
+        $role->uid = Carbon::now()->timestamp . Role::count();
+        $role->name = 'asset_management';
+        $role->desc = $faker->paragraph();
+        $role->save();
     }
 }

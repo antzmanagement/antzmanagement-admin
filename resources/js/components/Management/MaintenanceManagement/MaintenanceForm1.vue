@@ -17,7 +17,7 @@ export default {
     },
     selectedData: {
       type: Object,
-      default: {},
+      default: () => ({})
     },
     returnObject: {
       type: Boolean,
@@ -32,7 +32,7 @@ export default {
   data() {
     return {
       propertyFormDialog: false,
-      paidStatus : false,
+      paidStatus: false,
       dateMenu: false,
       rooms: [],
       properties: [],
@@ -40,6 +40,26 @@ export default {
       owners: [],
       maintenanceTypes: ["repair", "renew"],
       maintenanceStatus: ["pending", "inprogress", "reject", "done"],
+      propertyFilterGroup: new Form({
+        name: "",
+        category: "",
+      }),
+      propertyFilterDialogConfig: {
+        buttonStyle: {
+          block: false,
+          class: "ml-2",
+          text: "",
+          icon: "mdi-magnify",
+          isIcon: true,
+          color: "primary",
+        },
+        dialogStyle: {
+          persistent: true,
+          maxWidth: "600px",
+          fullscreen: false,
+          hideOverlay: true,
+        },
+      },
       data: new Form({
         remark: "",
         price: 0,
@@ -130,6 +150,7 @@ export default {
     ...mapActions({
       getRoomsAction: "getRooms",
       filterRoomContractsAction: "filterRoomContracts",
+      filterPropertiesAction: "filterProperties",
       getOwnersAction: "getOwners",
       getPropertiesAction: "getProperties",
       getMaintenanceAction: "getMaintenance",
@@ -223,11 +244,14 @@ export default {
             if (data.data) {
               this.roomcontracts = data.data;
               if (this.editMode && this.selectedData) {
-                this.data.tenant = _.get(_.find(this.roomcontracts, [
-                  "tenant.id",
-                  _.get(this.selectedData, `tenant.id`) ||
-                    _.get(this.selectedData, `tenant_id`),
-                ]), 'tenant');
+                this.data.tenant = _.get(
+                  _.find(this.roomcontracts, [
+                    "tenant.id",
+                    _.get(this.selectedData, `tenant.id`) ||
+                      _.get(this.selectedData, `tenant_id`),
+                  ]),
+                  "tenant"
+                );
               } else {
                 this.data.tenant = _.get(data.data, `[0].tenant`);
               }
@@ -269,6 +293,38 @@ export default {
       }
       this.$emit("submit", finalData);
       this.reset();
+    },
+    initPropertyFilter(filterGroup) {
+      this.propertyFilterGroup.reset();
+      if (filterGroup.category) {
+        this.propertyFilterGroup.category = filterGroup.category;
+      }
+      if (filterGroup.name) {
+        this.propertyFilterGroup.name = filterGroup.name;
+      }
+      this.getProperties();
+    },
+    getProperties() {
+      let filterGroup = _.cloneDeep(this.propertyFilterGroup);
+      filterGroup.pageSize = -1;
+      filterGroup.pageNumber = -1;
+
+      console.log(filterGroup);
+      this.filterPropertiesAction(filterGroup)
+        .then((data) => {
+          console.log(data);
+          if (data.data) {
+            this.properties = data.data;
+          } else {
+            this.properties = [];
+          }
+        })
+        .catch((error) => {
+          Toast.fire({
+            icon: "warning",
+            title: "Something went wrong... ",
+          });
+        });
     },
   },
 };
@@ -353,12 +409,19 @@ export default {
           <v-col cols="12">
             <v-autocomplete
               v-model="data.property"
-              :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
+              :item-text="(item) => helpers.capitalizeFirstLetter(item.text)"
               :items="properties || []"
               label="Property"
               chips
               return-object
             >
+              <template v-slot:append-outer>
+                <property-filter-dialog
+                  :buttonStyle="propertyFilterDialogConfig.buttonStyle"
+                  :dialogStyle="propertyFilterDialogConfig.dialogStyle"
+                  @submitFilter="initPropertyFilter($event)"
+                ></property-filter-dialog>
+              </template>
             </v-autocomplete>
           </v-col>
           <v-col cols="12" md="12">
@@ -412,7 +475,10 @@ export default {
               ></v-date-picker>
             </v-menu>
           </v-col>
-          <v-col cols="12" v-if="paidStatus && (data.claim_by_owner || data.claim_by_tenant)">
+          <v-col
+            cols="12"
+            v-if="paidStatus && (data.claim_by_owner || data.claim_by_tenant)"
+          >
             <div>Paid Status</div>
             <v-radio-group v-model="data.paid" row>
               <v-radio label="Paid" :value="1"></v-radio>

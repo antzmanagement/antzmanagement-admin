@@ -30,10 +30,8 @@ class PropertyController extends Controller
         error_log($this->controllerName . 'Retrieving list of filtered properties.');
         // api/property/filter (GET)
         $params = collect([
-            'keyword' => $request->keyword,
-            'fromdate' => $request->fromdate,
-            'todate' => $request->todate,
-            'status' => $request->status,
+            'name' => $request->name,
+            'category' => $request->category,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

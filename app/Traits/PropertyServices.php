@@ -25,14 +25,13 @@ trait PropertyServices
 
     private function filterProperties($data, $params)
     {
-        $data = $this->globalFilter($data, $params);
         $params = $this->checkUndefinedProperty($params, $this->propertyFilterCols());
 
-        if ($params->keyword) {
-            $keyword = $params->keyword;
-            $data = $data->filter(function ($item) use ($keyword) {
+        if ($params->name) {
+            $name = $params->name;
+            $data = $data->filter(function ($item) use ($name) {
                 //check string exist inside or not
-                if (stristr($item->name, $keyword) == TRUE   ) {
+                if (stristr($item->name, $name) == TRUE   ) {
                     return true;
                 } else {
                     return false;
@@ -40,7 +39,19 @@ trait PropertyServices
             });
         }
 
-        $data = $data->unique('id');
+
+        if ($params->category) {
+            $category = $params->category;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($category) {
+                return $item->category== $category;
+            })->values();
+        }
+
+
+        $data = $data->unique('id')->sortBy(function ($item, $key) {
+            return $item->category;
+        })->flatten(1);
 
         return $data;
     }
@@ -143,7 +154,7 @@ trait PropertyServices
     public function propertyFilterCols()
     {
 
-        return ['keyword', 'propertyTypes'];
+        return ['name', 'category'];
     }
 
 }

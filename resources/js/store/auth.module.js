@@ -15,7 +15,7 @@ const initialState = {
         {
             icon: "mdi-view-dashboard-outline",
             text: "Dashboard",
-            name: "management"
+            name: "dashboard"
         },
         {
             icon: "mdi-account-multiple",

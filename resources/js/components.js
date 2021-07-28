@@ -47,7 +47,7 @@ Vue.component('room-check-form', require('./components/Management/RoomCheckManag
 Vue.component('room-check-filter-dialog', require('./components/Management/RoomCheckManagement/RoomCheckFilterDialog.vue').default);
 
 Vue.component('property-form', require('./components/Management/PropertyManagement/PropertyForm.vue').default);
-Vue.component('property-filter-form', require('./components/Management/PropertyManagement/PropertyFilterForm.vue').default);
+Vue.component('property-filter-dialog', require('./components/Management/PropertyManagement/PropertyFilterDialog.vue').default);
 
 Vue.component('services-dialog', require('./components/Management/ServiceManagement/ServicesDialog.vue').default);
 Vue.component('service-form', require('./components/Management/ServiceManagement/ServiceForm.vue').default);

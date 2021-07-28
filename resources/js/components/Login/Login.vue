@@ -158,7 +158,7 @@ export default {
             this.$Progress.finish();
 
             this.endLoadingAction();
-            this.$router.push("management");
+            this.$router.push("dashboard");
           })
           .catch(error => {
             Toast.fire({

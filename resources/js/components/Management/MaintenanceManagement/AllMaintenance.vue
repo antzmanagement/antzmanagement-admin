@@ -12,6 +12,7 @@ export default {
       data: [],
       loading: true,
       options: {},
+      maintenanceFormDialog: false,
       maintenanceFilterGroup: new Form({
         rooms: [],
         selectedRooms: [],
@@ -33,18 +34,6 @@ export default {
           maxWidth: "1200px",
           fullscreen: false,
           hideOverlay: true,
-        },
-      },
-
-      maintenanceFormDialogConfig: {
-        buttonStyle: {
-          block: true,
-          class: "title font-weight-bold ma-2",
-          text: "Add Maintenance",
-          icon: "mdi-plus",
-          isIcon: false,
-          color: "primary",
-          evalation: "5",
         },
       },
       headers: [
@@ -137,6 +126,7 @@ export default {
       filterMaintenancesAction: "filterMaintenances",
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction",
+      createMaintenanceAction: "createMaintenance",
     }),
     initMaintenanceFilter(filterGroup) {
       this.maintenanceFilterGroup.reset();
@@ -206,7 +196,7 @@ export default {
     },
     async fetchExcelData() {
       let total = this.totalDataLength || 0;
-      let size = 50;
+      let size = 100;
       let maxPage = Math.ceil(total / size);
       let promises = [];
       let self = this;
@@ -228,6 +218,46 @@ export default {
       });
       this.excelData = finalData;
       return finalData;
+    },
+    updateMaintenances($data) {
+      try {
+        this.maintenanceFormDialog = false;
+        if (!_.get($data, "uid")) {
+          $data.uid = new Date().getTime();
+        }
+
+        this.data = _.unionBy([$data], this.data, "uid");
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    createMaintenance($data) {
+      try {
+        console.log($data);
+        let finalData = _.cloneDeep($data);
+        this.createMaintenanceAction(finalData)
+          .then((data) => {
+            Toast.fire({
+              icon: "success",
+              title: "Successful Created Maintenance. ",
+            });
+            this.$Progress.finish();
+            this.endLoadingAction();
+            this.maintenanceFormDialog = false;
+            this.showMaintenance(data.data)
+          })
+          .catch((error) => {
+            Toast.fire({
+              icon: "warning",
+              title: "Something went wrong!!!!! ",
+            });
+            this.$Progress.finish();
+            this.endLoadingAction();
+            this.maintenanceFormDialog = false;
+          });
+      } catch (error) {
+        console.log(error);
+      }
     },
   },
 };
@@ -256,11 +286,9 @@ export default {
               )
             "
           >
-            <maintenance-form
-              :editMode="false"
-              :buttonStyle="maintenanceFormDialogConfig.buttonStyle"
-              @created="showMaintenance($event)"
-            ></maintenance-form>
+            <v-btn block color="primary" @click="maintenanceFormDialog = true"
+              ><v-icon left>mdi-plus</v-icon>Add Maintenance</v-btn
+            >
           </v-col>
         </v-row>
 
@@ -367,19 +395,47 @@ export default {
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showMaintenance(props.item)">
-                    <td class="text-truncate">{{ _.get(props.item , `room.name`) || 'N/A' }}</td>
-                    <td class="text-truncate">{{ _.get(props.item , `property.text`) || 'N/A' }}</td>
-                    <td class="text-truncate">{{ props.item.maintenance_type }}</td>
-                    <td class="text-truncate">{{ props.item.maintenance_status }}</td>
+                    <td class="text-truncate">
+                      {{ _.get(props.item, `room.name`) || "N/A" }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ _.get(props.item, `property.text`) || "N/A" }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.maintenance_type }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.maintenance_status }}
+                    </td>
                     <td class="text-truncate">{{ props.item.price }}</td>
-                    <td class="text-truncate">{{ _.get(props.item, ["owner", "name"]) || "N/A" }}</td>
-                    <td class="text-truncate">{{ props.item.created_at | formatDate }}</td>
+                    <td class="text-truncate">
+                      {{ _.get(props.item, ["owner", "name"]) || "N/A" }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.created_at | formatDate }}
+                    </td>
                   </tr>
                 </template>
               </v-data-table>
             </v-card>
           </v-col>
         </v-row>
+
+        <v-dialog
+          v-model="maintenanceFormDialog"
+          persistent
+          hideOverlay
+          max-width="600px"
+        >
+          <maintenance-form-1
+            returnObject
+            :reset="maintenanceFormDialog"
+            :editMode="false"
+            @cancel="maintenanceFormDialog = false"
+            @submit="createMaintenance"
+          >
+          </maintenance-form-1>
+        </v-dialog>
       </v-container>
     </v-content>
   </v-app>

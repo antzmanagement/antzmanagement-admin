@@ -21,8 +21,8 @@ export default {
       {
         icon: "mdi-view-dashboard-outline",
         text: "Dashboard",
-        name: "management",
-        module: "management",
+        name: "dashboard",
+        module: "dashboard",
       },
       {
         icon: "mdi-account-cog",
@@ -128,6 +128,7 @@ export default {
       .then((res) => {
         this.role = res.data.data.role;
         this.endLoadingAction();
+        this.checkIsValidPage();
         try {
           if (this.returnRole) {
             this.returnRole(this.role);
@@ -153,6 +154,20 @@ export default {
     logout() {
       if (this.logoutAction()) {
         this.$router.push("/login");
+      }
+    },
+    checkIsValidPage() {
+      let roleItems = [];
+      let self = this;
+      _.forEach(this.items, function (item) {
+        if (checkIsAccessible(self.role.name, item.module, "nav") == true) {
+          roleItems.push(item);
+        }
+      });
+
+      
+      if(_.some(this.items, ['name', _.get(this.$router , `history.current.name`)]) && !_.some(roleItems, ['name', _.get(this.$router , `history.current.name`)]) && _.isArray(roleItems) && !_.isEmpty(roleItems)){
+        this.$router.push({name : _.get(roleItems , `[0].name`)})
       }
     },
   },
