@@ -15,13 +15,13 @@ export default {
       icon: "mdi-pencil",
     },
     _: _,
-    cleaningPayFormDialog: false,
     maintenancePayFormDialog: false,
+    maintenanceFormDialog: false,
     maintenanceEditMode: false,
     selectedMaintenance: {},
+    cleaningPayFormDialog: false,
     cleaningEditMode: false,
     selectedCleaning: {},
-    maintenanceFormDialog: false,
     cleaningFormDialog: false,
     maintenanceHeaders: [
       {
@@ -97,12 +97,6 @@ export default {
     showRoom($data) {
       this.$router.push("/room/" + $data.uid);
     },
-    showMaintenance($data) {
-      this.$router.push("/maintenance/" + $data.uid);
-    },
-    showCleaning($data) {
-      this.$router.push("/cleaning/" + $data.uid);
-    },
     deleteRoomCheck($isConfirmed, $uid) {
       if ($isConfirmed) {
         this.$Progress.start();
@@ -129,6 +123,12 @@ export default {
     },
     refreshPage() {
       location.reload();
+    },
+    showMaintenance($data) {
+      this.$router.push("/maintenance/" + $data.uid);
+    },
+    showCleaning($data) {
+      this.$router.push("/cleaning/" + $data.uid);
     },
     openMaintenanceDialog(item, editMode) {
       if (!_.get(this.data, `room.id`)) {

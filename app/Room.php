@@ -27,6 +27,11 @@ class Room extends Model
         return $this->hasMany('App\Maintenance');
     }
     
+    public function cleanings()
+    {
+        return $this->hasMany('App\Cleaning');
+    }
+    
     public function roomcontracts()
     {
         return $this->hasMany('App\RoomContract');

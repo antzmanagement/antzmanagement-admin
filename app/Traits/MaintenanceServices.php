@@ -26,7 +26,16 @@ trait MaintenanceServices
         }, 'property' => function ($q) {
             // Query the name field in status table
             $q->where('status', true);
-        }, 'owner' => function ($q) {
+        }, 'roomcheck' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        } , 'owner' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        }, 'tenant' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        },'issueby' => function ($q) {
             // Query the name field in status table
             $q->where('status', true);
         }])->get();
@@ -69,6 +78,16 @@ trait MaintenanceServices
                 return false;
             })->values();
         }
+
+        if($params->tenant_id){
+            $tenant_id = $params->tenant_id;
+            $data = $data->filter(function ($item) use($tenant_id) {
+                if($item->tenant){
+                    return $item->tenant->id == $tenant_id;
+                }
+                return false;
+            })->values();
+        }
         if ($params->maintenance_status) {
             $maintenance_status = $params->maintenance_status;
             $data = collect($data);
@@ -88,14 +107,14 @@ trait MaintenanceServices
             $date = Carbon::parse($params->fromdate);
             $data = collect($data);
             $data = $data->filter(function ($item) use ($date) {
-                return Carbon::parse(data_get($item, 'created_at'))->gte($date);
+                return Carbon::parse(data_get($item, 'maintenance_date'))->gte($date);
             })->values();
         }
         
         if ($params->todate) {
             $date = Carbon::parse($params->todate)->endOfDay();
             $data = $data->filter(function ($item) use ($date) {
-                return Carbon::parse(data_get($item, 'created_at'))->lte($date);
+                return Carbon::parse(data_get($item, 'maintenance_date'))->lte($date);
             })->values();
         }
 
@@ -119,7 +138,16 @@ trait MaintenanceServices
         }, 'property' => function ($q) {
             // Query the name field in status table
             $q->where('status', true);
-        }, 'owner' => function ($q) {
+        }, 'roomcheck' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        } , 'owner' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        }, 'tenant' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        },'issueby' => function ($q) {
             // Query the name field in status table
             $q->where('status', true);
         }])->where('status', true)->first();
@@ -138,7 +166,16 @@ trait MaintenanceServices
         }, 'property' => function ($q) {
             // Query the name field in status table
             $q->where('status', true);
-        }, 'owner' => function ($q) {
+        }, 'roomcheck' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        } , 'owner' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        }, 'tenant' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        },'issueby' => function ($q) {
             // Query the name field in status table
             $q->where('status', true);
         }])->where('status', true)->first();
@@ -354,6 +391,6 @@ trait MaintenanceServices
     }
     public function maintenanceFilterCols()
     {
-        return ['fromdate', 'todate', 'owner_id', 'room_id', 'property_id', 'maintenance_status', 'maintenance_type'];
+        return ['fromdate', 'todate', 'owner_id', 'room_id'. 'tenant_id', 'property_id', 'maintenance_status', 'maintenance_type'];
     }
 }

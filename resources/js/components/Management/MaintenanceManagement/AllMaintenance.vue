@@ -95,7 +95,7 @@ export default {
     },
     totalDataLength(v) {
       if (v > 0) {
-        this.fetchExcelData();
+        // this.fetchExcelData();
       }
     },
   },
@@ -133,6 +133,10 @@ export default {
       if (filterGroup.owner) {
         this.maintenanceFilterGroup.owner_id = filterGroup.owner.id;
         this.maintenanceFilterGroup.owner = filterGroup.owner;
+      }
+      if (filterGroup.tenant) {
+        this.maintenanceFilterGroup.tenant_id = filterGroup.tenant.id;
+        this.maintenanceFilterGroup.tenant = filterGroup.tenant;
       }
       if (filterGroup.room) {
         this.maintenanceFilterGroup.room_id = filterGroup.room.id;
@@ -176,7 +180,12 @@ export default {
         this.maintenanceFilterGroup.pageSize = itemsPerPage;
       }
 
-      this.filterMaintenancesAction(this.maintenanceFilterGroup)
+      let filterGroup = _.cloneDeep(this.maintenanceFilterGroup);
+      delete filterGroup.room;
+      delete filterGroup.tenant;
+      delete filterGroup.owner;
+      delete filterGroup.property;
+      this.filterMaintenancesAction(filterGroup)
         .then((data) => {
           if (data.data) {
             this.data = data.data;

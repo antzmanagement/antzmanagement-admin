@@ -45,6 +45,7 @@ export default {
       owners: [],
       rooms: [],
       properties : [],
+      tenants : [],
       fromdatemenu: false,
       todatemenu: false,
       maintenanceTypes: ["repair", "renew"],
@@ -76,13 +77,15 @@ export default {
     promises.push(this.getRoomsAction({ pageNumber: -1, pageSize: -1 }));
     promises.push(this.getOwnersAction({ pageNumber: -1, pageSize: -1 }));
     promises.push(this.getPropertiesAction({ pageNumber: -1, pageSize: -1 }));
+    promises.push(this.getTenantsAction({ pageNumber: -1, pageSize: -1 }));
 
 
     Promise.all(promises)
-      .then(([roomRes, ownerRes, propertyRes]) => {
+      .then(([roomRes, ownerRes, propertyRes, tenantRes]) => {
         this.rooms = _.get(roomRes, ["data"]) || [];
         this.owners = _.get(ownerRes, ["data"]) || [];
         this.properties = _.get(propertyRes, ["data"]) || [];
+        this.tenants = _.get(tenantRes, ["data"]) || [];
         this.endLoadingAction();
       })
       .catch((err) => {
@@ -97,6 +100,7 @@ export default {
   methods: {
     ...mapActions({
       getRoomsAction: "getRooms",
+      getTenantsAction: "getTenants",
       getPropertiesAction: "getProperties",
       getOwnersAction: "getOwners",
       showLoadingAction: "showLoadingAction",
@@ -138,7 +142,7 @@ export default {
         <v-btn icon dark @click="dialog = false">
           <v-icon>mdi-close</v-icon>
         </v-btn>
-        <v-toolbar-title v->Maintenance Filter</v-toolbar-title>
+        <v-toolbar-title >Maintenance Filter</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-toolbar-items>
           <v-btn dark text :disabled="isLoading" @click="submitFilter()"
@@ -151,7 +155,7 @@ export default {
           <v-row>
             <v-col cols="6">
               <div class="d-flex align-center">
-                <span className=" d-inline-block half-width">
+                <span className=" d-inline-block">
                   <v-menu
                     ref="menu"
                     v-model="fromdatemenu"
@@ -162,7 +166,7 @@ export default {
                     <template v-slot:activator="{ on }">
                       <v-text-field
                         v-model="data.fromdate"
-                        label="From Date"
+                        label="Maintenace From Date"
                         readonly
                         v-on="on"
                       ></v-text-field>
@@ -187,7 +191,7 @@ export default {
             </v-col>
             <v-col cols="6">
               <div class="d-flex align-center">
-                <span className=" d-inline-block half-width">
+                <span className=" d-inline-block">
                   <v-menu
                     ref="menu"
                     v-model="todatemenu"
@@ -198,7 +202,7 @@ export default {
                     <template v-slot:activator="{ on }">
                       <v-text-field
                         v-model="data.todate"
-                        label="To Date"
+                        label="Maintenance To Date"
                         readonly
                         v-on="on"
                       ></v-text-field>
@@ -237,7 +241,19 @@ export default {
                 v-model="data.owner"
                 :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
                 :items="owners || []"
-                label="Claim By"
+                label="Claim By Owner"
+                chips
+                return-object
+                deletable-chips
+              >
+              </v-autocomplete>
+            </v-col>
+            <v-col cols="12">
+              <v-autocomplete
+                v-model="data.tenant"
+                :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
+                :items="tenants || []"
+                label="Claim By Tenant"
                 chips
                 return-object
                 deletable-chips

@@ -41,7 +41,7 @@ class MaintenanceController extends Controller
         //Convert To Json Object
         $params = json_decode(json_encode($params));
         $maintenances = $this->getMaintenances($request->user());
-        $maintenances = $this->filterMaintenances($maintenances, $params);
+        $maintenances = $this->filterMaintenances($maintenances, $request);
 
         if ($this->isEmpty($maintenances)) {
             return $this->errorPaginateResponse('Maintenances');
@@ -117,7 +117,6 @@ class MaintenanceController extends Controller
             $request->issue_by = $request->user()->id;
         }else if(!$maintenance->claim_by_owner && !$maintenance->claim_by_tenant){
             $request->issue_by = $request->user()->id;
-            $request->paid = true;
         }
         $maintenance = $this->updateMaintenance($maintenance, $request);
 

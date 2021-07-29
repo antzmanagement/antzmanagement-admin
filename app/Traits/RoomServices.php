@@ -129,6 +129,12 @@ trait RoomServices
             // Query the name field in status table
             $q->with('property');
             $q->where('status', true);
+        },'roomchecks' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        },'cleanings' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
         }, 'roomTypes' => function ($q) {
             // Query the name field in status table
             $q->with('services');
@@ -151,6 +157,12 @@ trait RoomServices
         $data = Room::where('id', $id)->with(['maintenances' => function ($q) {
             // Query the name field in status table
             $q->with('property');
+            $q->where('status', true);
+        },'roomchecks' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        },'cleanings' => function ($q) {
+            // Query the name field in status table
             $q->where('status', true);
         }, 'roomTypes' => function ($q) {
             // Query the name field in status table

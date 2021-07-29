@@ -1,6 +1,6 @@
 <script>
 import { mapActions } from "vuex";
-import { _ } from "../../../common/common-function";
+import { sortByDateDesc, _ } from "../../../common/common-function";
 export default {
   data: () => ({
     _: _,
@@ -50,16 +50,38 @@ export default {
       room_types: [],
       maintenances: [],
     }),
+    maintenancePayFormDialog: false,
+    maintenanceFormDialog: false,
+    maintenanceEditMode: false,
+    selectedMaintenance: {},
+    cleaningPayFormDialog: false,
+    cleaningEditMode: false,
+    selectedCleaning: {},
+    cleaningFormDialog: false,
+    roomCheckHeaders: [
+      {
+        text: "Check date",
+      },
+      {
+        text: "Category",
+      },
+    ],
     maintenanceHeaders: [
       {
-        text: "ID",
-        value: "uid",
-      },
-      {
         text: "Property",
-        value: "property.name",
       },
-      { text: "Price (RM)", value: "price" },
+      { text: "Repair Type" },
+      { text: "Maintenance Status" },
+      { text: "Price (RM)" },
+      { text: "Claimed By" },
+      { text: "Actions" },
+    ],
+    cleaningHeaders: [
+      { text: "Cleaning Type" },
+      { text: "Cleaning Status" },
+      { text: "Price (RM)" },
+      { text: "Claimed By" },
+      { text: "Actions" },
     ],
   }),
 
@@ -74,8 +96,6 @@ export default {
     this.getRoomAction({ uid: this.$route.params.uid })
       .then((data) => {
         this.data = data.data;
-        console.log("room");
-        console.log(this.data);
         this.$Progress.finish();
         this.endLoadingAction();
       })
@@ -91,6 +111,10 @@ export default {
 
   methods: {
     ...mapActions({
+      updateMaintenanceAction: "updateMaintenance",
+      deleteMaintenanceAction: "deleteMaintenance",
+      deleteCleaningAction: "deleteCleaning",
+      updateCleaningAction: "updateCleaning",
       getRoomAction: "getRoom",
       deleteRoomAction: "deleteRoom",
       showLoadingAction: "showLoadingAction",
@@ -99,6 +123,9 @@ export default {
 
     showMaintenance($data) {
       this.$router.push("/maintenance/" + $data.uid);
+    },
+    showRoomCheck($data) {
+      this.$router.push("/roomcheck/" + $data.uid);
     },
     deleteRoom($isConfirmed, $uid) {
       if ($isConfirmed) {
@@ -132,6 +159,184 @@ export default {
         console.log("uid");
         console.log(uid);
         this.$router.push("/owner/" + $data.uid);
+      }
+    },
+    openMaintenanceDialog(item, editMode) {
+      if (!_.get(this.data, `id`)) {
+        Toast.fire({
+          icon: "error",
+          title: "Please Select A Room First. ",
+        });
+      } else {
+        this.maintenanceEditMode = editMode == true;
+        this.selectedMaintenance = item || {};
+        this.maintenanceFormDialog = true;
+      }
+    },
+    deleteMaintenance(item) {
+      this.showLoadingAction();
+      this.deleteMaintenanceAction(item)
+        .then((data) => {
+          Toast.fire({
+            icon: "success",
+            title: "Successful Deleted Maintenance. ",
+          });
+          this.$Progress.finish();
+          this.endLoadingAction();
+          let newData =
+            _.filter(_.cloneDeep(this.data.maintenances), (maintenance) => {
+              return data.data.uid != maintenance.uid;
+            }) || [];
+          this.data.maintenances = newData;
+        })
+        .catch((error) => {
+          Toast.fire({
+            icon: "warning",
+            title: "Something went wrong!!!!! ",
+          });
+          this.$Progress.finish();
+          this.endLoadingAction();
+        });
+    },
+    updateMaintenance($data) {
+      try {
+        console.log($data);
+        if (_.get($data, "uid")) {
+          let finalData = _.cloneDeep($data);
+          this.updateMaintenanceAction(finalData)
+            .then((data) => {
+              Toast.fire({
+                icon: "success",
+                title: "Successful Updated Maintenance. ",
+              });
+              this.$Progress.finish();
+              this.endLoadingAction();
+              this.maintenanceFormDialog = false;
+              this.updateMaintenances(data.data);
+            })
+            .catch((error) => {
+              Toast.fire({
+                icon: "warning",
+                title: "Something went wrong!!!!! ",
+              });
+              this.$Progress.finish();
+              this.endLoadingAction();
+              this.maintenanceFormDialog = false;
+            });
+        } else {
+          Toast.fire({
+            icon: "error",
+            title: "Maintenance Not Found!!!!! ",
+          });
+          this.$Progress.finish();
+          this.endLoadingAction();
+          this.maintenanceFormDialog = false;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    updateMaintenances($data) {
+      try {
+        this.maintenanceFormDialog = false;
+        if (!_.get($data, "uid")) {
+          $data.uid = new Date().getTime();
+        }
+
+        this.data.maintenances = _.unionBy(
+          [$data],
+          this.data.maintenances,
+          "uid"
+        );
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    openCleaningDialog(item, editMode) {
+      if (!_.get(this.data, `id`)) {
+        Toast.fire({
+          icon: "error",
+          title: "Please Select A Room First. ",
+        });
+      } else {
+        this.cleaningEditMode = editMode == true;
+        this.selectedCleaning = item || {};
+        this.cleaningFormDialog = true;
+      }
+    },
+    deleteCleaning(item) {
+      this.showLoadingAction();
+      this.deleteCleaningAction(item)
+        .then((data) => {
+          Toast.fire({
+            icon: "success",
+            title: "Successful Deleted Cleaning. ",
+          });
+          this.$Progress.finish();
+          this.endLoadingAction();
+          let newData =
+            _.filter(_.cloneDeep(this.data.cleanings), (cleaning) => {
+              return data.data.uid != cleaning.uid;
+            }) || [];
+          this.data.cleanings = newData;
+        })
+        .catch((error) => {
+          Toast.fire({
+            icon: "warning",
+            title: "Something went wrong!!!!! ",
+          });
+          this.$Progress.finish();
+          this.endLoadingAction();
+        });
+    },
+    updateCleaning($data) {
+      try {
+        console.log($data);
+        if (_.get($data, "uid")) {
+          let finalData = _.cloneDeep($data);
+          this.updateCleaningAction(finalData)
+            .then((data) => {
+              Toast.fire({
+                icon: "success",
+                title: "Successful Updated Cleaning. ",
+              });
+              this.$Progress.finish();
+              this.endLoadingAction();
+              this.cleaningFormDialog = false;
+              this.updateCleanings(data.data);
+            })
+            .catch((error) => {
+              Toast.fire({
+                icon: "warning",
+                title: "Something went wrong!!!!! ",
+              });
+              this.$Progress.finish();
+              this.endLoadingAction();
+              this.cleaningFormDialog = false;
+            });
+        } else {
+          Toast.fire({
+            icon: "error",
+            title: "Cleaning Not Found!!!!! ",
+          });
+          this.$Progress.finish();
+          this.endLoadingAction();
+          this.cleaningFormDialog = false;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    updateCleanings($data) {
+      try {
+        this.cleaningFormDialog = false;
+        if (!_.get($data, "uid")) {
+          $data.uid = new Date().getTime();
+        }
+
+        this.data.cleanings = _.unionBy([$data], this.data.cleanings, "uid");
+      } catch (error) {
+        console.log(error);
       }
     },
   },
@@ -453,68 +658,272 @@ export default {
               class="mx-3"
               :color="helpers.managementStyles().dividerColor"
             ></v-divider>
-            <!-- <v-row class="pa-2" justify="end" align="center">
-              <v-col cols="12">
-                <div class="headline font-weight-bold">Maintenance Records</div>
-              </v-col>
-            </v-row>-->
-            <v-row class="pa-2" justify="end" align="center">
-              <v-col cols="12">
-                <v-card class="pa-8" raised>
+            <v-row>
+              <v-col
+                cols="12"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
+                <v-card raised width="100%">
                   <v-data-table
-                    :headers="maintenanceHeaders"
-                    :items="data.maintenances"
+                    :headers="roomCheckHeaders"
+                    :items="
+                      _.reverse(_.sortBy(data.roomchecks || [], ['checked_date']))
+                    "
+                    fixed-header
+                    height="300px"
                     :items-per-page="5"
-                    item-key="uid"
                     disable-sort
                   >
                     <template v-slot:top>
-                      <v-container>
-                        <v-row>
-                          <v-col cols="auto">
-                            <div
-                              class="headline font-weight-bold text-left mb-5 d-inline-block"
-                            >
-                              Maintenance Records
-                            </div>
-                          </v-col>
-                          <v-spacer></v-spacer>
-                          <v-col
-                            cols="auto"
-                            v-if="
-                              helpers.isAccessible(
-                                _.get(role, ['name']),
-                                'roomMaintenance',
-                                'create'
-                              )
-                            "
-                          >
-                            <maintenance-form
-                              :editMode="false"
-                              :buttonStyle="
-                                maintenanceFormDialogConfig.buttonStyle
-                              "
-                              :dialogStyle="
-                                maintenanceFormDialogConfig.dialogStyle
-                              "
-                              :roomId="data.id"
-                              @created="refreshPage()"
-                            ></maintenance-form>
-                          </v-col>
-                        </v-row>
-                      </v-container>
+                      <v-toolbar flat color="white">
+                        <v-toolbar-title
+                          :class="helpers.managementStyles().subtitleClass"
+                          >Room Check</v-toolbar-title
+                        >
+                        <v-spacer></v-spacer>
+                      </v-toolbar>
                     </template>
                     <template v-slot:item="props">
-                      <tr @click="showMaintenance(props.item)">
-                        <td class="text-truncate">{{ props.item.uid }}</td>
-                        <td class="text-truncate">{{ props.item.property.name }}</td>
-                        <td class="text-truncate">{{ props.item.price }}</td>
+                      <tr :key="props.item.uid" @click="showRoomCheck(props.item)">
+                        <td class="text-truncate">
+                          {{ props.item.category }}
+                        </td>
+                        <td class="text-truncate">
+                          {{ props.item.checked_date | formatDate }}
+                        </td>
                       </tr>
                     </template>
                   </v-data-table>
                 </v-card>
               </v-col>
             </v-row>
+
+            <v-divider
+              class="mx-3"
+              :color="helpers.managementStyles().dividerColor"
+            ></v-divider>
+            <!-- <v-row class="pa-2" justify="end" align="center">
+              <v-col cols="12">
+                <div class="headline font-weight-bold">Maintenance Records</div>
+              </v-col>
+            </v-row>-->
+
+            <v-row>
+              <v-col
+                cols="12"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
+                <v-card raised width="100%">
+                  <v-data-table
+                    :headers="maintenanceHeaders"
+                    :items="
+                      _.reverse(_.sortBy(data.maintenances, ['created_at']))
+                    "
+                    fixed-header
+                    height="300px"
+                    :items-per-page="5"
+                    disable-sort
+                  >
+                    <template v-slot:top>
+                      <v-toolbar flat color="white">
+                        <v-toolbar-title
+                          :class="helpers.managementStyles().subtitleClass"
+                          >Maintenance</v-toolbar-title
+                        >
+                        <v-spacer></v-spacer>
+                      </v-toolbar>
+                    </template>
+                    <template v-slot:item="props">
+                      <tr :key="props.item.uid">
+                        <td class="text-truncate" @click="showMaintenance(props.item)">
+                          {{ _.get(props.item, `property.text`) || "N/A" }}
+                        </td>
+                        <td class="text-truncate" @click="showMaintenance(props.item)">
+                          {{ props.item.maintenance_type }}
+                        </td>
+                        <td class="text-truncate" @click="showMaintenance(props.item)">
+                          {{ props.item.maintenance_status }}
+                        </td>
+                        <td class="text-truncate" @click="showMaintenance(props.item)">{{ props.item.price }}</td>
+                        <td class="text-truncate" @click="showMaintenance(props.item)">
+                          {{
+                            _.get(props.item, ["claim_by_owner"])
+                              ? _.get(props.item, ["owner", "name"]) || "N/A"
+                              : _.get(props.item, ["claim_by_tenant"])
+                              ? _.get(props.item, ["tenant", "name"]) || "N/A"
+                              : "N/A"
+                          }}
+                        </td>
+                        <td class="text-truncate">
+                          <print-maintenance-button
+                            :item="props.item"
+                            v-if="props.item.paid"
+                          >
+                            <v-icon small class="mr-2" color="success"
+                              >mdi-printer</v-icon
+                            >
+                          </print-maintenance-button>
+
+                          <v-icon
+                            small
+                            class="mr-2"
+                            @click="
+                              maintenancePayFormDialog = true;
+                              selectedMaintenance = props.item;
+                            "
+                            color="warning"
+                            v-else-if="
+                              helpers.isAccessible(
+                                _.get(role, ['name']),
+                                'roomMaintenance',
+                                'makePayment'
+                              )
+                            "
+                            >mdi-currency-usd</v-icon
+                          >
+                          <v-icon
+                            small
+                            class="mr-2"
+                            @click="openMaintenanceDialog(props.item, true)"
+                            color="success"
+                            v-if="
+                              props.item.paid == true &&
+                              helpers.isAccessible(
+                                _.get(role, ['name']),
+                                'roomMaintenance',
+                                'edit'
+                              )
+                            "
+                            >mdi-pencil</v-icon
+                          >
+
+                          <confirm-dialog
+                            @confirmed="
+                              $event ? deleteMaintenance(props.item) : null
+                            "
+                          >
+                            <template v-slot="{ on }">
+                              <v-icon color="error" size="small" v-on="on"
+                                >mdi-trash-can-outline</v-icon
+                              >
+                            </template>
+                          </confirm-dialog>
+                        </td>
+                      </tr>
+                    </template>
+                  </v-data-table>
+                </v-card>
+              </v-col>
+            </v-row>
+            <v-divider
+              class="mx-3"
+              :color="helpers.managementStyles().dividerColor"
+            ></v-divider>
+            <v-row>
+              <v-col
+                cols="12"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
+                <v-card raised width="100%">
+                  <v-data-table
+                    :headers="cleaningHeaders"
+                    :items="
+                      _.reverse(_.sortBy(data.cleanings || [], ['created_at']))
+                    "
+                    fixed-header
+                    height="300px"
+                    :items-per-page="5"
+                    disable-sort
+                  >
+                    <template v-slot:top>
+                      <v-toolbar flat color="white">
+                        <v-toolbar-title
+                          :class="helpers.managementStyles().subtitleClass"
+                          >Cleaning</v-toolbar-title
+                        >
+                        <v-spacer></v-spacer>
+                      </v-toolbar>
+                    </template>
+                    <template v-slot:item="props">
+                      <tr :key="props.item.uid">
+                        <td class="text-truncate">
+                          {{ props.item.cleaning_type }}
+                        </td>
+                        <td class="text-truncate">
+                          {{ props.item.cleaning_status }}
+                        </td>
+                        <td class="text-truncate">{{ props.item.price }}</td>
+                        <td class="text-truncate">
+                          {{
+                            _.get(props.item, ["claim_by_owner"])
+                              ? _.get(props.item, ["owner", "name"]) || "N/A"
+                              : _.get(props.item, ["claim_by_tenant"])
+                              ? _.get(props.item, ["tenant", "name"]) || "N/A"
+                              : "N/A"
+                          }}
+                        </td>
+                        <td class="text-truncate">
+                          <print-cleaning-button
+                            :item="props.item"
+                            v-if="props.item.paid"
+                          >
+                            <v-icon small class="mr-2" color="success"
+                              >mdi-printer</v-icon
+                            >
+                          </print-cleaning-button>
+
+                          <v-icon
+                            small
+                            class="mr-2"
+                            @click="
+                              cleaningPayFormDialog = true;
+                              selectedCleaning = props.item;
+                            "
+                            color="warning"
+                            v-else-if="
+                              helpers.isAccessible(
+                                _.get(role, ['name']),
+                                'roomMaintenance',
+                                'makePayment'
+                              )
+                            "
+                            >mdi-currency-usd</v-icon
+                          >
+                          <v-icon
+                            small
+                            class="mr-2"
+                            @click="openCleaningDialog(props.item, true)"
+                            color="success"
+                            v-if="
+                              props.item.paid == true &&
+                              helpers.isAccessible(
+                                _.get(role, ['name']),
+                                'roomMaintenance',
+                                'edit'
+                              )
+                            "
+                            >mdi-pencil</v-icon
+                          >
+
+                          <confirm-dialog
+                            @confirmed="
+                              $event ? deleteCleaning(props.item) : null
+                            "
+                          >
+                            <template v-slot="{ on }">
+                              <v-icon color="error" size="small" v-on="on"
+                                >mdi-trash-can-outline</v-icon
+                              >
+                            </template>
+                          </confirm-dialog>
+                        </td>
+                      </tr>
+                    </template>
+                  </v-data-table>
+                </v-card>
+              </v-col>
+            </v-row>
+
             <v-divider
               class="mx-3"
               :color="helpers.managementStyles().dividerColor"
@@ -547,6 +956,68 @@ export default {
             </v-row>
           </v-container>
         </v-card>
+
+        <v-dialog
+          v-model="maintenanceFormDialog"
+          persistent
+          hideOverlay
+          max-width="600px"
+        >
+          <maintenance-form-1
+            :roomId="_.get(this.data, `id`) || null"
+            :selectedData="selectedMaintenance || {}"
+            :reset="maintenanceFormDialog"
+            :editMode="maintenanceEditMode"
+            @cancel="maintenanceFormDialog = false"
+            @submit="updateMaintenance"
+          >
+          </maintenance-form-1>
+        </v-dialog>
+
+        <v-dialog
+          v-model="maintenancePayFormDialog"
+          persistent
+          hideOverlay
+          max-width="600px"
+        >
+          <maintenance-pay-form
+            :uid="_.get(this.selectedMaintenance, ['uid'])"
+            @close="maintenancePayFormDialog = false"
+            @updated="updateMaintenances"
+          >
+          </maintenance-pay-form>
+        </v-dialog>
+
+        <v-dialog
+          v-model="cleaningFormDialog"
+          persistent
+          hideOverlay
+          max-width="600px"
+        >
+          <cleaning-form-1
+            :roomId="_.get(this.data, `id`) || null"
+            :selectedData="selectedCleaning || {}"
+            :reset="cleaningFormDialog"
+            :editMode="cleaningEditMode"
+            @cancel="cleaningFormDialog = false"
+            @submit="updateCleaning"
+          >
+          </cleaning-form-1>
+        </v-dialog>
+
+        <v-dialog
+          v-model="cleaningPayFormDialog"
+          persistent
+          hideOverlay
+          max-width="600px"
+        >
+          <cleaning-pay-form
+            :uid="_.get(this.selectedCleaning, ['uid'])"
+            @close="cleaningPayFormDialog = false"
+            @updated="updateCleanings"
+          >
+          </cleaning-pay-form>
+        </v-dialog>
       </v-container>
     </v-content>
   </v-app>
