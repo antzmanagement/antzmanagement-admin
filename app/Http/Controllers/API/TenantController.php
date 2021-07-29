@@ -416,6 +416,37 @@ class TenantController extends Controller
     
         }
 
+        if($roomContract->agreement_fees > 0){
+            $params = collect([
+                'room_contract_id' => $roomContract->id,
+                'other_charges' => $roomContract->agreement_fees,
+                'paid' => true,
+                'paymentdate' => Carbon::now(),
+                'issue_by' => $request->user()->id,
+            ]);
+            //Convert To Json Object
+            $params = json_decode(json_encode($params));
+            $payment = $this->createPayment($params);
+            $payment = $this->updatePayment($payment, $params);
+            $data = $this->getOtherPaymentTitleByName('Agreement Fees');
+            if (!$this->isEmpty($data)) {
+                $data->price = $this->toDouble($roomContract->agreement_fees);
+                $payment->otherpayments->push($data);
+                $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
+            }else{
+                $params = collect([
+                    'name' => 'Agreement Fees',
+                ]);
+                //Convert To Json Object
+                $params = json_decode(json_encode($params));
+                $data = $this->createOtherPaymentTitle($params);
+                if (!$this->isEmpty($data)) {
+                    $data->price = $this->toDouble($roomContract->agreement_fees);
+                    $payment->otherpayments->push($data);
+                    $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
+                }
+            }
+        }
         DB::commit();
         return $this->successResponse('Tenant', $tenant, 'create');
     }

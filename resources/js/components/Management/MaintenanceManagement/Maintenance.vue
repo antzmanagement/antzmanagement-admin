@@ -262,12 +262,13 @@ export default {
                   </v-card>
                 </div>
               </v-col>
-
+            </v-row>
+              
               <v-divider
                 class="mx-3"
                 :color="helpers.managementStyles().dividerColor"
-                v-if="_.isPlainObject(data.owner) && !_.isEmpty(data.owner)"
               ></v-divider>
+              <v-row>
               <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Paid</label>

@@ -173,7 +173,22 @@ trait RoomContractServices
                 return Carbon::parse(data_get($item, 'enddate'))->lte($date);
             })->values();
         }
-
+        
+        if ($params->createdDateFromDate) {
+            $date = Carbon::parse($params->createdDateFromDate);
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($date) {
+                return Carbon::parse(data_get($item, 'created_at'))->gte($date);
+            })->values();
+        }
+        
+        if ($params->createdDateToDate) {
+            $date = Carbon::parse($params->createdDateToDate)->endOfDay();
+            $data = $data->filter(function ($item) use ($date) {
+                return Carbon::parse(data_get($item, 'created_at'))->lte($date);
+            })->values();
+        }
+        
 
 
         $data = $data->unique('id')->sortBy(function ($item, $key) {
@@ -695,6 +710,7 @@ trait RoomContractServices
     }
     public function roomContractFilterCols()
     {
-        return ['keyword', 'startDateFromDate', 'startDateToDate', 'endDateFromDate', 'endDateToDate', 'tenant_id', 'owner_id', 'service_ids', 'room_id', 'checkedout', 'outstanding_deposit', 'sequence'];
+        return ['keyword', 'startDateFromDate', 'startDateToDate', 'endDateFromDate', 'endDateToDate', 
+        'createdDateFromDate', 'createdDateToDate', 'tenant_id', 'owner_id', 'service_ids', 'room_id', 'checkedout', 'outstanding_deposit', 'sequence'];
     }
 }

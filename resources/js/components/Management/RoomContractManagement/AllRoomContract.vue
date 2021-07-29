@@ -211,6 +211,12 @@ export default {
       if (filterGroup.endDateToDate) {
         this.roomContractFilterGroup.endDateToDate = filterGroup.endDateToDate;
       }
+      if (filterGroup.createdDateFromDate) {
+        this.roomContractFilterGroup.createdDateFromDate = filterGroup.createdDateFromDate;
+      }
+      if (filterGroup.createdDateToDate) {
+        this.roomContractFilterGroup.createdDateToDate = filterGroup.createdDateToDate;
+      }
       if (filterGroup.sequence) {
         this.roomContractFilterGroup.sequence = filterGroup.sequence;
       }
@@ -270,7 +276,6 @@ export default {
       let promises = [];
       let self = this;
       _.forEach(_.range(maxPage), function (index) {
-        console.log(index);
         promises.push(
           self.filterRoomContractsAction({
             pageSize: size,
@@ -280,7 +285,6 @@ export default {
       });
 
       let responses = await Promise.all(promises);
-      console.log(responses);
       let finalData = [];
       _.forEach(responses, function (response) {
         finalData = _.compact(

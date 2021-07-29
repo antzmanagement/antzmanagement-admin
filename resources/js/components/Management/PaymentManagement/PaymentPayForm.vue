@@ -25,7 +25,7 @@ export default {
   },
   data() {
     return {
-      paymentMethods: ["cash", "online_transfer", "credit"],
+      paymentMethods: ["cash", "online_transfer", 'eWallet', "credit"],
       _: _,
       menu: false,
       otherPaymentDialog: false,
@@ -184,6 +184,7 @@ export default {
           this.data.processing_fees = 3;
           break;
         case "online_transfer":
+        case 'eWallet':
           this.data.processing_fees = 0;
           break;
         case "credit":
@@ -289,13 +290,13 @@ export default {
           <v-col cols="12">
             <v-text-field label="Remark" v-model="data.remark"></v-text-field>
           </v-col>
-          <v-col cols="12" v-if="editMode">
+          <!-- <v-col cols="12" v-if="editMode">
             <div>Paid Status</div>
             <v-radio-group v-model="data.paid" row>
               <v-radio label="Paid" :value="1"></v-radio>
               <v-radio label="Unpaid" :value="0"></v-radio>
             </v-radio-group>
-          </v-col>
+          </v-col> -->
         </v-row>
       </v-container>
     </v-card-text>

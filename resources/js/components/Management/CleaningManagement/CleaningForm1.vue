@@ -387,13 +387,13 @@ export default {
               ></v-date-picker>
             </v-menu>
           </v-col>  
-          <v-col cols="12" v-if="paidStatus && (data.claim_by_owner || data.claim_by_tenant)">
+          <!-- <v-col cols="12" v-if="paidStatus && (data.claim_by_owner || data.claim_by_tenant)">
             <div>Paid Status</div>
             <v-radio-group v-model="data.paid" row>
               <v-radio label="Paid" :value="1"></v-radio>
               <v-radio label="Unpaid" :value="0"></v-radio>
             </v-radio-group>
-          </v-col>
+          </v-col> -->
           <v-col cols="12">
             <v-textarea
               label="Remark"

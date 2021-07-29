@@ -19,7 +19,9 @@ trait ServiceServices
 
         $data = Service::where('status', true)->get();
 
-        $data = $data->unique('id')->sortByDesc('id')->flatten(1);
+        $data = $data->unique('id')->sortBy(function ($item, $key) {
+            return $item->name;
+        })->flatten(1);
 
         return $data;
     }
@@ -42,7 +44,9 @@ trait ServiceServices
         }
        
 
-        $data = $data->unique('id');
+        $data = $data->unique('id')->sortBy(function ($item, $key) {
+            return $item->name;
+        })->flatten(1);
 
         return $data;
     }

@@ -26,7 +26,7 @@ export default {
     return {
       _: _,
       menu: false,
-      paymentMethods: ["cash", "online_transfer", "credit"],
+      paymentMethods: ["cash", "online_transfer", 'eWallet', "credit"],
       origPrice: 0,
       data: new Form({
         paymentdate: moment().format("YYYY-MM-DD"),

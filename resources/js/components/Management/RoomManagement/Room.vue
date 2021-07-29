@@ -443,7 +443,7 @@ export default {
                   <div class="form-control-plaintext">
                     <v-chip
                       class="ma-2"
-                      v-for="roomcontract in data.roomcontracts"
+                      v-for="roomcontract in _.sortBy(data.roomcontracts, ['startdate'])"
                       :key="roomcontract.uid"
                       :to="{
                         name: 'roomcontract',

@@ -46,6 +46,8 @@ export default {
       startDateToMenu: false,
       endDateFromMenu: false,
       endDateToMenu: false,
+      createdDateFromMenu: false,
+      createdDateToMenu: false,
       dialog: false,
       tenants: [],
       services: [],
@@ -304,6 +306,83 @@ export default {
                         class="btn"
                         v-if="data.endDateToDate"
                         @click="data.endDateToDate = ''"
+                        >mdi-close</v-icon
+                      >
+                    </span>
+                  </div>
+                </span>
+              </div>
+            </v-col>
+            <v-col cols="6">
+              <div>Room Contract Created Date</div>
+              <div class="d-flex justify-start">
+                <span class="d-inline-block mr-5">
+                  <div class="d-flex align-center">
+                    <span class="d-inline-block half-width">
+                      <v-menu
+                        ref="menu"
+                        v-model="createdDateFromMenu"
+                        :close-on-content-click="false"
+                        transition="scale-transition"
+                        offset-y
+                      >
+                        <template v-slot:activator="{ on }">
+                          <v-text-field
+                            v-model="data.createdDateFromDate"
+                            label="From Date"
+                            readonly
+                            v-on="on"
+                          ></v-text-field>
+                        </template>
+                        <v-date-picker
+                          v-model="data.createdDateFromDate"
+                          no-title
+                          scrollable
+                          :max="data.createdDateToDate"
+                        ></v-date-picker>
+                      </v-menu>
+                    </span>
+                    <span class="d-inline-block">
+                      <v-icon
+                        class="btn"
+                        v-if="data.createdDateFromDate"
+                        @click="data.createdDateFromDate = ''"
+                        >mdi-close</v-icon
+                      >
+                    </span>
+                  </div>
+                </span>
+                <span class="d-inline-block">
+                  <div class="d-flex align-center">
+                    <span class="d-inline-block half-width">
+                      <v-menu
+                        ref="menu"
+                        v-model="createdDateToMenu"
+                        :close-on-content-click="false"
+                        transition="scale-transition"
+                        offset-y
+                      >
+                        <template v-slot:activator="{ on }">
+                          <v-text-field
+                            v-model="data.createdDateToDate"
+                            label="To Date"
+                            readonly
+                            v-on="on"
+                          ></v-text-field>
+                        </template>
+                        <v-date-picker
+                          v-model="data.createdDateToDate"
+                          no-title
+                          scrollable
+                          :min="data.createdDateFromDate"
+                        ></v-date-picker>
+                      </v-menu>
+                    </span>
+                    <span class="d-inline-block">
+                      <v-icon
+                        class="btn"
+                        v-if="data.createdDateToDate"
+                        @click="data.createdDateToDate = ''"
                         >mdi-close</v-icon
                       >
                     </span>

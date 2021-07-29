@@ -26,8 +26,9 @@ export default {
     return {
       _: _,
       menu: false,
-      paymentMethods: ["cash", "online_transfer", "credit"],
+      paymentMethods: ["cash", "online_transfer", "eWallet", "credit"],
       penaltyRate: 3,
+      expiredDays: 10,
       origPrice: 0,
       data: new Form({
         paymentdate: moment().format("YYYY-MM-DD"),
@@ -62,8 +63,7 @@ export default {
   },
   mounted() {
     this.getRentalPayment();
-    this.authenticateAction().then((res) => {
-    });
+    this.authenticateAction().then((res) => {});
   },
   methods: {
     ...mapActions({
@@ -95,6 +95,7 @@ export default {
           this.endLoadingAction();
         })
         .catch((error) => {
+          console.log(error);
           Toast.fire({
             icon: "warning",
             title: "Fail to retrieve the rental!!!!! ",
@@ -180,19 +181,26 @@ export default {
         });
     },
     updateProcessingFees() {
-      let price = !_.isNaN(parseFloat(this.data.price)) ? parseFloat(this.data.price) : 0;
-      let penalty = !_.isNaN(parseFloat(this.data.penalty)) ? parseFloat(this.data.penalty) : 0;
+      let price = !_.isNaN(parseFloat(this.data.price))
+        ? parseFloat(this.data.price)
+        : 0;
+      let penalty = !_.isNaN(parseFloat(this.data.penalty))
+        ? parseFloat(this.data.penalty)
+        : 0;
       switch (this.data.paymentmethod) {
-        case 'cash':
+        case "cash":
           this.data.processing_fees = 3;
           break;
-        case 'online_transfer':
+        case "online_transfer":
+        case "eWallet":
           this.data.processing_fees = 0;
           break;
-        case 'credit':
-          this.data.processing_fees = parseFloat(((price + penalty) * 0.02).toFixed(2));
+        case "credit":
+          this.data.processing_fees = parseFloat(
+            ((price + penalty) * 0.02).toFixed(2)
+          );
           break;
-      
+
         default:
           this.data.processing_fees = 0;
           break;
@@ -298,13 +306,13 @@ export default {
           <v-col cols="12">
             <v-text-field label="Remark" v-model="data.remark"></v-text-field>
           </v-col>
-          <v-col cols="12" v-if="editMode">
+          <!-- <v-col cols="12" v-if="editMode">
             <div>Paid Status</div>
             <v-radio-group v-model="data.paid" row>
               <v-radio label="Paid" :value="1"></v-radio>
               <v-radio label="Unpaid" :value="0"></v-radio>
             </v-radio-group>
-          </v-col>
+          </v-col> -->
         </v-row>
       </v-container>
     </v-card-text>

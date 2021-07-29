@@ -43,12 +43,14 @@ class RoomContractController extends Controller
             'startDateToDate' => $request->startDateToDate,
             'endDateFromDate' => $request->endDateFromDate,
             'endDateToDate' => $request->endDateToDate,
+            'createdDateFromDate' => $request->createdDateFromDate,
+            'createdDateToDate' => $request->createdDateToDate,
             'sequence' => $request->sequence,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
         $roomContracts = $this->getRoomContracts($request->user());
-        $roomContracts = $this->filterRoomContracts( $roomContracts , $params);
+        $roomContracts = $this->filterRoomContracts( $roomContracts , $request);
 
         if ($this->isEmpty($roomContracts)) {
             return $this->errorPaginateResponse('RoomContracts');

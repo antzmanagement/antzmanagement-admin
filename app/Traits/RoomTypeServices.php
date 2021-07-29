@@ -25,7 +25,10 @@ trait RoomTypeServices
             $q->where('services.status', true);
         }])->get();
 
-        $data = $data->unique('id')->sortByDesc('id')->flatten(1);
+
+        $data = $data->unique('id')->sortBy(function ($item, $key) {
+            return $item->name;
+        })->flatten(1);
 
         return $data;
     }
@@ -61,7 +64,9 @@ trait RoomTypeServices
             }
         }
 
-        $data = $data->unique('id');
+        $data = $data->unique('id')->sortBy(function ($item, $key) {
+            return $item->name;
+        })->flatten(1);
 
         return $data;
     }

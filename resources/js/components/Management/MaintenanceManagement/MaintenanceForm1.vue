@@ -100,6 +100,7 @@ export default {
           ),
           "id"
         );
+        console.log(tenants);
         return _.isArray(tenants) && !_.isEmpty(tenants) ? tenants : [];
       } else {
         return [];
@@ -181,7 +182,6 @@ export default {
             });
 
             this.data.room = selectedRoom;
-            this.getRoomContracts();
           }
 
           if (this.editMode && this.selectedData) {
@@ -204,6 +204,11 @@ export default {
             this.paidStatus = this.selectedData.paid;
             this.data = new Form(this.selectedData);
           }
+
+
+            if(_.get(this.data , `room.id`)){
+              this.getRoomContracts();
+            }
           this.endLoadingAction();
         })
         .catch((error) => {
@@ -228,7 +233,6 @@ export default {
       if (_.get(this.data, `claim_by_tenant`)) {
         this.data.claim_by_owner = false;
         this.data.owner = null;
-        this.getRoomContracts();
       } else {
         this.data.tenant = {};
       }
@@ -358,6 +362,7 @@ export default {
               label="Room"
               chips
               return-object
+              @change="getRoomContracts()"
             >
             </v-autocomplete>
           </v-col>
@@ -415,7 +420,7 @@ export default {
               chips
               return-object
             >
-              <template v-slot:append-outer>
+              <template v-slot:prepend>
                 <property-filter-dialog
                   :buttonStyle="propertyFilterDialogConfig.buttonStyle"
                   :dialogStyle="propertyFilterDialogConfig.dialogStyle"
@@ -475,7 +480,7 @@ export default {
               ></v-date-picker>
             </v-menu>
           </v-col>
-          <v-col
+          <!-- <v-col
             cols="12"
             v-if="paidStatus && (data.claim_by_owner || data.claim_by_tenant)"
           >
@@ -484,7 +489,7 @@ export default {
               <v-radio label="Paid" :value="1"></v-radio>
               <v-radio label="Unpaid" :value="0"></v-radio>
             </v-radio-group>
-          </v-col>
+          </v-col> -->
           <v-col cols="12">
             <v-textarea
               label="Remark"
