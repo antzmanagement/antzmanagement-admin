@@ -114,9 +114,15 @@ export default {
       }
     },
     calculatePenalty(data) {
+      if (!_.isNumber(parseInt(this.expiredDays))) {
+        this.expiredDays = 10;
+      }
       let rentaldate = moment(data.rentaldate);
+      console.log(rentaldate);
       let diff = moment().diff(rentaldate, "days", false);
-      let overDays = diff - parseInt(this.expiredDays);
+      console.log(diff);
+      let overDays = diff + 1 - (parseInt(this.expiredDays) || 10);
+      console.log(overDays);
       if (overDays > 0) {
         return overDays * this.penaltyRate;
       } else {
@@ -215,7 +221,7 @@ export default {
     <v-card-text>
       <v-container>
         <v-row>
-          <v-col cols="12">
+          <v-col cols="12" v-if="!editMode || data.paid">
             <v-text-field
               label="Reference No"
               v-model="data.referenceno"
@@ -233,33 +239,31 @@ export default {
               v-model="data.issue_by"
             ></v-text-field>
           </v-col> -->
-          <v-col cols="12">
+          <v-col cols="12" v-if="!editMode || data.paid">
             <v-select
               :items="paymentMethods"
               v-model="data.paymentmethod"
               label="Payment Method"
               @change="updateProcessingFees"
+              :disabled="data.paid == true"
             ></v-select>
           </v-col>
-          <v-col cols="12">
+          <v-col cols="12" v-if="!editMode || data.paid">
             <v-menu
               ref="menu"
               v-model="menu"
               :close-on-content-click="false"
               transition="scale-transition"
               offset-y
+              :disabled="data.paid == true"
             >
               <template v-slot:activator="{ on }">
                 <v-text-field
+                  :disabled="data.paid == true"
                   v-model="data.paymentdate"
                   label="Payment Date"
                   readonly
                   v-on="on"
-                  :error-messages="
-                    helpers.isEmpty(data.paymentdate)
-                      ? 'Payment Date is required'
-                      : ''
-                  "
                 ></v-text-field>
               </template>
               <v-date-picker
@@ -276,6 +280,7 @@ export default {
               step="0.01"
               v-model="data.price"
               @change="updateProcessingFees"
+              :disabled="data.paid == true"
             ></v-text-field>
           </v-col>
           <!-- <v-col cols="12">
@@ -292,6 +297,7 @@ export default {
               type="number"
               step="0.01"
               v-model="data.processing_fees"
+              :disabled="data.paid == true"
             ></v-text-field>
           </v-col>
           <v-col cols="12">
@@ -301,6 +307,7 @@ export default {
               step="0.01"
               v-model="data.penalty"
               @change="updateProcessingFees"
+              :disabled="data.paid == true"
             ></v-text-field>
           </v-col>
           <v-col cols="12">

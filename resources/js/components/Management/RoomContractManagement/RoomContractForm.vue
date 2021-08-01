@@ -53,6 +53,7 @@ export default {
       dialog: false,
       rooms: [],
       tenants: [],
+      staffs: [],
       contracts: [],
       properties: [],
       isSubContract: false,
@@ -76,10 +77,10 @@ export default {
           text: "Partial Payment (Deposit)",
           width: "150px",
         },
-        {
-          text: "Outstanding Deposit",
-          width: "150px",
-        },
+        // {
+        //   text: "Outstanding",
+        //   width: "150px",
+        // },
         {
           text: "Contract",
           width: "150px",
@@ -103,6 +104,7 @@ export default {
       ],
       data: new Form({
         tenant: "",
+        pic: "",
         remark: "",
         room: null,
       }),
@@ -236,8 +238,8 @@ export default {
                 data.data.agreement_fees
               );
               data.data.room.booking_fees = parseFloat(data.data.booking_fees) || 0;
-              data.data.room.outstanding_deposit = parseFloat(
-                data.data.outstanding_deposit
+              data.data.room.outstanding = parseFloat(
+                data.data.outstanding
               )|| 0;
               data.data.room.origPrice = parseFloat(data.data.room.price);
               data.data.room.price = parseFloat(data.data.rental);
@@ -267,9 +269,10 @@ export default {
     promises.push(this.getRoomsAction({ pageNumber: -1, pageSize: -1 }));
     promises.push(this.getContractsAction({ pageNumber: -1, pageSize: -1 }));
     promises.push(this.getTenantsAction({ pageNumber: -1, pageSize: -1 }));
+    promises.push(this.getStaffsAction({ pageNumber: -1, pageSize: -1 }));
 
     Promise.all(promises)
-      .then(([rooms, contracts, tenants]) => {
+      .then(([rooms, contracts, tenants, staffs]) => {
         this.rooms = rooms.data.map(function (room) {
           if (
             room.room_types.length > 0 &&
@@ -286,13 +289,14 @@ export default {
           room.deposit = 700;
           room.booking_fees = 200;
           room.agreement_fees = 50;
-          room.outstanding_deposit = room.deposit + room.agreement_fees - room.booking_fees;
+          room.outstanding = room.deposit + room.agreement_fees - room.booking_fees;
           room.autorenew = false;
           return room;
         });
 
         this.contracts = contracts.data;
         this.tenants = tenants.data;
+        this.staffs = staffs.data;
         this.endLoadingAction();
 
         if (this.editMode && this.uid) {
@@ -319,8 +323,8 @@ export default {
                 data.data.agreement_fees
               );
               data.data.room.booking_fees = parseFloat(data.data.booking_fees);
-              data.data.room.outstanding_deposit = parseFloat(
-                data.data.outstanding_deposit
+              data.data.room.outstanding = parseFloat(
+                data.data.outstanding
               );
               data.data.room.origPrice = parseFloat(data.data.room.price);
               data.data.room.price = parseFloat(data.data.rental);
@@ -355,6 +359,7 @@ export default {
       getRoomsAction: "getRooms",
       getTenantsAction: "getTenants",
       getContractsAction: "getContracts",
+      getStaffsAction: "getStaffs",
       getRoomContractAction: "getRoomContract",
       filterRoomsAction: "filterRooms",
       filterTenantsAction: "filterTenants",
@@ -607,13 +612,13 @@ export default {
       let booking_fees = !_.isNaN(parseFloat(_.get(this.data.room, `booking_fees`)))
         ? parseFloat(_.get(this.data.room, `booking_fees`))
         : 0;
-      let outstanding_deposit = deposit + agreement_fees - booking_fees;
+      let outstanding = deposit + agreement_fees - booking_fees;
       this.data.room = {
         ...this.data.room,
         deposit,
         agreement_fees,
         booking_fees,
-        outstanding_deposit,
+        outstanding,
       };
     },
     console(){
@@ -670,30 +675,26 @@ export default {
           <v-row>
             <v-col cols="12" md="12">
               <v-autocomplete
+                v-model="data.pic"
+                :items="staffs || []"
+                item-text="name"
+                item-value="id"
+                label="Person In Charge"
+                :error-messages="!data.pic ? 'Person In Charge is required' : ''"
+              >
+              </v-autocomplete>
+            </v-col>
+            <v-col cols="12" md="12">
+              <v-autocomplete
                 v-model="data.tenant"
                 :items="tenants || []"
                 item-value="id"
                 item-text="name"
                 label="Tenant"
                 :error-messages="
-                  helpers.isEmpty(data.tenant) ? 'Tenant is required' : ''
+                  !data.tenant ? 'Tenant is required' : ''
                 "
               >
-                <!-- <template v-slot:append>
-                  <room-form
-                    :editMode="false"
-                    :dialogStyle="roomFormDialogConfig.dialogStyle"
-                    :buttonStyle="roomFormDialogConfig.buttonStyle"
-                    @created="appendRoomList($event)"
-                  ></room-form>
-                </template>-->
-                <template v-slot:append-outer>
-                  <tenant-filter-dialog
-                    :buttonStyle="roomFilterDialogConfig.buttonStyle"
-                    :dialogStyle="roomFilterDialogConfig.dialogStyle"
-                    @submitFilter="initTenantFilter($event)"
-                  ></tenant-filter-dialog>
-                </template>
               </v-autocomplete>
             </v-col>
             <v-col cols="12" md="12">
@@ -706,21 +707,6 @@ export default {
                 return-object
                 :disabled="editMode"
               >
-                <!-- <template v-slot:append>
-                  <room-form
-                    :editMode="false"
-                    :dialogStyle="roomFormDialogConfig.dialogStyle"
-                    :buttonStyle="roomFormDialogConfig.buttonStyl·e"
-                    @created="appendRoomList($event)"
-                  ></room-form>
-                </template>-->
-                <template v-slot:append-outer>
-                  <room-filter-dialog
-                    :buttonStyle="roomFilterDialogConfig.buttonStyle"
-                    :dialogStyle="roomFilterDialogConfig.dialogStyle"
-                    @submitFilter="initRoomFilter($event)"
-                  ></room-filter-dialog>
-                </template>
               </v-autocomplete>
             </v-col>
             <v-col cols="12">
@@ -793,20 +779,20 @@ export default {
                           @change="updateOutstanding"
                         ></v-text-field>
                       </td>
-                      <td class="text-truncate">
+                      <!-- <td class="text-truncate">
                         <v-text-field
-                          v-model="props.item.outstanding_deposit"
+                          v-model="props.item.outstanding"
                           prefix="RM"
                           type="number"
                           step="0.01"
                           :error-messages="
-                            (props.item.outstanding_deposit == null || props.item.outstanding_deposit == '') && props.item.outstanding_deposit != 0
+                            (props.item.outstanding == null || props.item.outstanding == '') && props.item.outstanding != 0
                               ? 'Outstanding deposit is required'
                               : ''
                           "
                           @change="console"
                         ></v-text-field>
-                      </td>
+                      </td> -->
                       <td class="text-truncate">
                         <v-autocomplete
                           v-model="props.item.contract_id"

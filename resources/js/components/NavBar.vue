@@ -190,10 +190,7 @@ export default {
             <v-list-item-content>
               <v-list-item-title>{{ item.text }}</v-list-item-title>
             </v-list-item-content>
-          </v-list-item>
-        </v-list>
-
-        <v-list :style="{ position: 'absolute', bottom: '0', left: '0' }" dense>
+          </v-list-item>    
           <v-list-item @click="logout">
             <v-list-item-action>
               <v-icon>mdi-logout</v-icon>
@@ -203,6 +200,7 @@ export default {
             </v-list-item-content>
           </v-list-item>
         </v-list>
+
       </v-navigation-drawer>
     </v-theme-provider>
 

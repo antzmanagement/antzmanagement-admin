@@ -787,7 +787,6 @@ export default {
                             @click="openMaintenanceDialog(props.item, true)"
                             color="success"
                             v-if="
-                              props.item.paid == true &&
                               helpers.isAccessible(
                                 _.get(role, ['name']),
                                 'roomMaintenance',
@@ -895,7 +894,6 @@ export default {
                             @click="openCleaningDialog(props.item, true)"
                             color="success"
                             v-if="
-                              props.item.paid == true &&
                               helpers.isAccessible(
                                 _.get(role, ['name']),
                                 'roomMaintenance',

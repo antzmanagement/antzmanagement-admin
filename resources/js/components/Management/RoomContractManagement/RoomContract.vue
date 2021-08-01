@@ -1,6 +1,6 @@
 
 <script>
-import moment from 'moment';
+import moment from "moment";
 import { mapActions } from "vuex";
 import { _ } from "../../../common/common-function";
 import PrintPaymentButton from "../PaymentManagement/PrintPaymentButton.vue";
@@ -197,6 +197,11 @@ export default {
     showTenant($data) {
       this.$router.push("/tenant/" + $data.uid);
     },
+    showStaff($data) {
+      if (_.get($data, `uid`)) {
+        this.$router.push("/staff/" + $data.uid);
+      }
+    },
     showService($data) {
       this.$router.push("/service/" + $data.uid);
     },
@@ -260,16 +265,16 @@ export default {
         payment.otherpayments = _.map(payment.otherpayments, (otherpayment) => {
           if (otherpayment.name == "Deposit") {
             if (payment.paid) {
-              console.log(parseFloat(this.data.outstanding_deposit));
+              console.log(parseFloat(this.data.outstanding));
               console.log(parseFloat(otherpayment.pivot.price));
-              this.data.outstanding_deposit =
-                (parseFloat(this.data.outstanding_deposit) || 0) -
+              this.data.outstanding =
+                (parseFloat(this.data.outstanding) || 0) -
                 parseFloat(otherpayment.pivot.price);
 
-              console.log(this.data.outstanding_deposit);
+              console.log(this.data.outstanding);
             } else {
-              this.data.outstanding_deposit =
-                parseFloat(this.data.outstanding_deposit) ||
+              this.data.outstanding =
+                parseFloat(this.data.outstanding) ||
                 0 + parseFloat(otherpayment.price) ||
                 0;
             }
@@ -332,7 +337,7 @@ export default {
       ) {
         _.forEach(data.otherpayments, (otherpayment) => {
           if (otherpayment.name == "Deposit") {
-            this.data.outstanding_deposit = 0;
+            this.data.outstanding = 0;
           }
         });
       }
@@ -470,12 +475,24 @@ export default {
               :color="helpers.managementStyles().dividerColor"
             ></v-divider>
             <v-row justify="start" align="center" class="pa-2">
-              <v-col cols="12">
+              <v-col cols="6">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Name</label>
                   <div class="form-control-plaintext">
                     <v-chip class="ma-2">
                       <h4 class="text-center ma-2">{{ data.name }}</h4>
+                    </v-chip>
+                  </div>
+                </div>
+              </v-col>
+              <v-col cols="6">
+                <div class="form-group mb-0">
+                  <label class="form-label mb-0">Person In Charge</label>
+                  <div class="form-control-plaintext">
+                    <v-chip class="ma-2" @click="showStaff(data.creator)">
+                      <h4 class="text-center ma-2">
+                        {{ _.get(data, "creator.name") || "N/A" }}
+                      </h4>
                     </v-chip>
                   </div>
                 </div>
@@ -639,22 +656,22 @@ export default {
                   </div>
                 </div>
               </v-col>
-              <v-col cols="12" md="4">
+              <!-- <v-col cols="12" md="4">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Booking fees</label>
                   <div class="form-control-plaintext">
                     <h4>RM {{ data.booking_fees }}</h4>
                   </div>
                 </div>
-              </v-col>
-              <v-col cols="12" md="4">
+              </v-col> -->
+              <!-- <v-col cols="12" md="4">
                 <div class="form-group mb-0">
-                  <label class="form-label mb-0">Outstanding Deposit</label>
+                  <label class="form-label mb-0">Outstanding</label>
                   <div class="form-control-plaintext">
-                    <h4>RM {{ data.outstanding_deposit }}</h4>
+                    <h4>RM {{ data.outstanding }}</h4>
                   </div>
                 </div>
-              </v-col>
+              </v-col> -->
               <!-- <v-col cols="12">
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Terms</label>
@@ -906,7 +923,6 @@ export default {
                             @click="openPaymentDialog(props.item.uid, true)"
                             color="success"
                             v-if="
-                              props.item.paid == true &&
                               helpers.isAccessible(
                                 _.get(role, ['name']),
                                 'rentalPayment',
@@ -966,7 +982,7 @@ export default {
                         >
                         <v-spacer></v-spacer>
                         <!-- <v-btn
-                          v-if="data.outstanding_deposit > 0"
+                          v-if="data.outstanding > 0"
                           color="success"
                           dark
                           class="mb-2 mr-2"
@@ -1065,7 +1081,6 @@ export default {
                             "
                             color="success"
                             v-if="
-                              props.item.paid == true &&
                               helpers.isAccessible(
                                 _.get(role, ['name']),
                                 'rentalPayment',
@@ -1174,7 +1189,7 @@ export default {
             :editMode="this.editMode"
             @createPayment="
               ($event) => {
-                this.data.outstanding_deposit = 0;
+                this.data.outstanding = 0;
                 updatePaymentDetails($event);
               }
             "

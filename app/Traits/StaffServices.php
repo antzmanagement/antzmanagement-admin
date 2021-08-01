@@ -57,14 +57,7 @@ trait StaffServices
             $q->wherePivot('status', true);
         }, 'role' => function ($q) {
             $q->where('status', true);
-            $q->with(['modules' => function($q1){
-                $q1->wherePivot('status', true);
-                $q1->with(['actions' => function($q2){
-                    $q2->where('status', true);
-                }]);
-
-            }]);
-        }])->where('uid', $uid)->wherePivot('status', 1)->where('users.status', true)->first();
+        }])->where('uid', $uid)->where('users.status', 1)->first();
         return $data;
     }
 
@@ -75,14 +68,7 @@ trait StaffServices
             $q->wherePivot('status', true);
         }, 'role' => function ($q) {
             $q->where('status', true);
-            $q->with(['modules' => function($q1){
-                $q1->wherePivot('status', true);
-                $q1->with(['actions' => function($q2){
-                    $q2->where('status', true);
-                }]);
-
-            }]);
-        }])->where('id', $id)->wherePivot('status', 1)->first();
+        }])->where('users.id', $id)->where('users.status', true)->first();
         return $data;
     }
 

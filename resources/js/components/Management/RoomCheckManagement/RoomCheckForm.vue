@@ -73,13 +73,15 @@ export default {
         { text: "Maintenance Status" },
         { text: "Price (RM)" },
         { text: "Claimed By" },
-        { text: "Actions" },
+        { text: "Maintenance Date" },
+        { text: "Claimed By" },
       ],
       cleaningHeaders: [
         { text: "Cleaning Type" },
         { text: "Cleaning Status" },
         { text: "Price (RM)" },
         { text: "Claimed By" },
+        { text: "Cleaning Date" },
         { text: "Actions" },
       ],
     };
@@ -476,14 +478,15 @@ export default {
                           : "N/A"
                       }}
                     </td>
+                    <td class="text-truncate">{{ props.item.maintenance_date || 'N/A' }}</td>
                     <td class="text-truncate">
-                      <v-icon
+                      <!-- <v-icon
                         small
                         class="mr-2"
                         @click="openMaintenanceDialog(props.item, true)"
                         color="success"
                         >mdi-pencil</v-icon
-                      >
+                      > -->
 
                       <confirm-dialog
                         @confirmed="
@@ -540,14 +543,15 @@ export default {
                           : "N/A"
                       }}
                     </td>
+                    <td class="text-truncate">{{ props.item.cleaning_date || 'N/A' }}</td>
                     <td class="text-truncate">
-                      <v-icon
+                      <!-- <v-icon
                         small
                         class="mr-2"
                         @click="openCleaningDialog(props.item, true)"
                         color="success"
                         >mdi-pencil</v-icon
-                      >
+                      > -->
 
                       <confirm-dialog
                         @confirmed="$event ? deleteCleaning(props.item) : null"

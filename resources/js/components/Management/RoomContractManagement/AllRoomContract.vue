@@ -124,7 +124,7 @@ export default {
         booking_fees: "booking_fees",
         deposit: "deposit",
         agreement_fees: "agreement_fees",
-        outstanding_deposit: "outstanding_deposit",
+        outstanding: "outstanding",
         checkedout: {
           field: "sublet",
           callback: (value) => (value ? "Yes" : "No"),
@@ -224,11 +224,11 @@ export default {
         this.roomContractFilterGroup.checkedout = filterGroup.checkedout;
       }
       if (
-        filterGroup.outstanding_deposit === 1 ||
-        filterGroup.outstanding_deposit === 0
+        filterGroup.outstanding === 1 ||
+        filterGroup.outstanding === 0
       ) {
-        this.roomContractFilterGroup.outstanding_deposit =
-          filterGroup.outstanding_deposit;
+        this.roomContractFilterGroup.outstanding =
+          filterGroup.outstanding;
       }
       console.log(this.roomContractFilterGroup);
       this.options.page = 1;
@@ -387,13 +387,13 @@ export default {
               </v-card-subtitle>
               <v-card-subtitle
                 v-show="
-                  roomContractFilterGroup.outstanding_deposit === 1 ||
-                  roomContractFilterGroup.outstanding_deposit === 0
+                  roomContractFilterGroup.outstanding === 1 ||
+                  roomContractFilterGroup.outstanding === 0
                 "
               >
                 Outstanding Deposit :
                 <v-chip class="mx-2">{{
-                  roomContractFilterGroup.outstanding_deposit ? "Yes" : "No"
+                  roomContractFilterGroup.outstanding ? "Yes" : "No"
                 }}</v-chip>
               </v-card-subtitle>
               <v-card-subtitle

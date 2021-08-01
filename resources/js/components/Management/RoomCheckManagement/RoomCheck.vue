@@ -31,6 +31,7 @@ export default {
       { text: "Maintenance Status" },
       { text: "Price (RM)" },
       { text: "Claimed By" },
+      { text: "Maintenance Date" },
       { text: "Actions" },
     ],
     cleaningHeaders: [
@@ -38,6 +39,7 @@ export default {
       { text: "Cleaning Status" },
       { text: "Price (RM)" },
       { text: "Claimed By" },
+      { text: "Cleaning Date" },
       { text: "Actions" },
     ],
     deleteButtonConfig: {
@@ -433,6 +435,7 @@ export default {
                               : "N/A"
                           }}
                         </td>
+                        <td class="text-truncate">{{ props.item.maintenance_date || 'N/A' }}</td>
                         <td class="text-truncate">
                           <print-maintenance-button
                             :item="props.item"
@@ -466,7 +469,6 @@ export default {
                             @click="openMaintenanceDialog(props.item, true)"
                             color="success"
                             v-if="
-                              props.item.paid == true &&
                               helpers.isAccessible(
                                 _.get(role, ['name']),
                                 'roomMaintenance',
@@ -539,6 +541,7 @@ export default {
                               : "N/A"
                           }}
                         </td>
+                        <td class="text-truncate">{{ props.item.cleaning_date || 'N/A' }}</td>
                         <td class="text-truncate">
                           <print-cleaning-button
                             :item="props.item"
@@ -572,7 +575,6 @@ export default {
                             @click="openCleaningDialog(props.item, true)"
                             color="success"
                             v-if="
-                              props.item.paid == true &&
                               helpers.isAccessible(
                                 _.get(role, ['name']),
                                 'roomMaintenance',

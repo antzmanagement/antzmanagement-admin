@@ -136,17 +136,6 @@ class PaymentController extends Controller
                 }
             }
         }
-
-        if(collect($payment->otherpayments)->contains('name', 'Deposit')){
-            $roomcontract = $this->getRoomContractById($payment->room_contract_id);
-            if ($this->isEmpty($roomcontract)) {
-                DB::rollBack();
-                return $this->errorResponse();
-            }
-            $roomcontract->outstanding_deposit = $payment->other_charges;
-            $roomcontract = $this->updateRoomContract($roomcontract, $roomcontract);
-        }
-        
         
 
         DB::commit();
@@ -229,16 +218,6 @@ class PaymentController extends Controller
             $payment->otherpayments()->sync($finalotherpayments);
         }
         
-        if(collect($payment->otherpayments)->contains('name', 'Deposit')){
-            $roomcontract = $this->getRoomContractById($payment->room_contract_id);
-            if ($this->isEmpty($roomcontract)) {
-                DB::rollBack();
-                return $this->errorResponse();
-            }
-            $roomcontract->outstanding_deposit -= $payment->other_charges;
-            $roomcontract = $this->updateRoomContract($roomcontract, $roomcontract);
-        }
-        
         $payment = $this->getPaymentById($payment->id);
         if ($this->isEmpty($payment)) {
             DB::rollBack();
@@ -261,15 +240,6 @@ class PaymentController extends Controller
         }
 
         $payment = $this->deletePayment($payment);
-        if(collect($payment->otherpayments)->contains('name', 'Deposit')){
-            $roomcontract = $this->getRoomContractById($payment->room_contract_id);
-            if ($this->isEmpty($roomcontract)) {
-                DB::rollBack();
-                return $this->errorResponse();
-            }
-            $roomcontract->outstanding_deposit = 0;
-            $roomcontract = $this->updateRoomContract($roomcontract, $roomcontract);
-        }
 
         if ($this->isEmpty($payment)) {
             DB::rollBack();
@@ -315,30 +285,6 @@ class PaymentController extends Controller
         $params = json_decode(json_encode($params));
         $payment = $this->updatePayment($payment, $params);
 
-        if ($this->isEmpty($payment)) {
-            DB::rollBack();
-            return $this->errorResponse();
-        }
-
-        if(collect($payment->otherpayments)->contains('name', 'Deposit')){
-            error_log('here');
-            $roomcontract = $this->getRoomContractById($payment->room_contract_id);
-            if ($this->isEmpty($roomcontract)) {
-                DB::rollBack();
-                return $this->errorResponse();
-            }
-            $depositPayment = collect($payment->otherpayments)->where('name', 'Deposit')->first();
-            if($depositPayment){
-                try {
-                    $depositPayment = $depositPayment->pivot->price;
-                } catch (\Throwable $th) {
-                    //throw $th;
-                    $depositPayment = 0;
-                }
-                $roomcontract = $this->payRoomContractDeposit($roomcontract, $depositPayment);
-            }
-        }
-        $payment = $this->getPaymentById($payment->id);
         if ($this->isEmpty($payment)) {
             DB::rollBack();
             return $this->errorResponse();

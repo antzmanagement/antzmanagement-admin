@@ -9,6 +9,7 @@ import {
 } from "vuelidate/lib/validators";
 import { mapActions } from "vuex";
 import { _ } from "../../../common/common-function";
+import { Form } from "vform";
 export default {
   props: {
     editMode: {
@@ -17,7 +18,7 @@ export default {
     },
     selectedData: {
       type: Object,
-      default: () => ({})
+      default: () => ({}),
     },
     returnObject: {
       type: Boolean,
@@ -40,6 +41,7 @@ export default {
       owners: [],
       maintenanceTypes: ["repair", "renew"],
       maintenanceStatus: ["pending", "inprogress", "reject", "done"],
+      initStatus: "pending",
       propertyFilterGroup: new Form({
         name: "",
         category: "",
@@ -100,7 +102,6 @@ export default {
           ),
           "id"
         );
-        console.log(tenants);
         return _.isArray(tenants) && !_.isEmpty(tenants) ? tenants : [];
       } else {
         return [];
@@ -143,6 +144,14 @@ export default {
       },
       deep: true,
     },
+    selectedData: {
+      handler: function (val, oldVal) {
+        if (val) {
+          this.init(); // call it in the context of your component object
+        }
+      },
+      deep: true,
+    },
   },
   mounted() {
     this.init();
@@ -152,6 +161,7 @@ export default {
       getRoomsAction: "getRooms",
       filterRoomContractsAction: "filterRoomContracts",
       filterPropertiesAction: "filterProperties",
+      filterRoomsAction: "filterRooms",
       getOwnersAction: "getOwners",
       getPropertiesAction: "getProperties",
       getMaintenanceAction: "getMaintenance",
@@ -163,17 +173,43 @@ export default {
     cancel() {
       this.$emit("cancel");
     },
+    reset() {
+      this.data = new Form({
+        remark: "",
+        price: 0,
+        room: "",
+        property: "",
+        owner: "",
+        tenant: "",
+        maintenance_type: "repair",
+        maintenance_status: "pending",
+        claim_by_owner: false,
+        claim_by_tenant: false,
+        maintenance_date: null,
+      });
+      this.maintenanceStatus = ["pending", "inprogress", "reject", "done"];
+      this.initStatus = "pending";
+    },
     init() {
       this.showLoadingAction();
+      this.reset();
       let promises = [];
-      promises.push(this.getRoomsAction({ pageNumber: -1, pageSize: -1 }));
+      if (!this.roomId) {
+        promises.push(this.getRoomsAction({ pageNumber: -1, pageSize: -1 }));
+      } else {
+        promises.push(
+          this.filterRoomsAction({
+            pageNumber: -1,
+            pageSize: -1,
+            id: this.roomId,
+          })
+        );
+      }
       promises.push(this.getPropertiesAction({ pageNumber: -1, pageSize: -1 }));
-      promises.push(this.getOwnersAction({ pageNumber: -1, pageSize: -1 }));
 
       Promise.all(promises)
-        .then(([roomRes, propertyRes, ownerRes]) => {
+        .then(([roomRes, propertyRes]) => {
           this.rooms = roomRes.data || [];
-          this.owners = ownerRes.data || [];
           this.properties = propertyRes.data || [];
 
           if (this.roomId) {
@@ -185,30 +221,43 @@ export default {
           }
 
           if (this.editMode && this.selectedData) {
-            this.selectedData.room = _.find(this.rooms, [
+            let cloneData = _.cloneDeep(this.selectedData) || {};
+            cloneData.room = _.find(this.rooms, [
               "id",
-              _.get(this.selectedData, `room.id`) ||
-                _.get(this.selectedData, `room_id`),
+              _.get(cloneData, `room.id`) ||
+                _.get(cloneData, `room_id`),
             ]);
-            this.selectedData.property = _.find(this.properties, [
+            cloneData.property = _.find(this.properties, [
               "id",
-              _.get(this.selectedData, `property.id`) ||
-                _.get(this.selectedData, `property_id`),
+              _.get(cloneData, `property.id`) ||
+                _.get(cloneData, `property_id`),
             ]);
-            this.selectedData.owner = _.find(this.owners, [
-              "id",
-              _.get(this.selectedData, `owner.id`) ||
-                _.get(this.selectedData, `owner_id`),
-            ]);
+            cloneData.owner = _.find(
+              _.get(cloneData, `room.owners`),
+              [
+                "id",
+                _.get(cloneData, `owner.id`) ||
+                  _.get(cloneData, `owner_id`),
+              ]
+            );
 
-            this.paidStatus = this.selectedData.paid;
-            this.data = new Form(this.selectedData);
+            this.paidStatus = cloneData.paid == true;
+            this.data = new Form(cloneData);
+
+            this.initStatus = _.get(this.data , `maintenance_status`) || 'pending';
           }
 
+          if (_.get(this.data, `room.id`)) {
+            this.getRoomContracts();
+          }
 
-            if(_.get(this.data , `room.id`)){
-              this.getRoomContracts();
-            }
+          if (this.initStatus == "inprogress") {
+            this.maintenanceStatus = ["inprogress", "done"];
+          } else if (this.initStatus == "reject") {
+            this.maintenanceStatus = ["reject"];
+          } else if (this.initStatus == "done") {
+            this.maintenanceStatus = ["done"];
+          }
           this.endLoadingAction();
         })
         .catch((error) => {
@@ -276,9 +325,6 @@ export default {
         this.data.tenant = {};
       }
     },
-    reset() {
-      this.data.reset();
-    },
     handleSubmit() {
       let finalData = _.cloneDeep(this.data);
       try {
@@ -313,10 +359,8 @@ export default {
       filterGroup.pageSize = -1;
       filterGroup.pageNumber = -1;
 
-      console.log(filterGroup);
       this.filterPropertiesAction(filterGroup)
         .then((data) => {
-          console.log(data);
           if (data.data) {
             this.properties = data.data;
           } else {
@@ -363,6 +407,7 @@ export default {
               chips
               return-object
               @change="getRoomContracts()"
+              :disabled="initStatus != 'pending'"
             >
             </v-autocomplete>
           </v-col>
@@ -419,6 +464,7 @@ export default {
               label="Property"
               chips
               return-object
+              :disabled="initStatus != 'pending'"
             >
               <template v-slot:prepend>
                 <property-filter-dialog
@@ -440,6 +486,7 @@ export default {
               @input="$v.data.price.$touch()"
               @blur="$v.data.price.$touch()"
               :error-messages="priceErrors"
+              :disabled="initStatus != 'pending'"
             ></v-text-field>
           </v-col>
           <v-col cols="12" md="6">
@@ -447,9 +494,10 @@ export default {
               :items="maintenanceTypes"
               v-model="data.maintenance_type"
               label="Maintenance Type"
+              :disabled="initStatus != 'pending'"
             ></v-select>
           </v-col>
-          <v-col cols="12" md="6">
+          <v-col cols="12" md="6" v-if="editMode">
             <v-select
               :items="maintenanceStatus"
               v-model="data.maintenance_status"
@@ -458,6 +506,7 @@ export default {
           </v-col>
           <v-col cols="6">
             <v-menu
+              :disabled="initStatus != 'pending'"
               ref="menu"
               v-model="dateMenu"
               :close-on-content-click="false"
@@ -466,6 +515,7 @@ export default {
             >
               <template v-slot:activator="{ on }">
                 <v-text-field
+                  :disabled="initStatus != 'pending'"
                   v-model="data.maintenance_date"
                   label="Maintenance Date"
                   prepend-icon="event"

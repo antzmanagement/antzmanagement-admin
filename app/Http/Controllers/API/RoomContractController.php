@@ -38,7 +38,7 @@ class RoomContractController extends Controller
             'service_ids' => $request->service_ids,
             'room_id' => $request->room_id,
             'checkedout' => $request->checkedout,
-            'outstanding_deposit' => $request->outstanding_deposit,
+            'outstanding' => $request->outstanding,
             'startDateFromDate' => $request->startDateFromDate,
             'startDateToDate' => $request->startDateToDate,
             'endDateFromDate' => $request->endDateFromDate,
@@ -80,12 +80,19 @@ class RoomContractController extends Controller
         $this->validate($request, [
             'tenant' => 'required',
             'room' => 'required',
+            'pic' => 'required',
         ]);
         error_log($this->controllerName . 'Creating roomContract.');
         $tenant = $this->getTenantById($request->tenant);
         if ($this->isEmpty($tenant)) {
             DB::rollBack();
             return $this->notFoundResponse('Tenant');
+        }
+
+        $pic = $this->getStaffById($request->pic);
+        if ($this->isEmpty($pic)) {
+            DB::rollBack();
+            return $this->notFoundResponse('Staff');
         }
 
 
@@ -148,8 +155,10 @@ class RoomContractController extends Controller
         }
 
         $max = RoomContract::where('status', true)->max('sequence') + 1;
+        $outstanding = $this->toDouble($request->room->deposit) + $this->toDouble($request->room->agreement_fees) - $this->toDouble($request->room->booking_fees);
         $params = collect([
             'tenant_id' => $tenant->id,
+            'pic' => $pic->id,
             'room_id' => $room->id,
             'contract_id' => $contract->id,
             'name' => $startdate. ' - ' . $enddate,
@@ -166,7 +175,7 @@ class RoomContractController extends Controller
             'rental' => $request->room->price,
             'deposit' => $request->room->deposit,
             'agreement_fees' => $request->room->agreement_fees,
-            'outstanding_deposit' => $request->room->outstanding_deposit,
+            'outstanding' => $outstanding,
             'booking_fees' => $request->room->booking_fees,
             'sequence' => $max,
         ]);
@@ -197,21 +206,23 @@ class RoomContractController extends Controller
                 DB::rollBack();
                 return $this->errorResponse();
             }
-
             $finalservices[$service->id] = ['status' => true];
         }
+
         $roomContract->origservices()->sync($finalservices);
-        if($roomContract->outstanding_deposit > 0){
+
+        $outstanding_deposit = $roomContract->deposit - $roomContract->booking_fees;
+        if($outstanding_deposit > 0){
             $params = collect([
                 'room_contract_id' => $roomContract->id,
-                'other_charges' => $roomContract->outstanding_deposit,
+                'other_charges' => $outstanding_deposit,
             ]);
             //Convert To Json Object
             $params = json_decode(json_encode($params));
             $payment = $this->createPayment($params);
             $data = $this->getOtherPaymentTitleByName('Deposit');
             if (!$this->isEmpty($data)) {
-                $data->price = $this->toDouble($roomContract->outstanding_deposit);
+                $data->price = $this->toDouble($outstanding_deposit);
                 $payment->otherpayments->push($data);
                 $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
             }else{
@@ -222,7 +233,7 @@ class RoomContractController extends Controller
                 $params = json_decode(json_encode($params));
                 $data = $this->createOtherPaymentTitle($params);
                 if (!$this->isEmpty($data)) {
-                    $data->price = $this->toDouble($roomContract->outstanding_deposit);
+                    $data->price = $this->toDouble($outstanding_deposit);
                     $payment->otherpayments->push($data);
                     $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
                 }
@@ -267,14 +278,10 @@ class RoomContractController extends Controller
             $params = collect([
                 'room_contract_id' => $roomContract->id,
                 'other_charges' => $roomContract->agreement_fees,
-                'paid' => true,
-                'paymentdate' => Carbon::now(),
-                'issue_by' => $request->user()->id,
             ]);
             //Convert To Json Object
             $params = json_decode(json_encode($params));
             $payment = $this->createPayment($params);
-            $payment = $this->updatePayment($payment, $params);
             $data = $this->getOtherPaymentTitleByName('Agreement Fees');
             if (!$this->isEmpty($data)) {
                 $data->price = $this->toDouble($roomContract->agreement_fees);
@@ -292,6 +299,7 @@ class RoomContractController extends Controller
                     $payment->otherpayments->push($data);
                     $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
                 }
+
             }
         }
         DB::commit();
@@ -311,12 +319,19 @@ class RoomContractController extends Controller
         $this->validate($request, [
             'tenant' => 'required',
             'room' => 'required',
+            'pic' => 'required',
         ]);
         $tenant = $this->getTenantById($request->tenant);
         if ($this->isEmpty($tenant)) {
             DB::rollBack();
             return $this->notFoundResponse('Tenant');
         }
+        $pic = $this->getStaffById($request->pic);
+        if ($this->isEmpty($pic)) {
+            DB::rollBack();
+            return $this->notFoundResponse('Staff');
+        }
+
         $request->room = json_decode(json_encode($request->room));
         $room = $this->getRoomById($request->room->id);
         if ($this->isEmpty($room)) {
@@ -374,6 +389,7 @@ class RoomContractController extends Controller
         $addOnServicesIds = $servicesIds->diff($origServiceIds);
         $params = collect([
             'tenant_id' => $tenant->id,
+            'pic' => $pic->id,
             'room_id' => $room->id,
             'contract_id' => $contract->id,
             'orig_service_ids' => $origServiceIds,
@@ -392,7 +408,7 @@ class RoomContractController extends Controller
             'rental' => $request->room->price,
             'deposit' => $request->room->deposit,
             'agreement_fees' => $request->room->agreement_fees,
-            'outstanding_deposit' => $request->room->outstanding_deposit,
+            'outstanding' => $request->room->outstanding,
             'booking_fees' => $request->room->booking_fees,
 
         ]);
@@ -434,194 +450,6 @@ class RoomContractController extends Controller
         }
         $roomContract->origservices()->sync($finalservices);
 
-        $payments = $roomContract->payments;
-
-        if($roomContract->outstanding_deposit > 0){
-
-            $got = false;
-            foreach ($payments as $payment) {
-                if(collect($payment->otherpayments)->contains('name', 'Deposit')){
-                    $got = true;
-                    $roomContract = $this->getRoomContractById($payment->room_contract_id);
-                    if ($this->isEmpty($roomContract)) {
-                        DB::rollBack();
-                        return $this->errorResponse();
-                    }
-                    $roomContract->outstanding_deposit = $payment->other_charges;
-                    $roomContract = $this->updateRoomContract($roomContract, $roomContract);
-                }
-            }
-            if(!$got){
-                $params = collect([
-                    'room_contract_id' => $roomContract->id,
-                    'other_charges' => $roomContract->outstanding_deposit,
-                ]);
-                //Convert To Json Object
-                $params = json_decode(json_encode($params));
-                $payment = $this->createPayment($params);
-                $data = $this->getOtherPaymentTitleByName('Deposit');
-                if (!$this->isEmpty($data)) {
-                    $data->price = $this->toDouble($roomContract->outstanding_deposit);
-                    $payment->otherpayments->push($data);
-                    $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
-                }else{
-                    $params = collect([
-                        'name' => 'Deposit',
-                    ]);
-                    //Convert To Json Object
-                    $params = json_decode(json_encode($params));
-                    $data = $this->createOtherPaymentTitle($params);
-                    if (!$this->isEmpty($data)) {
-                        $data->price = $this->toDouble($roomContract->outstanding_deposit);
-                        $payment->otherpayments->push($data);
-                        $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
-                    }
-    
-                }
-            }
-        }else{
-            if($roomContract->outstanding_deposit == 0){
-                foreach ($payments as $payment) {
-                    if(collect($payment->otherpayments)->contains('name', 'Deposit')){
-                        $roomContract = $this->getRoomContractById($payment->room_contract_id);
-                        if ($this->isEmpty($roomContract)) {
-                            DB::rollBack();
-                            return $this->errorResponse();
-                        }
-                        $this->deletePayment($payment);
-                    }
-                }
-            }
-    
-        }
-        
-        if($roomContract->booking_fees > 0){
-
-            $got = false;
-            foreach ($payments as $payment) {
-                if(collect($payment->otherpayments)->contains('name', 'Partial Payment (Deposit)')){
-
-                    $got = true;
-                    $roomContract = $this->getRoomContractById($payment->room_contract_id);
-                    if ($this->isEmpty($roomContract)) {
-                        DB::rollBack();
-                        return $this->errorResponse();
-                    }
-                    $roomContract->booking_fees = $payment->other_charges;
-                    $roomContract = $this->updateRoomContract($roomContract, $roomContract);
-                }
-            }
-
-            if(!$got){
-                $params = collect([
-                    'room_contract_id' => $roomContract->id,
-                    'other_charges' => $roomContract->booking_fees,
-                    'paid' => true,
-                    'paymentdate' => Carbon::now(),
-                    'issue_by' => $request->user()->id,
-                ]);
-                //Convert To Json Object
-                $params = json_decode(json_encode($params));
-                $payment = $this->createPayment($params);
-                $payment = $this->updatePayment($payment, $params);
-                $data = $this->getOtherPaymentTitleByName('Partial Payment (Deposit)');
-                if (!$this->isEmpty($data)) {
-                    $data->price = $this->toDouble($roomContract->booking_fees);
-                    $payment->otherpayments->push($data);
-                    $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
-                }else{
-                    $params = collect([
-                        'name' => 'Partial Payment (Deposit)',
-                    ]);
-                    //Convert To Json Object
-                    $params = json_decode(json_encode($params));
-                    $data = $this->createOtherPaymentTitle($params);
-                    if (!$this->isEmpty($data)) {
-                        $data->price = $this->toDouble($roomContract->booking_fees);
-                        $payment->otherpayments->push($data);
-                        $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
-                    }
-                }
-            }
-        }else{
-            if($roomContract->booking_fees == 0){
-                foreach ($payments as $payment) {
-                    if(collect($payment->otherpayments)->contains('name', 'Partial Payment (Deposit)')){
-                        $roomContract = $this->getRoomContractById($payment->room_contract_id);
-                        if ($this->isEmpty($roomContract)) {
-                            DB::rollBack();
-                            return $this->errorResponse();
-                        }
-                        $this->deletePayment($payment);
-                    }
-                }
-            }
-    
-        }
-        
-        if($roomContract->agreement_fees > 0){
-
-            $got = false;
-            foreach ($payments as $payment) {
-                if(collect($payment->otherpayments)->contains('name', 'Agreement Fees')){
-
-                    $got = true;
-                    $roomContract = $this->getRoomContractById($payment->room_contract_id);
-                    if ($this->isEmpty($roomContract)) {
-                        DB::rollBack();
-                        return $this->errorResponse();
-                    }
-                    $roomContract->agreement_fees = $payment->other_charges;
-                    $roomContract = $this->updateRoomContract($roomContract, $roomContract);
-                }
-            }
-
-            if(!$got){
-                $params = collect([
-                    'room_contract_id' => $roomContract->id,
-                    'other_charges' => $roomContract->agreement_fees,
-                    'paid' => true,
-                    'paymentdate' => Carbon::now(),
-                    'issue_by' => $request->user()->id,
-                ]);
-                //Convert To Json Object
-                $params = json_decode(json_encode($params));
-                $payment = $this->createPayment($params);
-                $payment = $this->updatePayment($payment, $params);
-                $data = $this->getOtherPaymentTitleByName('Agreement Fees');
-                if (!$this->isEmpty($data)) {
-                    $data->price = $this->toDouble($roomContract->agreement_fees);
-                    $payment->otherpayments->push($data);
-                    $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
-                }else{
-                    $params = collect([
-                        'name' => 'Agreement Fees',
-                    ]);
-                    //Convert To Json Object
-                    $params = json_decode(json_encode($params));
-                    $data = $this->createOtherPaymentTitle($params);
-                    if (!$this->isEmpty($data)) {
-                        $data->price = $this->toDouble($roomContract->agreement_fees);
-                        $payment->otherpayments->push($data);
-                        $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
-                    }
-                }
-            }
-        }else{
-            if($roomContract->agreement_fees == 0){
-                foreach ($payments as $payment) {
-                    if(collect($payment->otherpayments)->contains('name', 'Agreement Fees')){
-                        $roomContract = $this->getRoomContractById($payment->room_contract_id);
-                        if ($this->isEmpty($roomContract)) {
-                            DB::rollBack();
-                            return $this->errorResponse();
-                        }
-                        $this->deletePayment($payment);
-                    }
-                }
-            }
-    
-        }
         DB::commit();
         return $this->successResponse('RoomContract', $roomContract, 'update');
     }

@@ -141,6 +141,7 @@ export default {
           this.data.processing_fees = 3;
           break;
         case 'online_transfer':
+        case 'eWallet':
           this.data.processing_fees = 0;
           break;
         case 'credit':

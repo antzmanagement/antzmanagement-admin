@@ -35,6 +35,7 @@ class RoomController extends Controller
         error_log($this->controllerName . 'Retrieving list of filtered rooms.');
         // api/room/filter (GET)
         $params = collect([
+            'id' => $request->id,
             'unit' => $request->unit,
             'floor' => $request->floor,
             'lot' => $request->lot,

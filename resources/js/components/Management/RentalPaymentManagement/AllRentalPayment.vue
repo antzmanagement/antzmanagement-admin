@@ -866,7 +866,6 @@ export default {
                         @click="openPaymentDialog(props.item.uid, true)"
                         color="success"
                         v-if="
-                          props.item.paid == true &&
                           helpers.isAccessible(
                             _.get(role, ['name']),
                             'rentalPayment',
@@ -1019,7 +1018,6 @@ export default {
                         @click="openAddOnPaymentDialog(props.item.uid, true)"
                         color="success"
                         v-if="
-                          props.item.paid == true &&
                           helpers.isAccessible(
                             _.get(role, ['name']),
                             'rentalPayment',

@@ -26,6 +26,11 @@ class RoomContract extends Model
         return $this->belongsTo('App\User', 'tenant_id');
     }
     
+    public function creator()
+    {
+        return $this->belongsTo('App\User', 'pic');
+    }
+    
     public function contract()
     {
         return $this->belongsTo('App\Contract', 'contract_id');

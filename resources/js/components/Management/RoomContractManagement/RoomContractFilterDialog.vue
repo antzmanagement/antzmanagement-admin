@@ -60,7 +60,7 @@ export default {
         room: "",
         owner: "",
         tenant: "",
-        outstanding_deposit: "",
+        outstanding: "",
         checkedout: "",
       }),
     };
@@ -404,13 +404,13 @@ export default {
                 <v-radio label="No" :value="0"></v-radio>
               </v-radio-group>
             </v-col>
-            <v-col cols="6">
+            <!-- <v-col cols="6">
               <div>Outstanding Deposit</div>
-              <v-radio-group v-model="data.outstanding_deposit" row>
+              <v-radio-group v-model="data.outstanding" row>
                 <v-radio label="Yes" :value="1"></v-radio>
                 <v-radio label="No" :value="0"></v-radio>
               </v-radio-group>
-            </v-col>
+            </v-col> -->
             <v-col cols="12">
               <v-autocomplete
                 v-model="data.tenant"

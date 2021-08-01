@@ -287,7 +287,7 @@ export default {
         booking_fees: "booking_fees",
         deposit: "deposit",
         agreement_fees: "agreement_fees",
-        outstanding_deposit: "outstanding_deposit",
+        outstanding: "outstanding",
         checkedout: {
           field: "sublet",
           callback: (value) => (value ? "Yes" : "No"),
@@ -782,7 +782,7 @@ export default {
                     <td class="text-truncate">{{ props.item.startdate }}</td>
                     <td class="text-truncate">{{ props.item.enddate }}</td>
                     <td class="text-truncate">RM {{ props.item.deposit | toDouble }}</td>
-                    <td class="text-truncate">RM {{ props.item.outstanding_deposit | toDouble }}</td>
+                    <td class="text-truncate">RM {{ props.item.outstanding | toDouble }}</td>
                     <td class="text-truncate">RM {{ props.item.rental | toDouble }}</td>
                     <td class="text-truncate">
                       {{ props.item.duration }}

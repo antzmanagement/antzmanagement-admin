@@ -31,13 +31,14 @@ export default {
   },
   data() {
     return {
-      paidStatus : false,
+      paidStatus: false,
       dateMenu: false,
       rooms: [],
       roomcontracts: [],
       owners: [],
       cleaningTypes: ["normal", "deep"],
       cleaningStatus: ["pending", "inprogress", "reject", "done"],
+      initStatus: "pending",
       data: new Form({
         remark: "",
         price: 0,
@@ -119,6 +120,14 @@ export default {
       },
       deep: true,
     },
+    selectedData: {
+      handler: function (val, oldVal) {
+        if (val) {
+          this.init(); // call it in the context of your component object
+        }
+      },
+      deep: true,
+    },
   },
   mounted() {
     this.init();
@@ -127,6 +136,7 @@ export default {
     ...mapActions({
       getRoomsAction: "getRooms",
       filterRoomContractsAction: "filterRoomContracts",
+      filterRoomsAction: "filterRooms",
       getOwnersAction: "getOwners",
       getCleaningAction: "getCleaning",
       createCleaningAction: "createCleaning",
@@ -137,16 +147,40 @@ export default {
     cancel() {
       this.$emit("cancel");
     },
+    reset() {
+      this.data = new Form({
+        remark: "",
+        price: 0,
+        room: "",
+        owner: "",
+        tenant: "",
+        cleaning_type: "normal",
+        cleaning_status: "pending",
+        claim_by_owner: false,
+        claim_by_tenant: false,
+        cleaning_date: null,
+      });
+      this.cleaningStatus = ["pending", "inprogress", "reject", "done"];
+      this.initStatus = "pending";
+    },
     init() {
       this.showLoadingAction();
+      this.reset();
       let promises = [];
-      promises.push(this.getRoomsAction({ pageNumber: -1, pageSize: -1 }));
-      promises.push(this.getOwnersAction({ pageNumber: -1, pageSize: -1 }));
-
+      if (!this.roomId) {
+        promises.push(this.getRoomsAction({ pageNumber: -1, pageSize: -1 }));
+      } else {
+        promises.push(
+          this.filterRoomsAction({
+            pageNumber: -1,
+            pageSize: -1,
+            id: this.roomId,
+          })
+        );
+      }
       Promise.all(promises)
-        .then(([roomRes, ownerRes]) => {
+        .then(([roomRes]) => {
           this.rooms = roomRes.data || [];
-          this.owners = ownerRes.data || [];
 
           if (this.roomId) {
             let selectedRoom = _.find(this.rooms, (room) => {
@@ -154,22 +188,35 @@ export default {
             });
 
             this.data.room = selectedRoom;
-            this.getRoomContracts();
           }
 
           if (this.editMode && this.selectedData) {
-            this.selectedData.room = _.find(this.rooms, [
+            let cloneData = _.cloneDeep(this.selectedData) || {};
+            cloneData.room = _.find(this.rooms, [
               "id",
-              _.get(this.selectedData, `room.id`) ||
-                _.get(this.selectedData, `room_id`),
+              _.get(cloneData, `room.id`) || _.get(cloneData, `room_id`),
             ]);
-            this.selectedData.owner = _.find(this.owners, [
+            cloneData.owner = _.find(_.get(cloneData, `room.owners`), [
               "id",
-              _.get(this.selectedData, `owner.id`) ||
-                _.get(this.selectedData, `owner_id`),
+              _.get(cloneData, `owner.id`) || _.get(cloneData, `owner_id`),
             ]);
-            this.paidStatus = this.selectedData.paid;
-            this.data = new Form(this.selectedData);
+
+            this.paidStatus = cloneData.paid;
+            this.data = new Form(cloneData);
+
+            this.initStatus = _.get(this.data, `cleaning_status`) || "pending";
+          }
+
+          if (_.get(this.data, `room.id`)) {
+            this.getRoomContracts();
+          }
+
+          if (this.initStatus == "inprogress") {
+            this.cleaningStatus = ["inprogress", "done"];
+          } else if (this.initStatus == "reject") {
+            this.cleaningStatus = ["reject"];
+          } else if (this.initStatus == "done") {
+            this.cleaningStatus = ["done"];
           }
           this.endLoadingAction();
         })
@@ -211,11 +258,14 @@ export default {
             if (data.data) {
               this.roomcontracts = data.data;
               if (this.editMode && this.selectedData) {
-                this.data.tenant = _.get(_.find(this.roomcontracts, [
-                  "tenant.id",
-                  _.get(this.selectedData, `tenant.id`) ||
-                    _.get(this.selectedData, `tenant_id`),
-                ]), 'tenant');
+                this.data.tenant = _.get(
+                  _.find(this.roomcontracts, [
+                    "tenant.id",
+                    _.get(this.selectedData, `tenant.id`) ||
+                      _.get(this.selectedData, `tenant_id`),
+                  ]),
+                  "tenant"
+                );
               } else {
                 this.data.tenant = _.get(data.data, `[0].tenant`);
               }
@@ -235,9 +285,6 @@ export default {
         this.roomcontracts = [];
         this.data.tenant = {};
       }
-    },
-    reset() {
-      this.data.reset();
     },
     handleSubmit() {
       let finalData = _.cloneDeep(this.data);
@@ -288,6 +335,7 @@ export default {
               label="Room"
               chips
               return-object
+              :disabled="initStatus != 'pending'"
             >
             </v-autocomplete>
           </v-col>
@@ -347,6 +395,7 @@ export default {
               @input="$v.data.price.$touch()"
               @blur="$v.data.price.$touch()"
               :error-messages="priceErrors"
+              :disabled="initStatus != 'pending'"
             ></v-text-field>
           </v-col>
           <v-col cols="12" md="6">
@@ -354,9 +403,10 @@ export default {
               :items="cleaningTypes"
               v-model="data.cleaning_type"
               label="Cleaning Type"
+              :disabled="initStatus != 'pending'"
             ></v-select>
           </v-col>
-          <v-col cols="12" md="6">
+          <v-col cols="12" md="6" v-if="editMode">
             <v-select
               :items="cleaningStatus"
               v-model="data.cleaning_status"
@@ -370,6 +420,7 @@ export default {
               :close-on-content-click="false"
               transition="scale-transition"
               offset-y
+              :disabled="initStatus != 'pending'"
             >
               <template v-slot:activator="{ on }">
                 <v-text-field
@@ -378,6 +429,7 @@ export default {
                   prepend-icon="event"
                   readonly
                   v-on="on"
+                  :disabled="initStatus != 'pending'"
                 ></v-text-field>
               </template>
               <v-date-picker
@@ -386,7 +438,7 @@ export default {
                 scrollable
               ></v-date-picker>
             </v-menu>
-          </v-col>  
+          </v-col>
           <!-- <v-col cols="12" v-if="paidStatus && (data.claim_by_owner || data.claim_by_tenant)">
             <div>Paid Status</div>
             <v-radio-group v-model="data.paid" row>

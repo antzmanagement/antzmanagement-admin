@@ -32,7 +32,7 @@ export default {
   },
   data() {
     return {
-      paymentMethods: ["cash", "online_transfer", 'eWallet', "credit"],
+      paymentMethods: ["cash", "online_transfer", "eWallet", "credit"],
       moment: moment,
       _: _,
       menu: false,
@@ -48,6 +48,7 @@ export default {
         room_contract_id: "",
         paymentmethod: "cash",
         otherpayments: [],
+        paid: false,
       }),
       servicesDialogConfig: {
         dialogStyle: {
@@ -60,18 +61,26 @@ export default {
     };
   },
   watch: {
-    uid: (val) => {
-      if (val) {
-        this.getPayment();
-      } else {
-        this.data.reset();
-      }
+    uid: {
+      handler: function (val, oldVal) {
+        if (val) {
+          this.getPayment();
+        } else {
+          this.reset();
+        }
+      },
+      deep: true,
+    },
+    resetIndicator: {
+      handler: function (val, oldVal) {
+        console.log("reset");
+        this.reset();
+        this.otherpayments = [];
+      },
+      deep: true,
     },
     resetIndicator: (val) => {
       if (val) {
-        console.log("reset");
-        this.data.reset();
-        this.otherpayments = [];
       }
     },
   },
@@ -97,6 +106,18 @@ export default {
     close() {
       this.$emit("close");
     },
+    reset() {
+      this.data = new Form({
+        price: 0,
+        other_charges: 0,
+        remark: "",
+        services: [],
+        room_contract_id: "",
+        paymentmethod: "cash",
+        otherpayments: [],
+        paid: false,
+      });
+    },
     getPayment() {
       this.showLoadingAction();
       this.$Progress.start();
@@ -118,6 +139,7 @@ export default {
                 return otherpayment;
               }
             );
+            this.otherpayments = this.data.otherpayments;
           }
           if (!this.data.paymentmethod) {
             this.data.paymentmethod = this.paymentMethods[0];
@@ -231,7 +253,7 @@ export default {
           this.data.processing_fees = 3;
           break;
         case "online_transfer":
-        case 'eWallet':
+        case "eWallet":
           this.data.processing_fees = 0;
           break;
         case "credit":
@@ -254,22 +276,24 @@ export default {
     <v-card-text>
       <v-container>
         <v-row>
-          <v-col cols="12" v-if="editMode">
+          <v-col cols="12" v-if="editMode && data.paid == true">
             <v-text-field
               label="Reference No"
               v-model="data.referenceno"
             ></v-text-field>
           </v-col>
-          <v-col cols="12" v-if="editMode">
+          <v-col cols="12" v-if="editMode && data.paid == true">
             <v-menu
               ref="menu"
               v-model="menu"
               :close-on-content-click="false"
               transition="scale-transition"
               offset-y
+              :disabled="data.paid == true"
             >
               <template v-slot:activator="{ on }">
                 <v-text-field
+                  :disabled="data.paid == true"
                   v-model="data.paymentdate"
                   label="Payment Date"
                   readonly
@@ -288,12 +312,13 @@ export default {
               ></v-date-picker>
             </v-menu>
           </v-col>
-          <v-col cols="12" v-if="editMode">
+          <v-col cols="12" v-if="editMode && data.paid == true">
             <v-select
               :items="paymentMethods"
               v-model="data.paymentmethod"
               label="Payment Method"
               @change="updateProcessingFees"
+              :disabled="data.paid == true"
             ></v-select>
           </v-col>
           <v-col cols="12">
@@ -302,6 +327,7 @@ export default {
               type="number"
               step="0.01"
               v-model="data.price"
+              :disabled="data.paid == true"
               readonly
             ></v-text-field>
           </v-col>
@@ -311,18 +337,20 @@ export default {
               type="number"
               step="0.01"
               v-model="data.other_charges"
+              :disabled="data.paid == true"
               readonly
             ></v-text-field>
           </v-col>
-          <v-col cols="12" v-if="editMode">
+          <v-col cols="12" v-if="editMode && data.paid == true">
             <v-text-field
               label="Processing Fees"
               type="number"
               step="0.01"
               v-model="data.processing_fees"
+              :disabled="data.paid == true"
             ></v-text-field>
           </v-col>
-          <!-- <v-col cols="12" v-if="editMode">
+          <!-- <v-col cols="12" v-if="editMode && data.paid == true">
             <div>Paid Status</div>
             <v-radio-group v-model="data.paid" row>
               <v-radio label="Paid" :value="1"></v-radio>
@@ -341,6 +369,7 @@ export default {
     </v-card-text>
     <v-card-actions>
       <services-dialog
+        v-if="!data.paid"
         :dialogStyle="servicesDialogConfig.dialogStyle"
         :services="!_.isEmpty(data.services) ? _.cloneDeep(data.services) : []"
         editMode
@@ -352,7 +381,11 @@ export default {
       >
         <v-btn color="green darken-1" text>Add On Services</v-btn>
       </services-dialog>
-      <v-btn color="yellow darken-4" text @click="otherPaymentDialog = true"
+      <v-btn
+        color="yellow darken-4"
+        text
+        v-if="!data.paid"
+        @click="otherPaymentDialog = true"
         >Other Payment</v-btn
       >
       <v-spacer></v-spacer>

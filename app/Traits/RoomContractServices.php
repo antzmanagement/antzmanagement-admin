@@ -33,6 +33,9 @@ trait RoomContractServices
         }, 'tenant' => function ($q) {
             // Query the name field in status table
             $q->where('status', true);
+        }, 'creator' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
         }, 'addonservices' => function ($q) {
             // Query the name field in status table
             $q->wherePivot('status', true);
@@ -125,11 +128,11 @@ trait RoomContractServices
         }
 
 
-        if (property_exists($params, 'outstanding_deposit') && $params->outstanding_deposit != null) {
-            $outstanding_deposit = $params->outstanding_deposit;
+        if (property_exists($params, 'outstanding') && $params->outstanding != null) {
+            $outstanding = $params->outstanding;
             $data = collect($data);
-            $data = $data->filter(function ($item) use ($outstanding_deposit) {
-                return $outstanding_deposit ? $item->outstanding_deposit > 0 : $item->outstanding_deposit == 0;
+            $data = $data->filter(function ($item) use ($outstanding) {
+                return $outstanding ? $item->outstanding > 0 : $item->outstanding == 0;
             })->values();
         }
         
@@ -214,6 +217,9 @@ trait RoomContractServices
         }, 'tenant' => function ($q) {
             // Query the name field in status table
             $q->where('status', true);
+        }, 'creator' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
         }, 'addonservices' => function ($q) {
             // Query the name field in status table
             $q->wherePivot('status', true);
@@ -252,6 +258,9 @@ trait RoomContractServices
             // Query the name field in status table
             $q->where('status', true);
         }, 'tenant' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        }, 'creator' => function ($q) {
             // Query the name field in status table
             $q->where('status', true);
         }, 'addonservices' => function ($q) {
@@ -300,8 +309,7 @@ trait RoomContractServices
         $data->booking_fees  = $this->toDouble($params->booking_fees);
         $data->agreement_fees  = $this->toDouble($params->agreement_fees);
         $data->deposit  = $this->toDouble($params->deposit);
-        $data->agreement_fees  = $this->toDouble($params->agreement_fees);
-        $data->outstanding_deposit  = $this->toDouble($params->outstanding_deposit);
+        $data->outstanding  = $this->toDouble($params->outstanding);
         $data->rental  = $this->toDouble($params->rental);
         $data->sequence = $this->toInt($params->sequence);
 
@@ -323,6 +331,12 @@ trait RoomContractServices
             return null;
         }
         $data->tenant()->associate($tenant);
+
+        $pic = $this->getStaffById($params->pic);
+        if ($this->isEmpty($pic)) {
+            return null;
+        }
+        $data->creator()->associate($pic);
 
         if($params->room_contract_id){
             $roomcontract = $this->getRoomContractById($params->room_contract_id);
@@ -365,7 +379,7 @@ trait RoomContractServices
         $data->agreement_fees  = $this->toDouble($params->agreement_fees);
         $data->deposit  = $this->toDouble($params->deposit);
         $data->agreement_fees  = $this->toDouble($params->agreement_fees);
-        $data->outstanding_deposit  = $this->toDouble($params->outstanding_deposit);
+        $data->outstanding  = $this->toDouble($params->outstanding);
         $data->rental  = $this->toDouble($params->rental);
 
         $room = $this->getRoomById($params->room_id);
@@ -379,6 +393,12 @@ trait RoomContractServices
             return null;
         }
         $data->tenant()->associate($tenant);
+
+        $pic = $this->getStaffById($params->pic);
+        if ($this->isEmpty($pic)) {
+            return null;
+        }
+        $data->creator()->associate($pic);
 
         if (!$this->saveModel($data)) {
             return null;
@@ -395,9 +415,9 @@ trait RoomContractServices
     private function payRoomContractDeposit($data, $price)
     {
         $price = $this->toDouble($price);
-        if($data->outstanding_deposit >= $price && $data->outstanding_deposit > 0){
+        if($data->outstanding >= $price && $data->outstanding > 0){
 
-            $data->outstanding_deposit -= $price;
+            $data->outstanding -= $price;
         }
         if (!$this->saveModel($data)) {
             return null;
@@ -554,7 +574,7 @@ trait RoomContractServices
             //         'agreement_fees' => $data->agreement_fees,
             //         'booking_fees' => $data->booking_fees,
             //         'agreement_fees' => $data->agreement_fees,
-            //         'outstanding_deposit' => $data->outstanding_deposit,
+            //         'outstanding' => $data->outstanding,
             //     ]);
 
             //     //Convert To Json Object
@@ -694,7 +714,7 @@ trait RoomContractServices
     {
         return ['id', 'uid', 'name', 'room_id', 'tenant_id','duration', 'left' ,
         'latest', 'expired', 'terms', 'autorenew', 'startdate',
-        'booking_fees','deposit','rental', 'outstanding_deposit',
+        'booking_fees','deposit','rental', 'outstanding',
         'room_contract_id', 'rental_payment_start_date'];
     }
 
@@ -710,7 +730,7 @@ trait RoomContractServices
     }
     public function roomContractFilterCols()
     {
-        return ['keyword', 'startDateFromDate', 'startDateToDate', 'endDateFromDate', 'endDateToDate', 
-        'createdDateFromDate', 'createdDateToDate', 'tenant_id', 'owner_id', 'service_ids', 'room_id', 'checkedout', 'outstanding_deposit', 'sequence'];
+        return ['keyword', 'startDateFromDate', 'startDateToDate', 'endDateFromDate', 'endDateToDate', 'pic',
+        'createdDateFromDate', 'createdDateToDate', 'tenant_id', 'owner_id', 'service_ids', 'room_id', 'checkedout', 'outstanding', 'sequence'];
     }
 }

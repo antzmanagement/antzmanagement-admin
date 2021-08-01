@@ -40,6 +40,15 @@ trait RoomServices
         $params = $this->checkUndefinedProperty($params, $this->roomFilterCols());
 
     
+    
+        if ($params->id) {
+            $id = $params->id;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($id) {
+                return $item->id == $id;
+            })->values();
+        }
+
         if ($params->unit) {
             $unit = $params->unit;
             $data = collect($data);
@@ -338,6 +347,6 @@ trait RoomServices
     public function roomFilterCols()
     {
 
-        return ['unit', 'jalan','lot', 'floor','room_type_id', 'owner_id','room_status'];
+        return ['unit', 'jalan','lot', 'floor','room_type_id', 'owner_id','room_status', 'id'];
     }
 }
