@@ -184,7 +184,7 @@ export default {
         data: {
           name: { required, maxLength: maxLength(100) },
           icno: { required, maxLength: maxLength(14) },
-          tel1: {},
+          tel1: {required},
           tel2: {},
           tel3: {},
           email: { email },
@@ -197,9 +197,9 @@ export default {
           mother_tel: {},
           father_name: {},
           mother_tel: {},
-          emergency_name: {},
-          emergency_contact: {},
-          emergency_relationship: {},
+          emergency_name: {required},
+          emergency_contact: {required},
+          emergency_relationship: {required},
         },
       };
     } else {
@@ -241,6 +241,39 @@ export default {
         return errors;
       }
     },
+    emergency_nameErrors() {
+      const errors = [];
+      if (!this.$v.data.emergency_name.$dirty) {
+        return errors;
+      }
+
+      if (!this.$v.data.emergency_name.required) {
+        errors.push("Emergency Contact Person is required");
+        return errors;
+      }
+    },
+    emergency_contactErrors() {
+      const errors = [];
+      if (!this.$v.data.emergency_contact.$dirty) {
+        return errors;
+      }
+
+      if (!this.$v.data.emergency_contact.required) {
+        errors.push("Emergency Contact is required");
+        return errors;
+      }
+    },
+    emergency_relationshipErrors() {
+      const errors = [];
+      if (!this.$v.data.emergency_relationship.$dirty) {
+        return errors;
+      }
+
+      if (!this.$v.data.emergency_relationship.required) {
+        errors.push("Emergency Relationship is required");
+        return errors;
+      }
+    },
     icnoErrors() {
       const errors = [];
       if (!this.$v.data.icno.$dirty) {
@@ -260,6 +293,11 @@ export default {
     tel1Errors() {
       const errors = [];
       if (!this.$v.data.tel1.$dirty) {
+        return errors;
+      }
+
+      if (!this.$v.data.tel1.required) {
+        errors.push("Phone is required");
         return errors;
       }
 
@@ -359,44 +397,44 @@ export default {
   },
   created() {
     this.showLoadingAction();
-    this.getRoomsAction({
-      pageNumber: -1,
-      pageSize: -1,
-    })
-      .then((data) => {
-        this.rooms = (data.data || []).map(function (room) {
-          if (
-            room.room_types.length > 0 &&
-            room.room_types[0].services.length > 0
-          ) {
-            room.services = room.room_types[0].services;
-            room.origServices = room.room_types[0].services;
-          } else {
-            room.services = [];
-            room.origServices = [];
-          }
-          room.origPrice = parseFloat(room.price);
-          room.price = parseFloat(room.price);
-          room.deposit = 700;
-          room.booking_fees = 200;
-          room.outstanding_deposit = room.deposit - room.booking_fees;
-          room.agreement_fees = 50;
-          room.autorenew = false;
-          return room;
-        });
-        this.getContractsAction({
-          pageNumber: -1,
-          pageSize: -1,
-        })
-          .then((data) => {
-            this.contracts = data.data;
+    // this.getRoomsAction({
+    //   pageNumber: -1,
+    //   pageSize: -1,
+    // })
+    //   .then((data) => {
+    //     this.rooms = (data.data || []).map(function (room) {
+    //       if (
+    //         room.room_types.length > 0 &&
+    //         room.room_types[0].services.length > 0
+    //       ) {
+    //         room.services = room.room_types[0].services;
+    //         room.origServices = room.room_types[0].services;
+    //       } else {
+    //         room.services = [];
+    //         room.origServices = [];
+    //       }
+    //       room.origPrice = parseFloat(room.price);
+    //       room.price = parseFloat(room.price);
+    //       room.deposit = 700;
+    //       room.booking_fees = 200;
+    //       room.outstanding_deposit = room.deposit - room.booking_fees;
+    //       room.agreement_fees = 50;
+    //       room.autorenew = false;
+    //       return room;
+    //     });
+    //     this.getContractsAction({
+    //       pageNumber: -1,
+    //       pageSize: -1,
+    //     })
+    //       .then((data) => {
+    //         this.contracts = data.data;
 
-            this.getStaffsAction({
-              pageNumber: -1,
-              pageSize: -1,
-            })
-              .then((data) => {
-                this.staffs = data.data;
+    //         this.getStaffsAction({
+    //           pageNumber: -1,
+    //           pageSize: -1,
+    //         })
+    //           .then((data) => {
+    //             this.staffs = data.data;
                 if (this.editMode && this.uid) {
                   this.getTenantAction({ uid: this.uid })
                     .then((data) => {
@@ -414,32 +452,32 @@ export default {
                 } else {
                   this.endLoadingAction();
                 }
-              })
-              .catch((error) => {
-                console.log(error);
-                this.endLoadingAction();
-                Toast.fire({
-                  icon: "warning",
-                  title: "Something went wrong... ",
-                });
-              });
-          })
-          .catch((error) => {
-            this.endLoadingAction();
-            Toast.fire({
-              icon: "warning",
-              title: "Something went wrong... ",
-            });
-          });
-      })
-      .catch((error) => {
-        console.log(error);
-        this.endLoadingAction();
-        Toast.fire({
-          icon: "warning",
-          title: "Something went wrong... ",
-        });
-      });
+      //         })
+      //         .catch((error) => {
+      //           console.log(error);
+      //           this.endLoadingAction();
+      //           Toast.fire({
+      //             icon: "warning",
+      //             title: "Something went wrong... ",
+      //           });
+      //         });
+      //     })
+      //     .catch((error) => {
+      //       this.endLoadingAction();
+      //       Toast.fire({
+      //         icon: "warning",
+      //         title: "Something went wrong... ",
+      //       });
+      //     });
+      // })
+      // .catch((error) => {
+      //   console.log(error);
+      //   this.endLoadingAction();
+      //   Toast.fire({
+      //     icon: "warning",
+      //     title: "Something went wrong... ",
+      //   });
+      // });
   },
   methods: {
     ...mapActions({
@@ -697,7 +735,7 @@ export default {
       <v-card-text>
         <v-container>
           <v-row>
-            <v-col cols="12">
+            <!-- <v-col cols="12">
               <v-autocomplete
                 v-model="data.pic"
                 :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
@@ -707,16 +745,8 @@ export default {
                 chips
                 deletable-chips
               >
-                <!-- <template v-slot:append>
-                  <room-type-form
-                    :editMode="false"
-                    :dialogStyle="roomFormDialogConfig.dialogStyle"
-                    :buttonStyle="roomFormDialogConfig.buttonStyle"
-                    @created="appendRoomTypeList($event)"
-                  ></room-type-form>
-                </template>-->
               </v-autocomplete>
-            </v-col>
+            </v-col> -->
             <v-col cols="12" md="6">
               <v-text-field
                 label="Name*"
@@ -780,7 +810,7 @@ export default {
             </v-col>
             <v-col cols="12" md="6">
               <v-text-field
-                label="Phone No 1"
+                label="Phone No 1*"
                 persistent-hint
                 v-model="data.tel1"
                 :maxlength="20"
@@ -815,7 +845,6 @@ export default {
               <v-text-field
                 label="Email"
                 persistent-hint
-                required
                 :maxlength="255"
                 v-model="data.email"
                 @input="$v.data.email.$touch()"
@@ -908,32 +937,35 @@ export default {
             </v-col>
             <v-col cols="6">
               <v-text-field
-                label="Emergency Contact Person"
+                label="Emergency Contact Person*"
                 required
                 :maxlength="255"
                 v-model="data.emergency_name"
                 @input="$v.data.emergency_name.$touch()"
                 @blur="$v.data.emergency_name.$touch()"
+                :error-messages="emergency_nameErrors"
               ></v-text-field>
             </v-col>
             <v-col cols="6">
               <v-text-field
-                label="Emergency Contact"
+                label="Emergency Contact*"
                 required
                 :maxlength="255"
                 v-model="data.emergency_contact"
                 @input="$v.data.emergency_contact.$touch()"
                 @blur="$v.data.emergency_contact.$touch()"
+                :error-messages="emergency_contactErrors"
               ></v-text-field>
             </v-col>
             <v-col cols="6">
               <v-text-field
-                label="Emergency Person Relationship"
+                label="Emergency Person Relationship*"
                 required
                 :maxlength="255"
                 v-model="data.emergency_relationship"
                 @input="$v.data.emergency_relationship.$touch()"
                 @blur="$v.data.emergency_relationship.$touch()"
+                :error-messages="emergency_relationshipErrors"
               ></v-text-field>
             </v-col>
             <v-col cols="12" md="6">
@@ -970,7 +1002,7 @@ export default {
               ></v-text-field>
             </v-col>-->
 
-            <v-col cols="12" md="12"  v-if="!editMode">
+            <!-- <v-col cols="12" md="12"  v-if="!editMode">
               <v-autocomplete
                 v-model="data.room"
                 :items="rooms || []"
@@ -987,7 +1019,7 @@ export default {
                   ></room-filter-dialog>
                 </template>
               </v-autocomplete>
-            </v-col>
+            </v-col> -->
             <v-col cols="12" v-if="!_.isEmpty(data.room)">
               <v-card>
                 <v-data-table

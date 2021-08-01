@@ -16,7 +16,17 @@ trait TenantServices
         $data = collect([]);
         //Role Based Retrieve Done in Store
         $userType = $this->getUserTypeById($this->tenantType);
-        $data = $data->merge($userType->users()->with('creator')->with('roomcontracts.room')->wherePivot('status', true)->where('users.status', true)->get());
+        $data = $data->merge($userType->users()->with('creator')->with(['roomcontracts' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+            $q->with(['room' => function ($q) {
+                // Query the name field in status table
+                $q->where('status', true);
+            }, 'contract' => function ($q) {
+                // Query the name field in status table
+                $q->where('status', true);
+            }]);
+        }, 'creator'])->wherePivot('status', true)->where('users.status', true)->get());
 
         $data = $data->unique('id')->sortBy(function ($item) {
             $unit = '';

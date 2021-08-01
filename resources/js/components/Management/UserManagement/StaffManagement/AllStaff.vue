@@ -48,11 +48,6 @@ export default {
       },
       headers: [
         {
-          text: "Id",
-          align: "start",
-          value: "id",
-        },
-        {
           text: "Name",
           align: "start",
           value: "name",
@@ -60,6 +55,7 @@ export default {
         { text: "Ic No", value: "icno" },
         { text: "Phone", value: "tel1" },
         { text: "Email", value: "email" },
+        { text: "Role" },
       ],
     };
   },
@@ -70,9 +66,7 @@ export default {
       },
       deep: true,
     },
-    role: function (val) {
-      console.log("role", val);
-    },
+    role: function (val) {},
   },
   computed: {
     isLoading() {
@@ -96,7 +90,6 @@ export default {
   },
   mounted() {
     this.getStaffs();
-    console.log(this.helpers);
   },
   methods: {
     ...mapActions({
@@ -106,7 +99,6 @@ export default {
       endLoadingAction: "endLoadingAction",
     }),
     initStaffFilter(filterGroup) {
-      console.log(filterGroup);
       this.staffFilterGroup.reset();
       if (filterGroup) {
         this.staffFilterGroup.keyword = filterGroup.keyword;
@@ -133,6 +125,7 @@ export default {
 
       this.filterStaffsAction(this.staffFilterGroup)
         .then((data) => {
+          console.log(data);
           if (data.data) {
             this.data = data.data;
           } else {
@@ -235,11 +228,13 @@ export default {
                 </template>
                 <template v-slot:item="props">
                   <tr @click="showStaff(props.item)">
-                    <td class="text-truncate">{{ props.item.id }}</td>
                     <td class="text-truncate">{{ props.item.name }}</td>
                     <td class="text-truncate">{{ props.item.icno }}</td>
                     <td class="text-truncate">{{ props.item.tel1 }}</td>
                     <td class="text-truncate">{{ props.item.email }}</td>
+                    <td class="text-truncate">
+                      {{ _.get(props.item, "role.name") || "N/A" }}
+                    </td>
                   </tr>
                 </template>
               </v-data-table>

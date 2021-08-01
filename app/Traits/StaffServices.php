@@ -16,7 +16,11 @@ trait StaffServices
         $data = collect();
         //Role Based Retrieve Done in Store
         $userType = $this->getUserTypeById($this->staffType);
-        $data = $data->merge($userType->users()->wherePivot('status', true)->where('users.status', true)->get());
+        $data = $data->merge($userType->users()->wherePivot('status', true)->where('users.status', true)->with(['usertypes' => function ($q) {
+            $q->wherePivot('status', true);
+        }, 'role' => function ($q) {
+            $q->where('status', true);
+        }])->get());
 
         $data = $data->unique('id')->sortByDesc('id')->flatten(1);
 
