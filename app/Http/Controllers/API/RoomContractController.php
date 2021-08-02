@@ -241,26 +241,23 @@ class RoomContractController extends Controller
             }
         }
 
+
         if($roomContract->booking_fees > 0){
             $params = collect([
                 'room_contract_id' => $roomContract->id,
                 'other_charges' => $roomContract->booking_fees,
-                'paid' => true,
-                'paymentdate' => Carbon::now(),
-                'issueby' => $request->user()->id,
             ]);
             //Convert To Json Object
             $params = json_decode(json_encode($params));
             $payment = $this->createPayment($params);
-            $payment = $this->updatePayment($payment, $params);
-            $data = $this->getOtherPaymentTitleByName('Partial Payment (Deposit)');
+            $data = $this->getOtherPaymentTitleByName('Partial Payment(Deposit)');
             if (!$this->isEmpty($data)) {
                 $data->price = $this->toDouble($roomContract->booking_fees);
                 $payment->otherpayments->push($data);
                 $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
             }else{
                 $params = collect([
-                    'name' => 'Partial Payment (Deposit)',
+                    'name' => 'Partial Payment(Deposit)',
                 ]);
                 //Convert To Json Object
                 $params = json_decode(json_encode($params));
@@ -270,6 +267,7 @@ class RoomContractController extends Controller
                     $payment->otherpayments->push($data);
                     $payment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
                 }
+
             }
         }
         

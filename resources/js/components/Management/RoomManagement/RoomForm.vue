@@ -244,6 +244,7 @@ export default {
         //Property
         this.properties = _.map(_.get(propertyRes , `data`) || [], (item) => {
           item.qty = 1;
+          item.remark = "";
           return item;
         });
 

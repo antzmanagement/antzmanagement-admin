@@ -111,6 +111,16 @@ trait PropertyServices
     {
 
         $data->status = false;
+
+        $maintenances = $data->maintenances()->where('status', true)->get();
+        foreach ($maintenances as $maintenance) {
+            $this->deleteMaintenance($maintenance);
+        }
+        $rooms = $data->rooms()->where('rooms.status', true)->get();
+        foreach ($rooms as $room) {
+            $room->properties()->detach([$data->id]);
+        }
+
         if ($this->saveModel($data)) {
             return $data->refresh();
         } else {

@@ -262,7 +262,6 @@ class RoomController extends Controller
                     DB::rollBack();
                     return $this->errorResponse();
                 }
-    
                 $finalproperties[$property->id] = ['status' => true, 'qty' => $property->qty, 'remark' => $property->remark];
             }
             error_log($finalproperties);
