@@ -155,6 +155,13 @@ export default {
     data: {
       otherpayments : [],
       services : [],
+      issueby : {},
+      sequence : '',
+      paymentdate : '',
+      receive_from : '',
+      paymentmethod : '',
+      referenceno : '',
+      remark : '',
     },
     uid: new Date().getTime(),
   }),
@@ -290,7 +297,7 @@ export default {
           </td>
 
           <td class="text-truncate subtitle">
-            RM {{ _.get(otherpayment, ["pivot", "price"]) || "N/A" | toDouble }}
+            RM {{ _.get(otherpayment, ["pivot", "price"]) || _.get(otherpayment, ["price"]) || "N/A" | toDouble }}
           </td>
         </tr>
 

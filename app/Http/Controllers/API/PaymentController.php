@@ -222,7 +222,6 @@ class PaymentController extends Controller
             DB::rollBack();
             return $this->errorResponse();
         }
-        error_log($payment->issueby);
         DB::commit();
         return $this->successResponse('Payment', $payment, 'update');
     }
@@ -291,6 +290,11 @@ class PaymentController extends Controller
         }
         
         DB::commit();
+        $payment = $this->getPaymentById($payment->id);
+        if ($this->isEmpty($payment)) {
+            DB::rollBack();
+            return $this->errorResponse();
+        }
         return $this->successResponse('Payment', $payment, 'update');
     }
 

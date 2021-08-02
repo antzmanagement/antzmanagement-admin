@@ -259,44 +259,6 @@ export default {
       console.log(data);
       var id = data.id;
       var payment = data;
-      if (
-        _.isArray(_.get(payment, ["services"])) &&
-        !_.isEmpty(_.get(payment, ["services"]))
-      ) {
-        payment.services = _.map(payment.services, function (service) {
-          service.pivot = {
-            price: service.price,
-          };
-          return service;
-        });
-      }
-      if (
-        _.isArray(_.get(payment, ["otherpayments"])) &&
-        !_.isEmpty(_.get(payment, ["otherpayments"]))
-      ) {
-        payment.otherpayments = _.map(payment.otherpayments, (otherpayment) => {
-          if (otherpayment.name == "Deposit") {
-            if (payment.paid) {
-              console.log(parseFloat(this.data.outstanding));
-              console.log(parseFloat(otherpayment.pivot.price));
-              this.data.outstanding =
-                (parseFloat(this.data.outstanding) || 0) -
-                parseFloat(otherpayment.pivot.price);
-
-              console.log(this.data.outstanding);
-            } else {
-              this.data.outstanding =
-                parseFloat(this.data.outstanding) ||
-                0 + parseFloat(otherpayment.price) ||
-                0;
-            }
-          }
-          otherpayment.pivot = {
-            price: otherpayment.other_charges,
-          };
-          return otherpayment;
-        });
-      }
 
       if (_.some(this.data.payments, ["id", id])) {
         this.data.payments = _.map(this.data.payments, function (item) {

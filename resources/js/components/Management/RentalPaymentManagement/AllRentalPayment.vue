@@ -313,13 +313,11 @@ export default {
       deep: true,
     },
     paymentTotal(v) {
-      console.log(v);
       if (v > 0) {
         this.fetchPaymentExcelData();
       }
     },
     rentalPaymentTotal(v) {
-      console.log(v);
       if (v > 0) {
         this.fetchRentalPaymentExcelData();
       }
@@ -450,32 +448,6 @@ export default {
     updatePaymentDetails(data) {
       var id = data.id;
       var payment = data;
-      if (
-        _.isArray(_.get(payment, ["services"])) &&
-        !_.isEmpty(_.get(payment, ["services"]))
-      ) {
-        payment.services = _.map(payment.services, function (service) {
-          service.pivot = {
-            price: service.price,
-          };
-          return service;
-        });
-      }
-      if (
-        _.isArray(_.get(payment, ["otherpayments"])) &&
-        !_.isEmpty(_.get(payment, ["otherpayments"]))
-      ) {
-        payment.otherpayments = _.map(
-          payment.otherpayments,
-          function (otherpayment) {
-            otherpayment.pivot = {
-              price: otherpayment.price,
-            };
-            return otherpayment;
-          }
-        );
-      }
-
       if (_.some(this.paymentData, ["id", id])) {
         this.paymentData = _.map(this.paymentData, function (item) {
           if (item.id == id) {
@@ -598,8 +570,6 @@ export default {
           }
           this.paymentTotal = data.totalResult;
           this.paymentLoading = false;
-          console.log("data");
-          console.log(this.paymentData);
         })
         .catch((error) => {
           this.paymentLoading = false;
@@ -611,7 +581,6 @@ export default {
     },
     print(data) {
       this.selectedRental = data;
-      console.log(this.selectedRental);
       this.showLoadingAction();
       setTimeout(() => {
         this.endLoadingAction();
@@ -625,7 +594,6 @@ export default {
       let promises = [];
       let self = this;
       _.forEach(_.range(maxPage), function (index) {
-        console.log(index);
         promises.push(
           self.filterPaymentsAction({
             pageSize: size,
@@ -635,14 +603,12 @@ export default {
       });
 
       let responses = await Promise.all(promises);
-      console.log(responses);
       let finalData = [];
       _.forEach(responses, function (response) {
         finalData = _.compact(
           _.concat(finalData, _.get(response, `data`) || [])
         );
       });
-      console.log(finalData);
       this.paymentExcelData = finalData;
       return finalData;
     },
@@ -653,7 +619,6 @@ export default {
       let promises = [];
       let self = this;
       _.forEach(_.range(maxPage), function (index) {
-        console.log(index);
         promises.push(
           self.filterRentalPaymentsAction({
             pageSize: size,
@@ -663,14 +628,12 @@ export default {
       });
 
       let responses = await Promise.all(promises);
-      console.log(responses);
       let finalData = [];
       _.forEach(responses, function (response) {
         finalData = _.compact(
           _.concat(finalData, _.get(response, `data`) || [])
         );
       });
-      console.log(finalData);
       this.rentalPaymentExcelData = finalData;
       return finalData;
     },
