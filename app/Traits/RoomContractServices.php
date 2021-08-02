@@ -500,7 +500,7 @@ trait RoomContractServices
         for ($x = $latest; $x < $duration; $x++) {
 
             if($data->rental_type == 'day'){
-                $latestdate = Carbon::parse($date1)->addDay($latest);
+                $latestdate = Carbon::parse($startdate)->addDay($latest);
             }else{
                 $date1 = Carbon::parse($startdate)->startOfMonth()->tz('Asia/Kuala_Lumpur');
                 $latestdate = Carbon::parse($date1)->addMonth($latest);
