@@ -133,17 +133,10 @@ trait RoomTypeServices
 
         $data->status = false;
         try {
-            $ids = $data->rooms()->wherePivot('status', true)->get();
-            $ids = $ids->pluck('id');
-            $data->rooms()->updateExistingPivot($ids, ['status' => false]);
+            $data->rooms()->sync([]);
+            $data->properties()->sync([]);
+            $data->services()->sync([]);
 
-            $ids = $data->properties()->wherePivot('status', true)->get();
-            $ids = $ids->pluck('id');
-            $data->properties()->updateExistingPivot($ids, ['status' => false]);
-
-            $ids = $data->services()->wherePivot('status', true)->get();
-            $ids = $ids->pluck('id');
-            $data->services()->updateExistingPivot($ids, ['status' => false]);
         } catch (Exception $e) {
             DB::rollBack();
             return $this->errorResponse();

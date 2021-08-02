@@ -265,14 +265,24 @@ trait RoomServices
             $data->owners()->sync([]);
             $data->properties()->sync([]);
 
+            $roomchecks = $data->roomchecks()->where('status', true)->get();
+            foreach ($roomchecks as $roomcheck) {
+                $this->deleteRoomCheck($roomcheck);
+            }
+
             $maintenances = $data->maintenances()->where('status', true)->get();
             foreach ($maintenances as $maintenance) {
                 $this->deleteMaintenance($maintenance);
             }
 
+            $cleanings = $data->cleanings()->where('status', true)->get();
+            foreach ($cleanings as $cleaning) {
+                $this->deleteCleaning($cleaning);
+            }
+
             $roomcontracts = $data->roomcontracts()->where('status', true)->get();
             foreach ($roomcontracts as $roomcontract) {
-                $this->deleteMaintenance($maintenance);
+                $this->deleteMaintenance($roomcontract);
             }
 
         } catch (Exception $e) {

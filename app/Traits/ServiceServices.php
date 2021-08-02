@@ -105,17 +105,12 @@ trait ServiceServices
     {
         $data->status = false;
         try {
-            $ids = $data->room_types()->wherePivot('status', true)->get();
-            $ids = $ids->pluck('id');
-            $data->room_types()->updateExistingPivot($ids, ['status' => false]);
-
-            $ids = $data->room_contracts_with_orig()->wherePivot('status', true)->get();
-            $ids = $ids->pluck('id');
-            $data->room_contracts_with_orig()->updateExistingPivot($ids, ['status' => false]);
-
-            $ids = $data->room_contracts_with_add_on()->wherePivot('status', true)->get();
-            $ids = $ids->pluck('id');
-            $data->room_contracts_with_add_on()->updateExistingPivot($ids, ['status' => false]);
+            $data->room_types()->sync([]);
+            $data->room_contracts_with_orig()->sync([]);
+            $data->room_contracts_with_add_on()->sync([]);
+            $data->rentalpayments()->sync([]);
+            $data->payments()->sync([]);
+            
         } catch (Exception $e) {
             DB::rollBack();
             return $this->errorResponse();

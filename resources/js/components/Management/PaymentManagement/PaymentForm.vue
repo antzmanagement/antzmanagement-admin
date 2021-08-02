@@ -79,10 +79,6 @@ export default {
       },
       deep: true,
     },
-    resetIndicator: (val) => {
-      if (val) {
-      }
-    },
   },
   computed: {
     isLoading() {
@@ -181,9 +177,9 @@ export default {
       this.data.otherpayments.forEach((item) => {
         price += parseFloat(item.price);
       });
-
       this.data.other_charges = parseFloat(price);
       this.updateProcessingFees();
+      console.log(this.data.otherpayments);
     },
     createPayment() {
       if (!this.roomcontractid) {
@@ -220,6 +216,7 @@ export default {
     updatePayment() {
       this.showLoadingAction();
       this.$Progress.start();
+      console.log(this.data.otherpayments);
       this.updatePaymentAction(this.data)
         .then((data) => {
           Toast.fire({

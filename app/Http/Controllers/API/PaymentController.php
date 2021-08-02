@@ -200,7 +200,7 @@ class PaymentController extends Controller
                 $data = $this->getOtherPaymentTitleByName($otherpayment->name);
                 if (!$this->isEmpty($data)) {
                     $price = $this->toDouble($otherpayment->price);
-                    $finalservices[$data->id] = ['status' => true, 'price' => $price];
+                    $finalotherpayments[$data->id] = ['status' => true, 'price' => $price];
                 }else{
                     $params = collect([
                         'name' => $otherpayment->name,
@@ -210,7 +210,7 @@ class PaymentController extends Controller
                     $data = $this->createOtherPaymentTitle($params);
                     if (!$this->isEmpty($data)) {
                         $price = $this->toDouble($otherpayment->price);
-                        $finalservices[$data->id] = ['status' => true, 'price' => $price];
+                        $finalotherpayments[$data->id] = ['status' => true, 'price' => $price];
                     }
                 }
             }

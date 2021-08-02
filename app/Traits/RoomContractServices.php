@@ -446,13 +446,8 @@ trait RoomContractServices
             $this->deleteRoomContract($childrenroomcontract);
         }
         try {
-            $ids = $data->addonservices()->wherePivot('status', true)->get();
-            $ids = $ids->pluck('id');
-            $data->addonservices()->updateExistingPivot($ids, ['status' => false]);
-
-            $ids = $data->origservices()->wherePivot('status', true)->get();
-            $ids = $ids->pluck('id');
-            $data->origservices()->updateExistingPivot($ids, ['status' => false]);
+            $data->addonservices()->sync([]);
+            $data->origservices()->sync([]);
 
         } catch (Exception $e) {
             DB::rollBack();

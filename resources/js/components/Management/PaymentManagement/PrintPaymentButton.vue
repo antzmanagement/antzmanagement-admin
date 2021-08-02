@@ -152,7 +152,10 @@ export default {
   },
   data: () => ({
     _: _,
-    data: {},
+    data: {
+      otherpayments : [],
+      services : [],
+    },
     uid: new Date().getTime(),
   }),
 

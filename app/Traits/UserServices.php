@@ -209,13 +209,65 @@ trait UserServices
 
             $ids = $data->ownrooms()->wherePivot('status', true)->get();
             $ids = $ids->pluck('id');
-            $data->ownrooms()->updateExistingPivot($ids, ['status' => false]);
+            $data->ownrooms()->sync([]);
 
-            // $roomcontracts = $data->roomcontracts()->where('status', true)->get();
-            // foreach ($roomcontracts as $roomcontract) {
-            //     $this->deleteRoomContract($roomcontract);
-            // }
+            $roomcontracts = $data->roomcontracts()->where('status', true)->get();
+            foreach ($roomcontracts as $roomcontract) {
+                $this->deleteRoomContract($roomcontract);
+            }
 
+            $manageroomcontracts = $data->manageroomcontracts()->where('status', true)->get();
+            foreach ($manageroomcontracts as $manageroomcontract) {
+                $manageroomcontract->pic = null;
+                $this->updateRoomContract($manageroomcontract, $manageroomcontract);
+            }
+
+            $maintenances = $data->maintenances()->where('status', true)->get();
+            foreach ($maintenances as $maintenance) {
+                $maintenance->tenant_id = null;
+                $maintenance->claim_by_tenant = false;
+                $this->updateMaintenance($maintenance, $maintenance);
+            }
+
+            $cleanings = $data->cleanings()->where('status', true)->get();
+            foreach ($cleanings as $cleaning) {
+                $cleaning->tenant_id = null;
+                $cleaning->claim_by_tenant = false;
+                $this->updateCleaning($cleaning, $cleaning);
+            }
+
+            $ownermaintenances = $data->ownermaintenances()->where('status', true)->get();
+            foreach ($ownermaintenances as $ownermaintenance) {
+                $ownermaintenance->owner_id = null;
+                $ownermaintenance->claim_by_owner = false;
+                $this->updateMaintenance($ownermaintenance, $ownermaintenance);
+            }
+
+            $ownercleanings = $data->ownercleanings()->where('status', true)->get();
+            foreach ($ownercleanings as $ownercleaning) {
+                $ownercleaning->owner_id = null;
+                $ownercleaning->claim_by_owner = false;
+                $this->updateCleaning($ownercleaning, $ownercleaning);
+            }
+
+            $createdUsers = $data->createdUsers()->where('status', true)->get();
+            foreach ($createdUsers as $createdUser) {
+                $createdUser->pic = null;
+                $this->updateUser($createdUser, $createdUser);
+            }
+
+            $issuerentalpayments = $data->issuerentalpayments()->where('status', true)->get();
+            foreach ($issuerentalpayments as $issuerentalpayment) {
+                $issuerentalpayment->issueby = null;
+                $this->updateRentalPayment($issuerentalpayment, $issuerentalpayment);
+            }
+
+            $issuepayments = $data->issuepayments()->where('status', true)->get();
+            foreach ($issuepayments as $issuepayment) {
+                $issuepayment->issueby = null;
+                $this->updatePayment($issuepayment, $issuepayment);
+            }
+            
         } catch (Exception $e) {
             DB::rollBack();
             return $this->errorResponse();

@@ -177,6 +177,7 @@ class RoomContractController extends Controller
             'agreement_fees' => $request->room->agreement_fees,
             'outstanding' => $outstanding,
             'booking_fees' => $request->room->booking_fees,
+            'remark' => $request->remark,
             'sequence' => $max,
         ]);
         //Convert To Json Object
@@ -408,6 +409,7 @@ class RoomContractController extends Controller
             'agreement_fees' => $request->room->agreement_fees,
             'outstanding' => $request->room->outstanding,
             'booking_fees' => $request->room->booking_fees,
+            'remark' => $request->remark,
 
         ]);
         //Convert To Json Object

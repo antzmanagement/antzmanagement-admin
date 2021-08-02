@@ -136,9 +136,6 @@ export default {
           text: "Processing Fees (RM)",
         },
         {
-          text: "Service Fees (RM)",
-        },
-        {
           text: "Paid",
         },
         {
@@ -175,12 +172,15 @@ export default {
           text: "Contract End Date",
         },
         { text: "Payment Date", value: "paymentdate" },
-        { text: "Price", value: "price" },
-        { text: "Other Charges", value: "other_charges" },
-        { text: "Other Payments" },
         {
           text: "Services",
           value: "services",
+        },
+        { text: "Service Price", value: "price" },
+        { text: "Other Payments" },
+        { text: "Other Charges", value: "other_charges" },
+        {
+          text: "Paid",
         },
         { text: "Remark", value: "remark" },
         { text: "Actions" },
@@ -827,9 +827,6 @@ export default {
                     <td class="text-truncate">
                       {{ props.item.processing_fees | toDouble }}
                     </td>
-                    <td class="text-truncate">
-                      {{ props.item.service_fees | toDouble }}
-                    </td>
                     <td class="text-truncate" v-if="props.item.paid">
                       <v-icon small color="success">mdi-check</v-icon>
                     </td>
@@ -932,7 +929,7 @@ export default {
                   <v-toolbar flat color="white">
                     <v-toolbar-title
                       :class="helpers.managementStyles().subtitleClass"
-                      >Pending Payment</v-toolbar-title
+                      >Others Payment</v-toolbar-title
                     >
                     <v-spacer></v-spacer>
                     <download-excel
@@ -988,10 +985,16 @@ export default {
                       {{ props.item.paymentdate | formatDate }}
                     </td>
                     <td class="text-truncate">
-                      {{ props.item.totalpayment | toDouble }}
+                      {{
+                        _.compact(
+                          _.map(props.item.services, function (service) {
+                            return _.get(service, ["text"]) || "";
+                          })
+                        ) | getArrayValues
+                      }}
                     </td>
                     <td class="text-truncate">
-                      {{ props.item.other_charges | toDouble }}
+                      {{ props.item.price | toDouble }}
                     </td>
                     <td class="text-truncate">
                       {{
@@ -1006,13 +1009,13 @@ export default {
                       }}
                     </td>
                     <td class="text-truncate">
-                      {{
-                        _.compact(
-                          _.map(props.item.services, function (service) {
-                            return _.get(service, ["text"]) || "";
-                          })
-                        ) | getArrayValues
-                      }}
+                      {{ props.item.other_charges | toDouble }}
+                    </td>
+                    <td class="text-truncate" v-if="props.item.paid">
+                      <v-icon small color="success">mdi-check</v-icon>
+                    </td>
+                    <td class="text-truncate" v-else>
+                      <v-icon small color="danger">mdi-close</v-icon>
                     </td>
                     <td class="text-truncate">{{ props.item.remark }}</td>
                     <td class="text-truncate">

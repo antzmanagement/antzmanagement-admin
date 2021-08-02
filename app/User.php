@@ -113,13 +113,24 @@ class User extends Authenticatable
 
     public function maintenances()
     {
-        return $this->hasMany('App\Maintenance', 'owner_id');
+        return $this->hasMany('App\Maintenance', 'tenant_id');
     }
 
     public function cleanings()
     {
-        return $this->hasMany('App\Cleaning');
+        return $this->hasMany('App\Cleaning', 'tenant_id');
     }
+    
+    public function ownermaintenances()
+    {
+        return $this->hasMany('App\Maintenance', 'owner_id');
+    }
+
+    public function ownercleanings()
+    {
+        return $this->hasMany('App\Cleaning', 'owner_id');
+    }
+
 
     public function claims()
     {

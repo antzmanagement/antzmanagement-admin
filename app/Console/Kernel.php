@@ -21,6 +21,7 @@ class Kernel extends ConsoleKernel
         Commands\DeleteRoomContractWithoutTenant::class,
         Commands\DeletePaymentWithoutRoomContract::class,
         Commands\UpdatePropertyList::class,
+        Commands\Redelete::class,
         //
     ];
 
