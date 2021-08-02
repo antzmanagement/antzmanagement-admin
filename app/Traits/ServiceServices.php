@@ -108,7 +108,6 @@ trait ServiceServices
             $data->room_types()->sync([]);
             $data->room_contracts_with_orig()->sync([]);
             $data->room_contracts_with_add_on()->sync([]);
-            $data->rentalpayments()->sync([]);
             $data->payments()->sync([]);
             
         } catch (Exception $e) {
