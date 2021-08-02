@@ -247,7 +247,7 @@ class RoomContractController extends Controller
                 'other_charges' => $roomContract->booking_fees,
                 'paid' => true,
                 'paymentdate' => Carbon::now(),
-                'issue_by' => $request->user()->id,
+                'issueby' => $request->user()->id,
             ]);
             //Convert To Json Object
             $params = json_decode(json_encode($params));
@@ -534,7 +534,7 @@ class RoomContractController extends Controller
                 'other_charges' => $roomContract->checkout_charges,
                 'paid' => true,
                 'paymentdate' => Carbon::now(),
-                'issue_by' => $request->user()->id,
+                'issueby' => $request->user()->id,
             ]);
             //Convert To Json Object
             $params = json_decode(json_encode($params));
