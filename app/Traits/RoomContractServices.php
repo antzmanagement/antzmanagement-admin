@@ -59,7 +59,11 @@ trait RoomContractServices
         }])->get();
 
         $data = $data->unique('id')->sortBy(function ($item, $key) {
-            return $item->room->unit;
+            if($item->room){
+                return $item->room->unit;
+            }else{
+                return '';
+            }
         })->flatten(1);
 
         return $data;
@@ -195,7 +199,11 @@ trait RoomContractServices
 
 
         $data = $data->unique('id')->sortBy(function ($item, $key) {
-            return $item->room->unit;
+            if($item->room){
+                return $item->room->unit;
+            }else{
+                return '';
+            }
         })->flatten(1);
 
         return $data;

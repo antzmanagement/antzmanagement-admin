@@ -42,7 +42,11 @@ trait RoomCheckServices
         }])->get();
 
         $data = $data->unique('id')->sortBy(function ($item, $key) {
-            return $item->room->unit;
+            if($item->room){
+                return $item->room->unit;
+            }else{
+                return '';
+            }
         })->flatten(1);
 
         return $data;
@@ -88,7 +92,11 @@ trait RoomCheckServices
 
 
         $data = $data->unique('id')->sortBy(function ($item, $key) {
-            return $item->checked_date;
+            if($item->room){
+                return $item->room->unit;
+            }else{
+                return '';
+            }
         })->flatten(1);
 
         return $data;
