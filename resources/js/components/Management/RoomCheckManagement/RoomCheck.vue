@@ -325,7 +325,7 @@ export default {
     ></navbar>
     <v-content
       :class="helpers.managementStyles().backgroundClass"
-      v-if="helpers.isAccessible(_.get(role, ['name']), 'roomCheck', 'read')"
+      v-if="helpers.isAccessible(_.get(role, ['name']), 'roomCheck', 'view')"
     >
       <v-container>
         <loading></loading>
@@ -349,7 +349,18 @@ export default {
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Room</label>
                   <div class="form-control-plaintext">
-                    <v-chip class="ma-2" @click="showRoom(data.room)">
+                    <v-chip
+                      class="ma-2"
+                      @click="
+                        helpers.isAccessible(
+                          _.get(role, ['name']),
+                          'room',
+                          'view'
+                        )
+                          ? showRoom(data.room)
+                          : null
+                      "
+                    >
                       <h4 class="text-center ma-2">{{ data.room.name }}</h4>
                     </v-chip>
                   </div>
@@ -435,11 +446,20 @@ export default {
                               : "N/A"
                           }}
                         </td>
-                        <td class="text-truncate">{{ props.item.maintenance_date || 'N/A' }}</td>
+                        <td class="text-truncate">
+                          {{ props.item.maintenance_date || "N/A" }}
+                        </td>
                         <td class="text-truncate">
                           <print-maintenance-button
                             :item="props.item"
-                            v-if="props.item.paid"
+                            v-if="
+                              props.item.paid &&
+                              helpers.isAccessible(
+                                _.get(role, ['name']),
+                                'roomMaintenance',
+                                'print'
+                              )
+                            "
                           >
                             <v-icon small class="mr-2" color="success"
                               >mdi-printer</v-icon
@@ -479,6 +499,13 @@ export default {
                           >
 
                           <confirm-dialog
+                            v-if="
+                              helpers.isAccessible(
+                                _.get(role, ['name']),
+                                'roomMaintenance',
+                                'delete'
+                              )
+                            "
                             @confirmed="
                               $event ? deleteMaintenance(props.item) : null
                             "
@@ -541,11 +568,20 @@ export default {
                               : "N/A"
                           }}
                         </td>
-                        <td class="text-truncate">{{ props.item.cleaning_date || 'N/A' }}</td>
+                        <td class="text-truncate">
+                          {{ props.item.cleaning_date || "N/A" }}
+                        </td>
                         <td class="text-truncate">
                           <print-cleaning-button
                             :item="props.item"
-                            v-if="props.item.paid"
+                            v-if="
+                              props.item.paid &&
+                              helpers.isAccessible(
+                                _.get(role, ['name']),
+                                'roomMaintenance',
+                                'print'
+                              )
+                            "
                           >
                             <v-icon small class="mr-2" color="success"
                               >mdi-printer</v-icon
@@ -585,6 +621,13 @@ export default {
                           >
 
                           <confirm-dialog
+                            v-if="
+                              helpers.isAccessible(
+                                _.get(role, ['name']),
+                                'roomMaintenance',
+                                'delete'
+                              )
+                            "
                             @confirmed="
                               $event ? deleteCleaning(props.item) : null
                             "
@@ -611,7 +654,6 @@ export default {
               <v-col
                 cols="auto"
                 v-if="
-                  !data.checkedout &&
                   helpers.isAccessible(
                     _.get(role, ['name']),
                     'roomCheck',

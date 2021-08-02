@@ -83,6 +83,11 @@ export default {
       { text: "Claimed By" },
       { text: "Actions" },
     ],
+    propertyHeaders: [
+      { text: "Name" },
+      { text: "Qty" },
+      { text: "Remark" },
+    ],
   }),
 
   computed: {
@@ -354,7 +359,7 @@ export default {
     ></navbar>
     <v-content
       :class="helpers.managementStyles().backgroundClass"
-      v-if="helpers.isAccessible(_.get(role, ['name']), 'room', 'read')"
+      v-if="helpers.isAccessible(_.get(role, ['name']), 'room', 'view')"
     >
       <v-container>
         <loading></loading>
@@ -382,43 +387,10 @@ export default {
                       class="ma-2"
                       v-for="roomType in data.room_types"
                       :key="roomType.uid"
-                      :to="{ name: 'roomtype', params: { uid: roomType.uid } }"
+                      :to="helpers.isAccessible(_.get(role, ['name']), 'roomType', 'view') ? { name: 'roomtype', params: { uid: roomType.uid } } : {}"
                     >
                       <h4 class="text-center ma-2">
                         {{ roomType.name | capitalizeFirstLetter }}
-                      </h4>
-                    </v-chip>
-                  </div>
-                </div>
-              </v-col>
-            </v-row>
-
-            <v-row
-              justify="start"
-              align="center"
-              class="pa-2"
-              v-if="
-                _.isArray(_.get(data, ['properties'])) &&
-                !_.isEmpty(_.get(data, ['properties']))
-              "
-            >
-              <v-divider
-                :color="helpers.managementStyles().dividerColor"
-              ></v-divider>
-              <v-col cols="12">
-                <div class="form-group mb-0">
-                  <label class="form-label mb-0">Properties</label>
-                  <div class="form-control-plaintext">
-                    <v-chip
-                      class="ma-2"
-                      v-for="property in data.properties"
-                      :key="property.uid"
-                    >
-                      <h4 class="text-center ma-2">
-                        {{
-                          _.get(property, ["name"]) ||
-                          "" | capitalizeFirstLetter
-                        }}
                       </h4>
                     </v-chip>
                   </div>
@@ -443,12 +415,16 @@ export default {
                   <div class="form-control-plaintext">
                     <v-chip
                       class="ma-2"
-                      v-for="roomcontract in _.sortBy(data.roomcontracts, ['startdate'])"
+                      v-for="roomcontract in _.sortBy(data.roomcontracts, [
+                        'startdate',
+                      ])"
                       :key="roomcontract.uid"
-                      :to="{
+                      :to="helpers.isAccessible(_.get(role, ['name']), 'roomContract', 'view') ? {
                         name: 'roomcontract',
                         params: { uid: roomcontract.uid },
-                      }"
+                      }
+                      :
+                      {}"
                     >
                       <h4 class="text-center ma-2">
                         {{
@@ -482,7 +458,10 @@ export default {
                       class="ma-2"
                       v-for="owner in data.owners"
                       :key="owner.uid"
-                      :to="{ name: 'owner', params: { uid: owner.uid } }"
+                      :to="helpers.isAccessible(_.get(role, ['name']), 'owner', 'view') ? 
+                      { name: 'owner', params: { uid: owner.uid } }
+                      :
+                      null"
                     >
                       <h4 class="text-center ma-2" type="button">
                         {{
@@ -665,9 +644,58 @@ export default {
               >
                 <v-card raised width="100%">
                   <v-data-table
+                    :headers="propertyHeaders"
+                    :items="
+                      _.reverse(_.sortBy(data.properties || [], ['created_at']))
+                    "
+                    fixed-header
+                    height="300px"
+                    :items-per-page="5"
+                    disable-sort
+                  >
+                    <template v-slot:top>
+                      <v-toolbar flat color="white">
+                        <v-toolbar-title
+                          :class="helpers.managementStyles().subtitleClass"
+                          >Property</v-toolbar-title
+                        >
+                        <v-spacer></v-spacer>
+                      </v-toolbar>
+                    </template>
+                    <template v-slot:item="props">
+                      <tr :key="props.item.uid">
+                        <td class="text-truncate">
+                          {{ props.item.text }}
+                        </td>
+                        <td class="text-truncate">
+                          {{ _.get(props.item, "pivot.qty") || 0 }}
+                        </td>
+                        <td class="text-truncate">
+                          {{ _.get(props.item, "pivot.remark") || 0 }}
+                        </td>
+                      </tr>
+                    </template>
+                  </v-data-table>
+                </v-card>
+              </v-col>
+            </v-row>
+
+            <v-divider
+              class="mx-3"
+              :color="helpers.managementStyles().dividerColor"
+            ></v-divider>
+            <v-row>
+              <v-col
+                cols="12"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
+                <v-card raised width="100%">
+                  <v-data-table
                     :headers="roomCheckHeaders"
                     :items="
-                      _.reverse(_.sortBy(data.roomchecks || [], ['checked_date']))
+                      _.reverse(
+                        _.sortBy(data.roomchecks || [], ['checked_date'])
+                      )
                     "
                     fixed-header
                     height="300px"
@@ -684,7 +712,10 @@ export default {
                       </v-toolbar>
                     </template>
                     <template v-slot:item="props">
-                      <tr :key="props.item.uid" @click="showRoomCheck(props.item)">
+                      <tr
+                        :key="props.item.uid"
+                        @click="helpers.isAccessible(_.get(role, ['name']), 'roomCheck', 'view') ? showRoomCheck(props.item) : null"
+                      >
                         <td class="text-truncate">
                           {{ props.item.category }}
                         </td>
@@ -735,17 +766,34 @@ export default {
                     </template>
                     <template v-slot:item="props">
                       <tr :key="props.item.uid">
-                        <td class="text-truncate" @click="showMaintenance(props.item)">
+                        <td
+                          class="text-truncate"
+                          @click="helpers.isAccessible(_.get(role, ['name']), 'roomMaintenance', 'view') ? showMaintenance(props.item) : null"
+                        >
                           {{ _.get(props.item, `property.text`) || "N/A" }}
                         </td>
-                        <td class="text-truncate" @click="showMaintenance(props.item)">
+                        <td
+                          class="text-truncate"
+                          @click="helpers.isAccessible(_.get(role, ['name']), 'roomMaintenance', 'view') ? showMaintenance(props.item) : null"
+                        >
                           {{ props.item.maintenance_type }}
                         </td>
-                        <td class="text-truncate" @click="showMaintenance(props.item)">
+                        <td
+                          class="text-truncate"
+                          @click="helpers.isAccessible(_.get(role, ['name']), 'roomMaintenance', 'view') ? showMaintenance(props.item) : null"
+                        >
                           {{ props.item.maintenance_status }}
                         </td>
-                        <td class="text-truncate" @click="showMaintenance(props.item)">{{ props.item.price }}</td>
-                        <td class="text-truncate" @click="showMaintenance(props.item)">
+                        <td
+                          class="text-truncate"
+                          @click="helpers.isAccessible(_.get(role, ['name']), 'roomMaintenance', 'view') ? showMaintenance(props.item) : null"
+                        >
+                          {{ props.item.price }}
+                        </td>
+                        <td
+                          class="text-truncate"
+                          @click="helpers.isAccessible(_.get(role, ['name']), 'roomMaintenance', 'view') ? showMaintenance(props.item) : null"
+                        >
                           {{
                             _.get(props.item, ["claim_by_owner"])
                               ? _.get(props.item, ["owner", "name"]) || "N/A"
@@ -797,6 +845,13 @@ export default {
                           >
 
                           <confirm-dialog
+                            v-if="
+                              helpers.isAccessible(
+                                _.get(role, ['name']),
+                                'roomMaintenance',
+                                'delete'
+                              )
+                            "
                             @confirmed="
                               $event ? deleteMaintenance(props.item) : null
                             "
@@ -864,7 +919,12 @@ export default {
                         <td class="text-truncate">
                           <print-cleaning-button
                             :item="props.item"
-                            v-if="props.item.paid"
+                            v-if="props.item.paid && 
+                              helpers.isAccessible(
+                                _.get(role, ['name']),
+                                'roomMaintenance',
+                                'print'
+                              )"
                           >
                             <v-icon small class="mr-2" color="success"
                               >mdi-printer</v-icon
@@ -904,6 +964,13 @@ export default {
                           >
 
                           <confirm-dialog
+                            v-if="
+                              helpers.isAccessible(
+                                _.get(role, ['name']),
+                                'roomMaintenance',
+                                'delete'
+                              )
+                            "
                             @confirmed="
                               $event ? deleteCleaning(props.item) : null
                             "

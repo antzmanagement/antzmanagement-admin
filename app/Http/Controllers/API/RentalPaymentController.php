@@ -163,7 +163,7 @@ class RentalPaymentController extends Controller
             'paymentmethod' => $request->paymentmethod,
             // 'receive_from' => $request->receive_from,
             'receive_from' => $rentalPayment->roomcontract->tenant->name,
-            'issue_by' => $request->user()->id,
+            'issueby' => $request->user()->id,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
@@ -250,7 +250,7 @@ class RentalPaymentController extends Controller
             'paymentmethod' => $request->paymentmethod,
             // 'receive_from' => $request->receive_from,
             'receive_from' => $rentalPayment->roomcontract->tenant->name,
-            'issue_by' => $request->user()->id,
+            'issueby' => $request->user()->id,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

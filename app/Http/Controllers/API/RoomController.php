@@ -109,7 +109,6 @@ class RoomController extends Controller
             'roomType' => $request->roomType,
             'owner' => $request->owner,
             'room_status' => $request->room_status,
-            'properties' => $request->properties,
             'lot' =>  $request->lot,
             'tnb_account_no' => $request->tnb_account_no,
         ]);
@@ -150,13 +149,19 @@ class RoomController extends Controller
         }
 
         if($request->properties){
-            $properties = collect(json_decode(json_encode($request->properties)));
-            foreach ($properties as $property) {
-                $property = $this->getPropertyById($property);
-                if (!$this->isEmpty($property)) {
-                    $room->properties()->syncWithoutDetaching([$property->id => ['status' => true]]);
+            $finalproperties = collect();
+            foreach ($request->properties as $property) {
+                $property = json_decode(json_encode($property));
+                $origProperty = $this->getPropertyById($property->id);
+                if ($this->isEmpty($origProperty)) {
+                    DB::rollBack();
+                    return $this->errorResponse();
                 }
+    
+                $finalproperties[$property->id] = ['status' => true, 'qty' => $property->qty, 'remark' => $property->remark];
             }
+            error_log($finalproperties);
+            $room->properties()->sync($finalproperties);
         }
         
 
@@ -249,17 +254,19 @@ class RoomController extends Controller
         }
 
         if($request->properties){
-            $properties = collect(json_decode(json_encode($request->properties)));
-            $syncArray = collect();
-            foreach ($properties as $property) {
-                $property = $this->getPropertyById($property);
-                if (!$this->isEmpty($property)) {
-                    $syncArray->push($property->id);
+            $finalproperties = collect();
+            foreach ($request->properties as $property) {
+                $property = json_decode(json_encode($property));
+                $origProperty = $this->getPropertyById($property->id);
+                if ($this->isEmpty($origProperty)) {
+                    DB::rollBack();
+                    return $this->errorResponse();
                 }
+    
+                $finalproperties[$property->id] = ['status' => true, 'qty' => $property->qty, 'remark' => $property->remark];
             }
-            $room->properties()->sync($syncArray);
-        }else{
-            $room->properties()->sync([]);
+            error_log($finalproperties);
+            $room->properties()->sync($finalproperties);
         }
         
 

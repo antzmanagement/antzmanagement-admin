@@ -9,7 +9,7 @@ export default {
       moment: moment,
       _: _,
       editMode: false,
-      paymentPayDialog : false,
+      paymentPayDialog: false,
       addOnPaymentEditMode: false,
       addOnPaymentDialog: false,
       paymentDialog: false,
@@ -147,6 +147,12 @@ export default {
         {
           text: "Action",
         },
+        {
+          text: "Receive From",
+        },
+        {
+          text: "Issue By",
+        },
       ],
       paymentHeaders: [
         {
@@ -178,6 +184,12 @@ export default {
         },
         { text: "Remark", value: "remark" },
         { text: "Actions" },
+        {
+          text: "Receive From",
+        },
+        {
+          text: "Issue By",
+        },
       ],
       paymentExcelData: [],
       paymentExcelFields: {
@@ -414,7 +426,8 @@ export default {
         this.paymentFilterGroup.paid = filterGroup.paid;
       }
       if (filterGroup.otherPaymentTitle) {
-        this.paymentFilterGroup.otherPaymentTitle = filterGroup.otherPaymentTitle;
+        this.paymentFilterGroup.otherPaymentTitle =
+          filterGroup.otherPaymentTitle;
       }
 
       this.paymentOptions.page = 1;
@@ -463,15 +476,15 @@ export default {
         );
       }
 
-      if(_.some(this.paymentData, ['id', id])){
-        this.paymentData = _.map(this.paymentData, function(item) { 
-         if(item.id == id){
-           return payment;
-         } 
-         return item;
-        })
-      }else{
-        this.paymentData = _.concat(this.paymentData, [data])
+      if (_.some(this.paymentData, ["id", id])) {
+        this.paymentData = _.map(this.paymentData, function (item) {
+          if (item.id == id) {
+            return payment;
+          }
+          return item;
+        });
+      } else {
+        this.paymentData = _.concat(this.paymentData, [data]);
       }
     },
     deletePaymentDetails(data) {
@@ -741,7 +754,7 @@ export default {
           align="center"
           class="ma-3"
           v-if="
-            helpers.isAccessible(_.get(role, ['name']), 'rentalPayment', 'read')
+            helpers.isAccessible(_.get(role, ['name']), 'rentalPayment', 'tableView')
           "
         >
           <v-col cols="12">
@@ -830,7 +843,7 @@ export default {
                       <print-rental-payment-button
                         :item="props.item"
                         :roomcontract="props.item.roomcontract"
-                        v-if="props.item.paid"
+                        v-if="props.item.paid && helpers.isAccessible(_.get(role, ['name']), 'rentalPayment', 'print')"
                       >
                         <v-icon small class="mr-2" color="success"
                           >mdi-printer</v-icon
@@ -891,6 +904,12 @@ export default {
                         "
                       ></confirm-dialog>
                     </td>
+                    <td class="text-truncate">
+                      {{ props.item.receive_from || "N/A" }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ _.get(props.item, "issueby.name") || "N/A" }}
+                    </td>
                   </tr>
                 </template>
               </v-data-table>
@@ -946,16 +965,24 @@ export default {
                     <td class="text-truncate">{{ props.item.receiptno }}</td>
                     <td class="text-truncate">{{ props.item.referenceno }}</td>
                     <td class="text-truncate">
-                      {{ _.get(props.item, 'roomcontract.tenant.name') || 'N/A' }}
+                      {{
+                        _.get(props.item, "roomcontract.tenant.name") || "N/A"
+                      }}
                     </td>
                     <td class="text-truncate">
-                      {{ _.get(props.item, 'roomcontract.room.name') || 'N/A' }}
+                      {{ _.get(props.item, "roomcontract.room.name") || "N/A" }}
                     </td>
                     <td class="text-truncate">
-                      {{ _.get(props.item, 'roomcontract.startdate') || 'N/A' | formatDate}}
+                      {{
+                        _.get(props.item, "roomcontract.startdate") ||
+                        "N/A" | formatDate
+                      }}
                     </td>
                     <td class="text-truncate">
-                      {{ _.get(props.item, 'roomcontract.enddate') || 'N/A' | formatDate}}
+                      {{
+                        _.get(props.item, "roomcontract.enddate") ||
+                        "N/A" | formatDate
+                      }}
                     </td>
                     <td class="text-truncate">
                       {{ props.item.paymentdate | formatDate }}
@@ -992,7 +1019,7 @@ export default {
                       <print-payment-button
                         :item="props.item"
                         :roomcontract="props.item.roomcontract"
-                        v-if="props.item.paid"
+                        v-if="props.item.paid && helpers.isAccessible(_.get(role, ['name']), 'rentalPayment', 'print')"
                       >
                         <v-icon small class="mr-2" color="success"
                           >mdi-printer</v-icon
@@ -1043,14 +1070,18 @@ export default {
                         "
                       ></confirm-dialog>
                     </td>
+                    <td class="text-truncate">
+                      {{ props.item.receive_from || "N/A" }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ _.get(props.item, "issueby.name") || "N/A" }}
+                    </td>
                   </tr>
                 </template>
               </v-data-table>
             </v-card>
           </v-col>
         </v-row>
-
-
 
         <v-dialog
           persistent

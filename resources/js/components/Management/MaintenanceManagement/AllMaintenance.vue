@@ -253,7 +253,7 @@ export default {
             this.$Progress.finish();
             this.endLoadingAction();
             this.maintenanceFormDialog = false;
-            this.showMaintenance(data.data)
+            this.showMaintenance(data.data);
           })
           .catch((error) => {
             Toast.fire({
@@ -359,7 +359,7 @@ export default {
             helpers.isAccessible(
               _.get(role, ['name']),
               'roomMaintenance',
-              'read'
+              'tableView'
             )
           "
         >
@@ -403,7 +403,17 @@ export default {
                   </v-toolbar>
                 </template>
                 <template v-slot:item="props">
-                  <tr @click="showMaintenance(props.item)">
+                  <tr
+                    @click="
+                      helpers.isAccessible(
+                        _.get(role, ['name']),
+                        'roomMaintenance',
+                        'view'
+                      )
+                        ? showMaintenance(props.item)
+                        : null
+                    "
+                  >
                     <td class="text-truncate">
                       {{ _.get(props.item, `room.name`) || "N/A" }}
                     </td>

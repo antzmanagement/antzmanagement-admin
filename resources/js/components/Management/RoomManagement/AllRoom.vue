@@ -333,7 +333,7 @@ export default {
           justify="center"
           align="center"
           class="ma-3"
-          v-if="helpers.isAccessible(_.get(role, ['name']), 'service', 'read')"
+          v-if="helpers.isAccessible(_.get(role, ['name']), 'service', 'tableView')"
         >
           <v-col cols="12">
             <v-card class="pa-8" raised>
@@ -371,7 +371,7 @@ export default {
                   </v-toolbar>
                 </template>
                 <template v-slot:item="props">
-                  <tr @click="showRoom(props.item)">
+                  <tr @click="helpers.isAccessible(_.get(role, ['name']), 'room', 'view')  ? showRoom(props.item) : null">
                     <td class="text-truncate">{{ props.item.unit }}</td>
                     <td class="text-truncate">{{ props.item.jalan }}</td>
                     <td class="text-truncate">{{ props.item.lot }}</td>

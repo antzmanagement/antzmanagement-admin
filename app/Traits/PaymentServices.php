@@ -27,7 +27,7 @@ trait PaymentServices
             $q->where('status', true);
         }, 'services' => function ($q) {
         },'otherpayments' => function ($q) {
-        }])->get();
+        }, 'issueby'])->get();
 
         $data = $data->unique('id')->sortByDesc('id')->flatten(1);
         error_log($data->count());
@@ -213,15 +213,11 @@ trait PaymentServices
         $data->processing_fees = $this->toDouble($params->processing_fees);
         $data->totalpayment = $data->price + $data->other_charges;
         $data->paid = $params->paid;
-        $data->paymentdate = $this->toDate($params->paymentdate);
         $data->remark = $params->remark;
-        $data->referenceno = $params->referenceno;
         if($params->sequence){
             $data->sequence = $this->toInt($params->sequence);
             $data->receiptno = 'ap-'. $data->sequence;
         }
-        $data->receive_from = $params->receive_from;
-        $data->paymentmethod = $params->paymentmethod;
         
         $roomContract = $this->getRoomContractById($params->room_contract_id);
         if ($this->isEmpty($roomContract)) {
@@ -229,11 +225,18 @@ trait PaymentServices
         }
         $data->roomcontract()->associate($roomContract);
 
-        $issueBy = $this->getUserById($params->issue_by);
-        if ($this->isEmpty($issueBy)) {
-            return false;
+        if($params->paid){
+            
+            $data->receive_from = $params->receive_from;
+            $data->paymentmethod = $params->paymentmethod;
+            $data->referenceno = $params->referenceno;
+            $data->paymentdate = $this->toDate($params->paymentdate);
+            $issueBy = $this->getUserById($params->issueby);
+            if ($this->isEmpty($issueBy)) {
+                return false;
+            }
+            $data->issueby()->associate($issueBy);
         }
-        $data->issueby()->associate($issueBy);
 
         if (!$this->saveModel($data)) {
             return null;
@@ -263,7 +266,7 @@ trait PaymentServices
     public function paymentAllCols()
     {
 
-        return ['id', 'uid', 'price', 'remark', 'referenceno' ,'receive_from', 'issue_by', 'sequence', 'paymentdate', 'other_charges', 'room_contract_id', 'paymentmethod', 'processing_fees'];
+        return ['id', 'uid', 'price', 'remark', 'referenceno' ,'receive_from', 'issueby', 'sequence', 'paymentdate', 'other_charges', 'room_contract_id', 'paymentmethod', 'processing_fees'];
     }
 
     public function paymentDefaultCols()

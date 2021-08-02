@@ -102,7 +102,7 @@ export default {
     ></navbar>
     <v-content
       :class="helpers.managementStyles().backgroundClass"
-      v-if="helpers.isAccessible(_.get(role, ['name']), 'staff', 'read')"
+      v-if="helpers.isAccessible(_.get(role, ['name']), 'staff', 'view')"
     >
       <v-container class="pa-5">
         <loading></loading>

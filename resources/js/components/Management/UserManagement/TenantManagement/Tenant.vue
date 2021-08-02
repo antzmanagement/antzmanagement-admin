@@ -111,7 +111,7 @@ export default {
     ></navbar>
     <v-content
       :class="helpers.managementStyles().backgroundClass"
-      v-if="helpers.isAccessible(_.get(role, ['name']), 'tenant', 'read')"
+      v-if="helpers.isAccessible(_.get(role, ['name']), 'tenant', 'view')"
     >
       <v-container class="pa-5">
         <loading></loading>
@@ -342,7 +342,7 @@ export default {
                       v-for="roomcontract in data.roomcontracts"
                       :key="roomcontract.uid"
                       class="mr-2 my-2"
-                      @click="showRoomContract(roomcontract)"
+                      @click="helpers.isAccessible(_.get(role, ['name']), 'roomContract', 'view') ? showRoomContract(roomcontract) : null"
                     >
                       <div class="text-center ma-2 title">
                         {{ roomcontract.name }}

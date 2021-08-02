@@ -137,7 +137,7 @@ export default {
     <v-content
       :class="helpers.managementStyles().backgroundClass"
       v-if="
-        helpers.isAccessible(_.get(role, ['name']), 'roomMaintenance', 'read')
+        helpers.isAccessible(_.get(role, ['name']), 'roomMaintenance', 'view')
       "
     >
       <v-container>
@@ -162,7 +162,7 @@ export default {
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Room</label>
                   <div class="form-control-plaintext">
-                    <v-chip class="ma-2" @click="showRoom(data.room)">
+                    <v-chip class="ma-2" @click="helpers.isAccessible(_.get(role, ['name']), 'room', 'view') ? showRoom(data.room) : null">
                       <h4 class="text-center ma-2">{{ _.get(data , ['room', 'unit']) || 'N/A' }}</h4>
                     </v-chip>
                   </div>
@@ -374,7 +374,7 @@ export default {
               :color="helpers.managementStyles().dividerColor"
             ></v-divider>
             <v-row class="pa-2" justify="end" align="center">
-              <v-col cols="auto" v-if="data.paid">
+              <v-col cols="auto" v-if="data.paid && helpers.isAccessible(_.get(role, ['name']), 'roomMaintenance', 'print')">
                 <print-maintenance-button :item="data">
                   <v-btn color="success">
                     <v-icon left>mdi-printer</v-icon>
@@ -383,7 +383,7 @@ export default {
                 </print-maintenance-button>
               </v-col>
 
-              <v-col cols="auto" v-else>
+              <v-col cols="auto" v-else-if="helpers.isAccessible(_.get(role, ['name']), 'roomMaintenance', 'makePayment')">
                 <v-btn color="warning" @click="maintenancePayFormDialog = true"
                   ><v-icon left>mdi-currency-usd</v-icon>Pay</v-btn
                 >

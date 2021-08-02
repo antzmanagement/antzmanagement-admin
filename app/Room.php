@@ -44,6 +44,6 @@ class Room extends Model
 
     public function properties()
     {
-        return $this->belongsToMany('App\Property','rooms_properties', 'room_id', 'property_id')->withPivot('remark','status','created_at','updated_at');
+        return $this->belongsToMany('App\Property','rooms_properties', 'room_id', 'property_id')->withPivot('remark','status','created_at','updated_at', 'qty');
     }
 }

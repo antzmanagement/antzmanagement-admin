@@ -97,7 +97,7 @@ export default {
     <navbar  :returnRole="(role) => { this.role = role}"></navbar>
     <v-content :class="helpers.managementStyles().backgroundClass" 
               v-if="
-                helpers.isAccessible(_.get(role, ['name']), 'tenant', 'read')
+                helpers.isAccessible(_.get(role, ['name']), 'roomType', 'view')
               ">
       <v-container>
         <loading></loading>
@@ -170,7 +170,7 @@ export default {
                       class="ma-2"
                       v-for="service in data.services"
                       :key="service.uid"
-                      @click="showService(service)"
+                      @click="helpers.isAccessible(_.get(role, ['name']), 'service', 'view') ? showService(service) : null"
                     >
                       <h4 class="text-center ma-2">{{ service.text }}</h4>
                     </v-chip>
@@ -185,7 +185,7 @@ export default {
             <v-row class="pa-2" justify="end" align="center">
               <v-col cols="auto" 
               v-if="
-                helpers.isAccessible(_.get(role, ['name']), 'tenant', 'edit')
+                helpers.isAccessible(_.get(role, ['name']), 'roomType', 'edit')
               ">
                 <room-type-form
                   :editMode="true"
@@ -199,7 +199,7 @@ export default {
               </v-col>
               <v-col cols="auto" 
               v-if="
-                helpers.isAccessible(_.get(role, ['name']), 'tenant', 'delete')
+                helpers.isAccessible(_.get(role, ['name']), 'roomType', 'delete')
               ">
                 <confirm-dialog
                   :activatorStyle="deleteButtonConfig.buttonStyle"

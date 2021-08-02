@@ -1077,10 +1077,10 @@ export const accessRule = {
         all: false,
         nav: false,
     },
-    edit: {
-        all: false,
+    onlyEdit: {
         nav: true,
-        read: true,
+        tableView: true,
+        view: true,
         create: false,
         edit: true,
         delete: false,
@@ -1088,36 +1088,135 @@ export const accessRule = {
     modify: {
         all: false,
         nav: true,
-        read: true,
+        tableView: true,
+        view: true,
         create: true,
         edit: true,
         delete: false,
     },
-    view: {
+    onlyCreate: {
         all: false,
         nav: true,
-        read: true,
+        tableView: true,
+        view: true,
+        create: true,
+        edit: false,
+        delete: false,
+    },
+    onlyTableView: {
+        all: false,
+        nav: true,
+        tableView: true,
+        view: false,
         create: false,
         edit: false,
         delete: false,
     },
-    access: {
+    onlyView: {
         all: false,
         nav: true,
-        read: true,
+        tableView: true,
+        view: true,
+        create: false,
+        edit: false,
+        delete: false,
+    },
+    control : {
+        all: false,
+        nav: true,
+        tableView: true,
+        view: true,
+        create: true,
+        edit: true,
+        delete: true,
+    },
+    onlyMakePayment: {
+        all: false,
+        nav: true,
+        tableView: true,
+        view: true,
+        create: false,
+        edit: false,
+        delete: false,
+        makePayment: true,
+        print: true,
+    },
+    onlyPrint: {
+        all: false,
+        nav: true,
+        tableView: true,
+        view: true,
+        create: false,
+        edit: false,
+        delete: false,
+        makePayment: false,
+        print: true,
+    },
+    onlyCreatePayment: {
+        all: false,
+        nav: true,
+        tableView: true,
+        view: true,
         create: true,
         edit: false,
         delete: false,
+        makePayment: false,
+        print: false,
+    },
+    onlyEditPayment: {
+        all: false,
+        nav: true,
+        tableView: true,
+        view: true,
+        create: false,
+        edit: true,
+        delete: false,
+        makePayment: false,
+        print: false,
+    },
+    editPaymentWithPrint: {
+        all: false,
+        nav: true,
+        tableView: true,
+        view: true,
+        create: false,
+        edit: true,
+        delete: false,
+        makePayment: false,
+        print: true,
+    },
+    modifyPayment: {
+        all: false,
+        nav: true,
+        tableView: true,
+        view: true,
+        create: true,
+        edit: true,
+        delete: false,
+        makePayment: false,
+        print: false,
+    },
+    controlPayment: {
+        all: false,
+        nav: true,
+        tableView: true,
+        view: true,
+        create: true,
+        edit: true,
+        delete: true,
+        makePayment: false,
+        print: false,
     },
     accessPayment: {
         all: false,
         nav: true,
-        read: true,
+        tableView: true,
+        view: true,
         create: true,
-        edit: false,
+        edit: true,
         delete: false,
         makePayment: true,
-        printReceipt: true,
+        print: true,
     },
 }
 
@@ -1211,25 +1310,25 @@ export const roleAccess = {
                 ...(_.get(accessRule, `noAccess`) || {})
             },
             roomType: {
-                ...(_.get(accessRule, `view`) || {})
+                ...(_.get(accessRule, `onlyView`) || {})
             },
             service: {
-                ...(_.get(accessRule, `view`) || {})
+                ...(_.get(accessRule, `onlyView`) || {})
             },
             room: {
-                ...(_.get(accessRule, `view`) || {})
+                ...(_.get(accessRule, `onlyView`) || {})
+            },
+            roomCheck: {
+                ...(_.get(accessRule, `onlyCreate`) || {})
             },
             roomContract: {
                 ...(_.get(accessRule, `noAccess`) || {})
             },
             rentalPayment: {
-                ...(_.get(accessRule, `edit`) || {})
+                ...(_.get(accessRule, `noAccess`) || {})
             },
             roomMaintenance: {
-                ...(_.get(accessRule, `edit`) || {})
-            },
-            roomCheck: {
-                ...(_.get(accessRule, `edit`) || {})
+                ...(_.get(accessRule, `onlyCreate`) || {})
             },
         }
     },
@@ -1245,16 +1344,19 @@ export const roleAccess = {
                 ...(_.get(accessRule, `noAccess`) || {})
             },
             tenant: {
-                ...(_.get(accessRule, `noAccess`) || {})
+                ...(_.get(accessRule, `onlyCreate`) || {})
             },
             roomType: {
-                ...(_.get(accessRule, `view`) || {})
+                ...(_.get(accessRule, `onlyView`) || {})
             },
             service: {
-                ...(_.get(accessRule, `view`) || {})
+                ...(_.get(accessRule, `onlyView`) || {})
             },
             room: {
-                ...(_.get(accessRule, `view`) || {})
+                ...(_.get(accessRule, `onlyTableView`) || {})
+            },
+            roomCheck: {
+                ...(_.get(accessRule, `noAccess`) || {})
             },
             roomContract: {
                 ...(_.get(accessRule, `noAccess`) || {})
@@ -1263,9 +1365,6 @@ export const roleAccess = {
                 ...(_.get(accessRule, `noAccess`) || {})
             },
             roomMaintenance: {
-                ...(_.get(accessRule, `noAccess`) || {})
-            },
-            roomCheck: {
                 ...(_.get(accessRule, `noAccess`) || {})
             },
         },
@@ -1273,7 +1372,7 @@ export const roleAccess = {
     customer_service: {
         modules: {
             dashboard: {
-                ...(_.get(accessRule, `modify`) || {})
+                ...(_.get(accessRule, `all`) || {})
             },
             staff: {
                 ...(_.get(accessRule, `noAccess`) || {})
@@ -1282,27 +1381,27 @@ export const roleAccess = {
                 ...(_.get(accessRule, `noAccess`) || {})
             },
             tenant: {
-                ...(_.get(accessRule, `access`) || {})
+                ...(_.get(accessRule, `onlyCreate`) || {})
             },
             roomType: {
-                ...(_.get(accessRule, `view`) || {})
+                ...(_.get(accessRule, `onlyView`) || {})
             },
             service: {
-                ...(_.get(accessRule, `view`) || {})
+                ...(_.get(accessRule, `onlyView`) || {})
             },
             room: {
-                ...(_.get(accessRule, `view`) || {})
-            },
-            roomContract: {
-                ...(_.get(accessRule, `access`) || {})
-            },
-            rentalPayment: {
-                ...(_.get(accessRule, `accessPayment`) || {})
-            },
-            roomMaintenance: {
-                ...(_.get(accessRule, `noAccess`) || {})
+                ...(_.get(accessRule, `onlyTableView`) || {})
             },
             roomCheck: {
+                ...(_.get(accessRule, `onlyCreate`) || {})
+            },
+            roomContract: {
+                ...(_.get(accessRule, `onlyView`) || {})
+            },
+            rentalPayment: {
+                ...(_.get(accessRule, `onlyMakePayment`) || {})
+            },
+            roomMaintenance: {
                 ...(_.get(accessRule, `noAccess`) || {})
             },
         }
@@ -1310,7 +1409,7 @@ export const roleAccess = {
     account_clerk: {
         modules: {
             dashboard: {
-                ...(_.get(accessRule, `modify`) || {})
+                ...(_.get(accessRule, `all`) || {})
             },
             staff: {
                 ...(_.get(accessRule, `noAccess`) || {})
@@ -1319,35 +1418,35 @@ export const roleAccess = {
                 ...(_.get(accessRule, `modify`) || {})
             },
             tenant: {
-                ...(_.get(accessRule, `modify`) || {})
+                ...(_.get(accessRule, `onlyView`) || {})
             },
             roomType: {
-                ...(_.get(accessRule, `view`) || {})
+                ...(_.get(accessRule, `onlyView`) || {})
             },
             service: {
-                ...(_.get(accessRule, `view`) || {})
+                ...(_.get(accessRule, `onlyView`) || {})
             },
             room: {
                 ...(_.get(accessRule, `modify`) || {})
             },
-            roomContract: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            rentalPayment: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            roomMaintenance: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
             roomCheck: {
                 ...(_.get(accessRule, `modify`) || {})
+            },
+            roomContract: {
+                ...(_.get(accessRule, `onlyView`) || {})
+            },
+            rentalPayment: {
+                ...(_.get(accessRule, `editPaymentWithPrint`) || {})
+            },
+            roomMaintenance: {
+                ...(_.get(accessRule, `accessPayment`) || {})
             },
         }
     },
     asset_management: {
         modules: {
             dashboard: {
-                ...(_.get(accessRule, `modify`) || {})
+                ...(_.get(accessRule, `all`) || {})
             },
             staff: {
                 ...(_.get(accessRule, `noAccess`) || {})
@@ -1367,17 +1466,17 @@ export const roleAccess = {
             room: {
                 ...(_.get(accessRule, `modify`) || {})
             },
+            roomCheck: {
+                ...(_.get(accessRule, `onlyCreate`) || {})
+            },
             roomContract: {
-                ...(_.get(accessRule, `access`) || {})
+                ...(_.get(accessRule, `onlyCreate`) || {})
             },
             rentalPayment: {
-                ...(_.get(accessRule, `view`) || {})
+                ...(_.get(accessRule, `onlyTableView`) || {})
             },
             roomMaintenance: {
-                ...(_.get(accessRule, `modify`) || {})
-            },
-            roomCheck: {
-                ...(_.get(accessRule, `modify`) || {})
+                ...(_.get(accessRule, `onlyView`) || {})
             },
         }
     },

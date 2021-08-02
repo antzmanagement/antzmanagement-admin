@@ -218,7 +218,7 @@ export default {
           align="center"
           class="ma-3"
           v-if="
-            helpers.isAccessible(_.get(role, ['name']), 'roomCheck', 'read')
+            helpers.isAccessible(_.get(role, ['name']), 'roomCheck', 'tableView')
           "
         >
           <v-col cols="12">
@@ -257,7 +257,7 @@ export default {
                   </v-toolbar> -->
                 </template>
                 <template v-slot:item="props">
-                  <tr @click="showRoomCheck(props.item)">
+                  <tr @click="helpers.isAccessible(_.get(role, ['name']), 'roomCheck', 'view') ? showRoomCheck(props.item) : null">
                     <td class="text-truncate">
                       {{ _.get(props.item, ["room", "name"]) || "N/A" }}
                     </td>

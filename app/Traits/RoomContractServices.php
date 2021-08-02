@@ -240,6 +240,7 @@ trait RoomContractServices
             // Query the name field in status table
             $q->with('services');
             $q->with('otherpayments');
+            $q->with('issueby');
             $q->where('status', true);
         }])->where('status', true)->first();
         return $data;
@@ -282,6 +283,7 @@ trait RoomContractServices
             // Query the name field in status table
             $q->with('services');
             $q->with('otherpayments');
+            $q->with('issueby');
             $q->where('status', true);
         }])->where('status', true)->first();
         return $data;

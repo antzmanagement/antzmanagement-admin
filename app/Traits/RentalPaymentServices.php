@@ -207,12 +207,8 @@ trait RentalPaymentServices
         $data->outstanding = $this->toDouble($data->price + $data->penalty  - $data->payment);
         $data->paid = $params->paid;
         $data->rentaldate = $this->toDate($params->rentaldate);
-        $data->paymentdate = $this->toDate($params->paymentdate);
         $data->sequence = $this->toInt($params->sequence);
         $data->remark = $params->remark;
-        $data->referenceno = $params->referenceno;
-        $data->receive_from = $params->receive_from;
-        $data->paymentmethod = $params->paymentmethod;
         
         $roomContract = $this->getRoomContractById($params->room_contract_id);
         if ($this->isEmpty($roomContract)) {
@@ -220,11 +216,18 @@ trait RentalPaymentServices
         }
         $data->roomcontract()->associate($roomContract);
 
-        $issueBy = $this->getUserById($params->issue_by);
-        if ($this->isEmpty($issueBy)) {
-            return false;
+        if($params->paid){
+            
+            $data->receive_from = $params->receive_from;
+            $data->paymentmethod = $params->paymentmethod;
+            $data->referenceno = $params->referenceno;
+            $data->paymentdate = $this->toDate($params->paymentdate);
+            $issueBy = $this->getUserById($params->issueby);
+            if ($this->isEmpty($issueBy)) {
+                return false;
+            }
+            $data->issueby()->associate($issueBy);
         }
-        $data->issueby()->associate($issueBy);
 
         if (!$this->saveModel($data)) {
             return null;

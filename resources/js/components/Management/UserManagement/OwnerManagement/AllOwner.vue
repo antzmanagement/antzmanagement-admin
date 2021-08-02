@@ -286,7 +286,9 @@ export default {
           justify="center"
           align="center"
           class="ma-3"
-          v-if="helpers.isAccessible(_.get(role, ['name']), 'owner', 'read')"
+          v-if="
+            helpers.isAccessible(_.get(role, ['name']), 'owner', 'tableView')
+          "
         >
           <v-col cols="12">
             <v-card class="pa-8" raised>
@@ -325,14 +327,21 @@ export default {
                   </v-toolbar>
                 </template>
                 <template v-slot:item="props">
-                  <tr @click="showOwner(props.item)">
+                  <tr
+                    @click="
+                      helpers.isAccessible(
+                        _.get(role, ['name']),
+                        'owner',
+                        'view'
+                      )
+                        ? showOwner(props.item)
+                        : null
+                    "
+                  >
                     <td class="text-truncate small">{{ props.item.name }}</td>
                     <td class="text-truncate fs-5">
-                      <div
-                        v-for="room in props.item.ownrooms"
-                        :key="room.id"
-                      >
-                      {{ _.get(room , ['unit']) || 'N/A' }}
+                      <div v-for="room in props.item.ownrooms" :key="room.id">
+                        {{ _.get(room, ["unit"]) || "N/A" }}
                       </div>
                     </td>
                     <td class="text-truncate fs-normal">

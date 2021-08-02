@@ -47,7 +47,18 @@ export default {
       roomTypes: [],
       owners: [],
       properties: [],
-      roomStatusOptions: [ "maintaining", "occupied", 'vacant', 'defect'],
+      roomStatusOptions: ["maintaining", "occupied", "vacant", "defect"],
+      propertyHeaders: [
+        {
+          text: "Property",
+        },
+        {
+          text: "Qty",
+        },
+        {
+          text: "Remark",
+        },
+      ],
       data: new Form({
         name: "",
         price: "",
@@ -68,7 +79,7 @@ export default {
         owner_claim: 0,
         roomType: "",
         owner: "",
-        room_status: "empty",
+        room_status: "vacant",
         properties: [],
         tnb_account_no: "",
       }),
@@ -204,6 +215,11 @@ export default {
         this.$v.$reset();
       }
     },
+    data: {
+      handler : (val, oldVal) => {
+      },
+      deep : true,
+    }
   },
   mounted() {
     this.showLoadingAction();
@@ -224,12 +240,12 @@ export default {
             ? roomTypesRes.data
             : [];
 
+
         //Property
-        this.properties =
-          _.isArray(_.get(propertyRes, ["data"])) &&
-          !_.isEmpty(_.get(propertyRes, ["data"]))
-            ? propertyRes.data
-            : [];
+        this.properties = _.map(_.get(propertyRes , `data`) || [], (item) => {
+          item.qty = 1;
+          return item;
+        });
 
         //owners
         this.owners =
@@ -260,22 +276,20 @@ export default {
           ownerIds =
             _.isArray(ownerIds) && !_.isEmpty(ownerIds) ? ownerIds[0] : "";
 
-          var propertyIds = (_.get(roomRes, ["data", "properties"]) || []).map(
-            function (item) {
-              return item.id;
+          var properties = (_.get(roomRes, ["data", "properties"]) || []).map(
+             (item)=>{
+               item.qty = _.get(item , `pivot.qty`) || 0;
+               item.remark = _.get(item , `pivot.remark`) || '';
+              return item;
             }
           );
 
-          propertyIds =
-            _.isArray(propertyIds) && !_.isEmpty(propertyIds)
-              ? propertyIds
-              : [];
 
           roomRes.data = {
             ...roomRes.data,
             roomType: roomTypeIds,
             owner: ownerIds,
-            properties: propertyIds,
+            properties: properties,
           };
           this.data = new Form({
             ...(_.get(roomRes, ["data"]) || {}),
@@ -496,27 +510,6 @@ export default {
                 </template>-->
               </v-autocomplete>
             </v-col>
-            <v-col cols="12">
-              <v-autocomplete
-                v-model="data.properties"
-                :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
-                item-value="id"
-                :items="properties || []"
-                label="Property"
-                chips
-                multiple
-                deletable-chips
-              >
-                <!-- <template v-slot:append>
-                  <room-type-form
-                    :editMode="false"
-                    :dialogStyle="roomFormDialogConfig.dialogStyle"
-                    :buttonStyle="roomFormDialogConfig.buttonStyle"
-                    @created="appendRoomTypeList($event)"
-                  ></room-type-form>
-                </template>-->
-              </v-autocomplete>
-            </v-col>
             <v-col cols="12" md="6">
               <v-text-field
                 label="Unit No*"
@@ -674,6 +667,57 @@ export default {
                 v-model="data.owner_claim"
               ></v-text-field>
               <span>(By default based on 10% of rental)</span>
+            </v-col>
+            <v-col cols="12">
+              <v-autocomplete
+                v-model="data.properties"
+                :item-text="(item) => item.text"
+                :items="properties || []"
+                label="Property"
+                chips
+                multiple
+                deletable-chips
+                return-object
+              >
+              </v-autocomplete>
+            </v-col>
+            <v-col
+              cols="12"
+              v-if="_.isArray(data.properties) && !_.isEmpty(data.properties)"
+            >
+              <v-data-table
+                :headers="propertyHeaders"
+                :items="data.properties ? data.properties : []"
+                fixed-header
+                height="300px"
+                disable-sort
+                hide-default-footer
+              >
+                <template v-slot:item="props">
+                  <tr>
+                    <td class="text-truncate">
+                      {{ props.item.text }}
+                    </td>
+                    <td class="text-truncate">
+                      <v-text-field
+                        v-model="props.item.qty"
+                        type="number"
+                        step="1"
+                        :error-messages="
+                          !_.isNumber(parseInt(props.item.qty))
+                            ? 'Qty is required'
+                            : props.item.qty <= 0
+                            ? 'Qty should be greater than 0'
+                            : ''
+                        "
+                      ></v-text-field>
+                    </td>
+                    <td class="text-truncate">
+                      <v-text-field v-model="props.item.remark"></v-text-field>
+                    </td>
+                  </tr>
+                </template>
+              </v-data-table>
             </v-col>
             <v-col cols="12">
               <v-textarea

@@ -59,6 +59,12 @@ export default {
         value: "paymentdate",
       },
       { text: "Actions" },
+      {
+        text: "Receive From",
+      },
+      {
+        text: "Issue By",
+      },
     ],
     paymentHeaders: [
       {
@@ -77,6 +83,12 @@ export default {
       { text: "Remark" },
       { text: "Total Payment" },
       { text: "Actions" },
+      {
+        text: "Receive From",
+      },
+      {
+        text: "Issue By",
+      },
     ],
     editButtonStyle: {
       block: false,
@@ -422,7 +434,7 @@ export default {
     ></navbar>
     <v-content
       :class="helpers.managementStyles().backgroundClass"
-      v-if="helpers.isAccessible(_.get(role, ['name']), 'roomContract', 'read')"
+      v-if="helpers.isAccessible(_.get(role, ['name']), 'roomContract', 'view')"
     >
       <v-container>
         <loading></loading>
@@ -489,7 +501,18 @@ export default {
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Person In Charge</label>
                   <div class="form-control-plaintext">
-                    <v-chip class="ma-2" @click="showStaff(data.creator)">
+                    <v-chip
+                      class="ma-2"
+                      @click="
+                        helpers.isAccessible(
+                          _.get(role, ['name']),
+                          'staff',
+                          'view'
+                        )
+                          ? showStaff(data.creator)
+                          : null
+                      "
+                    >
                       <h4 class="text-center ma-2">
                         {{ _.get(data, "creator.name") || "N/A" }}
                       </h4>
@@ -507,7 +530,18 @@ export default {
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Room</label>
                   <div class="form-control-plaintext">
-                    <v-chip class="ma-2" @click="showRoom(data.room)">
+                    <v-chip
+                      class="ma-2"
+                      @click="
+                        helpers.isAccessible(
+                          _.get(role, ['name']),
+                          'room',
+                          'view'
+                        )
+                          ? showRoom(data.room)
+                          : null
+                      "
+                    >
                       <h4 class="text-center ma-2">{{ data.room.name }}</h4>
                     </v-chip>
                   </div>
@@ -539,7 +573,18 @@ export default {
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Tenant</label>
                   <div class="form-control-plaintext">
-                    <v-chip class="ma-2" @click="showTenant(data.tenant)">
+                    <v-chip
+                      class="ma-2"
+                      @click="
+                        helpers.isAccessible(
+                          _.get(role, ['name']),
+                          'tenant',
+                          'view'
+                        )
+                          ? showTenant(data.tenant)
+                          : null
+                      "
+                    >
                       <h4 class="text-center ma-2">{{ data.tenant.name }}</h4>
                     </v-chip>
                   </div>
@@ -785,7 +830,15 @@ export default {
                       class="ma-2"
                       v-for="service in data.origservices"
                       :key="service.uid"
-                      @click="showService(service)"
+                      @click="
+                        helpers.isAccessible(
+                          _.get(role, ['name']),
+                          'service',
+                          'view'
+                        )
+                          ? showService(service)
+                          : null
+                      "
                     >
                       <h4 class="text-center ma-2">{{ service.text }}</h4>
                     </v-chip>
@@ -812,7 +865,15 @@ export default {
                       class="ma-2"
                       v-for="service in data.addonservices"
                       :key="service.uid"
-                      @click="showService(service)"
+                      @click="
+                        helpers.isAccessible(
+                          _.get(role, ['name']),
+                          'service',
+                          'view'
+                        )
+                          ? showService(service)
+                          : null
+                      "
                     >
                       <h4 class="text-center ma-2">{{ service.text }}</h4>
                     </v-chip>
@@ -846,7 +907,7 @@ export default {
                         >
                         <v-spacer></v-spacer>
                         <v-btn
-                          v-if="!data.checkedout"
+                          v-if="!data.checkedout && helpers.isAccessible(_.get(role, ['name']), 'rentalPayment', 'create') "
                           color="primary"
                           dark
                           class="mb-2"
@@ -889,7 +950,7 @@ export default {
                           <print-rental-payment-button
                             :item="props.item"
                             :roomcontract="data"
-                            v-if="props.item.paid"
+                            v-if="props.item.paid && helpers.isAccessible(_.get(role, ['name']), 'rentalPayment', 'print')"
                           >
                             <v-icon small class="mr-2" color="success"
                               >mdi-printer</v-icon
@@ -950,6 +1011,12 @@ export default {
                             "
                           ></confirm-dialog>
                         </td>
+                        <td class="text-truncate">
+                          {{ props.item.receive_from || "N/A" }}
+                        </td>
+                        <td class="text-truncate">
+                          {{ _.get(props.item, "issueby.name") || "N/A" }}
+                        </td>
                       </tr>
                     </template>
                   </v-data-table>
@@ -990,7 +1057,7 @@ export default {
                           >Deposit Payment</v-btn
                         > -->
                         <v-btn
-                          v-if="!data.checkedout"
+                          v-if="!data.checkedout && helpers.isAccessible(_.get(role, ['name']), 'rentalPayment', 'create')"
                           color="success"
                           dark
                           class="mb-2 mr-2"
@@ -1045,7 +1112,7 @@ export default {
                           <print-payment-button
                             :item="props.item"
                             :roomcontract="data"
-                            v-if="props.item.paid"
+                            v-if="props.item.paid && helpers.isAccessible(_.get(role, ['name']), 'rentalPayment', 'print')"
                           >
                             <v-icon small class="mr-2" color="success"
                               >mdi-printer</v-icon
@@ -1105,6 +1172,12 @@ export default {
                               )
                             "
                           ></confirm-dialog>
+                        </td>
+                        <td class="text-truncate">
+                          {{ props.item.receive_from || "N/A" }}
+                        </td>
+                        <td class="text-truncate">
+                          {{ _.get(props.item, "issueby.name") || "N/A" }}
                         </td>
                       </tr>
                     </template>

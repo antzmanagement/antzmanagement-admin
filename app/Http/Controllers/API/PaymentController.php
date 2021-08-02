@@ -169,13 +169,12 @@ class PaymentController extends Controller
             'referenceno' => $request->referenceno,
             'paymentmethod' => $request->paymentmethod,
             // 'receive_from' => $request->receive_from,
-            'receive_from' => $payment->roomcontract->tenant->name,
-            'issue_by' => $request->user()->id,
+            'receive_from' => $request->paid ? $payment->roomcontract->tenant->name : '',
+            'issueby' => $request->paid ? $request->user()->id : '',
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
         $payment = $this->updatePayment($payment, $params);
-
         if ($this->isEmpty($payment)) {
             DB::rollBack();
             return $this->errorResponse();
@@ -223,6 +222,7 @@ class PaymentController extends Controller
             DB::rollBack();
             return $this->errorResponse();
         }
+        error_log($payment->issueby);
         DB::commit();
         return $this->successResponse('Payment', $payment, 'update');
     }
@@ -279,7 +279,7 @@ class PaymentController extends Controller
             'paymentmethod' => $request->paymentmethod,
             // 'receive_from' => $request->receive_from,
             'receive_from' => $payment->roomcontract->tenant->name,
-            'issue_by' => $request->user()->id,
+            'issueby' => $request->user()->id,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
@@ -319,7 +319,7 @@ class PaymentController extends Controller
             'paymentmethod' => $request->paymentmethod,
             // 'receive_from' => $request->receive_from,
             'receive_from' => $rentalPayment->roomcontract->tenant->name,
-            'issue_by' => $request->user()->id,
+            'issueby' => $request->user()->id,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

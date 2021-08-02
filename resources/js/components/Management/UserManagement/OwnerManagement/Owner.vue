@@ -106,7 +106,7 @@ export default {
     ></navbar>
     <v-content
       :class="helpers.managementStyles().backgroundClass"
-      v-if="helpers.isAccessible(_.get(role, ['name']), 'owner', 'read')"
+      v-if="helpers.isAccessible(_.get(role, ['name']), 'owner', 'view')"
     >
       <v-container class="pa-5">
         <loading></loading>
@@ -272,7 +272,7 @@ export default {
                       v-for="room in data.ownrooms"
                       :key="room.uid"
                       class="mr-2 my-2"
-                      @click="showRoom(room)"
+                      @click="helpers.isAccessible(_.get(role, ['name']), 'room', 'view') ? showRoom(room) : null"
                     >
                       <h4 class="text-center ma-2">
                         {{ room.name | capitalizeFirstLetter }}
