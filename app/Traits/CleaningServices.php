@@ -229,12 +229,13 @@ trait CleaningServices
             $data->room_check_id = null;
         }
 
-
         if($data->paid){
             $data->payment = $this->toDouble($params->price);
             $data->processing_fees =  $this->toDouble($params->processing_fees);
             $data->paymentmethod = $params->paymentmethod;
             $data->receiptno = $params->receiptno;
+            $data->sequence = $this->toInt($params->sequence);
+            $data->referenceno = $params->referenceno;
             $data->receive_from = $params->receive_from;
 
             $issueBy = $this->getUserById($params->issue_by);
@@ -248,6 +249,8 @@ trait CleaningServices
             $data->processing_fees =  0;
             $data->paymentmethod = null;
             $data->receiptno = null;
+            $data->sequence = null;
+            $data->referenceno = null;
             $data->receive_from = null;
             $data->issue_by = null;
         }
@@ -280,7 +283,7 @@ trait CleaningServices
 
         return ['id', 'uid', 'price', 'remark', 'room_check_id', 'room_id', 'owner_id', 'tenant_id',
                 'cleaning_type', 'cleaning_status', 'cleaning_date', 'claim_by_owner', 'claim_by_tenant',
-                'paid', 'receive_from', 'issue_by', 'receiptno', 'paymentmethod', 'processing_fees', 'paymentdate'];
+                'paid', 'receive_from', 'issue_by', 'receiptno', 'sequence', 'referenceno', 'paymentmethod', 'processing_fees', 'paymentdate'];
     }
 
     public function cleaningDefaultCols()

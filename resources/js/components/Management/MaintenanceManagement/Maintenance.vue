@@ -383,7 +383,7 @@ export default {
                 </print-maintenance-button>
               </v-col>
 
-              <v-col cols="auto" v-else-if="helpers.isAccessible(_.get(role, ['name']), 'roomMaintenance', 'makePayment')">
+              <v-col cols="auto" v-else-if="helpers.isAccessible(_.get(role, ['name']), 'roomMaintenance', 'makePayment') && _.get(data , ['maintenance_status']) != 'reject'">
                 <v-btn color="warning" @click="maintenancePayFormDialog = true"
                   ><v-icon left>mdi-currency-usd</v-icon>Pay</v-btn
                 >

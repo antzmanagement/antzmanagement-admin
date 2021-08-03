@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use DB;
+use App\Cleaning;
 use App\Traits\AllServices;
 
 class CleaningController extends Controller
@@ -123,7 +124,11 @@ class CleaningController extends Controller
             $request->issue_by = $request->user()->id;
         }else if(!$cleaning->claim_by_owner && !$cleaning->claim_by_tenant){
             $request->issue_by = $request->user()->id;
-            $request->paid = true;
+        }
+
+        if($request->paid && !$request->sequence){
+            $request->sequence = Cleaning::where('status', true)->max('sequence') + 1;
+            $request->receiptno = 'cp-'.$request->sequence;
         }
         $cleaning = $this->updateCleaning($cleaning, $request);
 

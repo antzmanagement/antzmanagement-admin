@@ -164,8 +164,8 @@ export default {
         <v-row>
           <v-col cols="12">
             <v-text-field
-              label="Receipt No"
-              v-model="data.receiptno"
+              label="Reference No"
+              v-model="data.referenceno"
             ></v-text-field>
           </v-col>
           <v-col cols="12">

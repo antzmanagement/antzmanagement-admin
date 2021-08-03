@@ -479,7 +479,9 @@ export default {
                                 _.get(role, ['name']),
                                 'roomMaintenance',
                                 'makePayment'
-                              )
+                              ) &&
+                              _.get(props.item, 'maintenance_status') !=
+                                'reject'
                             "
                             >mdi-currency-usd</v-icon
                           >
@@ -602,6 +604,7 @@ export default {
                                 'roomMaintenance',
                                 'makePayment'
                               )
+                              &&_.get(props.item , ['cleaning_status']) != 'reject'
                             "
                             >mdi-currency-usd</v-icon
                           >

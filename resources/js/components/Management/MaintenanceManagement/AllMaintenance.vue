@@ -12,7 +12,9 @@ export default {
       data: [],
       loading: true,
       options: {},
+      maintenancePayFormDialog: false,
       maintenanceFormDialog: false,
+      selectedMaintenance: {},
       maintenanceFilterGroup: new Form({
         rooms: [],
         selectedRooms: [],
@@ -48,6 +50,7 @@ export default {
         { text: "Price (RM)" },
         { text: "Claimed By" },
         { text: "Created At" },
+        { text: "Actions" },
       ],
       excelData: [],
       excelFields: {
@@ -235,7 +238,13 @@ export default {
           $data.uid = new Date().getTime();
         }
 
-        this.data = _.unionBy([$data], this.data, "uid");
+        if (!_.some(this.data, ["uid", $data.uid])) {
+          this.data = _.unionBy([$data], this.data, "uid");
+        } else {
+          this.data = _.map(this.data, (item) => {
+            return item.uid == $data.uid ? $data : item;
+          });
+        }
       } catch (error) {
         console.log(error);
       }
@@ -403,35 +412,146 @@ export default {
                   </v-toolbar>
                 </template>
                 <template v-slot:item="props">
-                  <tr
-                    @click="
-                      helpers.isAccessible(
-                        _.get(role, ['name']),
-                        'roomMaintenance',
-                        'view'
-                      )
-                        ? showMaintenance(props.item)
-                        : null
-                    "
-                  >
-                    <td class="text-truncate">
+                  <tr>
+                    <td
+                      class="text-truncate"
+                      @click="
+                        helpers.isAccessible(
+                          _.get(role, ['name']),
+                          'roomMaintenance',
+                          'view'
+                        )
+                          ? showMaintenance(props.item)
+                          : null
+                      "
+                    >
                       {{ _.get(props.item, `room.name`) || "N/A" }}
                     </td>
-                    <td class="text-truncate">
+                    <td
+                      class="text-truncate"
+                      @click="
+                        helpers.isAccessible(
+                          _.get(role, ['name']),
+                          'roomMaintenance',
+                          'view'
+                        )
+                          ? showMaintenance(props.item)
+                          : null
+                      "
+                    >
                       {{ _.get(props.item, `property.text`) || "N/A" }}
                     </td>
-                    <td class="text-truncate">
+                    <td
+                      class="text-truncate"
+                      @click="
+                        helpers.isAccessible(
+                          _.get(role, ['name']),
+                          'roomMaintenance',
+                          'view'
+                        )
+                          ? showMaintenance(props.item)
+                          : null
+                      "
+                    >
                       {{ props.item.maintenance_type }}
                     </td>
-                    <td class="text-truncate">
+                    <td
+                      class="text-truncate"
+                      @click="
+                        helpers.isAccessible(
+                          _.get(role, ['name']),
+                          'roomMaintenance',
+                          'view'
+                        )
+                          ? showMaintenance(props.item)
+                          : null
+                      "
+                    >
                       {{ props.item.maintenance_status }}
                     </td>
-                    <td class="text-truncate">{{ props.item.price }}</td>
-                    <td class="text-truncate">
-                      {{ _.get(props.item, ["owner", "name"]) || "N/A" }}
+                    <td
+                      class="text-truncate"
+                      @click="
+                        helpers.isAccessible(
+                          _.get(role, ['name']),
+                          'roomMaintenance',
+                          'view'
+                        )
+                          ? showMaintenance(props.item)
+                          : null
+                      "
+                    >
+                      {{ props.item.price }}
+                    </td>
+                    <td
+                      class="text-truncate"
+                      @click="
+                        helpers.isAccessible(
+                          _.get(role, ['name']),
+                          'roomMaintenance',
+                          'view'
+                        )
+                          ? showMaintenance(props.item)
+                          : null
+                      "
+                    >
+                      {{
+                        _.get(props.item, ["claim_by_owner"])
+                          ? _.get(props.item, ["owner", "name"]) || "N/A"
+                          : _.get(props.item, ["claim_by_tenant"])
+                          ? _.get(props.item, ["tenant", "name"]) || "N/A"
+                          : "N/A"
+                      }}
+                    </td>
+                    <td
+                      class="text-truncate"
+                      @click="
+                        helpers.isAccessible(
+                          _.get(role, ['name']),
+                          'roomMaintenance',
+                          'view'
+                        )
+                          ? showMaintenance(props.item)
+                          : null
+                      "
+                    >
+                      {{ props.item.created_at | formatDate }}
                     </td>
                     <td class="text-truncate">
-                      {{ props.item.created_at | formatDate }}
+                      <print-maintenance-button
+                        :item="props.item"
+                        v-if="
+                          props.item.paid &&
+                          helpers.isAccessible(
+                            _.get(role, ['name']),
+                            'roomMaintenance',
+                            'print'
+                          )
+                        "
+                      >
+                        <v-icon small class="mr-2" color="success"
+                          >mdi-printer</v-icon
+                        >
+                      </print-maintenance-button>
+
+                      <v-icon
+                        small
+                        class="mr-2"
+                        @click="
+                          maintenancePayFormDialog = true;
+                          selectedMaintenance = props.item;
+                        "
+                        color="warning"
+                        v-else-if="
+                          helpers.isAccessible(
+                            _.get(role, ['name']),
+                            'roomMaintenance',
+                            'makePayment'
+                          ) &&
+                          _.get(props.item, 'maintenance_status') != 'reject'
+                        "
+                        >mdi-currency-usd</v-icon
+                      >
                     </td>
                   </tr>
                 </template>
@@ -454,6 +574,20 @@ export default {
             @submit="createMaintenance"
           >
           </maintenance-form-1>
+        </v-dialog>
+
+        <v-dialog
+          v-model="maintenancePayFormDialog"
+          persistent
+          hideOverlay
+          max-width="600px"
+        >
+          <maintenance-pay-form
+            :uid="_.get(this.selectedMaintenance, ['uid'])"
+            @close="maintenancePayFormDialog = false"
+            @updated="updateMaintenances"
+          >
+          </maintenance-pay-form>
         </v-dialog>
       </v-container>
     </v-content>

@@ -136,7 +136,7 @@ export default {
     totalDataLength(v) {
       console.log(v);
       if (v > 0) {
-        this.fetchExcelData();
+        // this.fetchExcelData();
       }
     },
   },

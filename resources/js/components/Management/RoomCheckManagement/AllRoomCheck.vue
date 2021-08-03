@@ -69,7 +69,7 @@ export default {
     },
     totalDataLength(v) {
       if (v > 0) {
-        this.fetchExcelData();
+        // this.fetchExcelData();
       }
     },
   },

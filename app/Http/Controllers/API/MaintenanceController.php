@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use DB;
+use App\Maintenance;
 use App\Traits\AllServices;
 
 class MaintenanceController extends Controller
@@ -117,6 +118,11 @@ class MaintenanceController extends Controller
             $request->issue_by = $request->user()->id;
         }else if(!$maintenance->claim_by_owner && !$maintenance->claim_by_tenant){
             $request->issue_by = $request->user()->id;
+        }
+
+        if($request->paid && !$request->sequence){
+            $request->sequence = Maintenance::where('status', true)->max('sequence') + 1;
+            $request->receiptno = 'mp-'.$request->sequence;
         }
         $maintenance = $this->updateMaintenance($maintenance, $request);
 
