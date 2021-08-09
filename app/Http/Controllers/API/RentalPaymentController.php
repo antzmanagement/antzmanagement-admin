@@ -157,7 +157,7 @@ class RentalPaymentController extends Controller
             'paymentdate' => $request->paymentdate,
             'rentaldate' => $rentalPayment->rentaldate,
             'remark' => $request->remark,
-            'sequence' => $rentalPayment->max,
+            'sequence' => $rentalPayment->sequence,
             'room_contract_id' => $rentalPayment->roomcontract->id,
             'referenceno' => $request->referenceno,
             'paymentmethod' => $request->paymentmethod,
