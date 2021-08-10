@@ -83,11 +83,7 @@ export default {
       { text: "Claimed By" },
       { text: "Actions" },
     ],
-    propertyHeaders: [
-      { text: "Name" },
-      { text: "Qty" },
-      { text: "Remark" },
-    ],
+    propertyHeaders: [{ text: "Name" }, { text: "Qty" }, { text: "Remark" }],
   }),
 
   computed: {
@@ -100,9 +96,11 @@ export default {
     this.showLoadingAction();
     this.getRoomAction({ uid: this.$route.params.uid })
       .then((data) => {
+        
         this.data = data.data;
         this.$Progress.finish();
         this.endLoadingAction();
+        document.title = `Room ${this.data.unit || ''}`;
       })
       .catch((error) => {
         Toast.fire({
@@ -387,7 +385,15 @@ export default {
                       class="ma-2"
                       v-for="roomType in data.room_types"
                       :key="roomType.uid"
-                      :to="helpers.isAccessible(_.get(role, ['name']), 'roomType', 'view') ? { name: 'roomtype', params: { uid: roomType.uid } } : {}"
+                      :to="
+                        helpers.isAccessible(
+                          _.get(role, ['name']),
+                          'roomType',
+                          'view'
+                        )
+                          ? { name: 'roomtype', params: { uid: roomType.uid } }
+                          : {}
+                      "
                     >
                       <h4 class="text-center ma-2">
                         {{ roomType.name | capitalizeFirstLetter }}
@@ -419,12 +425,18 @@ export default {
                         'startdate',
                       ])"
                       :key="roomcontract.uid"
-                      :to="helpers.isAccessible(_.get(role, ['name']), 'roomContract', 'view') ? {
-                        name: 'roomcontract',
-                        params: { uid: roomcontract.uid },
-                      }
-                      :
-                      {}"
+                      :to="
+                        helpers.isAccessible(
+                          _.get(role, ['name']),
+                          'roomContract',
+                          'view'
+                        )
+                          ? {
+                              name: 'roomcontract',
+                              params: { uid: roomcontract.uid },
+                            }
+                          : {}
+                      "
                     >
                       <h4 class="text-center ma-2">
                         {{
@@ -458,10 +470,15 @@ export default {
                       class="ma-2"
                       v-for="owner in data.owners"
                       :key="owner.uid"
-                      :to="helpers.isAccessible(_.get(role, ['name']), 'owner', 'view') ? 
-                      { name: 'owner', params: { uid: owner.uid } }
-                      :
-                      null"
+                      :to="
+                        helpers.isAccessible(
+                          _.get(role, ['name']),
+                          'owner',
+                          'view'
+                        )
+                          ? { name: 'owner', params: { uid: owner.uid } }
+                          : null
+                      "
                     >
                       <h4 class="text-center ma-2" type="button">
                         {{
@@ -714,7 +731,15 @@ export default {
                     <template v-slot:item="props">
                       <tr
                         :key="props.item.uid"
-                        @click="helpers.isAccessible(_.get(role, ['name']), 'roomCheck', 'view') ? showRoomCheck(props.item) : null"
+                        @click="
+                          helpers.isAccessible(
+                            _.get(role, ['name']),
+                            'roomCheck',
+                            'view'
+                          )
+                            ? showRoomCheck(props.item)
+                            : null
+                        "
                       >
                         <td class="text-truncate">
                           {{ props.item.category }}
@@ -768,31 +793,71 @@ export default {
                       <tr :key="props.item.uid">
                         <td
                           class="text-truncate"
-                          @click="helpers.isAccessible(_.get(role, ['name']), 'roomMaintenance', 'view') ? showMaintenance(props.item) : null"
+                          @click="
+                            helpers.isAccessible(
+                              _.get(role, ['name']),
+                              'roomMaintenance',
+                              'view'
+                            )
+                              ? showMaintenance(props.item)
+                              : null
+                          "
                         >
                           {{ _.get(props.item, `property.text`) || "N/A" }}
                         </td>
                         <td
                           class="text-truncate"
-                          @click="helpers.isAccessible(_.get(role, ['name']), 'roomMaintenance', 'view') ? showMaintenance(props.item) : null"
+                          @click="
+                            helpers.isAccessible(
+                              _.get(role, ['name']),
+                              'roomMaintenance',
+                              'view'
+                            )
+                              ? showMaintenance(props.item)
+                              : null
+                          "
                         >
                           {{ props.item.maintenance_type }}
                         </td>
                         <td
                           class="text-truncate"
-                          @click="helpers.isAccessible(_.get(role, ['name']), 'roomMaintenance', 'view') ? showMaintenance(props.item) : null"
+                          @click="
+                            helpers.isAccessible(
+                              _.get(role, ['name']),
+                              'roomMaintenance',
+                              'view'
+                            )
+                              ? showMaintenance(props.item)
+                              : null
+                          "
                         >
                           {{ props.item.maintenance_status }}
                         </td>
                         <td
                           class="text-truncate"
-                          @click="helpers.isAccessible(_.get(role, ['name']), 'roomMaintenance', 'view') ? showMaintenance(props.item) : null"
+                          @click="
+                            helpers.isAccessible(
+                              _.get(role, ['name']),
+                              'roomMaintenance',
+                              'view'
+                            )
+                              ? showMaintenance(props.item)
+                              : null
+                          "
                         >
                           {{ props.item.price }}
                         </td>
                         <td
                           class="text-truncate"
-                          @click="helpers.isAccessible(_.get(role, ['name']), 'roomMaintenance', 'view') ? showMaintenance(props.item) : null"
+                          @click="
+                            helpers.isAccessible(
+                              _.get(role, ['name']),
+                              'roomMaintenance',
+                              'view'
+                            )
+                              ? showMaintenance(props.item)
+                              : null
+                          "
                         >
                           {{
                             _.get(props.item, ["claim_by_owner"])
@@ -919,12 +984,14 @@ export default {
                         <td class="text-truncate">
                           <print-cleaning-button
                             :item="props.item"
-                            v-if="props.item.paid && 
+                            v-if="
+                              props.item.paid &&
                               helpers.isAccessible(
                                 _.get(role, ['name']),
                                 'roomMaintenance',
                                 'print'
-                              )"
+                              )
+                            "
                           >
                             <v-icon small class="mr-2" color="success"
                               >mdi-printer</v-icon

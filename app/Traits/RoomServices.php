@@ -40,7 +40,7 @@ trait RoomServices
         $params = $this->checkUndefinedProperty($params, $this->roomFilterCols());
 
     
-    
+        error_log(collect($params));
         if ($params->id) {
             $id = $params->id;
             $data = collect($data);
@@ -125,6 +125,19 @@ trait RoomServices
             })->values();
         }
 
+        if($params->minPrice){
+            $minPrice = $this->toDouble($params->minPrice);
+            $data = $data->filter(function ($item) use($minPrice) {
+                return $item->price >= $minPrice;
+            })->values();
+        }
+
+        if($params->maxPrice){
+            $maxPrice = $this->toDouble($params->maxPrice);
+            $data = $data->filter(function ($item) use($maxPrice) {
+                return $item->price <= $maxPrice;
+            })->values();
+        }
 
         $data = $data->unique('id');
 
@@ -137,12 +150,30 @@ trait RoomServices
         $data = Room::where('uid', $uid)->with(['maintenances' => function ($q) {
             // Query the name field in status table
             $q->with('property');
+            $q->with(['owner' => function ($q1) {
+                $q1->where('status', true);
+            }]);
+            $q->with(['tenant' => function ($q1) {
+                $q1->where('status', true);
+            }]);
+            $q->with(['issueby' => function ($q1) {
+                $q1->where('status', true);
+            }]);
             $q->where('status', true);
         },'roomchecks' => function ($q) {
             // Query the name field in status table
             $q->where('status', true);
         },'cleanings' => function ($q) {
-            // Query the name field in status table
+            // Query the name field in status table  
+            $q->with(['owner' => function ($q1) {
+                $q1->where('status', true);
+            }]);
+            $q->with(['tenant' => function ($q1) {
+                $q1->where('status', true);
+            }]);
+            $q->with(['issueby' => function ($q1) {
+                $q1->where('status', true);
+            }]);
             $q->where('status', true);
         }, 'roomTypes' => function ($q) {
             // Query the name field in status table
@@ -357,6 +388,6 @@ trait RoomServices
     public function roomFilterCols()
     {
 
-        return ['unit', 'jalan','lot', 'floor','room_type_id', 'owner_id','room_status', 'id'];
+        return ['unit', 'jalan','lot', 'floor','room_type_id', 'owner_id','room_status', 'id', 'minPrice', 'maxPrice'];
     }
 }

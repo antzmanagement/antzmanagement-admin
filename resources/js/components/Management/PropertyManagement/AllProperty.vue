@@ -80,7 +80,9 @@ export default {
       return this.helpers.isEmpty(this.propertyFilterGroup.todate);
     },
   },
-  created() {},
+  created() {
+    document.title = 'All Property'
+  },
   mounted() {
     this.getProperties();
   },
@@ -99,7 +101,12 @@ export default {
       this.getProperties();
     },
     showProperty($data) {
-      this.$router.push("/property/" + $data.uid);
+      let routeData = this.$router.resolve({
+        name: "property",
+        params: { uid: $data.uid },
+      });
+      window.open(routeData.href, "_blank");
+      // this.$router.push("/property/" + $data.uid);
     },
     getProperties() {
       this.loading = true;

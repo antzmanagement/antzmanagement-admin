@@ -302,6 +302,7 @@ export default {
     };
   },
   created() {
+    document.title = 'Antz Management';
     this.$vuetify.goTo(0);
     this.getReports();
   },

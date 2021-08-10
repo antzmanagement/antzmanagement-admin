@@ -132,5 +132,4 @@ const app = new Vue({
   icons: {
     iconfont: 'md' || 'fa'
   },
-
 });

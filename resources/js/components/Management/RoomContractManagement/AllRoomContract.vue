@@ -169,7 +169,9 @@ export default {
       return this.helpers.isEmpty(this.roomContractFilterGroup.selectedRooms);
     },
   },
-  created() {},
+  created() {
+    document.title = 'All Room Contract'
+  },
   mounted() {
     this.getRoomContracts();
   },
@@ -235,7 +237,12 @@ export default {
       this.getRoomContracts();
     },
     showRoomContract($data) {
-      this.$router.push("/roomcontract/" + $data.uid);
+      let routeData = this.$router.resolve({
+        name: "roomcontract",
+        params: { uid: $data.uid },
+      });
+      window.open(routeData.href, "_blank");
+      // this.$router.push("/roomcontract/" + $data.uid);
     },
     getRoomContracts() {
       this.loading = true;

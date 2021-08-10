@@ -157,7 +157,9 @@ export default {
       return this.helpers.isEmpty(this.roomFilterGroup.selectedRoomTypes);
     },
   },
-  created() {},
+  created() {
+    document.title = 'All Room'
+  },
   mounted() {
     this.getRooms();
   },
@@ -182,6 +184,13 @@ export default {
       if (filterGroup.lot) {
         this.roomFilterGroup.lot = filterGroup.lot;
       }
+
+      if (!_.isNaN(parseFloat(filterGroup.minPrice))) {
+        this.roomFilterGroup.minPrice = parseFloat(filterGroup.minPrice);
+      }
+      if (!_.isNaN(parseFloat(filterGroup.maxPrice))) {
+        this.roomFilterGroup.maxPrice = parseFloat(filterGroup.maxPrice);
+      }
       if (filterGroup.room_status) {
         this.roomFilterGroup.room_status = filterGroup.room_status;
       }
@@ -198,7 +207,12 @@ export default {
       this.getRooms();
     },
     showRoom($data) {
-      this.$router.push("/room/" + $data.uid);
+      let routeData = this.$router.resolve({
+        name: "room",
+        params: { uid: $data.uid },
+      });
+      window.open(routeData.href, "_blank");
+      // this.$router.push("/room/" + $data.uid);
     },
     getRooms() {
       this.loading = true;
@@ -333,7 +347,9 @@ export default {
           justify="center"
           align="center"
           class="ma-3"
-          v-if="helpers.isAccessible(_.get(role, ['name']), 'service', 'tableView')"
+          v-if="
+            helpers.isAccessible(_.get(role, ['name']), 'service', 'tableView')
+          "
         >
           <v-col cols="12">
             <v-card class="pa-8" raised>
@@ -371,15 +387,33 @@ export default {
                   </v-toolbar>
                 </template>
                 <template v-slot:item="props">
-                  <tr @click="helpers.isAccessible(_.get(role, ['name']), 'room', 'view')  ? showRoom(props.item) : null">
+                  <tr
+                    @click="
+                      helpers.isAccessible(
+                        _.get(role, ['name']),
+                        'room',
+                        'view'
+                      )
+                        ? showRoom(props.item)
+                        : null
+                    "
+                  >
                     <td class="text-truncate">{{ props.item.unit }}</td>
                     <td class="text-truncate">{{ props.item.jalan }}</td>
                     <td class="text-truncate">{{ props.item.lot }}</td>
                     <td class="text-truncate">{{ props.item.floor }}</td>
-                    <td class="text-truncate">{{ _.get(props.item , ['room_types', 0, 'name'])  || 'N/A'}}</td>
-                    <td class="text-truncate">{{ props.item.price | toDouble }}</td>
+                    <td class="text-truncate">
+                      {{
+                        _.get(props.item, ["room_types", 0, "name"]) || "N/A"
+                      }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.price | toDouble }}
+                    </td>
                     <td class="text-truncate">{{ props.item.room_status }}</td>
-                    <td class="text-truncate">{{ props.item.tnb_account_no }}</td>
+                    <td class="text-truncate">
+                      {{ props.item.tnb_account_no }}
+                    </td>
                     <!-- <td class="text-truncate">
                       {{ _.get(props.item, ["owners", 0, "name"]) || "N/A" }}
                     </td> -->

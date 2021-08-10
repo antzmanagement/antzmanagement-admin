@@ -41,7 +41,7 @@ export default {
   },
   data() {
     return {
-      roomStatusOptions: ["maintaining", "occupied", 'vacant', 'defect'],
+      roomStatusOptions: ["maintaining", "occupied", "vacant", "defect"],
       dialog: false,
       roomTypes: [],
       owners: [],
@@ -149,6 +149,23 @@ export default {
       <v-card-text>
         <v-container>
           <v-row>
+            <v-col cols="6">
+              <v-text-field
+                label="Min Price"
+                type="number"
+                step="1"
+                v-model="data.minPrice"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="6">
+              <v-text-field
+                label="Max Price"
+                :maxlength="300"
+                type="number"
+                step="1"
+                v-model="data.maxPrice"
+              ></v-text-field>
+            </v-col>
             <v-col cols="6">
               <v-text-field
                 label="Unit"

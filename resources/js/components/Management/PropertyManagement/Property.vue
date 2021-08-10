@@ -27,6 +27,8 @@ export default {
     }
   },
   created() {
+    document.title = 'Property'
+  
     this.$Progress.start();
     this.showLoadingAction();
     this.getPropertyAction({ uid: this.$route.params.uid })

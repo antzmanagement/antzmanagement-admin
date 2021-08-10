@@ -90,7 +90,9 @@ export default {
       return this.helpers.isEmpty(this.roomCheckFilterGroup.selectedRooms);
     },
   },
-  created() {},
+  created() {
+    document.title = 'All Room Check'
+  },
   mounted() {
     // this.getRoomChecks();
   },
@@ -120,7 +122,12 @@ export default {
       this.getRoomChecks();
     },
     showRoomCheck($data) {
-      this.$router.push("/roomcheck/" + $data.uid);
+      let routeData = this.$router.resolve({
+        name: "roomcheck",
+        params: { uid: $data.uid },
+      });
+      window.open(routeData.href, "_blank");
+      // this.$router.push("/roomcheck/" + $data.uid);
     },
     getRoomChecks() {
       this.loading = true;

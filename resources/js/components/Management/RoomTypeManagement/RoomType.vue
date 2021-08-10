@@ -40,6 +40,7 @@ export default {
         } else {
           this.data = {};
         }
+        document.title = `RoomType ${this.data.name || ''}`;
         this.$Progress.finish();
         this.endLoadingAction();
       })

@@ -49,6 +49,7 @@ export default {
         this.data = data.data;
         this.$Progress.finish();
         this.endLoadingAction();
+        document.title = `Tenant ${this.data.name || ''}`;
       })
       .catch((error) => {
         Toast.fire({
@@ -342,7 +343,15 @@ export default {
                       v-for="roomcontract in data.roomcontracts"
                       :key="roomcontract.uid"
                       class="mr-2 my-2"
-                      @click="helpers.isAccessible(_.get(role, ['name']), 'roomContract', 'view') ? showRoomContract(roomcontract) : null"
+                      @click="
+                        helpers.isAccessible(
+                          _.get(role, ['name']),
+                          'roomContract',
+                          'view'
+                        )
+                          ? showRoomContract(roomcontract)
+                          : null
+                      "
                     >
                       <div class="text-center ma-2 title">
                         {{ roomcontract.name }}
@@ -396,7 +405,6 @@ export default {
             </v-row>
           </v-container>
         </v-card>
-
       </v-container>
     </v-content>
   </v-app>

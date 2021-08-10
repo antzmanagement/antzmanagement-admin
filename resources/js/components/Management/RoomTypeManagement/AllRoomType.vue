@@ -77,7 +77,9 @@ export default {
       return this.helpers.isEmpty(this.roomTypeFilterGroup.selectedRooms);
     },
   },
-  created() {},
+  created() {
+    document.title = 'All Room Type'
+  },
   mounted() {
     this.getRoomTypes();
   },
@@ -97,7 +99,12 @@ export default {
       this.getRoomTypes();
     },
     showRoomType($data) {
-      this.$router.push("/roomtype/" + $data.uid);
+      let routeData = this.$router.resolve({
+        name: "roomtype",
+        params: { uid: $data.uid },
+      });
+      window.open(routeData.href, "_blank");
+      // this.$router.push("/roomtype/" + $data.uid);
     },
     getRoomTypes() {
       this.loading = true;

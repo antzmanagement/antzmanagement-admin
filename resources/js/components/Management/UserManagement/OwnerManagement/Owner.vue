@@ -43,6 +43,7 @@ export default {
         this.data = data.data;
         this.$Progress.finish();
         this.endLoadingAction();
+        document.title = `Owner ${this.data.name || ''}`;
       })
       .catch((error) => {
         Toast.fire({
@@ -272,7 +273,15 @@ export default {
                       v-for="room in data.ownrooms"
                       :key="room.uid"
                       class="mr-2 my-2"
-                      @click="helpers.isAccessible(_.get(role, ['name']), 'room', 'view') ? showRoom(room) : null"
+                      @click="
+                        helpers.isAccessible(
+                          _.get(role, ['name']),
+                          'room',
+                          'view'
+                        )
+                          ? showRoom(room)
+                          : null
+                      "
                     >
                       <h4 class="text-center ma-2">
                         {{ room.name | capitalizeFirstLetter }}

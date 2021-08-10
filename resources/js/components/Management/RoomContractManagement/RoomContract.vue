@@ -155,6 +155,8 @@ export default {
     },
   },
   created() {
+    document.title = 'Room Contract'
+  
     this.$Progress.start();
     this.showLoadingAction();
     this.getRoomContractAction({ uid: this.$route.params.uid })

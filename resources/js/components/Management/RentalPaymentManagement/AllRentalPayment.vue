@@ -340,7 +340,9 @@ export default {
       return this.helpers.isEmpty(this.rentalPaymentFilterGroup.selectedRooms);
     },
   },
-  created() {},
+  created() {
+    document.title = 'All Payment'
+  },
   mounted() {
     this.getRentalPayments();
     this.getPayments();
@@ -432,7 +434,12 @@ export default {
       this.getPayments();
     },
     showRentalPayment($data) {
-      this.$router.push("/rentalpayment/" + $data.uid);
+      let routeData = this.$router.resolve({
+        name: "rentalpayment",
+        params: { uid: $data.uid },
+      });
+      window.open(routeData.href, "_blank");
+      // this.$router.push("/rentalpayment/" + $data.uid);
     },
     updateRentalPaymentDetails(data) {
       var id = data.id;

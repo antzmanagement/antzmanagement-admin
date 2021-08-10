@@ -64,6 +64,8 @@ export default {
   },
   watch: {},
   created() {
+    document.title = 'Room Check'
+  
     this.$Progress.start();
     this.showLoadingAction();
     this.getRoomCheckAction({ uid: this.$route.params.uid })

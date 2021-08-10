@@ -42,6 +42,7 @@ export default {
         this.data = data.data;
         this.$Progress.finish();
         this.endLoadingAction();
+        document.title = `Staff ${this.data.name || ''}`;
       })
       .catch((error) => {
         Toast.fire({

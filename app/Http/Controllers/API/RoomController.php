@@ -43,6 +43,8 @@ class RoomController extends Controller
             'owner_id' => $request->owner_id,
             'room_type_id' => $request->room_type_id,
             'room_status' => $request->room_status,
+            'minPrice' => $request->minPrice,
+            'maxPrice' => $request->maxPrice,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

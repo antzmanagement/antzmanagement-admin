@@ -38,6 +38,9 @@ export default {
     },
   },
   created() {
+
+    document.title = 'Maintenance'
+  
     this.$Progress.start();
     this.showLoadingAction();
     this.getMaintenanceAction({ uid: this.$route.params.uid })

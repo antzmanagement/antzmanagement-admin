@@ -119,7 +119,9 @@ export default {
       return this.helpers.isEmpty(this.maintenanceFilterGroup.selectedRooms);
     },
   },
-  created() {},
+  created() {
+    document.title = 'All Maintenance'
+  },
   mounted() {
     this.getMaintenances();
   },
@@ -167,7 +169,12 @@ export default {
       this.getMaintenances();
     },
     showMaintenance($data) {
-      this.$router.push("/maintenance/" + $data.uid);
+      let routeData = this.$router.resolve({
+        name: "maintenance",
+        params: { uid: $data.uid },
+      });
+      window.open(routeData.href, "_blank");
+      // this.$router.push("/maintenance/" + $data.uid);
     },
     getMaintenances() {
       this.loading = true;

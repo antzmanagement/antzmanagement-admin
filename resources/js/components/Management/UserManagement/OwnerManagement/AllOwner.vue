@@ -131,6 +131,8 @@ export default {
     },
   },
   created() {
+    document.title = `All Owner`;
+  
     var styles = this.helpers.managementStyles();
   },
   mounted() {
@@ -156,7 +158,12 @@ export default {
       this.getOwners();
     },
     showOwner($data) {
-      this.$router.push("/owner/" + $data.uid);
+      let routeData = this.$router.resolve({
+        name: "owner",
+        params: { uid: $data.uid },
+      });
+      window.open(routeData.href, "_blank");
+      // this.$router.push("/owner/" + $data.uid);
     },
     getOwners() {
       this.loading = true;

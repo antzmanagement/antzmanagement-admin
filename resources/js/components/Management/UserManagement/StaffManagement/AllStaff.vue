@@ -86,6 +86,8 @@ export default {
     },
   },
   created() {
+    document.title = `All Staff`;
+  
     var styles = this.helpers.managementStyles();
   },
   mounted() {
@@ -107,7 +109,12 @@ export default {
       this.options.page = 1;
     },
     showStaff($data) {
-      this.$router.push("/staff/" + $data.uid);
+      let routeData = this.$router.resolve({
+        name: "staff",
+        params: { uid: $data.uid },
+      });
+      window.open(routeData.href, "_blank");
+      // this.$router.push("/staff/" + $data.uid);
     },
     getStaffs() {
       this.loading = true;

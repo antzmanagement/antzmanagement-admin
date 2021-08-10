@@ -136,6 +136,8 @@ export default {
     },
   },
   created() {
+    document.title = `All Tenant`;
+  
     var styles = this.helpers.managementStyles();
   },
   mounted() {
@@ -206,7 +208,12 @@ export default {
       this.getTenants();
     },
     showTenant($data) {
-      this.$router.push("/tenant/" + $data.uid);
+      let routeData = this.$router.resolve({
+        name: "tenant",
+        params: { uid: $data.uid },
+      });
+      window.open(routeData.href, "_blank");
+      // this.$router.push("/tenant/" + $data.uid);
     },
     getTenants() {
       this.loading = true;

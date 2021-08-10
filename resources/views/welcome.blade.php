@@ -12,6 +12,8 @@
         <link href="{{asset('css/app.css')}}"></link>
         <link rel="stylesheet" type="text/css" href="{{asset('css/invoice.css')}}"></link>
         <title>Antz Management</title>
+        <link rel="icon" href="https://res.cloudinary.com/dwslzbgaa/image/upload/v1623056803/Screenshot_2021-06-07_at_5.05.50_PM_xooqkt.png" />
+
 
     </head>
     <body>
