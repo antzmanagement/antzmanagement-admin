@@ -124,6 +124,14 @@ trait RentalPaymentServices
             })->values();
         }
         
+        if ($params->paymentmethod) {
+            $paymentmethod = $params->paymentmethod;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($paymentmethod) {
+                return $item->paymentmethod == $paymentmethod;
+            })->values();
+        }
+        
         $data = $data->unique('id')->sortByDesc('sequence')->flatten(1);
 
         return $data;
@@ -269,6 +277,6 @@ trait RentalPaymentServices
     }
     public function rentalPaymentFilterCols()
     {
-        return ['fromdate', 'todate', 'tenant_id', 'room_id', 'penalty', 'paid', 'sequence', 'paymentfromdate', 'paymenttodate', 'paymentmethod', 'receive_from'];
+        return ['fromdate', 'todate', 'tenant_id', 'room_id', 'penalty', 'paid', 'sequence', 'paymentfromdate', 'paymenttodate', 'paymentmethod', 'receive_from', 'paymentmethod'];
     }
 }

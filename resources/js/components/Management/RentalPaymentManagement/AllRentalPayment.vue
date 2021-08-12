@@ -145,6 +145,9 @@ export default {
           text: "Action",
         },
         {
+          text: "Payment Method",
+        },
+        {
           text: "Receive From",
         },
         {
@@ -184,6 +187,9 @@ export default {
         },
         { text: "Remark", value: "remark" },
         { text: "Actions" },
+        {
+          text: "Payment Method",
+        },
         {
           text: "Receive From",
         },
@@ -391,6 +397,9 @@ export default {
       if (filterGroup.todate) {
         this.rentalPaymentFilterGroup.todate = filterGroup.todate;
       }
+      if (filterGroup.paymentmethod) {
+        this.rentalPaymentFilterGroup.paymentmethod = filterGroup.paymentmethod;
+      }
       if (filterGroup.penalty === 1 || filterGroup.penalty === 0) {
         this.rentalPaymentFilterGroup.penalty = filterGroup.penalty;
       }
@@ -424,6 +433,9 @@ export default {
       }
       if (filterGroup.paid === 1 || filterGroup.paid === 0) {
         this.paymentFilterGroup.paid = filterGroup.paid;
+      }
+      if (filterGroup.paymentmethod) {
+        this.paymentFilterGroup.paymentmethod = filterGroup.paymentmethod;
       }
       if (filterGroup.otherPaymentTitle) {
         this.paymentFilterGroup.otherPaymentTitle =
@@ -872,6 +884,9 @@ export default {
                       ></confirm-dialog>
                     </td>
                     <td class="text-truncate">
+                      {{ props.item.paymentmethod || "N/A" }}
+                    </td>
+                    <td class="text-truncate">
                       {{ props.item.receive_from || "N/A" }}
                     </td>
                     <td class="text-truncate">
@@ -1042,6 +1057,9 @@ export default {
                           )
                         "
                       ></confirm-dialog>
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.paymentmethod || "N/A" }}
                     </td>
                     <td class="text-truncate">
                       {{ props.item.receive_from || "N/A" }}

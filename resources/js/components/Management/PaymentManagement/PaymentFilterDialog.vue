@@ -41,6 +41,7 @@ export default {
   },
   data() {
     return {
+      paymentMethods: ["cash", "online_transfer", "eWallet", "credit"],
       fromdatemenu: false,
       todatemenu: false,
       dialog: false,
@@ -268,6 +269,13 @@ export default {
                 deletable-chips
                 :return-object="true"
               ></v-autocomplete>
+            </v-col>
+            <v-col cols="12">
+              <v-select
+                :items="paymentMethods"
+                v-model="data.paymentmethod"
+                label="Payment Method"
+              ></v-select>
             </v-col>
             <v-col cols="6">
               <div>Paid Status</div>

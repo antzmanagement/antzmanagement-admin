@@ -532,14 +532,10 @@ class RoomContractController extends Controller
             $params = collect([
                 'room_contract_id' => $roomContract->id,
                 'other_charges' => $roomContract->checkout_charges,
-                'paid' => true,
-                'paymentdate' => Carbon::now(),
-                'issueby' => $request->user()->id,
             ]);
             //Convert To Json Object
             $params = json_decode(json_encode($params));
             $payment = $this->createPayment($params);
-            $payment = $this->updatePayment($payment, $params);
             $data = $this->getOtherPaymentTitleByName('Check out charges');
             if (!$this->isEmpty($data)) {
                 $data->price = $this->toDouble($roomContract->checkout_charges);

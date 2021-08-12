@@ -43,6 +43,7 @@ class PaymentController extends Controller
             'sequence' => $request->sequence,
             'otherPaymentTitle' => $request->otherPaymentTitle,
             'service_ids' => $request->service_ids,
+            'paymentmethod' => $request->paymentmethod,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

@@ -127,6 +127,14 @@ trait PaymentServices
             })->values();
         }
 
+        if ($params->paymentmethod) {
+            $paymentmethod = $params->paymentmethod;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($paymentmethod) {
+                return $item->paymentmethod == $paymentmethod;
+            })->values();
+        }
+
         $data = $data->unique('id');
 
         return $data;
@@ -281,6 +289,6 @@ trait PaymentServices
     }
     public function paymentFilterCols()
     {
-        return ['fromdate', 'todate', 'tenant_id', 'room_id', 'sequence', 'service_ids', 'otherPaymentTitle'];
+        return ['fromdate', 'todate', 'tenant_id', 'room_id', 'sequence', 'service_ids', 'otherPaymentTitle', 'paymentmethod'];
     }
 }
