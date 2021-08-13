@@ -171,7 +171,7 @@ class PaymentController extends Controller
             'paymentmethod' => $request->paymentmethod,
             // 'receive_from' => $request->receive_from,
             'receive_from' => $request->paid ? $payment->roomcontract->tenant->name : '',
-            'issueby' => $request->paid ? $request->user()->id : '',
+            // 'issueby' => $request->issueby,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

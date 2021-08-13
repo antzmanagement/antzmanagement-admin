@@ -239,11 +239,13 @@ trait PaymentServices
             $data->paymentmethod = $params->paymentmethod;
             $data->referenceno = $params->referenceno;
             $data->paymentdate = $this->toDate($params->paymentdate);
-            $issueBy = $this->getUserById($params->issueby);
-            if ($this->isEmpty($issueBy)) {
-                return false;
+            if($params->issueby){
+                $issueBy = $this->getUserById($params->issueby);
+                if ($this->isEmpty($issueBy)) {
+                    return false;
+                }
+                $data->issueby()->associate($issueBy);
             }
-            $data->issueby()->associate($issueBy);
         }
 
         if (!$this->saveModel($data)) {

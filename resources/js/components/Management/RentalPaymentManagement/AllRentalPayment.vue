@@ -312,6 +312,30 @@ export default {
       },
       deep: true,
     },
+    paymentPayDialog: {
+      handler(val, oldVal) {
+        if (!val) {
+          this.selectedAddOnPayment = { uid: "" };
+        }
+      },
+      deep: true,
+    },
+    addOnPaymentDialog: {
+      handler(val, oldVal) {
+        if (!val) {
+          this.selectedAddOnPayment = { uid: "" };
+        }
+      },
+      deep: true,
+    },
+    paymentDialog: {
+      handler(val, oldVal) {
+        if (!val) {
+          this.selectedPayment = { uid: "" };
+        }
+      },
+      deep: true,
+    },
     paymentOptions: {
       handler() {
         this.getPayments();
@@ -347,7 +371,7 @@ export default {
     },
   },
   created() {
-    document.title = 'All Payment'
+    document.title = "All Payment";
   },
   mounted() {
     this.getRentalPayments();
@@ -736,7 +760,11 @@ export default {
           align="center"
           class="ma-3"
           v-if="
-            helpers.isAccessible(_.get(role, ['name']), 'rentalPayment', 'tableView')
+            helpers.isAccessible(
+              _.get(role, ['name']),
+              'rentalPayment',
+              'tableView'
+            )
           "
         >
           <v-col cols="12">
@@ -822,7 +850,14 @@ export default {
                       <print-rental-payment-button
                         :item="props.item"
                         :roomcontract="props.item.roomcontract"
-                        v-if="props.item.paid && helpers.isAccessible(_.get(role, ['name']), 'rentalPayment', 'print')"
+                        v-if="
+                          props.item.paid &&
+                          helpers.isAccessible(
+                            _.get(role, ['name']),
+                            'rentalPayment',
+                            'print'
+                          )
+                        "
                       >
                         <v-icon small class="mr-2" color="success"
                           >mdi-printer</v-icon
@@ -1007,7 +1042,14 @@ export default {
                       <print-payment-button
                         :item="props.item"
                         :roomcontract="props.item.roomcontract"
-                        v-if="props.item.paid && helpers.isAccessible(_.get(role, ['name']), 'rentalPayment', 'print')"
+                        v-if="
+                          props.item.paid &&
+                          helpers.isAccessible(
+                            _.get(role, ['name']),
+                            'rentalPayment',
+                            'print'
+                          )
+                        "
                       >
                         <v-icon small class="mr-2" color="success"
                           >mdi-printer</v-icon

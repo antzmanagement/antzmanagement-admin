@@ -1509,3 +1509,142 @@ export function calculateAge(birthday) { // birthday is a date
     var ageDate = new Date(ageDifMs); // miliseconds from epoch
     return Math.abs(ageDate.getUTCFullYear() - 1970);
 }
+
+
+export const printCss = `
+
+.invoice-box {
+    max-width: 800px;
+    margin: auto;
+    padding: 30px;
+    border: 1px solid #eee;
+    box-shadow: 0 0 10px rgba(0, 0, 0, .15);
+    font-size: 10px;
+    line-height: 20px;
+    font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+    color: #555;
+}
+
+.subtitle td{
+    font-size: 10px;
+}
+.invoice-box table {
+    width: 100%;
+    line-height: inherit;
+    text-align: left;
+}
+
+.invoice-box table td {
+    padding: 5px;
+    vertical-align: top;
+}
+
+.invoice-box table tr td:nth-child(2) {
+    text-align: right;
+}
+
+.invoice-box table tr.top table td {
+    padding-bottom: 20px;
+}
+
+.invoice-box table tr.top table td.title {
+    font-size: 45px;
+    line-height: 30px;
+    color: #333;
+}
+
+.invoice-box table tr.information table td {
+    padding-bottom: 20px;
+}
+
+.invoice-box table tr.heading td {
+    background: #eee;
+    border-bottom: 1px solid #ddd;
+    font-weight: bold;
+}
+
+.invoice-box table tr.details td {
+    padding-bottom: 20px;
+}
+
+.invoice-box table tr.item td {
+    border-bottom: 1px solid #eee;
+}
+
+.invoice-box table tr.item.last td {
+    border-bottom: none;
+}
+
+.invoice-box table tr.total td:nth-child(2) {
+    border-top: 2px solid #eee;
+    font-weight: bold;
+}
+.font-weight-bold{
+    font-weight: bold;
+}
+.small-text {
+    font-size: 0.50rem;
+    letter-spacing: 0.01em;
+}
+.overline {
+    font-size: 0.75rem;
+    letter-spacing: 0.1666666667em;
+}
+
+.caption {
+    font-size: 0.75rem;
+    letter-spacing: 0.025rem;
+}
+.subtitle1 {
+    font-size: 1rem;
+    letter-spacing: 0.009375rem;
+}
+
+.text-align-right {
+    text-align: right;
+}
+
+.flex-items-align-center {
+    display: flex;
+    align-items: center;
+}
+.flex-justify-end {
+    display: flex;
+    justify-content: flex-end;
+}
+.d-inline-block {
+    display: inline-block
+}
+.margin-right-md {
+    margin-right: 1em;
+}
+.margin-top-md {
+    margin-top: 1em;
+}
+@media only screen and (max-width: 600px) {
+    .invoice-box table tr.top table td {
+        width: 100%;
+        display: block;
+        text-align: center;
+    }
+    .invoice-box table tr.information table td {
+        width: 100%;
+        display: block;
+        text-align: center;
+    }
+}
+
+/** RTL **/
+
+.rtl {
+    direction: rtl;
+    font-family: Tahoma, 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+}
+
+.rtl table {
+    text-align: right;
+}
+
+.rtl table tr td:nth-child(2) {
+    text-align: left;
+}`;

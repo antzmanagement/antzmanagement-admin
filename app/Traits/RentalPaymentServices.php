@@ -230,11 +230,13 @@ trait RentalPaymentServices
             $data->paymentmethod = $params->paymentmethod;
             $data->referenceno = $params->referenceno;
             $data->paymentdate = $this->toDate($params->paymentdate);
-            $issueBy = $this->getUserById($params->issueby);
-            if ($this->isEmpty($issueBy)) {
-                return false;
+            if($params->issueby){
+                $issueBy = $this->getUserById($params->issueby);
+                if ($this->isEmpty($issueBy)) {
+                    return false;
+                }
+                $data->issueby()->associate($issueBy);
             }
-            $data->issueby()->associate($issueBy);
         }
 
         if (!$this->saveModel($data)) {
@@ -262,7 +264,7 @@ trait RentalPaymentServices
     public function rentalPaymentAllCols()
     {
 
-        return ['id', 'uid', 'price', 'remark', 'referenceno'];
+        return ['id', 'uid', 'price', 'remark', 'referenceno', 'issueby'];
     }
 
     public function rentalPaymentDefaultCols()
@@ -277,6 +279,6 @@ trait RentalPaymentServices
     }
     public function rentalPaymentFilterCols()
     {
-        return ['fromdate', 'todate', 'tenant_id', 'room_id', 'penalty', 'paid', 'sequence', 'paymentfromdate', 'paymenttodate', 'paymentmethod', 'receive_from', 'paymentmethod'];
+        return ['fromdate', 'todate', 'tenant_id', 'room_id', 'penalty', 'paid', 'sequence', 'paymentfromdate', 'paymenttodate', 'paymentmethod', 'receive_from', 'paymentmethod', 'issueby'];
     }
 }
