@@ -43,7 +43,7 @@ export default {
         this.data = data.data;
         this.$Progress.finish();
         this.endLoadingAction();
-        document.title = `Owner ${this.data.name || ''}`;
+        document.title = `Owner ${this.data.name || ""}`;
       })
       .catch((error) => {
         Toast.fire({
@@ -301,6 +301,14 @@ export default {
               </v-col>
             </v-row>
             <v-row class="pa-2" justify="end" align="center">
+              <v-col cols="auto">
+                <print-owner-button :item="this.data">
+                  <v-btn color="success">
+                    <v-icon small class="mr-2" left>mdi-printer</v-icon>
+                    Print
+                  </v-btn>
+                </print-owner-button>
+              </v-col>
               <!-- <v-col cols="auto">
                 <change-password-dialog
                   :uid="this.$route.params.uid"

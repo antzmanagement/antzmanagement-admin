@@ -64,8 +64,8 @@ export default {
   },
   watch: {},
   created() {
-    document.title = 'Room Check'
-  
+    document.title = "Room Check";
+
     this.$Progress.start();
     this.showLoadingAction();
     this.getRoomCheckAction({ uid: this.$route.params.uid })
@@ -363,7 +363,7 @@ export default {
                           : null
                       "
                     >
-                      <h4 class="text-center ma-2">{{ data.room.name }}</h4>
+                      <h4 class="text-center ma-2">{{ data.room.unit }}</h4>
                     </v-chip>
                   </div>
                 </div>
@@ -605,8 +605,8 @@ export default {
                                 _.get(role, ['name']),
                                 'roomMaintenance',
                                 'makePayment'
-                              )
-                              &&_.get(props.item , ['cleaning_status']) != 'reject'
+                              ) &&
+                              _.get(props.item, ['cleaning_status']) != 'reject'
                             "
                             >mdi-currency-usd</v-icon
                           >
@@ -656,6 +656,18 @@ export default {
               :color="helpers.managementStyles().dividerColor"
             ></v-divider>
             <v-row class="pa-2" justify="end" align="center">
+              <v-col cols="auto">
+                <print-room-check-button
+                  :item="this.data"
+                >
+                <v-btn color="success">
+                  <v-icon small class="mr-2" left
+                    >mdi-printer</v-icon
+                  >
+                  Print
+                </v-btn>
+                </print-room-check-button>
+              </v-col>
               <v-col
                 cols="auto"
                 v-if="

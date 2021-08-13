@@ -1,8 +1,11 @@
 
 <script>
 import { mapActions } from "vuex";
-import { printCss, _ } from "../../../common/common-function";
+import { _ } from "../../../common/common-function";
 import print from "print-js";
+import printCss from "../../../common/printCssStr";
+
+
 
 export default {
   props: {
@@ -138,12 +141,12 @@ export default {
           </td>
         </tr>
 
-        <tr class="heading">
+        <tr class="heading invoice">
           <td class="text-truncate">Payment For:</td>
           <td class="text-truncate">RM :</td>
         </tr>
 
-        <tr class="item" v-for="service in data.services" :key="service.uid">
+        <tr class="item invoice" v-for="service in data.services" :key="service.uid">
           <td class="text-truncate subtitle">
             {{ _.get(service, ["text"]) || "N/A" }}
           </td>
@@ -153,7 +156,7 @@ export default {
           </td>
         </tr>
         <tr
-          class="item"
+          class="item invoice"
           v-for="otherpayment in data.otherpayments"
           :key="otherpayment.uid"
         >
@@ -166,7 +169,7 @@ export default {
           </td>
         </tr>
 
-        <tr class="total">
+        <tr class="total invoice">
           <td class="text-truncate subtitle"></td>
 
           <td class="text-truncate subtitle">

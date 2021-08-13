@@ -15,10 +15,12 @@ Vue.component('change-password-dialog', require('./components/Management/UserMan
 Vue.component('tenant-form', require('./components/Management/UserManagement/TenantManagement/TenantForm.vue').default);
 Vue.component('tenant-filter-dialog', require('./components/Management/UserManagement/TenantManagement/TenantFilterDialog.vue').default);
 Vue.component('tenant-room', require('./components/Management/UserManagement/TenantManagement/TenantRoom.vue').default);
+Vue.component('print-tenant-button', require('./components/Management/UserManagement/TenantManagement/PrintTenantButton.vue').default);
 
 
 Vue.component('owner-form', require('./components/Management/UserManagement/OwnerManagement/OwnerForm.vue').default);
 Vue.component('owner-filter-dialog', require('./components/Management/UserManagement/OwnerManagement/OwnerFilterDialog.vue').default);
+Vue.component('print-owner-button', require('./components/Management/UserManagement/OwnerManagement/PrintOwnerButton.vue').default);
 
 Vue.component('staff-form', require('./components/Management/UserManagement/StaffManagement/StaffForm.vue').default);
 Vue.component('staff-filter-dialog', require('./components/Management/UserManagement/StaffManagement/StaffFilterDialog.vue').default);
@@ -45,6 +47,7 @@ Vue.component('print-cleaning-button', require('./components/Management/Cleaning
 
 Vue.component('room-check-form', require('./components/Management/RoomCheckManagement/RoomCheckForm.vue').default);
 Vue.component('room-check-filter-dialog', require('./components/Management/RoomCheckManagement/RoomCheckFilterDialog.vue').default);
+Vue.component('print-room-check-button', require('./components/Management/RoomCheckManagement/PrintRoomCheckButton.vue').default);
 
 Vue.component('property-form', require('./components/Management/PropertyManagement/PropertyForm.vue').default);
 Vue.component('property-filter-dialog', require('./components/Management/PropertyManagement/PropertyFilterDialog.vue').default);

@@ -374,6 +374,14 @@ export default {
               <!-- <v-col cols="auto">
                 <change-password-dialog :uid="this.$route.params.uid" @updated="refreshPage()"></change-password-dialog>
               </v-col> -->
+              <v-col cols="auto">
+                <print-tenant-button :item="this.data">
+                  <v-btn color="success">
+                    <v-icon small class="mr-2" left>mdi-printer</v-icon>
+                    Print
+                  </v-btn>
+                </print-tenant-button>
+              </v-col>
               <v-col
                 cols="auto"
                 v-if="
