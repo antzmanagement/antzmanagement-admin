@@ -44,6 +44,8 @@ export default {
         keyword: null,
         fromdate: null,
         todate: null,
+        paymentfromdate: null,
+        paymenttodate: null,
         paid: null,
       }),
       paymentFilterGroup: new Form({
@@ -52,6 +54,8 @@ export default {
         keyword: null,
         fromdate: null,
         todate: null,
+        paymentfromdate: null,
+        paymenttodate: null,
         paid: null,
       }),
       rentalPaymentFilterDialogConfig: {
@@ -127,6 +131,9 @@ export default {
           text: "Rental Date",
         },
         {
+          text: "Payment Date",
+        },
+        {
           text: "Rental Price (RM)",
         },
         {
@@ -137,9 +144,6 @@ export default {
         },
         {
           text: "Paid",
-        },
-        {
-          text: "Payment Date",
         },
         {
           text: "Action",
@@ -415,11 +419,18 @@ export default {
       if (filterGroup.fromdate) {
         this.rentalPaymentFilterGroup.fromdate = filterGroup.fromdate;
       }
-      if (filterGroup.sequence) {
-        this.rentalPaymentFilterGroup.sequence = filterGroup.sequence;
-      }
       if (filterGroup.todate) {
         this.rentalPaymentFilterGroup.todate = filterGroup.todate;
+      }
+      if (filterGroup.paymentfromdate) {
+        this.rentalPaymentFilterGroup.paymentfromdate =
+          filterGroup.paymentfromdate;
+      }
+      if (filterGroup.paymenttodate) {
+        this.rentalPaymentFilterGroup.paymenttodate = filterGroup.paymenttodate;
+      }
+      if (filterGroup.sequence) {
+        this.rentalPaymentFilterGroup.sequence = filterGroup.sequence;
       }
       if (filterGroup.paymentmethod) {
         this.rentalPaymentFilterGroup.paymentmethod = filterGroup.paymentmethod;
@@ -447,13 +458,13 @@ export default {
       if (filterGroup.fromdate) {
         this.paymentFilterGroup.fromdate = filterGroup.fromdate;
       }
+      if (filterGroup.todate) {
+        this.paymentFilterGroup.todate = filterGroup.todate;
+      }
       if (filterGroup.services) {
         this.paymentFilterGroup.service_ids =
           _.map(filterGroup.services, "id") || [];
         this.paymentFilterGroup.services = filterGroup.services;
-      }
-      if (filterGroup.todate) {
-        this.paymentFilterGroup.todate = filterGroup.todate;
       }
       if (filterGroup.paid === 1 || filterGroup.paid === 0) {
         this.paymentFilterGroup.paid = filterGroup.paid;
@@ -572,6 +583,7 @@ export default {
         this.rentalPaymentFilterGroup.pageSize = itemsPerPage;
       }
 
+      console.log(this.rentalPaymentFilterGroup);
       this.filterRentalPaymentsAction(this.rentalPaymentFilterGroup)
         .then((data) => {
           if (data.data) {
@@ -829,6 +841,9 @@ export default {
                       {{ props.item.rentaldate | formatDate }}
                     </td>
                     <td class="text-truncate">
+                      {{ props.item.paymentdate | formatDate }}
+                    </td>
+                    <td class="text-truncate">
                       {{ props.item.price | toDouble }}
                     </td>
                     <td class="text-truncate">
@@ -842,9 +857,6 @@ export default {
                     </td>
                     <td class="text-truncate" v-else>
                       <v-icon small color="danger">mdi-close</v-icon>
-                    </td>
-                    <td class="text-truncate">
-                      {{ props.item.paymentdate | formatDate }}
                     </td>
                     <td class="text-truncate">
                       <print-rental-payment-button

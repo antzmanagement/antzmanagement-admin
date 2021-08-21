@@ -1390,7 +1390,7 @@ export const roleAccess = {
                 ...(_.get(accessRule, `onlyView`) || {})
             },
             room: {
-                ...(_.get(accessRule, `onlyTableView`) || {})
+                ...(_.get(accessRule, `onlyView`) || {})
             },
             roomCheck: {
                 ...(_.get(accessRule, `onlyCreate`) || {})

@@ -190,10 +190,11 @@ trait MaintenanceServices
         $data = new Maintenance();
         $data->uid = Carbon::now()->timestamp . Maintenance::count();
         $data->price  = $this->toDouble($params->price);
-        $data->maintenance_date  = $this->toDate($params->maintenance_date);
+        $data->maintenance_date  = Carbon::parse($params->maintenance_date)->timezone('Asia/Kuala_Lumpur');
         $data->remark = $params->remark;
         $data->maintenance_type = $params->maintenance_type;
         $data->maintenance_status = $params->maintenance_status;
+        $data->other_property = $params->other_property;
         $data->claim_by_owner = $params->claim_by_owner;
         $data->claim_by_tenant = $params->claim_by_tenant;
 
@@ -263,10 +264,11 @@ trait MaintenanceServices
 
         $params = $this->checkUndefinedProperty($params, $this->maintenanceAllCols());
         $data->price  = $this->toDouble($params->price);
-        $data->maintenance_date  = $this->toDate($params->maintenance_date);
+        $data->maintenance_date  = Carbon::parse($params->maintenance_date)->timezone('Asia/Kuala_Lumpur');
         $data->remark = $params->remark;
         $data->maintenance_type = $params->maintenance_type;
         $data->maintenance_status = $params->maintenance_status;
+        $data->other_property = $params->other_property;
         $data->claim_by_owner = $params->claim_by_owner;
         $data->claim_by_tenant = $params->claim_by_tenant;
 
@@ -381,7 +383,7 @@ trait MaintenanceServices
         return ['id', 'uid', 'price', 'remark', 'owner_id','room_check_id', 'property_id',
         'room_id', 'tenant_id', 'claim_by_owner', 'claim_by_tenant', 'claim_id', 'maintenance_type', 
         'maintenance_status', 'maintenance_date', 'price', 'paid', 'receive_from', 'issue_by', 'receiptno',
-        'sequence', 'referenceno', 'paymentmethod', 'processing_fees', 'paymentdate'];
+        'sequence', 'referenceno', 'paymentmethod', 'processing_fees', 'paymentdate', 'other_property'];
     }
 
     public function maintenanceDefaultCols()

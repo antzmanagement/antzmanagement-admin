@@ -116,7 +116,7 @@ trait CleaningServices
         $data->remark = $params->remark;
         $data->cleaning_type = $params->cleaning_type;
         $data->cleaning_status = $params->cleaning_status;
-        $data->cleaning_date = $this->toDate($params->cleaning_date);
+        $data->cleaning_date  = Carbon::parse($params->cleaning_date)->timezone('Asia/Kuala_Lumpur');
         $data->claim_by_owner = $params->claim_by_owner;
         $data->claim_by_tenant = $params->claim_by_tenant;
         
@@ -180,7 +180,7 @@ trait CleaningServices
         $data->remark = $params->remark;
         $data->cleaning_type = $params->cleaning_type;
         $data->cleaning_status = $params->cleaning_status;
-        $data->cleaning_date = $this->toDate($params->cleaning_date);
+        $data->cleaning_date  = Carbon::parse($params->cleaning_date)->timezone('Asia/Kuala_Lumpur');
         $data->claim_by_owner = $params->claim_by_owner;
         $data->claim_by_tenant = $params->claim_by_tenant;
         $data->paid = $params->paid == true;

@@ -10,6 +10,7 @@ import {
 } from "vuelidate/lib/validators";
 import { mapActions } from "vuex";
 import { _ } from "../../../common/common-function";
+import moment from 'moment';
 export default {
   props: {
     editMode: {
@@ -44,6 +45,7 @@ export default {
   },
   data() {
     return {
+      moment : moment,
       dialog: false,
       dateMenu: false,
       maintenanceEditMode: false,
@@ -221,6 +223,7 @@ export default {
             this.$Progress.finish();
             this.endLoadingAction();
             this.$emit("created", data.data);
+            this.data.reset();
             this.dialog = false;
           })
           .catch((error) => {
@@ -234,7 +237,7 @@ export default {
       }
     },
     updateRoomCheck() {
-        this.$v.$touch(); //it will validate all fields
+      this.$v.$touch(); //it will validate all fields
 
       if (this.$v.$invalid) {
         Toast.fire({
@@ -412,28 +415,13 @@ export default {
               ></v-select>
             </v-col>
             <v-col cols="6">
-              <v-menu
-                ref="menu"
-                v-model="dateMenu"
-                :close-on-content-click="false"
-                transition="scale-transition"
-                offset-y
-              >
-                <template v-slot:activator="{ on }">
-                  <v-text-field
-                    v-model="data.checked_date"
-                    label="Check Date"
-                    prepend-icon="event"
-                    readonly
-                    v-on="on"
-                  ></v-text-field>
-                </template>
-                <v-date-picker
-                  v-model="data.checked_date"
-                  no-title
-                  scrollable
-                ></v-date-picker>
-              </v-menu>
+              <v-datetime-picker
+                label="Checked Date"
+                v-model="data.checked_date"
+                no-title
+                scrollable
+                timeFormat="HH:mm"
+              ></v-datetime-picker>
             </v-col>
             <v-col cols="12" md="12">
               <div class="align-center d-flex">
@@ -478,7 +466,9 @@ export default {
                           : "N/A"
                       }}
                     </td>
-                    <td class="text-truncate">{{ props.item.maintenance_date || 'N/A' }}</td>
+                    <td class="text-truncate">
+                      {{ _.get(props.item, ["maintenance_date"]) ? moment(props.item.maintenance_date).format('YYYY-MM-DD HH:mm') : 'N/A' || "N/A" }}
+                    </td>
                     <td class="text-truncate">
                       <!-- <v-icon
                         small
@@ -543,7 +533,9 @@ export default {
                           : "N/A"
                       }}
                     </td>
-                    <td class="text-truncate">{{ props.item.cleaning_date || 'N/A' }}</td>
+                    <td class="text-truncate">
+                         {{ _.get(props.item, ["cleaning_date"]) ? moment(props.item.cleaning_date).format('YYYY-MM-DD HH:mm') : 'N/A' || "N/A" }}
+                    </td>
                     <td class="text-truncate">
                       <!-- <v-icon
                         small

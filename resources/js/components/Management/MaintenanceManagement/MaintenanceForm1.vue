@@ -224,27 +224,23 @@ export default {
             let cloneData = _.cloneDeep(this.selectedData) || {};
             cloneData.room = _.find(this.rooms, [
               "id",
-              _.get(cloneData, `room.id`) ||
-                _.get(cloneData, `room_id`),
+              _.get(cloneData, `room.id`) || _.get(cloneData, `room_id`),
             ]);
             cloneData.property = _.find(this.properties, [
               "id",
               _.get(cloneData, `property.id`) ||
                 _.get(cloneData, `property_id`),
             ]);
-            cloneData.owner = _.find(
-              _.get(cloneData, `room.owners`),
-              [
-                "id",
-                _.get(cloneData, `owner.id`) ||
-                  _.get(cloneData, `owner_id`),
-              ]
-            );
+            cloneData.owner = _.find(_.get(cloneData, `room.owners`), [
+              "id",
+              _.get(cloneData, `owner.id`) || _.get(cloneData, `owner_id`),
+            ]);
 
             this.paidStatus = cloneData.paid == true;
             this.data = new Form(cloneData);
 
-            this.initStatus = _.get(this.data , `maintenance_status`) || 'pending';
+            this.initStatus =
+              _.get(this.data, `maintenance_status`) || "pending";
           }
 
           if (_.get(this.data, `room.id`)) {
@@ -475,6 +471,13 @@ export default {
               </template>
             </v-autocomplete>
           </v-col>
+          <v-col cols="12" v-if="_.get(data , `property.name`) == 'others'">
+            <v-text-field
+              label="Other Property"
+              :maxlength="300"
+              v-model="data.other_property"
+            ></v-text-field>
+          </v-col>
           <v-col cols="12" md="12">
             <v-text-field
               label="Price"
@@ -505,30 +508,14 @@ export default {
             ></v-select>
           </v-col>
           <v-col cols="6">
-            <v-menu
+              <v-datetime-picker
               :disabled="initStatus != 'pending'"
-              ref="menu"
-              v-model="dateMenu"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              offset-y
-            >
-              <template v-slot:activator="{ on }">
-                <v-text-field
-                  :disabled="initStatus != 'pending'"
-                  v-model="data.maintenance_date"
-                  label="Maintenance Date"
-                  prepend-icon="event"
-                  readonly
-                  v-on="on"
-                ></v-text-field>
-              </template>
-              <v-date-picker
+                label="Maintenance Date"
                 v-model="data.maintenance_date"
                 no-title
                 scrollable
-              ></v-date-picker>
-            </v-menu>
+                timeFormat="HH:mm"
+              ></v-datetime-picker>
           </v-col>
           <!-- <v-col
             cols="12"

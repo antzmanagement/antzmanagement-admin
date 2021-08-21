@@ -1,10 +1,12 @@
 
 <script>
+import moment from 'moment';
 import { mapActions } from "vuex";
 import { _ } from "../../../common/common-function";
 export default {
   data: () => ({
     _: _,
+    moment : moment,
     maintenancePayFormDialog: false,
     maintenanceFormDialog: false,
     maintenanceEditMode: false,
@@ -185,7 +187,7 @@ export default {
                   <div class="form-control-plaintext">
                     <v-chip class="ma-2">
                       <h4 class="text-center ma-2">
-                        {{ _.get(data , ['property', 'name']) || 'N/A' | capitalizeFirstLetter }}
+                        {{ _.get(data , ['property', 'name']) == 'others' ? `${_.get(data , ['property', 'text']) || ''} - ${_.get(data , ['other_property']) || ''}` : _.get(data , ['property', 'text']) || 'N/A'  }}
                       </h4>
                     </v-chip>
                   </div>
@@ -251,7 +253,7 @@ export default {
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Maintenance Date</label>
                   <div class="form-control-plaintext">
-                    <h4>{{ data.maintenance_date | formatDate }}</h4>
+                    <h4>{{ _.get(data, ["maintenance_date"]) ? moment(data.maintenance_date).format('YYYY-MM-DD HH:mm') : 'N/A' || "N/A" }}</h4>
                   </div>
                 </div>
               </v-col>

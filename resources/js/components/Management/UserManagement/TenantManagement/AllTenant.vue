@@ -112,7 +112,6 @@ export default {
       deep: true,
     },
     totalDataLength(v) {
-      console.log(v);
       if (v > 0) {
         // this.fetchExcelData();
       }
@@ -203,7 +202,6 @@ export default {
         this.tenantFilterGroup.room_id = filterGroup.room.id;
         this.tenantFilterGroup.room = filterGroup.room;
       }
-      console.log(this.tenantFilterGroup);
       this.options.page = 1;
       this.getTenants();
     },
@@ -221,15 +219,18 @@ export default {
 
       var totalResult = itemsPerPage;
       //Show All Items
+      let filterGroup = {...this.tenantFilterGroup};
       if (totalResult == -1) {
-        this.tenantFilterGroup.pageNumber = -1;
-        this.tenantFilterGroup.pageSize = -1;
+        filterGroup.pageNumber = -1;
+        filterGroup.pageSize = -1;
       } else {
-        this.tenantFilterGroup.pageNumber = page;
-        this.tenantFilterGroup.pageSize = itemsPerPage;
+        filterGroup.pageNumber = page;
+        filterGroup.pageSize = itemsPerPage;
       }
 
-      this.filterTenantsAction(this.tenantFilterGroup)
+      delete filterGroup.room;
+      delete filterGroup.picObj;
+      this.filterTenantsAction(filterGroup)
         .then((data) => {
           if (data.data) {
             this.data = data.data;
@@ -256,7 +257,6 @@ export default {
       let promises = [];
       let self = this;
       _.forEach(_.range(maxPage), function (index) {
-        console.log(index);
         promises.push(
           self.filterTenantsAction({
             pageSize: size,
@@ -266,14 +266,12 @@ export default {
       });
 
       let responses = await Promise.all(promises);
-      console.log(responses);
       let finalData = [];
       _.forEach(responses, function (response) {
         finalData = _.compact(
           _.concat(finalData, _.get(response, `data`) || [])
         );
       });
-      console.log(finalData);
       this.excelData = finalData;
       return finalData;
     },

@@ -14,6 +14,7 @@ export default {
       options: {},
       maintenancePayFormDialog: false,
       maintenanceFormDialog: false,
+      maintenanceEditMode: false,
       selectedMaintenance: {},
       maintenanceFilterGroup: new Form({
         rooms: [],
@@ -120,7 +121,7 @@ export default {
     },
   },
   created() {
-    document.title = 'All Maintenance'
+    document.title = "All Maintenance";
   },
   mounted() {
     this.getMaintenances();
@@ -132,6 +133,8 @@ export default {
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction",
       createMaintenanceAction: "createMaintenance",
+      updateMaintenanceAction: "updateMaintenance",
+      deleteMaintenanceAction: "deleteMaintenance",
     }),
     initMaintenanceFilter(filterGroup) {
       this.maintenanceFilterGroup.reset();
@@ -238,19 +241,69 @@ export default {
       this.excelData = finalData;
       return finalData;
     },
-    updateMaintenances($data) {
+    openMaintenanceDialog(item, editMode) {
+      this.maintenanceEditMode = editMode == true;
+      this.selectedMaintenance = item || {};
+      this.maintenanceFormDialog = true;
+    },
+    updateMaintenance($data) {
+      try {
+        console.log($data);
+        if (_.get($data, "uid")) {
+          let finalData = _.cloneDeep($data);
+          this.updateMaintenanceAction(finalData)
+            .then((data) => {
+              Toast.fire({
+                icon: "success",
+                title: "Successful Updated Maintenance. ",
+              });
+              this.$Progress.finish();
+              this.endLoadingAction();
+              this.maintenanceFormDialog = false;
+              this.updateMaintenances(data.data);
+            })
+            .catch((error) => {
+              Toast.fire({
+                icon: "warning",
+                title: "Something went wrong!!!!! ",
+              });
+              this.$Progress.finish();
+              this.endLoadingAction();
+              this.maintenanceFormDialog = false;
+            });
+        } else {
+          Toast.fire({
+            icon: "error",
+            title: "Maintenance Not Found!!!!! ",
+          });
+          this.$Progress.finish();
+          this.endLoadingAction();
+          this.maintenanceFormDialog = false;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    updateMaintenances($data, remove = false) {
+      console.log($data);
       try {
         this.maintenanceFormDialog = false;
         if (!_.get($data, "uid")) {
           $data.uid = new Date().getTime();
         }
 
-        if (!_.some(this.data, ["uid", $data.uid])) {
-          this.data = _.unionBy([$data], this.data, "uid");
-        } else {
-          this.data = _.map(this.data, (item) => {
-            return item.uid == $data.uid ? $data : item;
+        if (remove) {
+          this.data = _.filter(this.data, (item) => {
+            return item.uid != $data.uid;
           });
+        } else {
+          if (!_.some(this.data, ["uid", $data.uid])) {
+            this.data = _.unionBy([$data], this.data, "uid");
+          } else {
+            this.data = _.map(this.data, (item) => {
+              return item.uid == $data.uid ? $data : item;
+            });
+          }
         }
       } catch (error) {
         console.log(error);
@@ -283,6 +336,27 @@ export default {
       } catch (error) {
         console.log(error);
       }
+    },
+    deleteMaintenance(item) {
+      this.showLoadingAction();
+      this.deleteMaintenanceAction(item)
+        .then((data) => {
+          Toast.fire({
+            icon: "success",
+            title: "Successful Deleted Maintenance. ",
+          });
+          this.$Progress.finish();
+          this.endLoadingAction();
+          this.updateMaintenances(data.data, true);
+        })
+        .catch((error) => {
+          Toast.fire({
+            icon: "warning",
+            title: "Something went wrong!!!!! ",
+          });
+          this.$Progress.finish();
+          this.endLoadingAction();
+        });
     },
   },
 };
@@ -446,7 +520,13 @@ export default {
                           : null
                       "
                     >
-                      {{ _.get(props.item, `property.text`) || "N/A" }}
+                      {{
+                        _.get(props.item, ["property", "name"]) == "others"
+                          ? `${_.get(props.item, ["property", "text"]) || ""} - ${
+                              _.get(props.item, ["other_property"]) || ""
+                            }`
+                          : _.get(props.item, ["property", "text"]) || "N/A"
+                      }}
                     </td>
                     <td
                       class="text-truncate"
@@ -559,6 +639,39 @@ export default {
                         "
                         >mdi-currency-usd</v-icon
                       >
+                      <v-icon
+                        small
+                        class="mr-2"
+                        @click="openMaintenanceDialog(props.item, true)"
+                        color="success"
+                        v-if="
+                          helpers.isAccessible(
+                            _.get(role, ['name']),
+                            'roomMaintenance',
+                            'edit'
+                          )
+                        "
+                        >mdi-pencil</v-icon
+                      >
+
+                      <confirm-dialog
+                        v-if="
+                          helpers.isAccessible(
+                            _.get(role, ['name']),
+                            'roomMaintenance',
+                            'delete'
+                          )
+                        "
+                        @confirmed="
+                          $event ? deleteMaintenance(props.item) : null
+                        "
+                      >
+                        <template v-slot="{ on }">
+                          <v-icon color="error" size="small" v-on="on"
+                            >mdi-trash-can-outline</v-icon
+                          >
+                        </template>
+                      </confirm-dialog>
                     </td>
                   </tr>
                 </template>
@@ -574,11 +687,22 @@ export default {
           max-width="600px"
         >
           <maintenance-form-1
-            returnObject
+            :selectedData="selectedMaintenance || {}"
             :reset="maintenanceFormDialog"
-            :editMode="false"
-            @cancel="maintenanceFormDialog = false"
-            @submit="createMaintenance"
+            :editMode="maintenanceEditMode"
+            @cancel="
+              maintenanceFormDialog = false;
+              selectedMaintenance = {};
+            "
+            @submit="
+              (event) => {
+                if (!maintenanceEditMode) {
+                  createMaintenance(event);
+                } else {
+                  updateMaintenance(event);
+                }
+              }
+            "
           >
           </maintenance-form-1>
         </v-dialog>
@@ -591,7 +715,10 @@ export default {
         >
           <maintenance-pay-form
             :uid="_.get(this.selectedMaintenance, ['uid'])"
-            @close="maintenancePayFormDialog = false"
+            @close="
+              maintenancePayFormDialog = false;
+              selectedMaintenance = {};
+            "
             @updated="updateMaintenances"
           >
           </maintenance-pay-form>

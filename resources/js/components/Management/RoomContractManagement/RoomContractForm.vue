@@ -237,10 +237,10 @@ export default {
               data.data.room.agreement_fees = parseFloat(
                 data.data.agreement_fees
               );
-              data.data.room.booking_fees = parseFloat(data.data.booking_fees) || 0;
-              data.data.room.outstanding = parseFloat(
-                data.data.outstanding
-              )|| 0;
+              data.data.room.booking_fees =
+                parseFloat(data.data.booking_fees) || 0;
+              data.data.room.outstanding =
+                parseFloat(data.data.outstanding) || 0;
               data.data.room.origPrice = parseFloat(data.data.room.price);
               data.data.room.price = parseFloat(data.data.rental);
               data.data.room.startdate = data.data.startdate;
@@ -289,7 +289,8 @@ export default {
           room.deposit = 700;
           room.booking_fees = 200;
           room.agreement_fees = 50;
-          room.outstanding = room.deposit + room.agreement_fees - room.booking_fees;
+          room.outstanding =
+            room.deposit + room.agreement_fees - room.booking_fees;
           room.autorenew = false;
           return room;
         });
@@ -323,9 +324,7 @@ export default {
                 data.data.agreement_fees
               );
               data.data.room.booking_fees = parseFloat(data.data.booking_fees);
-              data.data.room.outstanding = parseFloat(
-                data.data.outstanding
-              );
+              data.data.room.outstanding = parseFloat(data.data.outstanding);
               data.data.room.origPrice = parseFloat(data.data.room.price);
               data.data.room.price = parseFloat(data.data.rental);
               data.data.room.startdate = data.data.startdate;
@@ -372,14 +371,15 @@ export default {
       return this._.isEmpty(data);
     },
     customValidate() {
+      console.log();
       return (
         !this._.isEmpty(this.data.room) &&
         this.data.room.contract_id &&
         this.data.room.startdate &&
         this.data.room.enddate &&
-        this.data.room.deposit &&
-        this.data.room.agreement_fees &&
-        this.data.room.booking_fees
+        _.isNumber(this.data.room.deposit) &&
+        _.isNumber(this.data.room.agreement_fees) &&
+        _.isNumber(this.data.room.booking_fees)
       );
     },
     createRoomContract() {
@@ -601,6 +601,7 @@ export default {
       }
     },
     updateOutstanding() {
+      console.log(typeof _.get(this.data.room, `deposit`));
       let deposit = !_.isNaN(parseFloat(_.get(this.data.room, `deposit`)))
         ? parseFloat(_.get(this.data.room, `deposit`))
         : 0;
@@ -609,7 +610,9 @@ export default {
       )
         ? parseFloat(_.get(this.data.room, `agreement_fees`))
         : 0;
-      let booking_fees = !_.isNaN(parseFloat(_.get(this.data.room, `booking_fees`)))
+      let booking_fees = !_.isNaN(
+        parseFloat(_.get(this.data.room, `booking_fees`))
+      )
         ? parseFloat(_.get(this.data.room, `booking_fees`))
         : 0;
       let outstanding = deposit + agreement_fees - booking_fees;
@@ -621,9 +624,8 @@ export default {
         outstanding,
       };
     },
-    console(){
-      console.log(this.data.room);
-    }
+    console() {
+    },
   },
 };
 </script>
@@ -680,7 +682,9 @@ export default {
                 item-text="name"
                 item-value="id"
                 label="Person In Charge"
-                :error-messages="!data.pic ? 'Person In Charge is required' : ''"
+                :error-messages="
+                  !data.pic ? 'Person In Charge is required' : ''
+                "
               >
               </v-autocomplete>
             </v-col>
@@ -691,9 +695,7 @@ export default {
                 item-value="id"
                 item-text="name"
                 label="Tenant"
-                :error-messages="
-                  !data.tenant ? 'Tenant is required' : ''
-                "
+                :error-messages="!data.tenant ? 'Tenant is required' : ''"
               >
               </v-autocomplete>
             </v-col>
@@ -731,10 +733,11 @@ export default {
                           type="number"
                           step="0.01"
                           :error-messages="
-                            !_.isNumber(props.item.price)
+                            !props.item.price && props.item.price !== 0
                               ? 'Rental is required'
                               : ''
                           "
+                          @change="console"
                         ></v-text-field>
                       </td>
                       <td class="text-truncate">
@@ -744,7 +747,7 @@ export default {
                           type="number"
                           step="0.01"
                           :error-messages="
-                            !_.isNumber(props.item.deposit)
+                            !props.item.deposit && props.item.deposit !== 0
                               ? 'Deposit is required'
                               : ''
                           "
@@ -758,7 +761,8 @@ export default {
                           type="number"
                           step="0.01"
                           :error-messages="
-                            !_.isNumber(props.item.agreement_fees)
+                            !props.item.agreement_fees &&
+                            props.item.agreement_fees !== 0
                               ? 'Agreement is required'
                               : ''
                           "
@@ -772,8 +776,9 @@ export default {
                           type="number"
                           step="0.01"
                           :error-messages="
-                            !_.isNumber(props.item.booking_fees)
-                              ? 'Booking fees is required'
+                            !props.item.booking_fees &&
+                            props.item.booking_fees !== 0
+                              ? 'Partial Payment is required'
                               : ''
                           "
                           @change="updateOutstanding"
@@ -786,7 +791,7 @@ export default {
                           type="number"
                           step="0.01"
                           :error-messages="
-                            (props.item.outstanding == null || props.item.outstanding == '') && props.item.outstanding != 0
+                            (props.item.outstanding == null || props.item.outstanding == '') && props.item.outstanding !== 0
                               ? 'Outstanding deposit is required'
                               : ''
                           "

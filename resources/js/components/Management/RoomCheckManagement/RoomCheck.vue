@@ -7,6 +7,7 @@ import PrintPaymentButton from "../PaymentManagement/PrintPaymentButton.vue";
 export default {
   components: { PrintPaymentButton },
   data: () => ({
+    moment : moment,
     editButtonStyle: {
       block: false,
       color: "success",
@@ -386,7 +387,8 @@ export default {
                 <div class="form-group mb-0">
                   <label class="form-label mb-0">Checked Date</label>
                   <div class="form-control-plaintext">
-                    <h4>{{ data.checked_date | formatDate }}</h4>
+                    <h4>
+                      {{ _.get(data, ["checked_date"]) ? moment(data.checked_date).format('YYYY-MM-DD HH:mm') : 'N/A' || "N/A" }}</h4>
                   </div>
                 </div>
               </v-col>
@@ -430,7 +432,15 @@ export default {
                     <template v-slot:item="props">
                       <tr :key="props.item.uid">
                         <td class="text-truncate">
-                          {{ _.get(props.item, `property.text`) || "N/A" }}
+                          {{
+                            _.get(props.item, ["property", "name"]) == "others"
+                              ? `${
+                                  _.get(props.item, ["property", "text"]) || ""
+                                } - ${
+                                  _.get(props.item, ["other_property"]) || ""
+                                }`
+                              : _.get(props.item, ["property", "text"]) || "N/A"
+                          }}
                         </td>
                         <td class="text-truncate">
                           {{ props.item.maintenance_type }}
@@ -449,7 +459,7 @@ export default {
                           }}
                         </td>
                         <td class="text-truncate">
-                          {{ props.item.maintenance_date || "N/A" }}
+                          {{ _.get(props.item, ["maintenance_date"]) ? moment(props.item.maintenance_date).format('YYYY-MM-DD HH:mm') : 'N/A' || "N/A" }}
                         </td>
                         <td class="text-truncate">
                           <print-maintenance-button
@@ -573,7 +583,7 @@ export default {
                           }}
                         </td>
                         <td class="text-truncate">
-                          {{ props.item.cleaning_date || "N/A" }}
+                         {{ _.get(props.item, ["cleaning_date"]) ? moment(props.item.cleaning_date).format('YYYY-MM-DD HH:mm') : 'N/A' || "N/A" }}
                         </td>
                         <td class="text-truncate">
                           <print-cleaning-button
@@ -657,15 +667,11 @@ export default {
             ></v-divider>
             <v-row class="pa-2" justify="end" align="center">
               <v-col cols="auto">
-                <print-room-check-button
-                  :item="this.data"
-                >
-                <v-btn color="success">
-                  <v-icon small class="mr-2" left
-                    >mdi-printer</v-icon
-                  >
-                  Print
-                </v-btn>
+                <print-room-check-button :item="this.data">
+                  <v-btn color="success">
+                    <v-icon small class="mr-2" left>mdi-printer</v-icon>
+                    Print
+                  </v-btn>
                 </print-room-check-button>
               </v-col>
               <v-col

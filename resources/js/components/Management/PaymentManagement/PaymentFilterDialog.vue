@@ -161,7 +161,7 @@ export default {
                     <template v-slot:activator="{ on }">
                       <v-text-field
                         v-model="data.fromdate"
-                        label="From Date"
+                        label="Payment From Date"
                         readonly
                         v-on="on"
                       ></v-text-field>
@@ -197,7 +197,7 @@ export default {
                     <template v-slot:activator="{ on }">
                       <v-text-field
                         v-model="data.todate"
-                        label="To Date"
+                        label="Payment To Date"
                         readonly
                         v-on="on"
                       ></v-text-field>

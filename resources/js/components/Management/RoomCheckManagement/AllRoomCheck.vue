@@ -269,7 +269,7 @@ export default {
                       {{ _.get(props.item, ["room", "name"]) || "N/A" }}
                     </td>
                     <td class="text-truncate">
-                      {{ _.get(props.item, ["checked_date"]) || "N/A" }}
+                      {{ _.get(props.item, ["checked_date"]) ? moment(props.item.checked_date).format('YYYY-MM-DD HH:mm') : 'N/A' || "N/A" }}
                     </td>
                     <td class="text-truncate">
                       {{ _.get(props.item, ["category"]) || "N/A" }}

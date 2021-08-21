@@ -3,6 +3,7 @@
 import { mapActions } from "vuex";
 import print from "print-js";
 import printCss from "../../../common/printCssStr";
+import moment from 'moment';
 
 export default {
   props: {
@@ -13,6 +14,7 @@ export default {
   },
   data: () => ({
     _: _,
+    moment : moment,
     data: {
       otherpayments: [],
       services: [],
@@ -104,7 +106,11 @@ export default {
           <div class="col-auto mb-2">
             <div class="form-label">Checked Date</div>
             <div class="form-content">
-              {{ data.checked_date | formatDate }}
+              {{
+                _.get(data, ["checked_date"])
+                  ? moment(data.checked_date).format("YYYY-MM-DD HH:mm")
+                  : "N/A" || "N/A"
+              }}
             </div>
           </div>
           <div class="col-auto mb-2">
@@ -152,7 +158,13 @@ export default {
                   }}
                 </td>
                 <td class="text-truncate">
-                  {{ maintenance.maintenance_date || "N/A" }}
+                  {{
+                    _.get(maintenance, ["maintenance_date"])
+                      ? moment(maintenance.maintenance_date).format(
+                          "YYYY-MM-DD HH:mm"
+                        )
+                      : "N/A" || "N/A"
+                  }}
                 </td>
               </tr>
             </table>
@@ -193,7 +205,7 @@ export default {
                   }}
                 </td>
                 <td class="text-truncate">
-                  {{ cleaning.cleaning_date || "N/A" }}
+                  {{ _.get(cleaning, ["cleaning_date"]) ? moment(cleaning.cleaning_date).format('YYYY-MM-DD HH:mm') : 'N/A' || "N/A" }}
                 </td>
               </tr>
             </table>

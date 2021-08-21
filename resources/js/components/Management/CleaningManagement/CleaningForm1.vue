@@ -414,30 +414,14 @@ export default {
             ></v-select>
           </v-col>
           <v-col cols="6">
-            <v-menu
-              ref="menu"
-              v-model="dateMenu"
-              :close-on-content-click="false"
-              transition="scale-transition"
-              offset-y
+            <v-datetime-picker
               :disabled="initStatus != 'pending'"
-            >
-              <template v-slot:activator="{ on }">
-                <v-text-field
-                  v-model="data.cleaning_date"
-                  label="Cleaning Date"
-                  prepend-icon="event"
-                  readonly
-                  v-on="on"
-                  :disabled="initStatus != 'pending'"
-                ></v-text-field>
-              </template>
-              <v-date-picker
-                v-model="data.cleaning_date"
-                no-title
-                scrollable
-              ></v-date-picker>
-            </v-menu>
+              label="Cleaning Date"
+              v-model="data.cleaning_date"
+              no-title
+              scrollable
+              timeFormat="HH:mm"
+            ></v-datetime-picker>
           </v-col>
           <!-- <v-col cols="12" v-if="paidStatus && (data.claim_by_owner || data.claim_by_tenant)">
             <div>Paid Status</div>

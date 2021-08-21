@@ -191,7 +191,7 @@ trait RoomCheckServices
         $params = $this->checkUndefinedProperty($params, $this->roomCheckAllCols());
         $data = new RoomCheck();
         $data->uid = Carbon::now()->timestamp . RoomCheck::count();
-        $data->checked_date  = $this->toDate($params->checked_date);
+        $data->checked_date  = Carbon::parse($params->checked_date)->timezone('Asia/Kuala_Lumpur');
         $data->category  = $params->category;
         $data->remark  = $params->remark;
 
@@ -213,7 +213,7 @@ trait RoomCheckServices
     {
 
         $params = $this->checkUndefinedProperty($params, $this->roomCheckAllCols());
-        $data->checked_date  = $this->toDate($params->checked_date);
+        $data->checked_date  = Carbon::parse($params->checked_date)->timezone('Asia/Kuala_Lumpur');
         $data->category  = $params->category;
         $data->remark  = $params->remark;
 

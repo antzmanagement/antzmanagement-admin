@@ -44,6 +44,8 @@ export default {
       paymentMethods: ["cash", "online_transfer", "eWallet", "credit"],
       fromdatemenu: false,
       todatemenu: false,
+      paymentfromdatemenu : false,
+      paymenttodatemenu : false,
       dialog: false,
       tenants: [],
       rooms: [],
@@ -149,6 +151,78 @@ export default {
                 <span className=" d-inline-block half-width">
                   <v-menu
                     ref="menu"
+                    v-model="paymentfromdatemenu"
+                    :close-on-content-click="false"
+                    transition="scale-transition"
+                    offset-y
+                  >
+                    <template v-slot:activator="{ on }">
+                      <v-text-field
+                        v-model="data.paymentfromdate"
+                        label="Payment From Date"
+                        readonly
+                        v-on="on"
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      v-model="data.paymentfromdate"
+                      no-title
+                      scrollable
+                      :max="data.paymenttodate"
+                    ></v-date-picker>
+                  </v-menu>
+                </span>
+                <span className="d-inline-block">
+                  <v-icon
+                    class="btn"
+                    v-if="data.paymentfromdate"
+                    @click="data.paymentfromdate = ''"
+                    >mdi-close</v-icon
+                  >
+                </span>
+              </div>
+            </v-col>
+            <v-col cols="6">
+              <div class="d-flex align-center">
+                <span className=" d-inline-block half-width">
+                  <v-menu
+                    ref="menu"
+                    v-model="paymenttodatemenu"
+                    :close-on-content-click="false"
+                    transition="scale-transition"
+                    offset-y
+                  >
+                    <template v-slot:activator="{ on }">
+                      <v-text-field
+                        v-model="data.paymenttodate"
+                        label="Payment To Date"
+                        readonly
+                        v-on="on"
+                      ></v-text-field>
+                    </template>
+                    <v-date-picker
+                      v-model="data.paymenttodate"
+                      no-title
+                      scrollable
+                      :min="data.paymentfromdate"
+                    ></v-date-picker>
+                  </v-menu>
+                </span>
+                <span className="d-inline-block">
+                  <v-icon
+                    class="btn"
+                    v-if="data.paymenttodate"
+                    @click="data.paymenttodate = ''"
+                    >mdi-close</v-icon
+                  >
+                </span>
+              </div>
+            </v-col>
+            <v-col cols="6">
+              <div class="d-flex align-center">
+                <span className=" d-inline-block half-width">
+                  <v-menu
+                    ref="menu"
                     v-model="fromdatemenu"
                     :close-on-content-click="false"
                     transition="scale-transition"
@@ -157,7 +231,7 @@ export default {
                     <template v-slot:activator="{ on }">
                       <v-text-field
                         v-model="data.fromdate"
-                        label="From Date"
+                        label="Rental From Date"
                         readonly
                         v-on="on"
                       ></v-text-field>
@@ -193,7 +267,7 @@ export default {
                     <template v-slot:activator="{ on }">
                       <v-text-field
                         v-model="data.todate"
-                        label="To Date"
+                        label="Rental To Date"
                         readonly
                         v-on="on"
                       ></v-text-field>
@@ -247,13 +321,13 @@ export default {
                 :return-object="true"
               ></v-autocomplete>
             </v-col>
-          <v-col cols="12">
-            <v-select
-              :items="paymentMethods"
-              v-model="data.paymentmethod"
-              label="Payment Method"
-            ></v-select>
-          </v-col>
+            <v-col cols="12">
+              <v-select
+                :items="paymentMethods"
+                v-model="data.paymentmethod"
+                label="Payment Method"
+              ></v-select>
+            </v-col>
             <v-col cols="6">
               <div>Paid Status</div>
               <v-radio-group v-model="data.paid" row>

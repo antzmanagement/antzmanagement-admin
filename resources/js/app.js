@@ -44,6 +44,7 @@ import lodash from 'lodash'
 import Cloudinary, { CldImage, CldTransformation } from "cloudinary-vue";
 import { _ } from './common/common-function';
 import moment from 'moment';
+import DatetimePicker from 'vuetify-datetime-picker'
 
 const options = {
   name: '_blank',
@@ -73,6 +74,7 @@ Vue.use(Cloudinary, {
 });
 
 Vue.use(VueSpinners)
+Vue.use(DatetimePicker)
 Vue.use(VueRouter)
 Vue.use(Vuelidate)
 Vue.use(VueAxios, axios);

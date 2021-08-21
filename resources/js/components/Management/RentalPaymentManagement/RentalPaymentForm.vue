@@ -342,7 +342,7 @@ export default {
         color="blue darken-1"
         text
         @click="() => (editMode ? updateRentalPayment() : makePayment())"
-        >Save</v-btn
+        >{{editMode ? 'Save' : 'Pay'}}</v-btn
       >
     </v-card-actions>
   </v-card>

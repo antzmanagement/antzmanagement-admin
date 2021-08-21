@@ -1,9 +1,11 @@
 <script>
+import moment from 'moment';
 import { mapActions } from "vuex";
 import { sortByDateDesc, _ } from "../../../common/common-function";
 export default {
   data: () => ({
     _: _,
+    moment : moment,
     editButtonStyle: {
       block: false,
       color: "success",
@@ -96,11 +98,10 @@ export default {
     this.showLoadingAction();
     this.getRoomAction({ uid: this.$route.params.uid })
       .then((data) => {
-        
         this.data = data.data;
         this.$Progress.finish();
         this.endLoadingAction();
-        document.title = `Room ${this.data.unit || ''}`;
+        document.title = `Room ${this.data.unit || ""}`;
       })
       .catch((error) => {
         Toast.fire({
@@ -745,7 +746,13 @@ export default {
                           {{ props.item.category }}
                         </td>
                         <td class="text-truncate">
-                          {{ props.item.checked_date | formatDate }}
+                          {{
+                            _.get(props.item, ["checked_date"])
+                              ? moment(props.item.checked_date).format(
+                                  "YYYY-MM-DD HH:mm"
+                                )
+                              : "N/A" || "N/A"
+                          }}
                         </td>
                       </tr>
                     </template>

@@ -30,7 +30,7 @@ const helpers = {
         return false;
     },
     isEmpty(value) {
-        if (value == null || value == 'undefined' || value == "" || value == "N/A" || value == [] || value == {}) {
+        if (value == null || typeof(value) == 'undefined' || value == "" || value == "N/A" || value == [] || value == {}) {
             return true;
         }
 
