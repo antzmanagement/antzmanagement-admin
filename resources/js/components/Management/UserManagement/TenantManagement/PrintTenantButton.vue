@@ -13,6 +13,9 @@ export default {
   },
   data: () => ({
     _: _,
+    formLabelClass: "form-label margin-right-md width-30",
+    formContentClass:
+      "form-content height-100 width-50 thin-border padding-y-sm round-border padding-x-md",
     data: {
       otherpayments: [],
       services: [],
@@ -77,174 +80,366 @@ export default {
       <div class="container">
         <div class="row">
           <div class="col-12 h6 font-weight-bold">
-            Tenant - {{ _.get(data, ["uid"]) }}
+            Tenant Information
           </div>
         </div>
         <div class="row">
           <div class="divider my-2"></div>
         </div>
         <div class="row">
-          <div class="col-12 mb-2">
-            <div class="form-label">Room Contracts</div>
-            <span
-              v-for="roomcontract in data.roomcontracts"
-              :key="roomcontract.uid"
-              class="mr-2 my-2 d-inline-block"
-            >
-              <div class="text-align-center ma-2 form-content round-border thin-border px-3">
-                {{ `${_.get(roomcontract , ['room.unit']) || ''} ${_.get(roomcontract , ['name']) || ''}` || 'N/A' }}
-              </div>
-            </span>
-          </div>
-        </div>
-        <div class="row">
-          <div class="divider my-2"></div>
-        </div>
-        <div class="row">
-          <div class="col-2 mb-2">
-            <div class="form-label">Name</div>
-            <div class="form-content">
-              {{ data.name }}
-            </div>
-          </div>
-          <div class="col-2 mb-2">
-            <div class="form-label">IC-NO</div>
-            <div class="form-content">
-              {{ data.icno }}
-            </div>
-          </div>
-          <div class="col-2 mb-2">
-            <div class="form-label">Age</div>
-            <div class="form-content">
-              {{ data.age }}
-            </div>
-          </div>
-          <div class="col-2 mb-2">
-            <div class="form-label">Birthday</div>
-            <div class="form-content">
-              {{ data.birthday | formatDate }}
-            </div>
-          </div>
-          <div class="col-2 mb-2">
-            <div class="form-label">Gender</div>
-            <div class="form-content">
-              {{ data.gender }}
-            </div>
-          </div>
-          <div class="col-2 mb-2">
-            <div class="form-label">Phone 1</div>
-            <div class="form-content">
-              {{ data.tel1 }}
-            </div>
-          </div>
-          <div class="col-2 mb-2">
-            <div class="form-label">Phone 2</div>
-            <div class="form-content">
-              {{ data.tel2 }}
-            </div>
-          </div>
-          <div class="col-2 mb-2">
-            <div class="form-label">Phone 3</div>
-            <div class="form-content">
-              {{ data.tel3 }}
-            </div>
-          </div>
-          <div class="col-2 mb-2">
-            <div class="form-label">Email</div>
-            <div class="form-content">
-              {{ data.email }}
-            </div>
-          </div>
-          <div class="col-2 mb-2">
-            <div class="form-label">Religion</div>
-            <div class="form-content">
-              {{ data.religion }}
-            </div>
-          </div>
-          <div class="col-2 mb-2">
-            <div class="form-label">Occupation</div>
-            <div class="form-content">
-              {{ data.occupation }}
-            </div>
-          </div>
-          <div class="col-2 mb-2">
-            <div class="form-label">Address</div>
-            <div class="form-content">
-              {{ data.address }}
-            </div>
-          </div>
-          <div class="col-2 mb-2">
-            <div class="form-label">Postcode</div>
-            <div class="form-content">
-              {{ data.postcode }}
-            </div>
-          </div>
-          <div class="col-2 mb-2">
-            <div class="form-label">City</div>
-            <div class="form-content">
-              {{ data.city }}
-            </div>
-          </div>
-          <div class="col-2 mb-2">
-            <div class="form-label">State</div>
-            <div class="form-content">
-              {{ data.state }}
-            </div>
-          </div>
-          <div class="col-2 mb-2">
-            <div class="form-label">Mother Name</div>
-            <div class="form-content">
-              {{ data.mother_name }}
-            </div>
-          </div>
-          <div class="col-2 mb-2">
-            <div class="form-label">Mother Contact</div>
-            <div class="form-content">
-              {{ data.mother_tel }}
-            </div>
-          </div>
-          <div class="col-2 mb-2">
-            <div class="form-label">Father Name</div>
-            <div class="form-content">
-              {{ data.father_name }}
-            </div>
-          </div>
-          <div class="col-2 mb-2">
-            <div class="form-label">Father Contact</div>
-            <div class="form-content">
-              {{ data.father_tel }}
-            </div>
-          </div>
-          <div class="col-2 mb-2">
-            <div class="form-label">Emergency Contact Person</div>
-            <div class="form-content">
-              {{ data.emergency_name }}
-            </div>
-          </div>
-          <div class="col-2 mb-2">
-            <div class="form-label">Emergency Contact</div>
-            <div class="form-content">
-              {{ data.emergency_contact }}
-            </div>
-          </div>
-          <div class="col-2 mb-2">
-            <div class="form-label">Emergency Relationship</div>
-            <div class="form-content">
-              {{ data.emergency_relationship }}
-            </div>
-          </div>
-          <div class="col-2 mb-2">
-            <div class="form-label">How you know Us?</div>
-            <div class="form-content">
-              {{ data.approach_method }}
-            </div>
-          </div>
-          <div class="col-2 mb-2">
-            <div class="form-label">Person In Charge</div>
-            <div class="form-content">
-              {{ _.get(data, ["creator", "name"]) || "N/A" }}
-            </div>
-          </div>
+          <table>
+            <tr>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">Name</div>
+                  <div :class="formContentClass">
+                    {{ data.name }}
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">IC-NO</div>
+                  <div :class="formContentClass">
+                    {{ data.icno }}
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">Age</div>
+                  <div :class="formContentClass">
+                    {{ data.age }}
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">Birthday</div>
+                  <div :class="formContentClass">
+                    {{ data.birthday | formatDate }}
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">Gender</div>
+                  <div :class="formContentClass">
+                    {{ data.gender }}
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">Phone 1</div>
+                  <div :class="formContentClass">
+                    {{ data.tel1 }}
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">Phone 2</div>
+                  <div :class="formContentClass">
+                    {{ data.tel2 }}
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">Phone 3</div>
+                  <div :class="formContentClass">
+                    {{ data.tel3 }}
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">Email</div>
+                  <div :class="formContentClass">
+                    {{ data.email }}
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">Religion</div>
+                  <div :class="formContentClass">
+                    {{ data.religion }}
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">Occupation</div>
+                  <div :class="formContentClass">
+                    {{ data.occupation }}
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">Address</div>
+                  <div :class="formContentClass">
+                    {{ data.address }}
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">Postcode</div>
+                  <div :class="formContentClass">
+                    {{ data.postcode }}
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">City</div>
+                  <div :class="formContentClass">
+                    {{ data.city }}
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">Occupation</div>
+                  <div :class="formContentClass">
+                    {{ data.occupation }}
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">State</div>
+                  <div :class="formContentClass">
+                    {{ data.state }}
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">Mother Name</div>
+                  <div :class="formContentClass">
+                    {{ data.mother_name }}
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">Mother Contact</div>
+                  <div :class="formContentClass">
+                    {{ data.mother_tel }}
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">Father Name</div>
+                  <div :class="formContentClass">
+                    {{ data.father_name }}
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">Father Contact</div>
+                  <div :class="formContentClass">
+                    {{ data.father_tel }}
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">Emergency Contact Person</div>
+                  <div :class="formContentClass">
+                    {{ data.emergency_name }}
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">Emergency Contact</div>
+                  <div :class="formContentClass">
+                    {{ data.emergency_contact }}
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">Emergency Relationship</div>
+                  <div :class="formContentClass">
+                    {{ data.emergency_relationship }}
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">How you know Us?</div>
+                  <div :class="formContentClass">
+                    {{ data.approach_method }}
+                  </div>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div
+                  class="
+                    flex-justify-start flex-items-align-center
+                    padding-x-md
+                  "
+                >
+                  <div :class="formLabelClass">Person In Charge</div>
+                  <div :class="formContentClass">
+                    {{ _.get(data, ["creator", "name"]) || "N/A" }}
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </table>
         </div>
       </div>
     </div>

@@ -144,24 +144,26 @@ trait ReportServices
     {
         try {
             $total = 0;
+            $totalPaid = 0;
+            $totalUnpaid = 0;
+            $finalData = collect();
     
             $rentalPayments = RentalPayment::whereDate('rentaldate', '>=', Carbon::now()->firstOfMonth())->get();
     
-            $rentalPayments = $rentalPayments->countBy(function($rentalPayment){
-                return $rentalPayment->paid;
-            });
-            $rentalPayments['Paid'] = collect($rentalPayments)->get('1') || 0;
-            $rentalPayments['Unpaid'] = collect($rentalPayments)->get('0') || 0;
-            unset($rentalPayments['0']);
-            unset($rentalPayments['1']);
-    
             $total = 0;
             foreach ($rentalPayments as $rentalPayment) {
-                $total += $rentalPayment;
+                $total += 1;
+                if($rentalPayment->paid){
+                    $totalPaid += 1;
+                }else{
+                    $totalUnpaid += 1;
+                }
             }
             
+            $finalData['Paid'] = $totalPaid;
+            $finalData['Unpaid'] = $totalUnpaid;
     
-            $data['data'] = $rentalPayments;
+            $data['data'] = $finalData;
             $data['total'] = $total;
             return $data;
         } catch (\Throwable $th) {

@@ -375,7 +375,7 @@ export default {
           console.log("res");
           console.log(res);
           this.endLoadingAction();
-          console.log(res.data.unpaidTenant);
+          console.log(res.data.currentMonthUnpaidTenantPortion);
           this.unpaidrentals = res.data.unpaidTenant;
           this.todayPaidRentals = _.get(res.data, ["todayPaidRental"]) || [];
           this.roomContractAlmostEnd =

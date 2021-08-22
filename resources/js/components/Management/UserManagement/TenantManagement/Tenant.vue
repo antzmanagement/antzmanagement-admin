@@ -1,11 +1,11 @@
 
 
 <script>
-import moment from 'moment';
+import moment from "moment";
 import { mapActions } from "vuex";
 export default {
   data: () => ({
-    moment : moment,
+    moment: moment,
     maintenancePayFormDialog: false,
     maintenanceFormDialog: false,
     maintenanceEditMode: false,
@@ -14,6 +14,35 @@ export default {
     cleaningEditMode: false,
     selectedCleaning: {},
     cleaningFormDialog: false,
+    roomContractHeaders: [
+      {
+        text: "Room",
+      },
+      {
+        text: "Start date",
+      },
+      {
+        text: "End date",
+      },
+      {
+        text: "Deposit (RM)",
+      },
+      {
+        text: "Rental (RM)",
+      },
+      {
+        text: "Duration",
+      },
+      {
+        text: "Services",
+      },
+      {
+        text: "Check Out Date",
+      },
+      {
+        text: "Actions",
+      },
+    ],
     maintenanceHeaders: [
       {
         text: "Property",
@@ -138,9 +167,9 @@ export default {
       this.$router.push("/cleaning/" + $data.uid);
     },
     openMaintenanceDialog(item, editMode) {
-        this.maintenanceEditMode = editMode == true;
-        this.selectedMaintenance = item || {};
-        this.maintenanceFormDialog = true;
+      this.maintenanceEditMode = editMode == true;
+      this.selectedMaintenance = item || {};
+      this.maintenanceFormDialog = true;
     },
     deleteMaintenance(item) {
       this.showLoadingAction();
@@ -222,9 +251,9 @@ export default {
       }
     },
     openCleaningDialog(item, editMode) {
-        this.cleaningEditMode = editMode == true;
-        this.selectedCleaning = item || {};
-        this.cleaningFormDialog = true;
+      this.cleaningEditMode = editMode == true;
+      this.selectedCleaning = item || {};
+      this.cleaningFormDialog = true;
     },
     deleteCleaning(item) {
       this.showLoadingAction();
@@ -531,40 +560,182 @@ export default {
                 </div>
               </v-col>
             </v-row>
-
             <v-divider
               class="mx-3"
               :color="helpers.managementStyles().dividerColor"
             ></v-divider>
-
-            <v-row justify="start" align="center" class="pa-2">
-              <v-col cols="12">
-                <div class="form-group mb-0">
-                  <label class="form-label mb-0">Room Contract</label>
-                  <div class="form-control-plaintext">
-                    <v-chip
-                      v-for="roomcontract in data.roomcontracts"
-                      :key="roomcontract.uid"
-                      class="mr-2 my-2"
-                      @click="
-                        helpers.isAccessible(
-                          _.get(role, ['name']),
-                          'roomContract',
-                          'view'
-                        )
-                          ? showRoomContract(roomcontract)
-                          : null
-                      "
-                    >
-                      <div class="text-center ma-2 title">
-                        {{ roomcontract.name }}
-                      </div>
-                    </v-chip>
-                  </div>
-                </div>
+            <v-row>
+              <v-col
+                cols="12"
+                :class="helpers.managementStyles().centerWrapperClass"
+              >
+                <v-card raised width="100%">
+                  <v-data-table
+                    :headers="roomContractHeaders"
+                    :items="data.roomcontracts"
+                    fixed-header
+                    height="300px"
+                    :items-per-page="5"
+                    disable-sort
+                  >
+                    <template v-slot:top>
+                      <v-toolbar flat color="white">
+                        <v-toolbar-title
+                          :class="helpers.managementStyles().subtitleClass"
+                          >Room Contract</v-toolbar-title
+                        >
+                        <v-spacer></v-spacer>
+                      </v-toolbar>
+                    </template>
+                    <template v-slot:item="props">
+                      <tr>
+                        <td
+                          class="text-truncate"
+                          @click="
+                            helpers.isAccessible(
+                              _.get(role, ['name']),
+                              'roomContract',
+                              'view'
+                            )
+                              ? showRoomContract(props.item)
+                              : null
+                          "
+                        >
+                          {{ _.get(props.item, ["room", "name"]) || "N/A" }}
+                        </td>
+                        <td
+                          class="text-truncate"
+                          @click="
+                            helpers.isAccessible(
+                              _.get(role, ['name']),
+                              'roomContract',
+                              'view'
+                            )
+                              ? showRoomContract(props.item)
+                              : null
+                          "
+                        >
+                          {{ props.item.startdate | formatDate }}
+                        </td>
+                        <td
+                          class="text-truncate"
+                          @click="
+                            helpers.isAccessible(
+                              _.get(role, ['name']),
+                              'roomContract',
+                              'view'
+                            )
+                              ? showRoomContract(props.item)
+                              : null
+                          "
+                        >
+                          {{ props.item.enddate | formatDate }}
+                        </td>
+                        <td
+                          class="text-truncate"
+                          @click="
+                            helpers.isAccessible(
+                              _.get(role, ['name']),
+                              'roomContract',
+                              'view'
+                            )
+                              ? showRoomContract(props.item)
+                              : null
+                          "
+                        >
+                          {{ props.item.deposit | toDouble }}
+                        </td>
+                        <td
+                          class="text-truncate"
+                          @click="
+                            helpers.isAccessible(
+                              _.get(role, ['name']),
+                              'roomContract',
+                              'view'
+                            )
+                              ? showRoomContract(props.item)
+                              : null
+                          "
+                        >
+                          {{ props.item.rental | toDouble }}
+                        </td>
+                        <td
+                          class="text-truncate"
+                          @click="
+                            helpers.isAccessible(
+                              _.get(role, ['name']),
+                              'roomContract',
+                              'view'
+                            )
+                              ? showRoomContract(props.item)
+                              : null
+                          "
+                        >
+                          {{ props.item.duration }}
+                          {{ props.item.rental_type || "day" }}
+                        </td>
+                        <td
+                          class="text-truncate"
+                          @click="
+                            helpers.isAccessible(
+                              _.get(role, ['name']),
+                              'roomContract',
+                              'view'
+                            )
+                              ? showRoomContract(props.item)
+                              : null
+                          "
+                        >
+                          {{
+                            _.compact(
+                              _.map(
+                                _.concat(
+                                  _.get(props.item, ["addonservices"]) || [],
+                                  _.get(props.item, ["origservices"]) || []
+                                ),
+                                function (service) {
+                                  return _.get(service, ["text"]) || "";
+                                }
+                              )
+                            ) | getArrayValues
+                          }}
+                        </td>
+                        <td
+                          class="text-truncate"
+                          @click="
+                            helpers.isAccessible(
+                              _.get(role, ['name']),
+                              'roomContract',
+                              'view'
+                            )
+                              ? showRoomContract(props.item)
+                              : null
+                          "
+                        >
+                          {{ props.item.checkout_date | formatDate }}
+                        </td>
+                        <td class="text-truncate">
+                          <print-room-contract-button
+                            :item="{ ...props.item, tenant: data }"
+                            v-if="
+                              helpers.isAccessible(
+                                _.get(role, ['name']),
+                                'roomContract',
+                                'print'
+                              )
+                            "
+                          >
+                            <v-icon small class="mr-2" color="success"
+                              >mdi-printer</v-icon
+                            >
+                          </print-room-contract-button>
+                        </td>
+                      </tr>
+                    </template>
+                  </v-data-table>
+                </v-card>
               </v-col>
             </v-row>
-
             <v-divider
               class="mx-3"
               :color="helpers.managementStyles().dividerColor"
@@ -613,9 +784,7 @@ export default {
                         </td>
                         <td class="text-truncate">{{ props.item.price }}</td>
                         <td class="text-truncate">
-                          {{
-                            _.get(props.item, `room.unit`)
-                          }}
+                          {{ _.get(props.item, `room.unit`) }}
                         </td>
                         <td class="text-truncate">
                           {{
@@ -739,9 +908,7 @@ export default {
                         </td>
                         <td class="text-truncate">{{ props.item.price }}</td>
                         <td class="text-truncate">
-                          {{
-                            _.get(props.item, `room.unit`)
-                          }}
+                          {{ _.get(props.item, `room.unit`) }}
                         </td>
                         <td class="text-truncate">
                           {{

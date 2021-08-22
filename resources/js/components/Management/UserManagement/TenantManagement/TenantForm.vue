@@ -74,10 +74,10 @@ export default {
           text: "Partial Payment (Deposit)",
           width: "150px",
         },
-        {
-          text: "Outstanding Deposit",
-          width: "150px",
-        },
+        // {
+        //   text: "Outstanding",
+        //   width: "150px",
+        // },
         {
           text: "Contract",
           width: "150px",
@@ -184,7 +184,7 @@ export default {
         data: {
           name: { required, maxLength: maxLength(100) },
           icno: { required, maxLength: maxLength(14) },
-          tel1: {required},
+          tel1: { required },
           tel2: {},
           tel3: {},
           email: { email },
@@ -197,9 +197,9 @@ export default {
           mother_tel: {},
           father_name: {},
           mother_tel: {},
-          emergency_name: {required},
-          emergency_contact: {required},
-          emergency_relationship: {required},
+          emergency_name: { required },
+          emergency_contact: { required },
+          emergency_relationship: { required },
         },
       };
     } else {
@@ -397,44 +397,44 @@ export default {
   },
   created() {
     this.showLoadingAction();
-    // this.getRoomsAction({
-    //   pageNumber: -1,
-    //   pageSize: -1,
-    // })
-    //   .then((data) => {
-    //     this.rooms = (data.data || []).map(function (room) {
-    //       if (
-    //         room.room_types.length > 0 &&
-    //         room.room_types[0].services.length > 0
-    //       ) {
-    //         room.services = room.room_types[0].services;
-    //         room.origServices = room.room_types[0].services;
-    //       } else {
-    //         room.services = [];
-    //         room.origServices = [];
-    //       }
-    //       room.origPrice = parseFloat(room.price);
-    //       room.price = parseFloat(room.price);
-    //       room.deposit = 700;
-    //       room.booking_fees = 200;
-    //       room.outstanding_deposit = room.deposit - room.booking_fees;
-    //       room.agreement_fees = 50;
-    //       room.autorenew = false;
-    //       return room;
-    //     });
-    //     this.getContractsAction({
-    //       pageNumber: -1,
-    //       pageSize: -1,
-    //     })
-    //       .then((data) => {
-    //         this.contracts = data.data;
+    this.getRoomsAction({
+      pageNumber: -1,
+      pageSize: -1,
+    })
+      .then((data) => {
+        this.rooms = (data.data || []).map(function (room) {
+          if (
+            room.room_types.length > 0 &&
+            room.room_types[0].services.length > 0
+          ) {
+            room.services = room.room_types[0].services;
+            room.origServices = room.room_types[0].services;
+          } else {
+            room.services = [];
+            room.origServices = [];
+          }
+          room.origPrice = parseFloat(room.price);
+          room.price = parseFloat(room.price);
+          room.deposit = 700;
+          room.booking_fees = 200;
+          room.outstanding_deposit = room.deposit - room.booking_fees;
+          room.agreement_fees = 50;
+          room.autorenew = false;
+          return room;
+        });
+        this.getContractsAction({
+          pageNumber: -1,
+          pageSize: -1,
+        })
+          .then((data) => {
+            this.contracts = data.data;
 
-    //         this.getStaffsAction({
-    //           pageNumber: -1,
-    //           pageSize: -1,
-    //         })
-    //           .then((data) => {
-    //             this.staffs = data.data;
+            this.getStaffsAction({
+              pageNumber: -1,
+              pageSize: -1,
+            })
+              .then((data) => {
+                this.staffs = data.data;
                 if (this.editMode && this.uid) {
                   this.getTenantAction({ uid: this.uid })
                     .then((data) => {
@@ -452,32 +452,32 @@ export default {
                 } else {
                   this.endLoadingAction();
                 }
-      //         })
-      //         .catch((error) => {
-      //           console.log(error);
-      //           this.endLoadingAction();
-      //           Toast.fire({
-      //             icon: "warning",
-      //             title: "Something went wrong... ",
-      //           });
-      //         });
-      //     })
-      //     .catch((error) => {
-      //       this.endLoadingAction();
-      //       Toast.fire({
-      //         icon: "warning",
-      //         title: "Something went wrong... ",
-      //       });
-      //     });
-      // })
-      // .catch((error) => {
-      //   console.log(error);
-      //   this.endLoadingAction();
-      //   Toast.fire({
-      //     icon: "warning",
-      //     title: "Something went wrong... ",
-      //   });
-      // });
+              })
+              .catch((error) => {
+                console.log(error);
+                this.endLoadingAction();
+                Toast.fire({
+                  icon: "warning",
+                  title: "Something went wrong... ",
+                });
+              });
+          })
+          .catch((error) => {
+            this.endLoadingAction();
+            Toast.fire({
+              icon: "warning",
+              title: "Something went wrong... ",
+            });
+          });
+      })
+      .catch((error) => {
+        console.log(error);
+        this.endLoadingAction();
+        Toast.fire({
+          icon: "warning",
+          title: "Something went wrong... ",
+        });
+      });
   },
   methods: {
     ...mapActions({
@@ -493,14 +493,15 @@ export default {
       endLoadingAction: "endLoadingAction",
     }),
     customValidate() {
-
-      if(!this._.isEmpty(this.data.room)){
-        return (this.data.room.contract_id &&
+      if (!this._.isEmpty(this.data.room)) {
+        return (
+          this.data.room.contract_id &&
           this.data.room.startdate &&
           this.data.room.enddate &&
-          this.data.room.deposit &&
-          this.data.room.agreement_fees &&
-          this.data.room.booking_fees)
+          _.isNumber(this.data.room.deposit) &&
+          _.isNumber(this.data.room.agreement_fees) &&
+          _.isNumber(this.data.room.booking_fees)
+        );
       }
 
       return true;
@@ -671,23 +672,25 @@ export default {
       )
         ? parseFloat(_.get(this.data.room, `agreement_fees`))
         : 0;
-      let booking_fees = !_.isNaN(parseFloat(_.get(this.data.room, `booking_fees`)))
+      let booking_fees = !_.isNaN(
+        parseFloat(_.get(this.data.room, `booking_fees`))
+      )
         ? parseFloat(_.get(this.data.room, `booking_fees`))
         : 0;
-      let outstanding_deposit = deposit + agreement_fees - booking_fees;
+      let outstanding = deposit + agreement_fees - booking_fees;
       this.data.room = {
         ...this.data.room,
         deposit,
         agreement_fees,
         booking_fees,
-        outstanding_deposit,
+        outstanding,
       };
     },
-    updateAge(){
+    updateAge() {
       console.log(new Date(this.data.birthday));
       console.log(calculateAge(new Date(this.data.birthday)));
-      this.data.age = calculateAge(new Date(this.data.birthday))
-    }
+      this.data.age = calculateAge(new Date(this.data.birthday));
+    },
   },
 };
 </script>
@@ -735,18 +738,6 @@ export default {
       <v-card-text>
         <v-container>
           <v-row>
-            <!-- <v-col cols="12">
-              <v-autocomplete
-                v-model="data.pic"
-                :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
-                item-value="id"
-                :items="staffs || []"
-                label="Person In Charge"
-                chips
-                deletable-chips
-              >
-              </v-autocomplete>
-            </v-col> -->
             <v-col cols="12" md="6">
               <v-text-field
                 label="Name*"
@@ -789,7 +780,12 @@ export default {
                     v-on="on"
                   ></v-text-field>
                 </template>
-                <v-date-picker v-model="data.birthday" no-title scrollable @change="updateAge">
+                <v-date-picker
+                  v-model="data.birthday"
+                  no-title
+                  scrollable
+                  @change="updateAge"
+                >
                 </v-date-picker>
               </v-menu>
             </v-col>
@@ -1002,7 +998,7 @@ export default {
               ></v-text-field>
             </v-col>-->
 
-            <!-- <v-col cols="12" md="12"  v-if="!editMode">
+            <v-col cols="12" md="12" v-if="!editMode">
               <v-autocomplete
                 v-model="data.room"
                 :items="rooms || []"
@@ -1019,7 +1015,20 @@ export default {
                   ></room-filter-dialog>
                 </template>
               </v-autocomplete>
-            </v-col> -->
+            </v-col>
+            <v-col cols="12">
+              <v-autocomplete
+                v-if="!_.isEmpty(data.room)"
+                v-model="data.pic"
+                :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
+                item-value="id"
+                :items="staffs || []"
+                label="Person In Charge"
+                chips
+                deletable-chips
+              >
+              </v-autocomplete>
+            </v-col>
             <v-col cols="12" v-if="!_.isEmpty(data.room)">
               <v-card>
                 <v-data-table
@@ -1042,10 +1051,11 @@ export default {
                           type="number"
                           step="0.01"
                           :error-messages="
-                            !_.isNumber(props.item.price)
+                            !props.item.price && props.item.price !== 0
                               ? 'Rental is required'
                               : ''
                           "
+                          @change="console"
                         ></v-text-field>
                       </td>
                       <td class="text-truncate">
@@ -1055,7 +1065,7 @@ export default {
                           type="number"
                           step="0.01"
                           :error-messages="
-                            !_.isNumber(props.item.deposit)
+                            !props.item.deposit && props.item.deposit !== 0
                               ? 'Deposit is required'
                               : ''
                           "
@@ -1069,7 +1079,8 @@ export default {
                           type="number"
                           step="0.01"
                           :error-messages="
-                            !_.isNumber(props.item.agreement_fees)
+                            !props.item.agreement_fees &&
+                            props.item.agreement_fees !== 0
                               ? 'Agreement is required'
                               : ''
                           "
@@ -1083,26 +1094,28 @@ export default {
                           type="number"
                           step="0.01"
                           :error-messages="
-                            !_.isNumber(props.item.booking_fees)
-                              ? 'Booking fees is required'
+                            !props.item.booking_fees &&
+                            props.item.booking_fees !== 0
+                              ? 'Partial Payment is required'
                               : ''
                           "
                           @change="updateOutstanding"
                         ></v-text-field>
                       </td>
-                      <td class="text-truncate">
+                      <!-- <td class="text-truncate">
                         <v-text-field
-                          v-model="props.item.outstanding_deposit"
+                          v-model="props.item.outstanding"
                           prefix="RM"
                           type="number"
                           step="0.01"
                           :error-messages="
-                            helpers.isEmpty(props.item.outstanding_deposit)
+                            (props.item.outstanding == null || props.item.outstanding == '') && props.item.outstanding !== 0
                               ? 'Outstanding deposit is required'
                               : ''
                           "
+                          @change="console"
                         ></v-text-field>
-                      </td>
+                      </td> -->
                       <td class="text-truncate">
                         <v-autocomplete
                           v-model="props.item.contract_id"

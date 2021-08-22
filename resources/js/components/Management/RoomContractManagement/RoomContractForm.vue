@@ -601,7 +601,6 @@ export default {
       }
     },
     updateOutstanding() {
-      console.log(typeof _.get(this.data.room, `deposit`));
       let deposit = !_.isNaN(parseFloat(_.get(this.data.room, `deposit`)))
         ? parseFloat(_.get(this.data.room, `deposit`))
         : 0;
