@@ -43,6 +43,18 @@ trait OwnerServices
             })->values();
         }
 
+        if ($params->tel) {
+            $tel = $params->tel;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($tel) {
+                if ( stristr($item->tel1, $tel) == TRUE) {
+                    return true;
+                } else {
+                    return false;
+                }
+            })->values();
+        }
+
         if($params->room_id){
             $room_id = $params->room_id;
             $data = $data->filter(function ($item) use($room_id) {
@@ -66,6 +78,27 @@ trait OwnerServices
             // Query the name field in status table
         }])->with(['claims' => function ($q) {
             // Query the name field in status table
+        },'ownermaintenances' => function ($q) {
+            // Query the name field in status table
+            $q->with(['property' => function ($q1) {
+                $q1->where('status', true);
+            }]);
+            $q->with(['room' => function ($q1) {
+                $q1->where('status', true);
+            }]);
+            $q->with(['issueby' => function ($q1) {
+                $q1->where('status', true);
+            }]);
+            $q->where('status', true);
+        }, 'ownercleanings' => function ($q) {
+            $q->with(['room' => function ($q1) {
+                $q1->where('status', true);
+            }]);
+            $q->with(['issueby' => function ($q1) {
+                $q1->where('status', true);
+            }]);
+            // Query the name field in status table
+            $q->where('status', true);
         }])->where('users.status', true)->first();
         return $data;
     }
@@ -75,6 +108,27 @@ trait OwnerServices
         $userType = $this->getUserTypeById($this->ownerType);
         $data = $userType->users()->where('users.id', $id)->wherePivot('status', 1)->with(['ownrooms' => function ($q) {
             // Query the name field in status table
+        },'ownermaintenances' => function ($q) {
+            // Query the name field in status table
+            $q->with(['property' => function ($q1) {
+                $q1->where('status', true);
+            }]);
+            $q->with(['room' => function ($q1) {
+                $q1->where('status', true);
+            }]);
+            $q->with(['issueby' => function ($q1) {
+                $q1->where('status', true);
+            }]);
+            $q->where('status', true);
+        }, 'ownercleanings' => function ($q) {
+            $q->with(['room' => function ($q1) {
+                $q1->where('status', true);
+            }]);
+            $q->with(['issueby' => function ($q1) {
+                $q1->where('status', true);
+            }]);
+            // Query the name field in status table
+            $q->where('status', true);
         }])->where('users.status', true)->first();
         return $data;
     }
@@ -173,6 +227,6 @@ trait OwnerServices
     public function ownerFilterCols()
     {
 
-        return ['keyword', 'roomTypes', 'room_id'];
+        return ['keyword', 'roomTypes', 'room_id', 'tel'];
     }
 }

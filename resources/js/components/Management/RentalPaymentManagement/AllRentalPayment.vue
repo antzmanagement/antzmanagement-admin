@@ -47,6 +47,7 @@ export default {
         paymentfromdate: null,
         paymenttodate: null,
         paid: null,
+        status: 1,
       }),
       paymentFilterGroup: new Form({
         rooms: [],
@@ -57,6 +58,7 @@ export default {
         paymentfromdate: null,
         paymenttodate: null,
         paid: null,
+        status: 1,
       }),
       rentalPaymentFilterDialogConfig: {
         buttonStyle: {
@@ -146,7 +148,7 @@ export default {
           text: "Paid",
         },
         {
-          text: "Action",
+          text: "Actions",
         },
         {
           text: "Payment Method",
@@ -441,6 +443,9 @@ export default {
       if (filterGroup.paid === 1 || filterGroup.paid === 0) {
         this.rentalPaymentFilterGroup.paid = filterGroup.paid;
       }
+      if (filterGroup.status === 1 || filterGroup.status === 0) {
+        this.rentalPaymentFilterGroup.status = filterGroup.status;
+      }
 
       this.options.page = 1;
       this.getRentalPayments();
@@ -468,6 +473,10 @@ export default {
       }
       if (filterGroup.paid === 1 || filterGroup.paid === 0) {
         this.paymentFilterGroup.paid = filterGroup.paid;
+      }
+
+      if (filterGroup.status === 1 || filterGroup.status === 0) {
+        this.paymentFilterGroup.status = filterGroup.status;
       }
       if (filterGroup.paymentmethod) {
         this.paymentFilterGroup.paymentmethod = filterGroup.paymentmethod;
@@ -586,6 +595,7 @@ export default {
       console.log(this.rentalPaymentFilterGroup);
       this.filterRentalPaymentsAction(this.rentalPaymentFilterGroup)
         .then((data) => {
+          console.log(data);
           if (data.data) {
             this.data = data.data;
           } else {
@@ -782,7 +792,14 @@ export default {
           <v-col cols="12">
             <v-card class="pa-8" raised>
               <v-data-table
-                :headers="headers"
+                :headers="
+                  !_.get(rentalPaymentFilterGroup, 'status')
+                    ? _.concat(
+                        _.filter(headers, (header) => header.text != 'Actions'),
+                        [{ text: 'Deleted By' }]
+                      )
+                    : headers
+                "
                 :items="data"
                 :options.sync="options"
                 :server-items-length="rentalPaymentTotal"
@@ -826,16 +843,18 @@ export default {
                     <td class="text-truncate">{{ props.item.sequence }}</td>
                     <td class="text-truncate">{{ props.item.referenceno }}</td>
                     <td class="text-truncate">
-                      {{ props.item.roomcontract.tenant.name }}
+                      {{
+                        _.get(props.item, "roomcontract.tenant.name") || "N/A"
+                      }}
                     </td>
                     <td class="text-truncate">
-                      {{ props.item.roomcontract.room.name }}
+                      {{ _.get(props.item, "roomcontract.room.unit") || "N/A" }}
                     </td>
                     <td class="text-truncate">
-                      {{ props.item.roomcontract.startdate | formatDate }}
+                      {{ _.get(props.item, "roomcontract.startdate") || "N/A" }}
                     </td>
                     <td class="text-truncate">
-                      {{ props.item.roomcontract.enddate | formatDate }}
+                      {{ _.get(props.item, "roomcontract.enddate") || "N/A" }}
                     </td>
                     <td class="text-truncate">
                       {{ props.item.rentaldate | formatDate }}
@@ -858,7 +877,7 @@ export default {
                     <td class="text-truncate" v-else>
                       <v-icon small color="danger">mdi-close</v-icon>
                     </td>
-                    <td class="text-truncate">
+                    <td class="text-truncate" v-if="props.item.status">
                       <print-rental-payment-button
                         :item="props.item"
                         :roomcontract="props.item.roomcontract"
@@ -939,6 +958,9 @@ export default {
                     <td class="text-truncate">
                       {{ _.get(props.item, "issueby.name") || "N/A" }}
                     </td>
+                    <td class="text-truncate" v-if="!props.item.status">
+                      {{ _.get(props.item, "deletedby.name") || "N/A" }}
+                    </td>
                   </tr>
                 </template>
               </v-data-table>
@@ -950,7 +972,17 @@ export default {
           >
             <v-card raised width="100%" class="pa-8">
               <v-data-table
-                :headers="paymentHeaders"
+                :headers="
+                  !_.get(paymentFilterGroup, 'status')
+                    ? _.concat(
+                        _.filter(
+                          paymentHeaders,
+                          (paymentHeader) => paymentHeader.text != 'Actions'
+                        ),
+                        [{ text: 'Deleted By' }]
+                      )
+                    : paymentHeaders
+                "
                 :items="paymentData"
                 :options.sync="paymentOptions"
                 :server-items-length="paymentTotal"
@@ -1050,7 +1082,7 @@ export default {
                       <v-icon small color="danger">mdi-close</v-icon>
                     </td>
                     <td class="text-truncate">{{ props.item.remark }}</td>
-                    <td class="text-truncate">
+                    <td class="text-truncate" v-if="props.item.status">
                       <print-payment-button
                         :item="props.item"
                         :roomcontract="props.item.roomcontract"
@@ -1120,6 +1152,9 @@ export default {
                     </td>
                     <td class="text-truncate">
                       {{ _.get(props.item, "issueby.name") || "N/A" }}
+                    </td>
+                    <td class="text-truncate" v-if="!props.item.status">
+                      {{ _.get(props.item, "deletedby.name") || "N/A" }}
                     </td>
                   </tr>
                 </template>

@@ -21,7 +21,7 @@ class PaymentController extends Controller
     {
         error_log($this->controllerName . 'Retrieving list of payments.');
         // api/payment (GET)
-        $payments = $this->getPayments($request->user());
+        $payments = $this->getPayments($request->user(), null);
         if ($this->isEmpty($payments)) {
             return $this->errorPaginateResponse('Payments');
         } else {
@@ -44,10 +44,11 @@ class PaymentController extends Controller
             'otherPaymentTitle' => $request->otherPaymentTitle,
             'service_ids' => $request->service_ids,
             'paymentmethod' => $request->paymentmethod,
+            'status' => $request->status,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
-        $payments = $this->getPayments($request->user());
+        $payments = $this->getPayments($request->user(), $params);
         $payments = $this->filterPayments($payments, $params);
 
         if ($this->isEmpty($payments)) {
@@ -239,7 +240,7 @@ class PaymentController extends Controller
             return $this->notFoundResponse('Payment');
         }
 
-        $payment = $this->deletePayment($payment);
+        $payment = $this->deletePayment($payment, $request->user()->id);
 
         if ($this->isEmpty($payment)) {
             DB::rollBack();

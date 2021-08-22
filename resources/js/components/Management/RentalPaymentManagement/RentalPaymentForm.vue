@@ -84,12 +84,19 @@ export default {
         .then((data) => {
           this.data = data.data;
           this.origPrice = data.data.price;
-          if (!this.editMode) {
-            this.data.penalty = this.calculatePenalty(data.data);
-            this.data.paymentdate = moment().format("YYYY-MM-DD");
-            this.data.processing_fees = 3;
-            this.data.service_fees = 0;
-            this.data.paymentmethod = this.paymentMethods[0];
+          this.data.paymentdate =
+            this.data.paymentdate || moment().format("YYYY-MM-DD");
+          if (!this.data.penaltyEdited) {
+            this.data.penalty = this.calculatePenalty(
+              data.data,
+              this.data.paymentdate
+            );
+          }
+          this.data.service_fees = 0;
+          this.data.paymentmethod =
+            this.data.paymentmethod || this.paymentMethods[0];
+          if (!this.data.processingEdited) {
+            this.updateProcessingFees();
           }
           this.$Progress.finish();
           this.endLoadingAction();
@@ -113,16 +120,13 @@ export default {
         return [];
       }
     },
-    calculatePenalty(data) {
+    calculatePenalty(data, startDate = moment()) {
       if (!_.isNumber(parseInt(this.expiredDays))) {
         this.expiredDays = 10;
       }
       let rentaldate = moment(data.rentaldate);
-      console.log(rentaldate);
-      let diff = moment().diff(rentaldate, "days", false);
-      console.log(diff);
+      let diff = moment(startDate).diff(rentaldate, "days", false);
       let overDays = diff + 1 - (parseInt(this.expiredDays) || 10);
-      console.log(overDays);
       if (overDays > 0) {
         return overDays * this.penaltyRate;
       } else {
@@ -165,6 +169,18 @@ export default {
     updateRentalPayment() {
       this.showLoadingAction();
       this.$Progress.start();
+
+      this.data.penaltyEdited =
+        this.calculatePenalty(this.data, this.data.paymentdate) !=
+        this.data.penalty;
+
+      let newProcessing = this.data.processing_fees;
+      this.updateProcessingFees();
+      this.data.processingEdited = newProcessing != this.data.processing_fees;
+      console.log(this.data.processing_fees);
+      this.data.processing_fees = newProcessing;
+      console.log(newProcessing);
+      console.log(this.data);
       this.updateRentalPaymentAction(this.data)
         .then((data) => {
           Toast.fire({
@@ -187,29 +203,32 @@ export default {
         });
     },
     updateProcessingFees() {
-      let price = !_.isNaN(parseFloat(this.data.price))
-        ? parseFloat(this.data.price)
-        : 0;
-      let penalty = !_.isNaN(parseFloat(this.data.penalty))
-        ? parseFloat(this.data.penalty)
-        : 0;
-      switch (this.data.paymentmethod) {
-        case "cash":
-          this.data.processing_fees = 3;
-          break;
-        case "online_transfer":
-        case "eWallet":
-          this.data.processing_fees = 0;
-          break;
-        case "credit":
-          this.data.processing_fees = parseFloat(
-            ((price + penalty) * 0.02).toFixed(2)
-          );
-          break;
+      console.log('editMode', this.editMode);
+      if (!this.data.processingEdited || this.editMode) {
+        let price = !_.isNaN(parseFloat(this.data.price))
+          ? parseFloat(this.data.price)
+          : 0;
+        let penalty = !_.isNaN(parseFloat(this.data.penalty))
+          ? parseFloat(this.data.penalty)
+          : 0;
+        switch (this.data.paymentmethod) {
+          case "cash":
+            this.data.processing_fees = 3;
+            break;
+          case "online_transfer":
+          case "eWallet":
+            this.data.processing_fees = 0;
+            break;
+          case "credit":
+            this.data.processing_fees = parseFloat(
+              ((price + penalty) * 0.02).toFixed(2)
+            );
+            break;
 
-        default:
-          this.data.processing_fees = 0;
-          break;
+          default:
+            this.data.processing_fees = 0;
+            break;
+        }
       }
     },
   },
@@ -221,7 +240,7 @@ export default {
     <v-card-text>
       <v-container>
         <v-row>
-          <v-col cols="12" v-if="!editMode || data.paid">
+          <v-col cols="12">
             <v-text-field
               label="Reference No"
               v-model="data.referenceno"
@@ -239,7 +258,7 @@ export default {
               v-model="data.issue_by"
             ></v-text-field>
           </v-col> -->
-          <v-col cols="12" v-if="!editMode || data.paid">
+          <v-col cols="12">
             <v-select
               :items="paymentMethods"
               v-model="data.paymentmethod"
@@ -248,7 +267,7 @@ export default {
               :disabled="data.paid == true"
             ></v-select>
           </v-col>
-          <v-col cols="12" v-if="!editMode || data.paid">
+          <v-col cols="12">
             <v-menu
               ref="menu"
               v-model="menu"
@@ -270,6 +289,15 @@ export default {
                 v-model="data.paymentdate"
                 no-title
                 scrollable
+                @change="
+                  () => {
+                    if (!editMode && data.penaltyEdited) {
+                      return;
+                    }
+                    data.penalty = calculatePenalty(data, data.paymentdate);
+                    updateProcessingFees();
+                  }
+                "
               ></v-date-picker>
             </v-menu>
           </v-col>
@@ -280,7 +308,7 @@ export default {
               step="0.01"
               v-model="data.price"
               @change="updateProcessingFees"
-              :disabled="data.paid == true"
+              :disabled="data.paid == true || !editMode"
             ></v-text-field>
           </v-col>
           <!-- <v-col cols="12">
@@ -297,7 +325,7 @@ export default {
               type="number"
               step="0.01"
               v-model="data.processing_fees"
-              :disabled="data.paid == true"
+              :disabled="data.paid == true || !editMode"
             ></v-text-field>
           </v-col>
           <v-col cols="12">
@@ -307,7 +335,7 @@ export default {
               step="0.01"
               v-model="data.penalty"
               @change="updateProcessingFees"
-              :disabled="data.paid == true"
+              :disabled="data.paid == true || !editMode"
             ></v-text-field>
           </v-col>
           <v-col cols="12">
@@ -342,7 +370,7 @@ export default {
         color="blue darken-1"
         text
         @click="() => (editMode ? updateRentalPayment() : makePayment())"
-        >{{editMode ? 'Save' : 'Pay'}}</v-btn
+        >{{ editMode ? "Save" : "Pay" }}</v-btn
       >
     </v-card-actions>
   </v-card>

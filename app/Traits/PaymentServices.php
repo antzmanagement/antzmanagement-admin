@@ -9,28 +9,50 @@ trait PaymentServices
 {
 
 
-    private function getPayments($requester)
+    private function getPayments($requester, $params = null)
     {
 
+        $params = $this->checkUndefinedProperty($params, $this->paymentFilterCols());
         $data = collect();
 
-        $data = Payment::where('status', true)->with(['roomcontract' => function ($q) {
-            // Query the name field in status table
-            $q->with(['tenant' => function ($q1) {
+        if (property_exists($params, 'status') && $params->status != null) {   
+            error_log('==========');
+            error_log($params->status);
+            error_log($params->status ? 'Active' : 'Inactive');
+            $data = Payment::where('status', $params->status)->with(['roomcontract' => function ($q) {
                 // Query the name field in status table
-                $q1->where('status', true);
-            }]);
-            $q->with(['room' => function ($q1) {
+                $q->with(['tenant' => function ($q1) {
+                    // Query the name field in status table
+                    $q1->where('status', true);
+                }]);
+                $q->with(['room' => function ($q1) {
+                    // Query the name field in status table
+                    $q1->where('status', true);
+                }]);
+                $q->where('status', true);
+            }, 'services' => function ($q) {
+            },'otherpayments' => function ($q) {
+            }, 'issueby', 'deletedby'])->get();
+        }else{
+            $data = Payment::where('status', true)->with(['roomcontract' => function ($q) {
                 // Query the name field in status table
-                $q1->where('status', true);
-            }]);
-            $q->where('status', true);
-        }, 'services' => function ($q) {
-        },'otherpayments' => function ($q) {
-        }, 'issueby'])->get();
+                $q->with(['tenant' => function ($q1) {
+                    // Query the name field in status table
+                    $q1->where('status', true);
+                }]);
+                $q->with(['room' => function ($q1) {
+                    // Query the name field in status table
+                    $q1->where('status', true);
+                }]);
+                $q->where('status', true);
+            }, 'services' => function ($q) {
+            },'otherpayments' => function ($q) {
+            }, 'issueby'])->get();
+        }
+
+     
 
         $data = $data->unique('id')->sortByDesc('id')->flatten(1);
-        error_log($data->count());
         return $data;
     }
 
@@ -255,20 +277,21 @@ trait PaymentServices
         return $data->refresh();
     }
 
-    private function deletePayment($data)
+    private function deletePayment($data, $user_id = null)
     {
-        try {
-            $data->services()->sync([]);
-            $data->otherpayments()->sync([]);
-            $data->delete();
+        $data->status = false;
 
-        } catch (Exception $e) {
-            DB::rollBack();
-            return $this->errorResponse();
+        if($user_id){
+            $data->deletedby = $user_id;
+        }
+        if ($this->saveModel($data)) {
+            return $data->refresh();
+        } else {
+            return null;
         }
 
+        return $data->refresh();
 
-        return $data;
     }
 
     // Modifying Display Data
@@ -291,6 +314,6 @@ trait PaymentServices
     }
     public function paymentFilterCols()
     {
-        return ['fromdate', 'todate', 'tenant_id', 'room_id', 'sequence', 'service_ids', 'otherPaymentTitle', 'paymentmethod'];
+        return ['fromdate', 'todate', 'tenant_id', 'room_id', 'sequence', 'service_ids', 'otherPaymentTitle', 'paymentmethod', 'status'];
     }
 }

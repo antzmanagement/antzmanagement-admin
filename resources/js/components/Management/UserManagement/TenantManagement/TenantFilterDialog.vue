@@ -229,6 +229,13 @@ export default {
             </v-col>
             <v-col cols="12">
               <v-text-field
+                label="Phone"
+                :maxlength="300"
+                v-model="data.tel"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
                 label="State"
                 :maxlength="300"
                 v-model="data.state"

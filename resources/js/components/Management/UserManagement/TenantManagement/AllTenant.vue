@@ -195,6 +195,9 @@ export default {
       if (filterGroup.occupation) {
         this.tenantFilterGroup.occupation = filterGroup.occupation;
       }
+      if (filterGroup.tel) {
+        this.tenantFilterGroup.tel = filterGroup.tel;
+      }
       if (filterGroup.state) {
         this.tenantFilterGroup.state = filterGroup.state;
       }

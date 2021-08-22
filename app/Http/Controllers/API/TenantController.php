@@ -81,6 +81,7 @@ class TenantController extends Controller
             'occupation' => $request->occupation,
             'state' => $request->state,
             'room_id' => $request->room_id,
+            'tel' => $request->tel,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));

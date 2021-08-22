@@ -9,23 +9,42 @@ trait RentalPaymentServices
 {
 
 
-    private function getRentalPayments($requester)
+    private function getRentalPayments($requester, $params = null)
     {
 
+        $params = $this->checkUndefinedProperty($params, $this->rentalPaymentFilterCols());
         $data = collect();
 
-        $data = RentalPayment::where('status', true)->with(['roomcontract' => function ($q) {
-            // Query the name field in status table
-            $q->with(['tenant' => function ($q1) {
+        if (property_exists($params, 'status') && $params->status != null) {   
+            error_log('==========');
+            error_log($params->status);
+            error_log($params->status ? 'Active' : 'Inactive');
+            $data = RentalPayment::where('status', $params->status)->with(['roomcontract' => function ($q) {
                 // Query the name field in status table
-                $q1->where('status', true);
-            }]);
-            $q->with(['room' => function ($q1) {
+                $q->with(['tenant' => function ($q1) {
+                    // Query the name field in status table
+                    $q1->where('status', true);
+                }]);
+                $q->with(['room' => function ($q1) {
+                    // Query the name field in status table
+                    $q1->where('status', true);
+                }]);
+                $q->where('status', true);
+            }, 'issueby', 'deletedby'])->get();
+        }else{
+            $data = RentalPayment::where('status', true)->with(['roomcontract' => function ($q) {
                 // Query the name field in status table
-                $q1->where('status', true);
-            }]);
-            $q->where('status', true);
-        }, 'issueby'])->get();
+                $q->with(['tenant' => function ($q1) {
+                    // Query the name field in status table
+                    $q1->where('status', true);
+                }]);
+                $q->with(['room' => function ($q1) {
+                    // Query the name field in status table
+                    $q1->where('status', true);
+                }]);
+                $q->where('status', true);
+            }, 'issueby'])->get();
+        }
 
         $data = $data->unique('id')->sortByDesc('sequence')->flatten(1);
 
@@ -76,7 +95,6 @@ trait RentalPaymentServices
         }
         
         if (property_exists($params, 'paid') && $params->paid != null) {
-            error_log('$check paid');
             $paid = $params->paid;
             $data = collect($data);
             $data = $data->filter(function ($item) use ($paid) {
@@ -100,7 +118,6 @@ trait RentalPaymentServices
         }
 
         if ($params->paymentfromdate) {
-            error_log('$check paymentfromdate');
             $date = Carbon::parse($params->paymentfromdate);
             $data = collect($data);
             $data = $data->filter(function ($item) use ($date) {
@@ -115,7 +132,6 @@ trait RentalPaymentServices
         if ($params->paymenttodate) {
             $date = Carbon::parse($params->paymenttodate);
             $data = $data->filter(function ($item) use ($date) {
-                error_log(data_get($item, 'paymentdate'));
                 if(data_get($item, 'paymentdate')){
                     return Carbon::parse(data_get($item, 'paymentdate'))->lte($date);
                 }else{
@@ -217,6 +233,8 @@ trait RentalPaymentServices
         $data->rentaldate = $this->toDate($params->rentaldate);
         $data->sequence = $this->toInt($params->sequence);
         $data->remark = $params->remark;
+        $data->penaltyEdited = $params->penaltyEdited == true;
+        $data->processingEdited = $params->processingEdited == true;
         
         $roomContract = $this->getRoomContractById($params->room_contract_id);
         if ($this->isEmpty($roomContract)) {
@@ -246,10 +264,15 @@ trait RentalPaymentServices
         return $data->refresh();
     }
 
-    private function deleteRentalPayment($data)
+    private function deleteRentalPayment($data, $user_id = null)
     {
 
         $data->status = false;
+
+        if($user_id){
+            $data->deletedby = $user_id;
+        }
+        
         if ($this->saveModel($data)) {
             return $data->refresh();
         } else {
@@ -264,7 +287,7 @@ trait RentalPaymentServices
     public function rentalPaymentAllCols()
     {
 
-        return ['id', 'uid', 'price', 'remark', 'referenceno', 'issueby'];
+        return ['id', 'uid', 'price', 'remark', 'referenceno', 'issueby', 'penaltyEdited', 'processingEdited'];
     }
 
     public function rentalPaymentDefaultCols()
@@ -279,6 +302,7 @@ trait RentalPaymentServices
     }
     public function rentalPaymentFilterCols()
     {
-        return ['fromdate', 'todate', 'tenant_id', 'room_id', 'penalty', 'paid', 'sequence', 'paymentfromdate', 'paymenttodate', 'paymentmethod', 'receive_from', 'paymentmethod', 'issueby'];
+        return ['fromdate', 'todate', 'tenant_id', 'room_id', 'penalty', 'paid', 'sequence', 'paymentfromdate', 'paymenttodate', 'paymentmethod', 
+        'receive_from', 'paymentmethod', 'issueby', 'status'];
     }
 }

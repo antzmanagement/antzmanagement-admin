@@ -47,6 +47,7 @@ export default {
         tenant: "",
         cleaning_type: "normal",
         cleaning_status: "pending",
+        cleaning_date : '',
         claim_by_owner: false,
         claim_by_tenant: false,
         cleaning_date: null,

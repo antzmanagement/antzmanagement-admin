@@ -120,6 +120,19 @@ trait TenantServices
             })->values();
         }
 
+        if ($params->tel) {
+            $tel = $params->tel;
+            $data = collect($data);
+            $data = $data->filter(function ($item) use ($tel) {
+                if ( stristr($item->tel1, $tel) == TRUE) {
+                    return true;
+                } else {
+                    return false;
+                }
+            })->values();
+        }
+
+
         if ($params->birthdayfromdate) {
             $date = Carbon::parse($params->birthdayfromdate)->startOfDay();
             $data = $data->filter(function ($item) use ($date) {
@@ -221,6 +234,27 @@ trait TenantServices
                 // Query the name field in status table
                 $q->where('status', true);
             }]);
+        },'maintenances' => function ($q) {
+            // Query the name field in status table
+            $q->with(['property' => function ($q1) {
+                $q1->where('status', true);
+            }]);
+            $q->with(['room' => function ($q1) {
+                $q1->where('status', true);
+            }]);
+            $q->with(['issueby' => function ($q1) {
+                $q1->where('status', true);
+            }]);
+            $q->where('status', true);
+        }, 'cleanings' => function ($q) {
+            $q->with(['room' => function ($q1) {
+                $q1->where('status', true);
+            }]);
+            $q->with(['issueby' => function ($q1) {
+                $q1->where('status', true);
+            }]);
+            // Query the name field in status table
+            $q->where('status', true);
         }, 'creator'])->where('users.status', true)->first();
 
         return $data;
@@ -294,7 +328,7 @@ trait TenantServices
     public function tenantFilterCols()
     {
 
-        return ['keyword', 'religion', 'approach_method', 'gender', 'birthdayfromdate', 'birthdaytodate', 'pic', 'room_id','birthdayFromMonth','birthdayFromDay', 'birthdayToMonth', 'birthdayToDay', 'occupation', 'state'];
+        return ['keyword', 'religion', 'approach_method', 'gender', 'birthdayfromdate', 'birthdaytodate', 'tel', 'pic', 'room_id','birthdayFromMonth','birthdayFromDay', 'birthdayToMonth', 'birthdayToDay', 'occupation', 'state'];
     }
 
 }

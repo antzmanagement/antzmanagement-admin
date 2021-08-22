@@ -155,5 +155,15 @@ class User extends Authenticatable
     {
         return $this->hasMany('App\Payment', 'issueby');
     }
+
+    public function deletedrentalpayments()
+    {
+        return $this->hasMany('App\RentalPayment', 'deletedby');
+    }
+
+    public function deletedpayments()
+    {
+        return $this->hasMany('App\Payment', 'deletedby');
+    }
     
 }

@@ -154,6 +154,9 @@ export default {
         this.ownerFilterGroup.room_id = filterGroup.room.id;
         this.ownerFilterGroup.room = filterGroup.room;
       }
+      if (filterGroup.tel) {
+        this.ownerFilterGroup.tel = filterGroup.tel;
+      }
       this.options.page = 1;
       this.getOwners();
     },

@@ -20,4 +20,9 @@ class RentalPayment extends Model
     {
         return $this->belongsTo('App\User', 'issueby');
     }
+
+    public function deletedby()
+    {
+        return $this->belongsTo('App\User', 'deletedby');
+    }
 }

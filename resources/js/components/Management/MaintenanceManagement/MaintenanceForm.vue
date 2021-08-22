@@ -63,6 +63,7 @@ export default {
         owner: "",
         maintenance_type: "repair",
         maintenance_status: "pending",
+        maintenance_date : '',
         claim_by_owner: false,
       }),
       roomFormDialogConfig: {

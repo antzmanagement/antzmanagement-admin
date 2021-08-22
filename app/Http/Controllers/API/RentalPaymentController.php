@@ -44,10 +44,11 @@ class RentalPaymentController extends Controller
             'paid' => $request->paid,
             'sequence' => $request->sequence,
             'paymentmethod' => $request->paymentmethod,
+            'status' => $request->status,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
-        $rentalPayments = $this->getRentalPayments($request->user());
+        $rentalPayments = $this->getRentalPayments($request->user(), $params);
         $rentalPayments = $this->filterRentalPayments($rentalPayments, $params);
 
         if ($this->isEmpty($rentalPayments)) {
@@ -162,6 +163,8 @@ class RentalPaymentController extends Controller
             'room_contract_id' => $rentalPayment->roomcontract->id,
             'referenceno' => $request->referenceno,
             'paymentmethod' => $request->paymentmethod,
+            'penaltyEdited' => $request->penaltyEdited,
+            'processingEdited' => $request->processingEdited,
             // 'receive_from' => $request->receive_from,
             'receive_from' => $rentalPayment->roomcontract->tenant->name,
         ]);
@@ -198,7 +201,7 @@ class RentalPaymentController extends Controller
             DB::rollBack();
             return $this->notFoundResponse('RentalPayment');
         }
-        $rentalPayment = $this->deleteRentalPayment($rentalPayment);
+        $rentalPayment = $this->deleteRentalPayment($rentalPayment, $request->user()->id);
         if ($this->isEmpty($rentalPayment)) {
             DB::rollBack();
             return $this->errorResponse();

@@ -342,6 +342,13 @@ export default {
                 <v-radio label="No" :value="0"></v-radio>
               </v-radio-group>
             </v-col>
+            <v-col cols="6">
+              <div>Active</div>
+              <v-radio-group v-model="data.status" row>
+                <v-radio label="Yes" :value="1"></v-radio>
+                <v-radio label="No" :value="0"></v-radio>
+              </v-radio-group>
+            </v-col>
           </v-row>
         </v-container>
       </v-card-text>

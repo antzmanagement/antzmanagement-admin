@@ -1182,6 +1182,17 @@ export const accessRule = {
         create: false,
         edit: true,
         delete: false,
+        makePayment: true,
+        print: true,
+    },
+    createPaymentWithPrint: {
+        all: false,
+        nav: true,
+        tableView: true,
+        view: true,
+        create: true,
+        edit: false,
+        delete: false,
         makePayment: false,
         print: true,
     },
@@ -1328,7 +1339,7 @@ export const roleAccess = {
                 ...(_.get(accessRule, `noAccess`) || {})
             },
             roomMaintenance: {
-                ...(_.get(accessRule, `onlyCreate`) || {})
+                ...(_.get(accessRule, `onlyView`) || {})
             },
         }
     },
@@ -1418,7 +1429,7 @@ export const roleAccess = {
                 ...(_.get(accessRule, `modify`) || {})
             },
             tenant: {
-                ...(_.get(accessRule, `onlyView`) || {})
+                ...(_.get(accessRule, `onlyEdit`) || {})
             },
             roomType: {
                 ...(_.get(accessRule, `onlyView`) || {})
@@ -1430,7 +1441,7 @@ export const roleAccess = {
                 ...(_.get(accessRule, `modify`) || {})
             },
             roomCheck: {
-                ...(_.get(accessRule, `modify`) || {})
+                ...(_.get(accessRule, `onlyEdit`) || {})
             },
             roomContract: {
                 ...(_.get(accessRule, `onlyView`) || {})
@@ -1470,10 +1481,10 @@ export const roleAccess = {
                 ...(_.get(accessRule, `onlyCreate`) || {})
             },
             roomContract: {
-                ...(_.get(accessRule, `onlyCreate`) || {})
+                ...(_.get(accessRule, `modify`) || {})
             },
             rentalPayment: {
-                ...(_.get(accessRule, `onlyTableView`) || {})
+                ...(_.get(accessRule, `createPaymentWithPrint`) || {})
             },
             roomMaintenance: {
                 ...(_.get(accessRule, `onlyView`) || {})

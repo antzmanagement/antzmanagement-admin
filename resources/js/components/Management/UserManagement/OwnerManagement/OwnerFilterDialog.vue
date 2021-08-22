@@ -144,6 +144,13 @@ export default {
                 v-model="data.keyword"
               ></v-text-field>
             </v-col>
+            <v-col cols="12">
+              <v-text-field
+                label="Phone"
+                :maxlength="300"
+                v-model="data.tel"
+              ></v-text-field>
+            </v-col>
           </v-row>
           <v-col cols="12">
             <v-autocomplete
