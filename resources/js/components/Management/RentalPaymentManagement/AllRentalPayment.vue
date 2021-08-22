@@ -350,12 +350,12 @@ export default {
     },
     paymentTotal(v) {
       if (v > 0) {
-        this.fetchPaymentExcelData();
+        // this.fetchPaymentExcelData();
       }
     },
     rentalPaymentTotal(v) {
       if (v > 0) {
-        this.fetchRentalPaymentExcelData();
+        // this.fetchRentalPaymentExcelData();
       }
     },
   },
