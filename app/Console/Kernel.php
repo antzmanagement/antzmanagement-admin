@@ -23,6 +23,7 @@ class Kernel extends ConsoleKernel
         Commands\UpdatePropertyList::class,
         Commands\Redelete::class,
         Commands\SyncRoomContractRental::class,
+        Commands\InitPayment::class,
         //
     ];
 
