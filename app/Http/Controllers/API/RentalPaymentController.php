@@ -239,7 +239,6 @@ class RentalPaymentController extends Controller
 
         $params = collect([
             'price' => $request->price,
-            'payment' => $request->price,
             'paid' => true,
             'penalty' => $this->toDouble($request->penalty),
             'processing_fees' => $this->toDouble($request->processing_fees),
@@ -248,6 +247,7 @@ class RentalPaymentController extends Controller
             'rentaldate' => $rentalPayment->rentaldate,
             'remark' => $rentalPayment->remark,
             'sequence' => $max,
+            'payment' => $request->payment,
             'room_contract_id' => $rentalPayment->roomcontract->id,
             'referenceno' => $request->referenceno,
             'paymentmethod' => $request->paymentmethod,
@@ -270,8 +270,8 @@ class RentalPaymentController extends Controller
             return $this->errorResponse();
         }
 
-        if($rentalPayment->price < $roomContract->rental){
-            $balance = $roomContract->rental - $rentalPayment->price;
+        if($rentalPayment->outstanding > 0){
+            $balance = $rentalPayment->outstanding;
             $params = collect([
                 'room_contract_id' => $roomContract->id,
                 'other_charges' => $balance,

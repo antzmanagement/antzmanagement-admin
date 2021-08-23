@@ -38,6 +38,7 @@ export default {
         processing_fees: 0,
         referenceno: 0,
         paymentmethod: "cash",
+        payment : 0,
       }),
       servicesDialogConfig: {
         dialogStyle: {
@@ -97,6 +98,9 @@ export default {
             this.data.paymentmethod || this.paymentMethods[0];
           if (!this.data.processingEdited) {
             this.updateProcessingFees();
+          }
+          if(!this.editMode){
+            this.data.payment = parseFloat(this.data.price || 0) + parseFloat(this.data.penalty || 0) + parseFloat(this.data.processing_fees || 0);
           }
           this.$Progress.finish();
           this.endLoadingAction();
@@ -336,6 +340,15 @@ export default {
               v-model="data.penalty"
               @change="updateProcessingFees"
               :disabled="data.paid == true || !editMode"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12">
+            <v-text-field
+              label="Payment"
+              type="number"
+              step="0.01"
+              v-model="data.payment"
+              :disabled="data.paid == true"
             ></v-text-field>
           </v-col>
           <v-col cols="12">

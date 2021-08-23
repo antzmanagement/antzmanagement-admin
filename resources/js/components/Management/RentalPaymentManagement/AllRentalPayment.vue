@@ -145,6 +145,15 @@ export default {
           text: "Processing Fees (RM)",
         },
         {
+          text: "Grand Total (RM)",
+        },
+        {
+          text: "Payment (RM)",
+        },
+        {
+          text: "Oustanding (RM)",
+        },
+        {
           text: "Paid",
         },
         {
@@ -185,9 +194,21 @@ export default {
           text: "Services",
           value: "services",
         },
-        { text: "Service Price", value: "price" },
+        { text: "Service Price (RM)", value: "price" },
         { text: "Other Payments" },
-        { text: "Other Charges", value: "other_charges" },
+        { text: "Other Charges (RM)", value: "other_charges" },
+        {
+          text: "Processing Fees (RM)",
+        },
+        {
+          text: "Grand Total (RM)",
+        },
+        {
+          text: "Total Payment (RM)",
+        },
+        {
+          text: "Outstanding (RM)",
+        },
         {
           text: "Paid",
         },
@@ -584,16 +605,18 @@ export default {
 
       var totalResult = itemsPerPage;
       //Show All Items
+      let filterGroup = {...this.rentalPaymentFilterGroup};
       if (totalResult == -1) {
-        this.rentalPaymentFilterGroup.pageNumber = -1;
-        this.rentalPaymentFilterGroup.pageSize = -1;
+        filterGroup.pageNumber = -1;
+        filterGroup.pageSize = -1;
       } else {
-        this.rentalPaymentFilterGroup.pageNumber = page;
-        this.rentalPaymentFilterGroup.pageSize = itemsPerPage;
+        filterGroup.pageNumber = page;
+        filterGroup.pageSize = itemsPerPage;
       }
 
-      console.log(this.rentalPaymentFilterGroup);
-      this.filterRentalPaymentsAction(this.rentalPaymentFilterGroup)
+      delete filterGroup.tenant;
+      delete filterGroup.room;
+      this.filterRentalPaymentsAction(filterGroup)
         .then((data) => {
           console.log(data);
           if (data.data) {
@@ -617,16 +640,22 @@ export default {
       const { sortBy, sortDesc, page, itemsPerPage } = this.paymentOptions;
 
       var totalResult = itemsPerPage;
+
+      let filterGroup = {...this.paymentFilterGroup};
       //Show All Items
       if (totalResult == -1) {
-        this.paymentFilterGroup.pageNumber = -1;
-        this.paymentFilterGroup.pageSize = -1;
+        filterGroup.pageNumber = -1;
+        filterGroup.pageSize = -1;
       } else {
-        this.paymentFilterGroup.pageNumber = page;
-        this.paymentFilterGroup.pageSize = itemsPerPage;
+        filterGroup.pageNumber = page;
+        filterGroup.pageSize = itemsPerPage;
       }
 
-      this.filterPaymentsAction(this.paymentFilterGroup)
+      delete filterGroup.tenant;
+      delete filterGroup.room;
+      delete filterGroup.services;
+
+      this.filterPaymentsAction(filterGroup)
         .then((data) => {
           if (data.data) {
             this.paymentData = data.data;
@@ -871,6 +900,15 @@ export default {
                     <td class="text-truncate">
                       {{ props.item.processing_fees | toDouble }}
                     </td>
+                    <td class="text-truncate">
+                      {{ parseFloat(props.item.price || 0) + parseFloat(props.item.penalty || 0) + parseFloat(props.item.processing_fees || 0) }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.payment | toDouble }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.outstanding | toDouble }}
+                    </td>
                     <td class="text-truncate" v-if="props.item.paid">
                       <v-icon small color="success">mdi-check</v-icon>
                     </td>
@@ -1074,6 +1112,18 @@ export default {
                     </td>
                     <td class="text-truncate">
                       {{ props.item.other_charges | toDouble }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.processing_fees | toDouble }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ parseFloat(props.item.price || 0) + parseFloat(props.item.other_charges || 0) + parseFloat(props.item.processing_fees || 0) }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.totalpayment | toDouble }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.outstanding | toDouble }}
                     </td>
                     <td class="text-truncate" v-if="props.item.paid">
                       <v-icon small color="success">mdi-check</v-icon>

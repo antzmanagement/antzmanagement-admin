@@ -148,7 +148,7 @@ trait ReportServices
             $totalUnpaid = 0;
             $finalData = collect();
     
-            $rentalPayments = RentalPayment::whereDate('rentaldate', '>=', Carbon::now()->firstOfMonth())->get();
+            $rentalPayments = RentalPayment::whereDate('rentaldate', '>=', Carbon::now()->firstOfMonth())->where('status', true)->get();
     
             $total = 0;
             foreach ($rentalPayments as $rentalPayment) {
@@ -175,7 +175,7 @@ trait ReportServices
     private function getRoomContractAlmostEnd($requester)
     {
         try {
-            $roomcontracts = RoomContract::whereDate('enddate', '>=', Carbon::now()->firstOfMonth()->startOfMonth()->startOfDay())->whereDate('enddate', '<=', Carbon::now()->firstOfMonth()->addMonths(2)->endOfMonth()->endOfDay())->get();
+            $roomcontracts = RoomContract::whereDate('enddate', '>=', Carbon::now()->firstOfMonth()->startOfMonth()->startOfDay())->whereDate('enddate', '<=', Carbon::now()->firstOfMonth()->addMonths(2)->endOfMonth()->endOfDay())->where('status', true)->get();
     
             $roomcontracts = $roomcontracts->map(function($roomcontract){
                 $roomcontract['room'] = $roomcontract->room;
@@ -200,8 +200,8 @@ trait ReportServices
         try {
             $total = 0;
     
-            $ownerMaintenaces = Maintenance::whereDate('created_at', '>=', Carbon::now()->firstOfMonth())->where('claim_by_owner', true)->get();
-            $systemMaintenances = Maintenance::whereDate('created_at', '>=', Carbon::now()->firstOfMonth())->where('claim_by_owner', false)->get();
+            $ownerMaintenaces = Maintenance::whereDate('created_at', '>=', Carbon::now()->firstOfMonth())->where('claim_by_owner', true)->where('status', true)->get();
+            $systemMaintenances = Maintenance::whereDate('created_at', '>=', Carbon::now()->firstOfMonth())->where('claim_by_owner', false)->where('status', true)->get();
             
     
             $data['data'][0]['type'] = 'owner';

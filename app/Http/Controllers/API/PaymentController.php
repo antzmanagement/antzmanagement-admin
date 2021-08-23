@@ -267,7 +267,7 @@ class PaymentController extends Controller
         $max = Payment::where('status', true)->max('sequence') + 1;
         $params = collect([
             'price' => $request->price,
-            'totalpayment' => $request->price,
+            'totalpayment' => $request->totalpayment,
             'paid' => true,
             'penalty' => $this->toDouble($request->penalty),
             'processing_fees' => $this->toDouble($request->processing_fees),
@@ -290,6 +290,36 @@ class PaymentController extends Controller
             DB::rollBack();
             return $this->errorResponse();
         }
+
+        if($payment->outstanding > 0){
+            $balance = $payment->outstanding;
+            $params = collect([
+                'room_contract_id' => $payment->roomcontract->id,
+                'other_charges' => $balance,
+            ]);
+            //Convert To Json Object
+            $params = json_decode(json_encode($params));
+            $newPayment = $this->createPayment($params);
+            $data = $this->getOtherPaymentTitleByName("Balance of ". $payment->receiptno);
+            if (!$this->isEmpty($data)) {
+                $data->price = $this->toDouble($balance);
+                $newPayment->otherpayments->push($data);
+                $newPayment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
+            }else{
+                $params = collect([
+                    'name' => "Balance of ". $payment->receiptno,
+                ]);
+                //Convert To Json Object
+                $params = json_decode(json_encode($params));
+                $data = $this->createOtherPaymentTitle($params);
+                if (!$this->isEmpty($data)) {
+                    $data->price = $this->toDouble($balance);
+                    $newPayment->otherpayments->push($data);
+                    $newPayment->otherpayments()->syncWithoutDetaching([$data->id => ['status' => true, 'price' => $data->price]]);
+                }
+            }
+        }
+
         
         DB::commit();
         $payment = $this->getPaymentById($payment->id);

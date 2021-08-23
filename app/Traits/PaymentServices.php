@@ -211,7 +211,8 @@ trait PaymentServices
         $data->price = $this->toDouble($params->price);
         $data->other_charges = $this->toDouble($params->other_charges);
         $data->processing_fees = $this->toDouble($params->processing_fees);
-        $data->totalpayment = $data->price + $data->other_charges;
+        $data->totalpayment = $this->toDouble($params->totalpayment);
+        $data->outstanding = $data->price + $data->other_charges + $data->processing_fees - $data->totalpayment;
         $data->paymentdate = $this->toDate($params->paymentdate);
         if($params->sequence){
             $data->sequence = $this->toInt($params->sequence);
@@ -241,7 +242,8 @@ trait PaymentServices
         $data->price = $this->toDouble($params->price);
         $data->other_charges = $this->toDouble($params->other_charges);
         $data->processing_fees = $this->toDouble($params->processing_fees);
-        $data->totalpayment = $data->price + $data->other_charges;
+        $data->totalpayment = $this->toDouble($params->totalpayment);
+        $data->outstanding = $data->price + $data->other_charges + $data->processing_fees - $data->totalpayment;
         $data->paid = $params->paid;
         $data->remark = $params->remark;
         if($params->sequence){
@@ -299,7 +301,7 @@ trait PaymentServices
     public function paymentAllCols()
     {
 
-        return ['id', 'uid', 'price', 'remark', 'referenceno' ,'receive_from', 'issueby', 'sequence', 'paymentdate', 'other_charges', 'room_contract_id', 'paymentmethod', 'processing_fees'];
+        return ['id', 'uid', 'price', 'remark', 'referenceno' ,'receive_from', 'issueby', 'sequence', 'paymentdate', 'other_charges', 'room_contract_id', 'paymentmethod', 'processing_fees', 'totalpayment'];
     }
 
     public function paymentDefaultCols()

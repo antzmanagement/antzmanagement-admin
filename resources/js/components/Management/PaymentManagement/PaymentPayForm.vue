@@ -25,7 +25,7 @@ export default {
   },
   data() {
     return {
-      paymentMethods: ["cash", "online_transfer", 'eWallet', "credit"],
+      paymentMethods: ["cash", "online_transfer", "eWallet", "credit"],
       _: _,
       menu: false,
       otherPaymentDialog: false,
@@ -93,9 +93,6 @@ export default {
         .then((data) => {
           this.data = data.data;
           this.origPrice = data.data.price;
-          if (!this.editMode) {
-            this.data.paymentdate = moment().format("YYYY-MM-DD");
-          }
 
           this.data.services = this.pluckUid(
             _.get(data, `data.services`) || []
@@ -110,6 +107,14 @@ export default {
           if (!this.data.paymentmethod) {
             this.data.paymentmethod = this.paymentMethods[0];
             this.updateProcessingFees();
+          }
+
+          if (!this.editMode) {
+            this.data.paymentdate = moment().format("YYYY-MM-DD");
+            this.data.totalpayment =
+              parseFloat(this.data.price || 0) +
+              parseFloat(this.data.other_charges || 0) +
+              parseFloat(this.data.processing_fees || 0);
           }
 
           console.log(data);
@@ -184,7 +189,7 @@ export default {
           this.data.processing_fees = 3;
           break;
         case "online_transfer":
-        case 'eWallet':
+        case "eWallet":
           this.data.processing_fees = 0;
           break;
         case "credit":
@@ -285,6 +290,14 @@ export default {
               type="number"
               step="0.01"
               v-model="data.processing_fees"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12">
+            <v-text-field
+              label="Payment"
+              type="number"
+              step="0.01"
+              v-model="data.totalpayment"
             ></v-text-field>
           </v-col>
           <v-col cols="12">
