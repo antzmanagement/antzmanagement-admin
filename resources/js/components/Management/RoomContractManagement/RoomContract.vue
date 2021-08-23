@@ -35,30 +35,44 @@ export default {
     },
     rentalPaymentHeaders: [
       {
-        text: "Sequence No",
-        value: "sequence",
+        text: "Receipt No",
       },
       {
         text: "Reference No",
-        value: "referenceno",
       },
       {
-        text: "Rental",
-        value: "rentaldate",
-      },
-      { text: "Price", value: "price" },
-      { text: "Penalty", value: "penalty" },
-      { text: "Processing Fees", value: "processing_fees" },
-      { text: "Service Fees", value: "service_fees" },
-      {
-        text: "Paid",
-        value: "paid",
+        text: "Rental Date",
       },
       {
         text: "Payment Date",
-        value: "paymentdate",
       },
-      { text: "Actions" },
+      {
+        text: "Rental Price (RM)",
+      },
+      {
+        text: "Penalty (RM)",
+      },
+      {
+        text: "Processing Fees (RM)",
+      },
+      {
+        text: "Grand Total (RM)",
+      },
+      {
+        text: "Payment (RM)",
+      },
+      {
+        text: "Oustanding (RM)",
+      },
+      {
+        text: "Paid",
+      },
+      {
+        text: "Actions",
+      },
+      {
+        text: "Payment Method",
+      },
       {
         text: "Receive From",
       },
@@ -69,20 +83,39 @@ export default {
     paymentHeaders: [
       {
         text: "Receipt No",
+        value: "receiptno",
       },
       {
         text: "Reference No",
       },
-      { text: "Payment Date" },
-      { text: "Other Charges" },
-      { text: "Other Payments" },
-      { text: "Service Payment" },
+      { text: "Payment Date", value: "paymentdate" },
       {
         text: "Services",
+        value: "services",
       },
-      { text: "Remark" },
-      { text: "Total Payment" },
+      { text: "Service Price (RM)", value: "price" },
+      { text: "Other Payments" },
+      { text: "Other Charges (RM)", value: "other_charges" },
+      {
+        text: "Processing Fees (RM)",
+      },
+      {
+        text: "Grand Total (RM)",
+      },
+      {
+        text: "Total Payment (RM)",
+      },
+      {
+        text: "Outstanding (RM)",
+      },
+      {
+        text: "Paid",
+      },
+      { text: "Remark", value: "remark" },
       { text: "Actions" },
+      {
+        text: "Payment Method",
+      },
       {
         text: "Receive From",
       },
@@ -155,8 +188,8 @@ export default {
     },
   },
   created() {
-    document.title = 'Room Contract'
-  
+    document.title = "Room Contract";
+
     this.$Progress.start();
     this.showLoadingAction();
     this.getRoomContractAction({ uid: this.$route.params.uid })
@@ -871,7 +904,14 @@ export default {
                         >
                         <v-spacer></v-spacer>
                         <v-btn
-                          v-if="!data.checkedout && helpers.isAccessible(_.get(role, ['name']), 'rentalPayment', 'create') "
+                          v-if="
+                            !data.checkedout &&
+                            helpers.isAccessible(
+                              _.get(role, ['name']),
+                              'rentalPayment',
+                              'create'
+                            )
+                          "
                           color="primary"
                           dark
                           class="mb-2"
@@ -890,6 +930,9 @@ export default {
                           {{ props.item.rentaldate | formatDate }}
                         </td>
                         <td class="text-truncate">
+                          {{ props.item.paymentdate | formatDate }}
+                        </td>
+                        <td class="text-truncate">
                           {{ props.item.price | toDouble }}
                         </td>
                         <td class="text-truncate">
@@ -899,7 +942,17 @@ export default {
                           {{ props.item.processing_fees | toDouble }}
                         </td>
                         <td class="text-truncate">
-                          {{ props.item.service_fees | toDouble }}
+                          {{
+                            parseFloat(props.item.price || 0) +
+                            parseFloat(props.item.penalty || 0) +
+                            parseFloat(props.item.processing_fees || 0)
+                          }}
+                        </td>
+                        <td class="text-truncate">
+                          {{ props.item.payment | toDouble }}
+                        </td>
+                        <td class="text-truncate">
+                          {{ props.item.outstanding | toDouble }}
                         </td>
                         <td class="text-truncate" v-if="props.item.paid">
                           <v-icon small color="success">mdi-check</v-icon>
@@ -914,7 +967,14 @@ export default {
                           <print-rental-payment-button
                             :item="props.item"
                             :roomcontract="data"
-                            v-if="props.item.paid && helpers.isAccessible(_.get(role, ['name']), 'rentalPayment', 'print')"
+                            v-if="
+                              props.item.paid &&
+                              helpers.isAccessible(
+                                _.get(role, ['name']),
+                                'rentalPayment',
+                                'print'
+                              )
+                            "
                           >
                             <v-icon small class="mr-2" color="success"
                               >mdi-printer</v-icon
@@ -1021,7 +1081,14 @@ export default {
                           >Deposit Payment</v-btn
                         > -->
                         <v-btn
-                          v-if="!data.checkedout && helpers.isAccessible(_.get(role, ['name']), 'rentalPayment', 'create')"
+                          v-if="
+                            !data.checkedout &&
+                            helpers.isAccessible(
+                              _.get(role, ['name']),
+                              'rentalPayment',
+                              'create'
+                            )
+                          "
                           color="success"
                           dark
                           class="mb-2 mr-2"
@@ -1042,7 +1109,16 @@ export default {
                           {{ props.item.paymentdate | formatDate }}
                         </td>
                         <td class="text-truncate">
-                          {{ props.item.other_charges | toDouble }}
+                          {{
+                            _.compact(
+                              _.map(props.item.services, function (service) {
+                                return _.get(service, ["text"]) || "";
+                              })
+                            ) | getArrayValues
+                          }}
+                        </td>
+                        <td class="text-truncate">
+                          {{ props.item.price | toDouble }}
                         </td>
                         <td class="text-truncate">
                           {{
@@ -1057,26 +1133,43 @@ export default {
                           }}
                         </td>
                         <td class="text-truncate">
-                          {{ props.item.price | toDouble }}
+                          {{ props.item.other_charges | toDouble }}
+                        </td>
+                        <td class="text-truncate">
+                          {{ props.item.processing_fees | toDouble }}
                         </td>
                         <td class="text-truncate">
                           {{
-                            _.compact(
-                              _.map(props.item.services, function (service) {
-                                return _.get(service, ["text"]) || "";
-                              })
-                            ) | getArrayValues
+                            parseFloat(props.item.price || 0) +
+                            parseFloat(props.item.other_charges || 0) +
+                            parseFloat(props.item.processing_fees || 0)
                           }}
                         </td>
-                        <td class="text-truncate">{{ props.item.remark }}</td>
                         <td class="text-truncate">
                           {{ props.item.totalpayment | toDouble }}
                         </td>
                         <td class="text-truncate">
+                          {{ props.item.outstanding | toDouble }}
+                        </td>
+                        <td class="text-truncate" v-if="props.item.paid">
+                          <v-icon small color="success">mdi-check</v-icon>
+                        </td>
+                        <td class="text-truncate" v-else>
+                          <v-icon small color="danger">mdi-close</v-icon>
+                        </td>
+                        <td class="text-truncate">{{ props.item.remark }}</td>
+                        <td class="text-truncate">
                           <print-payment-button
                             :item="props.item"
                             :roomcontract="data"
-                            v-if="props.item.paid && helpers.isAccessible(_.get(role, ['name']), 'rentalPayment', 'print')"
+                            v-if="
+                              props.item.paid &&
+                              helpers.isAccessible(
+                                _.get(role, ['name']),
+                                'rentalPayment',
+                                'print'
+                              )
+                            "
                           >
                             <v-icon small class="mr-2" color="success"
                               >mdi-printer</v-icon
@@ -1136,6 +1229,9 @@ export default {
                               )
                             "
                           ></confirm-dialog>
+                        </td>
+                        <td class="text-truncate">
+                          {{ props.item.paymentmethod || "N/A" }}
                         </td>
                         <td class="text-truncate">
                           {{ props.item.receive_from || "N/A" }}
