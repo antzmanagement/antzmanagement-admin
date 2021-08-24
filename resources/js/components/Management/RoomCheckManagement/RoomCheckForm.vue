@@ -448,7 +448,15 @@ export default {
                 <template v-slot:item="props">
                   <tr :key="props.item.uid">
                     <td class="text-truncate">
-                      {{ _.get(props.item, `property.text`) || "N/A" }}
+                       {{
+                            _.get(props.item, ["property", "name"]) == "others"
+                              ? `${
+                                  _.get(props.item, ["property", "text"]) || ""
+                                } - ${
+                                  _.get(props.item, ["other_property"]) || ""
+                                }`
+                              : _.get(props.item, ["property", "text"]) || "N/A"
+                          }}
                     </td>
                     <td class="text-truncate">
                       {{ props.item.maintenance_type }}

@@ -38,6 +38,13 @@ export default {
     isLoading() {
       return this.$store.getters.isLoading;
     },
+    totalPayment() {
+      let totalPayment =
+        (parseFloat(this.data.price) || 0) +
+        (parseFloat(this.data.processing_fees) || 0) +
+        (parseFloat(this.data.other_charges) || 0);
+      return totalPayment;
+    },
   },
   created() {},
 
@@ -101,7 +108,7 @@ export default {
                       Receipt No #:
                     </span>
                     <span class="d-inline-block">
-                      {{ _.get(data, ["sequence"]) || "N/A" }}
+                      {{ _.get(data, ["receiptno"]) || "N/A" }}
                     </span>
                   </div>
                   <div class="flex-items-align-center flex-justify-end">
@@ -169,11 +176,25 @@ export default {
           </td>
         </tr>
 
-        <tr class="total invoice">
-          <td class="text-truncate subtitle"></td>
+        <tr class="subtitle invoice font-weight-bold">
+          <td class="text-truncate"></td>
 
-          <td class="text-truncate subtitle">
-            Total: RM {{ _.get(data, ["totalpayment"]) || "N/A" | toDouble }}
+          <td class="text-truncate">
+            Total: {{ totalPayment || "N/A" | toDouble }}
+          </td>
+        </tr>
+
+        <tr class="subtitle invoice font-weight-bold">
+          <td class="text-truncate"></td>
+          <td class="text-truncate">
+            Payment : {{ _.get(data, ["totalpayment"]) || "N/A" | toDouble }}
+          </td>
+        </tr>
+
+        <tr class="subtitle invoice font-weight-bold">
+          <td class="text-truncate"></td>
+          <td class="text-truncate">
+            Outstanding : {{ _.get(data, ["outstanding"]) || "N/A" | toDouble }}
           </td>
         </tr>
         <tr class="information">

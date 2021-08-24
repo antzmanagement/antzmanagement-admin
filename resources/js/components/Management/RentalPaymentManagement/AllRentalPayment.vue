@@ -210,6 +210,9 @@ export default {
           text: "Outstanding (RM)",
         },
         {
+          text: "Remark",
+        },
+        {
           text: "Paid",
         },
         { text: "Remark", value: "remark" },
@@ -908,6 +911,9 @@ export default {
                     </td>
                     <td class="text-truncate">
                       {{ props.item.outstanding | toDouble }}
+                    </td>
+                    <td class="text-truncate">
+                      {{ props.item.remark }}
                     </td>
                     <td class="text-truncate" v-if="props.item.paid">
                       <v-icon small color="success">mdi-check</v-icon>

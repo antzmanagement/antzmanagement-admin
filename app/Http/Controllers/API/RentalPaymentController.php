@@ -245,7 +245,7 @@ class RentalPaymentController extends Controller
             'service_fees' => $this->toDouble($request->service_fees),
             'paymentdate' => $request->paymentdate,
             'rentaldate' => $rentalPayment->rentaldate,
-            'remark' => $rentalPayment->remark,
+            'remark' => $request->remark,
             'sequence' => $max,
             'payment' => $request->payment,
             'room_contract_id' => $rentalPayment->roomcontract->id,

@@ -165,7 +165,7 @@ export default {
           </td>
         </tr>
 
-        <tr class="total subtitle invoice">
+        <tr class="subtitle invoice font-weight-bold">
           <td class="text-truncate"></td>
 
           <td class="text-truncate">
@@ -173,6 +173,19 @@ export default {
           </td>
         </tr>
 
+        <tr class="subtitle invoice font-weight-bold">
+          <td class="text-truncate"></td>
+          <td class="text-truncate">
+            Payment : {{ _.get(data, ["payment"]) || "N/A" | toDouble }}
+          </td>
+        </tr>
+
+        <tr class="subtitle invoice font-weight-bold">
+          <td class="text-truncate"></td>
+          <td class="text-truncate">
+            Outstanding : {{ _.get(data, ["outstanding"]) || "N/A" | toDouble }}
+          </td>
+        </tr>
         <tr class="information">
           <td class="text-truncate">
             <div class="small-text">

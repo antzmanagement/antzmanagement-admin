@@ -38,7 +38,7 @@ export default {
         processing_fees: 0,
         referenceno: 0,
         paymentmethod: "cash",
-        payment : 0,
+        payment: 0,
       }),
       servicesDialogConfig: {
         dialogStyle: {
@@ -99,8 +99,11 @@ export default {
           if (!this.data.processingEdited) {
             this.updateProcessingFees();
           }
-          if(!this.editMode){
-            this.data.payment = parseFloat(this.data.price || 0) + parseFloat(this.data.penalty || 0) + parseFloat(this.data.processing_fees || 0);
+          if (!this.editMode) {
+            this.data.payment =
+              parseFloat(this.data.price || 0) +
+              parseFloat(this.data.penalty || 0) +
+              parseFloat(this.data.processing_fees || 0);
           }
           this.$Progress.finish();
           this.endLoadingAction();
@@ -136,6 +139,13 @@ export default {
       } else {
         return 0;
       }
+    },
+    updateTotalPayment() {
+      this.data.payment =
+        parseFloat(this.data.price) ||
+        0 + parseFloat(this.data.penalty) ||
+        0 + parseFloat(this.data.processing_fees) ||
+        0;
     },
     roomServiceUpdated(event) {
       this.services = event.services;
@@ -207,7 +217,6 @@ export default {
         });
     },
     updateProcessingFees() {
-      console.log('editMode', this.editMode);
       if (!this.data.processingEdited || this.editMode) {
         let price = !_.isNaN(parseFloat(this.data.price))
           ? parseFloat(this.data.price)
@@ -233,6 +242,7 @@ export default {
             this.data.processing_fees = 0;
             break;
         }
+        this.updateTotalPayment();
       }
     },
   },

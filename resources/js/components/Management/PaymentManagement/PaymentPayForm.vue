@@ -177,6 +177,13 @@ export default {
           this.close();
         });
     },
+    updateTotalPayment() {
+      this.data.totalpayment =
+        parseFloat(this.data.price) ||
+        0 + parseFloat(this.data.other_charges) ||
+        0 + parseFloat(this.data.processing_fees) ||
+        0;
+    },
     updateProcessingFees() {
       let price = !_.isNaN(parseFloat(this.data.price))
         ? parseFloat(this.data.price)
@@ -202,6 +209,8 @@ export default {
           this.data.processing_fees = 0;
           break;
       }
+
+      this.updateTotalPayment();
     },
   },
 };
