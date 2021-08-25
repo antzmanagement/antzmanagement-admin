@@ -154,6 +154,9 @@ export default {
           text: "Oustanding (RM)",
         },
         {
+          text: "Remark",
+        },
+        {
           text: "Paid",
         },
         {
