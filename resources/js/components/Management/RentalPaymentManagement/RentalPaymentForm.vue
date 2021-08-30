@@ -83,7 +83,7 @@ export default {
       this.$Progress.start();
       this.getRentalPaymentAction({ uid: this.uid })
         .then((data) => {
-          this.data = data.data;
+          this.data = _.cloneDeep(data.data);
           this.origPrice = data.data.price;
           this.data.paymentdate =
             this.data.paymentdate || moment().format("YYYY-MM-DD");
@@ -104,6 +104,8 @@ export default {
               parseFloat(this.data.price || 0) +
               parseFloat(this.data.penalty || 0) +
               parseFloat(this.data.processing_fees || 0);
+          }else{
+            this.data.payment = parseFloat(_.get(data , `data.payment`) || 0);
           }
           this.$Progress.finish();
           this.endLoadingAction();
