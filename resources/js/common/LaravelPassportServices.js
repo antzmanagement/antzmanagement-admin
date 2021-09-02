@@ -25,6 +25,7 @@ const AuthenticationServices = {
     clonedata.refresh_token = "the-refresh-token";
     clonedata.scope = null;
     clonedata.username = data.email;
+    console.log(clonedata);
     return Vue.axios.post('oauth/token', clonedata)
   },
 
