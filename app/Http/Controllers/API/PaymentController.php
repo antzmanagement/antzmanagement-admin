@@ -272,7 +272,7 @@ class PaymentController extends Controller
             'penalty' => $this->toDouble($request->penalty),
             'processing_fees' => $this->toDouble($request->processing_fees),
             'other_charges' => $request->other_charges,
-            'paymentdate' => Carbon::now()->format('Y-m-d'),
+            'paymentdate' => $request->paymentdate,
             'remark' => $payment->remark,
             'sequence' => $max,
             'room_contract_id' => $payment->roomcontract->id,

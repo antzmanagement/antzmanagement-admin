@@ -1,6 +1,8 @@
 export let commonConfig = {
     //live
     // API_URL: 'http://139.162.41.95/api',
+
+
     API_URL: 'http://antzmanagement.com/api',
     client_secret : "EyXQsEteaGX7PuIL0Fsj7Q6Qk952LFiUrsHas5FU",
     client_id : "8",
