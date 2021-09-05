@@ -4022,7 +4022,7 @@ h6,
 
   .form-label { 
     font-weight: bold;
-    font-size: 8px;
+    font-size: 10px;
     margin-bottom: 1px;
     overflow-wrap: break-word;
   }
@@ -4030,7 +4030,7 @@ h6,
   
 .form-content { 
   min-height : 20px;
-    font-size: 8px;
+    font-size: 10px;
     overflow-wrap: break-word;
   }
   

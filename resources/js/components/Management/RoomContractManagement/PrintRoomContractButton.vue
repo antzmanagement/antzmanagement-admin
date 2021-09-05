@@ -93,7 +93,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Name</div>
@@ -106,7 +106,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">IC-NO</div>
@@ -121,7 +121,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Age</div>
@@ -134,7 +134,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Birthday</div>
@@ -149,7 +149,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Gender</div>
@@ -162,7 +162,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Phone 1</div>
@@ -177,7 +177,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Phone 2</div>
@@ -190,7 +190,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Phone 3</div>
@@ -205,7 +205,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Email</div>
@@ -218,7 +218,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Religion</div>
@@ -233,7 +233,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Occupation</div>
@@ -246,7 +246,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Address</div>
@@ -261,7 +261,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Postcode</div>
@@ -274,7 +274,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">City</div>
@@ -289,7 +289,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Occupation</div>
@@ -302,7 +302,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">State</div>
@@ -317,7 +317,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Mother Name</div>
@@ -330,7 +330,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Mother Contact</div>
@@ -345,7 +345,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Father Name</div>
@@ -358,7 +358,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Father Contact</div>
@@ -373,7 +373,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Emergency Contact Person</div>
@@ -386,7 +386,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Emergency Contact</div>
@@ -401,7 +401,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Emergency Relationship</div>
@@ -414,7 +414,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">How you know Us?</div>
@@ -429,7 +429,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Person In Charge</div>
@@ -461,7 +461,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Room</div>
@@ -474,7 +474,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Type</div>
@@ -489,7 +489,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Start Date</div>
@@ -502,7 +502,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">End Date</div>
@@ -517,7 +517,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Duration</div>
@@ -531,7 +531,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Rental</div>
@@ -546,7 +546,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Deposit</div>
@@ -559,7 +559,7 @@ export default {
                 <div
                   class="
                     flex-justify-start flex-items-align-center
-                    padding-x-md
+                    padding-left-md
                   "
                 >
                   <div :class="formLabelClass">Agreement Fees</div>
@@ -574,7 +574,7 @@ export default {
                   <div
                   class="width-50"
                     style="
-                      height: 100px;
+                      height: 70px;
                       border-bottom: solid 1px;
                       border-bottom-color: #EEEEEE;
                     "
@@ -590,7 +590,7 @@ export default {
                   <div
                   class="width-50"
                     style="
-                      height: 100px;
+                      height: 70px;
                       border-bottom: solid 1px;
                       border-bottom-color: #EEEEEE;
                     "
