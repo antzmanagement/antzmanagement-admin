@@ -596,6 +596,11 @@ h6,
 .margin-left-xl {
   margin-left: 3em;
 }
+
+.page-break {
+  page-break-after: always;
+}
+
 @media only screen and (max-width: 600px) {
     .invoice-box table tr.top table td {
         width: 100%;

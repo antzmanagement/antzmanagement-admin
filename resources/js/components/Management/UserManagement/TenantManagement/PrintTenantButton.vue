@@ -79,7 +79,12 @@ export default {
     <div class="d-none invoice-box" :id="`printTenant${uid}`">
       <div class="container">
         <div class="row">
-          <div class="col-12 h6 font-weight-bold">
+          <div class="col-12 h6 font-weight-bold flex-items-align-center">
+            <img
+              src="https://res.cloudinary.com/dwslzbgaa/image/upload/v1623056803/Screenshot_2021-06-07_at_5.05.50_PM_xooqkt.png"
+              style="width: 50px; height: 50px"
+              class="margin-right-md"
+            />
             Tenant Information
           </div>
         </div>
@@ -438,39 +443,30 @@ export default {
                   </div>
                 </div>
               </td>
-            </tr>   
+            </tr>
             <tr>
-              <td>
-                  <div
-                  class="width-50"
-                    style="
-                      height: 70px;
-                      border-bottom: solid 1px;
-                      border-bottom-color: #EEEEEE;
-                    "
-                  ></div>
-                  <div>
-                    Tenant Name : 
-                  </div>
-                  <div>
-                    Date : 
-                  </div>
+              <td colspan="2">
+                <div class="text-overflow-break margin-top-md">
+                  I hereby declare that all information furnished by me are true
+                </div>
+                <div class="text-overflow-break">
+                  I agree the booking fee is non refundable, it only can use to be the partial payment of the security deposit.
+                </div>
               </td>
-              <td>
-                  <div
+            </tr>
+            <tr>
+              <td colspan="2">
+                <div
                   class="width-50"
-                    style="
-                      height: 70px;
-                      border-bottom: solid 1px;
-                      border-bottom-color: #EEEEEE;
-                    "
-                  ></div>
-                  <div>
-                    Person In Charge Name : 
-                  </div>
-                  <div>
-                    Date : 
-                  </div>
+                  style="
+                    height: 70px;
+                    border-bottom: solid 1px;
+                    border-bottom-color: #eeeeee;
+                  "
+                ></div>
+                <div>Signature</div>
+                <div>Name :</div>
+                <div>Date :</div>
               </td>
             </tr>
           </table>

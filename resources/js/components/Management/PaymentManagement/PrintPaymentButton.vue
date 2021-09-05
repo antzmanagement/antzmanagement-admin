@@ -197,8 +197,8 @@ export default {
             Outstanding : {{ _.get(data, ["outstanding"]) || "N/A" | toDouble }}
           </td>
         </tr>
-        <tr class="information">
-          <td class="text-truncate">
+        <tr class="information subtitle">
+          <td class="text-truncate ">
             <div class="small-text">
               Payment By : {{ _.get(data, ["paymentmethod"]) || "N/A" }}
             </div>

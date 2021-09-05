@@ -224,16 +224,33 @@ trait TenantServices
         $data = $userType->users()->where('users.uid', $uid)->wherePivot('status', 1)->with(['roomcontracts' => function ($q) {
             // Query the name field in status table
             $q->where('status', true);
-            $q->with(['room' => function ($q) {
+            $q->with(['payments' => function ($q1) {
+                // Query the name field in status table
+                $q1->with('services');
+                $q1->with('otherpayments');
+                $q1->with('issueby');
+                $q1->where('status', true);
+            }, 'addonservices' => function ($q1) {
+                // Query the name field in status table
+                $q1->wherePivot('status', true);
+            }, 'origservices' => function ($q1) {
+                // Query the name field in status table
+                $q1->wherePivot('status', true);
+            },'room' => function ($q) {
                 // Query the name field in status table
                 $q->where('status', true);
+                $q->with(['roomTypes' => function ($q1) {
+                    // Query the name field in status table
+                    $q1->wherePivot('status', true);
+                }]);
             }, 'contract' => function ($q) {
                 // Query the name field in status table
                 $q->where('status', true);
             }, 'rentalpayments' => function ($q) {
                 // Query the name field in status table
                 $q->where('status', true);
-            }]);
+            }
+          ]);
         },'maintenances' => function ($q) {
             // Query the name field in status table
             $q->with(['property' => function ($q1) {
