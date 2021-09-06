@@ -82,7 +82,14 @@ export default {
       <div class="invoice-box">
         <div class="container">
           <div class="row">
-            <div class="col-12 h6 font-weight-bold">Tenant Information</div>
+            <div class="col-12 h6 font-weight-bold flex-items-align-center">
+              <img
+                src="https://res.cloudinary.com/dwslzbgaa/image/upload/v1623056803/Screenshot_2021-06-07_at_5.05.50_PM_xooqkt.png"
+                style="width: 50px; height: 50px"
+                class="margin-right-md"
+              />
+              Tenant Information
+            </div>
           </div>
           <div class="row">
             <div class="divider my-2"></div>
@@ -450,7 +457,14 @@ export default {
       <div class="invoice-box">
         <div class="container">
           <div class="row">
-            <div class="col-12 h6 font-weight-bold">Contract Information</div>
+            <div class="col-12 h6 font-weight-bold flex-items-align-center">
+              <img
+                src="https://res.cloudinary.com/dwslzbgaa/image/upload/v1623056803/Screenshot_2021-06-07_at_5.05.50_PM_xooqkt.png"
+                style="width: 50px; height: 50px"
+                class="margin-right-md"
+              />
+              Contract Information
+            </div>
           </div>
 
           <div class="row">
@@ -610,20 +624,18 @@ export default {
             <table>
               <tr
                 class="item invoice padding-x-md"
-                v-for="service in _.get(data , 'origservices')"
+                v-for="service in _.get(data, 'origservices')"
                 :key="service.uid"
               >
                 <td class="text-truncate subtitle">
                   {{ _.get(service, ["text"]) || "N/A" }}
                 </td>
 
-                <td class="text-truncate subtitle green">
-                  Package Included
-                </td>
+                <td class="text-truncate subtitle green">Package Included</td>
               </tr>
               <tr
                 class="item invoice padding-x-md"
-                v-for="service in _.get(data , 'addonservices')"
+                v-for="service in _.get(data, 'addonservices')"
                 :key="service.uid"
               >
                 <td class="text-truncate subtitle">
