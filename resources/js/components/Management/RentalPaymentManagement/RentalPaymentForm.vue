@@ -87,7 +87,7 @@ export default {
           this.origPrice = data.data.price;
           this.data.paymentdate =
             this.data.paymentdate || moment().format("YYYY-MM-DD");
-          if (!this.data.penaltyEdited) {
+          if (!this.data.penaltyEdited && !this.data.paid) {
             this.data.penalty = this.calculatePenalty(
               data.data,
               this.data.paymentdate
@@ -96,7 +96,7 @@ export default {
           this.data.service_fees = 0;
           this.data.paymentmethod =
             this.data.paymentmethod || this.paymentMethods[0];
-          if (!this.data.processingEdited) {
+          if (!this.data.processingEdited && !this.data.paid) {
             this.updateProcessingFees();
           }
           if (!this.editMode) {
@@ -104,8 +104,8 @@ export default {
               parseFloat(this.data.price || 0) +
               parseFloat(this.data.penalty || 0) +
               parseFloat(this.data.processing_fees || 0);
-          }else{
-            this.data.payment = parseFloat(_.get(data , `data.payment`) || 0);
+          } else {
+            this.data.payment = parseFloat(_.get(data, `data.payment`) || 0);
           }
           this.$Progress.finish();
           this.endLoadingAction();
@@ -244,7 +244,9 @@ export default {
             this.data.processing_fees = 0;
             break;
         }
-        this.updateTotalPayment();
+        if (!this.data.paid && !this.editMode) {
+          this.updateTotalPayment();
+        }
       }
     },
   },
@@ -256,7 +258,7 @@ export default {
     <v-card-text>
       <v-container>
         <v-row>
-          <v-col cols="12">
+          <v-col cols="12"  v-if="((editMode && data.paid) || !editMode) || !editMode">
             <v-text-field
               label="Reference No"
               v-model="data.referenceno"
@@ -274,7 +276,7 @@ export default {
               v-model="data.issue_by"
             ></v-text-field>
           </v-col> -->
-          <v-col cols="12">
+          <v-col cols="12" v-if="(editMode && data.paid) || !editMode">
             <v-select
               :items="paymentMethods"
               v-model="data.paymentmethod"
@@ -283,7 +285,7 @@ export default {
               :disabled="data.paid == true"
             ></v-select>
           </v-col>
-          <v-col cols="12">
+          <v-col cols="12"  v-if="(editMode && data.paid) || !editMode">
             <v-menu
               ref="menu"
               v-model="menu"
@@ -354,7 +356,7 @@ export default {
               :disabled="data.paid == true || !editMode"
             ></v-text-field>
           </v-col>
-          <v-col cols="12">
+          <v-col cols="12"  v-if="(editMode && data.paid) || !editMode">
             <v-text-field
               label="Payment"
               type="number"

@@ -151,7 +151,7 @@ class RentalPaymentController extends Controller
         }
         $params = collect([
             'price' => $request->price,
-            'payment' => $request->price,
+            'payment' => $request->payment,
             'paid' => $request->paid,
             'penalty' => $this->toDouble($request->penalty),
             'processing_fees' => $this->toDouble($request->processing_fees),
