@@ -91,24 +91,24 @@ export default {
                   />
                 </td>
                 <td>
-                  <div class="font-weight-bold subtitle1">Official Receipt</div>
-                  <div class="flex-items-align-center flex-justify-end">
+                  <div class="font-weight-bold  subtitle">Official Receipt</div>
+                  <div class="flex-items-align-center flex-justify-end subtitle">
                     <span
                       class="d-inline-block text-align-right margin-right-md"
                     >
                       Receipt No #:
                     </span>
-                    <span class="d-inline-block">
+                    <span class="d-inline-block subtitle">
                       {{ _.get(data, ["sequence"]) || "N/A" }}
                     </span>
                   </div>
                   <div class="flex-items-align-center flex-justify-end">
                     <span
-                      class="d-inline-block text-align-right margin-right-md"
+                      class="d-inline-block text-align-right margin-right-md subtitle"
                     >
                       Date:
                     </span>
-                    <span class="d-inline-block">
+                    <span class="d-inline-block subtitle">
                       {{ _.get(data, ["paymentdate"]) || "N/A" | formatDate }}
                     </span>
                   </div>
@@ -116,20 +116,20 @@ export default {
               </tr>
               <tr>
                 <td colspan="2">
-                  <div class="font-weight-bold">ANTZ MANAGEMENT SDN. BHD.</div>
-                  <div class="small-text">
+                  <div class="font-weight-bold  subtitle">ANTZ MANAGEMENT SDN. BHD.</div>
+                  <div class=" subtitle">
                     Reg. No : 202101013433 (1413732-W)
                   </div>
-                  <div class="small-text">
+                  <div class=" subtitle">
                     47G, Jalan Kampar Barat 1, Taman Kampar Barat 1, 31900
                     Kampar, Perak.
                   </div>
-                  <div class="small-text">010-2898012</div>
-                  <div class="small-text">antz.customerservice@gmail.com</div>
-                  <div class="margin-top-md small-text">
+                  <div class=" subtitle">010-2898012</div>
+                  <div class=" subtitle">antz.customerservice@gmail.com</div>
+                  <div class="margin-top-md subtitle">
                     Receive From #: {{ _.get(data, ["receive_from"]) || "N/A" }}
                   </div>
-                  <div class="small-text">
+                  <div class=" subtitle">
                     Room Unit No #:
                     {{ _.get(roomcontract, ["room", "unit"]) || "N/A" }}
                   </div>
@@ -140,8 +140,8 @@ export default {
         </tr>
 
         <tr class="heading invoice">
-          <td class="text-truncate">Payment For:</td>
-          <td class="text-truncate">RM :</td>
+          <td class="text-truncate subtitle">Payment For:</td>
+          <td class="text-truncate subtitle">RM :</td>
         </tr>
 
         <tr class="item subtitle invoice">
@@ -186,18 +186,18 @@ export default {
             Outstanding : {{ _.get(data, ["outstanding"]) || "N/A" | toDouble }}
           </td>
         </tr>
-        <tr class="information">
+        <tr>
           <td class="text-truncate">
-            <div class="small-text">
+            <div class=" subtitle">
               Payment By : {{ _.get(data, ["paymentmethod"]) || "N/A" }}
             </div>
-            <div class="small-text">
+            <div class=" subtitle">
               Ref. No : {{ _.get(data, ["referenceno"]) || "N/A" }}
             </div>
-            <div class="small-text">
+            <div class=" subtitle">
               Issue By : {{ _.get(data, ["issueby", "name"]) || "N/A" }}
             </div>
-            <div class="small-text" v-if="_.get(data , ['remark'])">
+            <div class=" subtitle" v-if="_.get(data , ['remark'])">
               Remark : {{ _.get(data, ["remark"]) || "N/A" }}
             </div>
           </td>

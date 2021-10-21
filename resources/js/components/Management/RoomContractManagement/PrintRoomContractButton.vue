@@ -75,7 +75,7 @@ export default {
   <span>
     <span class="btn" @click="print()">
       <slot>
-        <v-icon small color="success">mdi-printer </v-icon>
+        <v-icon small color="success">mdi-printer</v-icon>
       </slot>
     </span>
     <div class="d-none" :id="`printTenant${uid}`">

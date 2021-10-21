@@ -187,8 +187,11 @@ h6,
   font-size: 0.9rem;
 }
 
+.subtitle{
+  font-size: 15px;
+}
 .subtitle td{
-    font-size: 10px;
+    font-size: 15px;
 }
 .text-align-left {
     text-align: left;
