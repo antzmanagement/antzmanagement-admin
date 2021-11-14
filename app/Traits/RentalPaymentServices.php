@@ -16,9 +16,6 @@ trait RentalPaymentServices
         $data = collect();
 
         if (property_exists($params, 'status') && $params->status != null) {   
-            error_log('==========');
-            error_log($params->status);
-            error_log($params->status ? 'Active' : 'Inactive');
             $data = RentalPayment::where('status', $params->status)->with(['roomcontract' => function ($q) {
                 // Query the name field in status table
                 $q->with(['tenant' => function ($q1) {

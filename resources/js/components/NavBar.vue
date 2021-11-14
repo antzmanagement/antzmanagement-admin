@@ -74,8 +74,14 @@ export default {
       },
       {
         icon: "mdi-home-currency-usd",
-        text: "Payment",
+        text: "Rental Payment",
         name: "rentalpayments",
+        module: "rentalPayment",
+      },
+      {
+        icon: "mdi-home-currency-usd",
+        text: "Payment",
+        name: "payments",
         module: "rentalPayment",
       },
       // {

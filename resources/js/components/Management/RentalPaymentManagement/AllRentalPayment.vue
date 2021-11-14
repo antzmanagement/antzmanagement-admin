@@ -371,7 +371,7 @@ export default {
     },
     paymentOptions: {
       handler() {
-        this.getPayments();
+        // this.getPayments();
       },
       deep: true,
     },
@@ -408,7 +408,7 @@ export default {
   },
   mounted() {
     this.getRentalPayments();
-    this.getPayments();
+    // this.getPayments();
   },
   methods: {
     ...mapActions({
@@ -611,7 +611,7 @@ export default {
 
       var totalResult = itemsPerPage;
       //Show All Items
-      let filterGroup = {...this.rentalPaymentFilterGroup};
+      let filterGroup = { ...this.rentalPaymentFilterGroup };
       if (totalResult == -1) {
         filterGroup.pageNumber = -1;
         filterGroup.pageSize = -1;
@@ -647,7 +647,7 @@ export default {
 
       var totalResult = itemsPerPage;
 
-      let filterGroup = {...this.paymentFilterGroup};
+      let filterGroup = { ...this.paymentFilterGroup };
       //Show All Items
       if (totalResult == -1) {
         filterGroup.pageNumber = -1;
@@ -907,7 +907,11 @@ export default {
                       {{ props.item.processing_fees | toDouble }}
                     </td>
                     <td class="text-truncate">
-                      {{ parseFloat(props.item.price || 0) + parseFloat(props.item.penalty || 0) + parseFloat(props.item.processing_fees || 0) }}
+                      {{
+                        parseFloat(props.item.price || 0) +
+                        parseFloat(props.item.penalty || 0) +
+                        parseFloat(props.item.processing_fees || 0)
+                      }}
                     </td>
                     <td class="text-truncate">
                       {{ props.item.payment | toDouble }}
@@ -993,213 +997,6 @@ export default {
                         "
                         @confirmed="
                           $event ? deleteRentalPayment(props.item.uid) : null
-                        "
-                      ></confirm-dialog>
-                    </td>
-                    <td class="text-truncate">
-                      {{ props.item.paymentmethod || "N/A" }}
-                    </td>
-                    <td class="text-truncate">
-                      {{ props.item.receive_from || "N/A" }}
-                    </td>
-                    <td class="text-truncate">
-                      {{ _.get(props.item, "issueby.name") || "N/A" }}
-                    </td>
-                    <td class="text-truncate" v-if="!props.item.status">
-                      {{ _.get(props.item, "deletedby.name") || "N/A" }}
-                    </td>
-                  </tr>
-                </template>
-              </v-data-table>
-            </v-card>
-          </v-col>
-          <v-col
-            cols="12"
-            :class="helpers.managementStyles().centerWrapperClass"
-          >
-            <v-card raised width="100%" class="pa-8">
-              <v-data-table
-                :headers="
-                  !_.get(paymentFilterGroup, 'status')
-                    ? _.concat(
-                        _.filter(
-                          paymentHeaders,
-                          (paymentHeader) => paymentHeader.text != 'Actions'
-                        ),
-                        [{ text: 'Deleted By' }]
-                      )
-                    : paymentHeaders
-                "
-                :items="paymentData"
-                :options.sync="paymentOptions"
-                :server-items-length="paymentTotal"
-                :loading="paymentLoading"
-                disable-sort
-              >
-                <template v-slot:top>
-                  <v-toolbar flat color="white">
-                    <v-toolbar-title
-                      :class="helpers.managementStyles().subtitleClass"
-                      >Others Payment</v-toolbar-title
-                    >
-                    <v-spacer></v-spacer>
-                    <download-excel
-                      :header="`All_AddOnPayment_${moment().format(
-                        'YYYY_MM_DD'
-                      )}`"
-                      :name="`All_AddOnPayment_${moment().format(
-                        'YYYY_MM_DD'
-                      )}.csv`"
-                      type="csv"
-                      :data="paymentExcelData || []"
-                      :fields="paymentExcelFields || {}"
-                      v-if="
-                        _.isArray(paymentExcelData) &&
-                        !_.isEmpty(paymentExcelData)
-                      "
-                      ><v-btn text color="primary" class="mr-3"
-                        >Download as Excel</v-btn
-                      ></download-excel
-                    >
-                    <payment-filter-dialog
-                      :buttonStyle="rentalPaymentFilterDialogConfig.buttonStyle"
-                      :dialogStyle="rentalPaymentFilterDialogConfig.dialogStyle"
-                      @submitFilter="initPaymentFilter($event)"
-                    ></payment-filter-dialog>
-                  </v-toolbar>
-                </template>
-                <template v-slot:item="props">
-                  <tr>
-                    <td class="text-truncate">{{ props.item.receiptno }}</td>
-                    <td class="text-truncate">{{ props.item.referenceno }}</td>
-                    <td class="text-truncate">
-                      {{
-                        _.get(props.item, "roomcontract.tenant.name") || "N/A"
-                      }}
-                    </td>
-                    <td class="text-truncate">
-                      {{ _.get(props.item, "roomcontract.room.name") || "N/A" }}
-                    </td>
-                    <td class="text-truncate">
-                      {{
-                        _.get(props.item, "roomcontract.startdate") ||
-                        "N/A" | formatDate
-                      }}
-                    </td>
-                    <td class="text-truncate">
-                      {{
-                        _.get(props.item, "roomcontract.enddate") ||
-                        "N/A" | formatDate
-                      }}
-                    </td>
-                    <td class="text-truncate">
-                      {{ props.item.paymentdate | formatDate }}
-                    </td>
-                    <td class="text-truncate">
-                      {{
-                        _.compact(
-                          _.map(props.item.services, function (service) {
-                            return _.get(service, ["text"]) || "";
-                          })
-                        ) | getArrayValues
-                      }}
-                    </td>
-                    <td class="text-truncate">
-                      {{ props.item.price | toDouble }}
-                    </td>
-                    <td class="text-truncate">
-                      {{
-                        _.compact(
-                          _.map(
-                            props.item.otherpayments,
-                            function (otherpayment) {
-                              return _.get(otherpayment, ["name"]) || "";
-                            }
-                          )
-                        ) | getArrayValues
-                      }}
-                    </td>
-                    <td class="text-truncate">
-                      {{ props.item.other_charges | toDouble }}
-                    </td>
-                    <td class="text-truncate">
-                      {{ props.item.processing_fees | toDouble }}
-                    </td>
-                    <td class="text-truncate">
-                      {{ parseFloat(props.item.price || 0) + parseFloat(props.item.other_charges || 0) + parseFloat(props.item.processing_fees || 0) }}
-                    </td>
-                    <td class="text-truncate">
-                      {{ props.item.totalpayment | toDouble }}
-                    </td>
-                    <td class="text-truncate">
-                      {{ props.item.outstanding | toDouble }}
-                    </td>
-                    <td class="text-truncate" v-if="props.item.paid">
-                      <v-icon small color="success">mdi-check</v-icon>
-                    </td>
-                    <td class="text-truncate" v-else>
-                      <v-icon small color="danger">mdi-close</v-icon>
-                    </td>
-                    <td class="text-truncate">{{ props.item.remark }}</td>
-                    <td class="text-truncate" v-if="props.item.status">
-                      <print-payment-button
-                        :item="props.item"
-                        :roomcontract="props.item.roomcontract"
-                        v-if="
-                          props.item.paid &&
-                          helpers.isAccessible(
-                            _.get(role, ['name']),
-                            'rentalPayment',
-                            'print'
-                          )
-                        "
-                      >
-                        <v-icon small class="mr-2" color="success"
-                          >mdi-printer</v-icon
-                        >
-                      </print-payment-button>
-                      <v-icon
-                        small
-                        class="mr-2"
-                        @click="openPaymentPayDialog(props.item.uid)"
-                        color="warning"
-                        v-else-if="
-                          helpers.isAccessible(
-                            _.get(role, ['name']),
-                            'rentalPayment',
-                            'makePayment'
-                          )
-                        "
-                        >mdi-currency-usd</v-icon
-                      >
-                      <v-icon
-                        small
-                        class="mr-2"
-                        @click="openAddOnPaymentDialog(props.item.uid, true)"
-                        color="success"
-                        v-if="
-                          helpers.isAccessible(
-                            _.get(role, ['name']),
-                            'rentalPayment',
-                            'edit'
-                          )
-                        "
-                        >mdi-pencil</v-icon
-                      >
-
-                      <confirm-dialog
-                        :activatorStyle="
-                          deleteRentalButtonConfig.activatorStyle
-                        "
-                        @confirmed="
-                          $event ? deletePayment(props.item.uid) : null
-                        "
-                        v-if="
-                          helpers.isAccessible(
-                            _.get(role, ['name']),
-                            'rentalPayment',
-                            'delete'
-                          )
                         "
                       ></confirm-dialog>
                     </td>

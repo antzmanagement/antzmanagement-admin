@@ -49,7 +49,7 @@ class RoomTableSeeder extends Seeder
             $roomType->rooms()->syncWithoutDetaching([$room->refresh()->id]);
 
             //Create Contract For Tenant
-            $contract = Contract::find($faker->randomElement([1, 2]));
+            $contract = Contract::find($faker->randomElement([1]));
             
             $roomcontract = new RoomContract();
             $roomcontract->uid = Carbon::now()->timestamp . RoomContract::count();
