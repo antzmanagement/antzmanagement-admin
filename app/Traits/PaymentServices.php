@@ -57,109 +57,115 @@ trait PaymentServices
     }
 
 
-    private function filterPayments($data, $params)
+    private function filterPayments( $params, $take, $skip)
     {
         $params = $this->checkUndefinedProperty($params, $this->paymentFilterCols());
      
+        $query = Payment::query();
+        $query->orderBy('sequence', 'DESC');
         if($params->tenant_id){
             $tenant_id = $params->tenant_id;
-            $data = $data->filter(function ($item) use($tenant_id) {
-                if($item->roomcontract){
-                    if($item->roomcontract->tenant)
-                    return $item->roomcontract->tenant->id == $tenant_id;
-                }
-                return false;
-            })->values();
+            $query->whereHas('roomcontract', function($q) use($tenant_id) {
+                    $q->whereHas('tenant', function($q1) use($tenant_id) {
+                        $q1->where('id', $tenant_id);
+                });
+            });
         }
 
         if($params->room_id){
             $room_id = $params->room_id;
-            $data = $data->filter(function ($item) use($room_id) {
-                if($item->roomcontract){
-                    if($item->roomcontract->room)
-                    return $item->roomcontract->room->id == $room_id;
-                }
-                return false;
-            })->values();
+            $query->whereHas('roomcontract', function($q) use($room_id) {
+                    $q->whereHas('room', function($q1) use($room_id) {
+                        $q1->where('id', $room_id);
+                });
+            });
         }
 
         if ($params->sequence) {
             $sequence = $params->sequence;
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($sequence) {
-                return $item->sequence == $sequence;
-            })->values();
+            $query->where('sequence', $sequence);
         }
 
         if ($params->fromdate) {
             $date = Carbon::parse($params->fromdate);
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($date) {
-                return Carbon::parse(data_get($item, 'paymentdate'))->gte($date);
-            })->values();
+            $query->whereDate('paymentdate', '>=', $date );
         }
         
         if ($params->todate) {
             $date = Carbon::parse($params->todate)->endOfDay();
-            $data = $data->filter(function ($item) use ($date) {
-                return Carbon::parse(data_get($item, 'paymentdate'))->lte($date);
-            })->values();
+            $query->whereDate('paymentdate', '>=', $date );
         }
 
         if($params->service_ids){
             $service_ids = collect($params->service_ids);
             error_log($service_ids);
-            $data = $data->filter(function ($item) use($service_ids) {
-                $existed = false;
-                if($item->services){
-                    error_log($item->services->pluck('id'));
-                    foreach ($item->services as $service) {
-                        if($service_ids->contains($service->id)){
-                            $existed = true;
-                            break;
-                        }
-                    }
-                }
-                error_log($existed. ' ');
-                return $existed;
-            })->values();
+            $query->whereHas('services', function($q) use($service_ids) {
+                $q->whereIn('services.id', $service_ids);
+            });
         }
         
         if (property_exists($params, 'paid') && $params->paid != null) {
-            error_log('$check paid');
             $paid = $params->paid;
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($paid) {
-                return $item->paid == $paid;
-            })->values();
+            $query->where('paid' , $params->paid);
         }
 
         if($params->otherPaymentTitle){
             $keyword = $params->otherPaymentTitle;
-            $data = $data->filter(function ($item) use($keyword) {
-                $otherpayments = collect($item->otherpayments);
-                $existed = false;
-                foreach($otherpayments as $otherpayment){
-                    if ( stristr($otherpayment->name, $keyword) == TRUE) {
-                        $existed = true;
-                        break;
-                    }
-                }
-                return $existed;
-            })->values();
+            $query->whereHas('otherpayments', function($q) use($keyword) {
+                $q->where('name', 'like', '%' . $keyword . '%');
+            });
         }
 
         if ($params->paymentmethod) {
             $paymentmethod = $params->paymentmethod;
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($paymentmethod) {
-                return $item->paymentmethod == $paymentmethod;
-            })->values();
+            $query->where('paid' , $params->paid);
+        }
+    
+        $total = $query->count();
+        if($skip){
+            $query->skip($skip);
+        }
+        if($take){
+            $query->take($take);
+        }else{
+            $query->take(10);
+        }
+        if (property_exists($params, 'status') && $params->status != null) {   
+            $data = $query->where('status', $params->status)->with(['roomcontract' => function ($q) {
+                // Query the name field in status table
+                $q->with(['tenant' => function ($q1) {
+                    // Query the name field in status table
+                    $q1->where('status', true);
+                }]);
+                $q->with(['room' => function ($q1) {
+                    // Query the name field in status table
+                    $q1->where('status', true);
+                }]);
+                $q->where('status', true);
+            }, 'services' => function ($q) {
+            },'otherpayments' => function ($q) {
+            }, 'issueby', 'deletedby'])->get();
+        }else{
+            $data = $query->where('status', true)->with(['roomcontract' => function ($q) {
+                // Query the name field in status table
+                $q->with(['tenant' => function ($q1) {
+                    // Query the name field in status table
+                    $q1->where('status', true);
+                }]);
+                $q->with(['room' => function ($q1) {
+                    // Query the name field in status table
+                    $q1->where('status', true);
+                }]);
+                $q->where('status', true);
+            }, 'services' => function ($q) {
+            },'otherpayments' => function ($q) {
+            }, 'issueby'])->get()->unique('id')->flatten(1);;
         }
 
-        $data = $data->unique('id');
+        $result['data'] = $data;
+        $result['total'] = $total;
 
-        return $data;
+        return  $result;
     }
 
     private function getPayment($uid)

@@ -5,6 +5,7 @@ namespace App\Traits;
 use App\Room;
 use App\RoomType;
 use Carbon\Carbon;
+use DB;
 use Illuminate\Support\Facades\Hash;
 
 trait RoomServices
@@ -35,113 +36,92 @@ trait RoomServices
     }
 
 
-    private function filterRooms($data, $params)
+    private function filterRooms( $params, $take, $skip)
     {
         $params = $this->checkUndefinedProperty($params, $this->roomFilterCols());
 
-    
-        error_log(collect($params));
+        $query = Room::query();
+        $query->orderBy('unit');
         if ($params->id) {
-            $id = $params->id;
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($id) {
-                return $item->id == $id;
-            })->values();
+            $query->where('rooms.id', $params->id);
         }
 
         if ($params->unit) {
             $unit = $params->unit;
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($unit) {
-                if ( stristr($item->unit, $unit) == TRUE ) {
-                    return true;
-                } else {
-                    return false;
-                }
-            })->values();
+            $query->where('unit', 'like', '%' . $unit . '%');
         }
 
         if ($params->lot) {
             $lot = $params->lot;
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($lot) {
-                if ( stristr($item->lot, $lot) == TRUE ) {
-                    return true;
-                } else {
-                    return false;
-                }
-            })->values();
+            $query->where('lot', 'like', '%' . $lot . '%');
         }
 
         if ($params->floor) {
             $floor = $params->floor;
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($floor) {
-                if ( stristr($item->floor, $floor) == TRUE ) {
-                    return true;
-                } else {
-                    return false;
-                }
-            })->values();
+            $query->where('floor', 'like', '%' . $floor . '%');
         }
 
         if ($params->jalan) {
             $jalan = $params->jalan;
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($jalan) {
-                if ( stristr($item->jalan, $jalan) == TRUE ) {
-                    return true;
-                } else {
-                    return false;
-                }
-            })->values();
+            $query->where('jalan', 'like', '%' . $jalan . '%');
         }
 
         if ($params->room_status) {
             $room_status = $params->room_status;
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($room_status) {
-                return $item->room_status == $room_status;
-            })->values();
+            $query->where('room_status', $room_status);
         }
 
         if($params->room_type_id){
             $room_type_id = $params->room_type_id;
-            $data = $data->filter(function ($item) use($room_type_id) {
-                if($item->roomtypes){
-                    return $item->roomtypes->contains('id' , $room_type_id);
-                }
-                return false;
-            })->values();
+            $query->whereHas('roomTypes', function($q) use($room_type_id) {
+                $q->where('room_type_id', $room_type_id);
+            });
         }
 
         if($params->owner_id){
-            $owner_id = $params->owner_id;
-            $data = $data->filter(function ($item) use($owner_id) {
-                if($item->owners){
-                    return $item->owners->contains('id' , $owner_id);
-                }
-                return false;
-            })->values();
+            $owner_id = $params->owner_id;   
+            $query->whereHas('owners', function($q) use($owner_id) {
+                $q->where('owner_id', $owner_id);
+            });
         }
 
         if($params->minPrice){
             $minPrice = $this->toDouble($params->minPrice);
-            $data = $data->filter(function ($item) use($minPrice) {
-                return $item->price >= $minPrice;
-            })->values();
+            $query->where('price', '>=', $minPrice);
         }
 
         if($params->maxPrice){
             $maxPrice = $this->toDouble($params->maxPrice);
-            $data = $data->filter(function ($item) use($maxPrice) {
-                return $item->price <= $maxPrice;
-            })->values();
+            $query->where('price', '<=', $maxPrice);
         }
 
-        $data = $data->unique('id');
+        error_log($skip);
+        error_log($take);
+        $total = $query->count();
+        if($skip){
+            $query->skip($skip);
+        }
+        if($take){
+            $query->take($take);
+        }else{
+            $query->take(10);
+        }
+        $data = $query->with(['maintenances' => function ($q) {
+            // Query the name field in status table
+            $q->with('property');
+            $q->where('status', true);
+        }, 'roomTypes' => function ($q) {
+            // Query the name field in status table
+            $q->with('services');
+            $q->wherePivot('status', true);
+        }, 'owners' => function ($q) {
+            // Query the name field in status table
+            $q->wherePivot('status', true);
+        }])->where('rooms.status',true)->get();
+        $result['data'] = $data;
+        $result['total'] = $total;
 
-        return $data;
+        return  $result;
     }
 
     private function getRoom($uid)

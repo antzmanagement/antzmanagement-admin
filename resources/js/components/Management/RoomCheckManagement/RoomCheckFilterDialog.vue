@@ -69,12 +69,17 @@ export default {
   },
   mounted() {
     this.showLoadingAction();
-    this.getRoomsAction({ pageNumber: -1, pageSize: -1 })
-      .then((data) => {
+    this.filterRoomsAction({ pageNumber: 1, pageSize: 100 })
+      .then(async (data) => {
         this.rooms = data.data;
+        if (data.maximumPages > 1) {
+          let appendData = await this.getAllRoomResponses(data.maximumPages);
+          this.rooms = _.concat(this.rooms, appendData);
+        }
         this.endLoadingAction();
       })
       .catch((error) => {
+        console.log(error);
         Toast.fire({
           icon: "warning",
           title: "Something went wrong... ",
@@ -84,10 +89,39 @@ export default {
   },
   methods: {
     ...mapActions({
-      getRoomsAction: "getRooms",
+      filterRoomsAction: "filterRooms",
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction",
     }),
+    async getAllRoomResponses(maxPage, size = 100) {
+      let promises = [];
+      for (let index = 1; index < maxPage; index++) {
+        promises.push(
+          this.filterRoomsAction({ pageNumber: index + 1, pageSize: size })
+        );
+      }
+      this.showLoadingAction();
+      return await Promise.all(promises)
+        .then((responses) => {
+          let finalData = [];
+          responses.forEach((loopResponse) => {
+            finalData = _.concat(
+              finalData,
+              _.get(loopResponse, ["data"]) || []
+            );
+          });
+
+          return finalData;
+          this.endLoadingAction();
+        })
+        .catch((err) => {
+          console.log(err);
+          Toast.fire({
+            icon: "warning",
+            title: "Something went wrong...",
+          });
+        });
+    },
     submitFilter() {
       this.$emit("submitFilter", this.data);
       this.dialog = false;
@@ -124,7 +158,7 @@ export default {
         <v-btn icon dark @click="dialog = false">
           <v-icon>mdi-close</v-icon>
         </v-btn>
-        <v-toolbar-title >Room Check Filter</v-toolbar-title>
+        <v-toolbar-title>Room Check Filter</v-toolbar-title>
         <v-spacer></v-spacer>
         <v-toolbar-items>
           <v-btn dark text :disabled="isLoading" @click="submitFilter()"

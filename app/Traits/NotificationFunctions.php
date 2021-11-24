@@ -110,15 +110,15 @@ trait NotificationFunctions {
         return response()->json($response, 200);
     }
 
-    public function successPaginateResponse($provider , $data , $pageSize, $pageNumber){
+    public function successPaginateResponse($provider , $data , $pageSize, $pageNumber, $total = 10){
 
         //Page Pagination Result List
         //Default return 10
         $paginateddata = $this->paginateResult($data, $pageSize, $pageNumber);
         $response['status'] = 'success';
-        $response['data'] = $paginateddata;
-        $response['maximumPages'] = $this->getMaximumPaginationPage($data->count(), $pageSize);
-        $response['totalResult'] = $data->count();
+        $response['data'] = $data;
+        $response['maximumPages'] = $this->getMaximumPaginationPage($total, $pageSize);
+        $response['totalResult'] = $total;
         $response['msg'] = $this->getRetrievedSuccessMsg($provider);
         $response['code'] = 200;
 

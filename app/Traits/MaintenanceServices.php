@@ -46,83 +46,96 @@ trait MaintenanceServices
     }
 
 
-    private function filterMaintenances($data, $params)
+    private function filterMaintenances( $params, $take, $skip)
     {
         $params = $this->checkUndefinedProperty($params, $this->maintenanceFilterCols());
 
+        $query = Maintenance::query();
+        $query->orderBy('id', 'DESC');
         if($params->room_id){
             $room_id = $params->room_id;
-            $data = $data->filter(function ($item) use($room_id) {
-                if($item->room){
-                    return $item->room->id == $room_id;
-                }
-                return false;
-            })->values();
+            $query->whereHas('room', function($q) use($room_id) {
+                $q->where('id', $room_id);
+            });
         }
 
         if($params->property_id){
             $property_id = $params->property_id;
-            $data = $data->filter(function ($item) use($property_id) {
-                if($item->property){
-                    return $item->property->id == $property_id;
-                }
-                return false;
-            })->values();
+            $query->whereHas('property', function($q) use($property_id) {
+                $q->where('id', $property_id);
+            });
         }
         if($params->owner_id){
             $owner_id = $params->owner_id;
-            $data = $data->filter(function ($item) use($owner_id) {
-                if($item->owner){
-                    return $item->owner->id == $owner_id;
-                }
-                return false;
-            })->values();
+            $query->whereHas('owner', function($q) use($owner_id) {
+                $q->where('id', $owner_id);
+            });
         }
 
         if($params->tenant_id){
             $tenant_id = $params->tenant_id;
-            $data = $data->filter(function ($item) use($tenant_id) {
-                if($item->tenant){
-                    return $item->tenant->id == $tenant_id;
-                }
-                return false;
-            })->values();
+            $query->whereHas('tenant', function($q) use($tenant_id) {
+                $q->where('id', $tenant_id);
+            });
         }
         if ($params->maintenance_status) {
             $maintenance_status = $params->maintenance_status;
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($maintenance_status) {
-                return $item->maintenance_status == $maintenance_status;
-            })->values();
+            $query->where('maintenance_status', $maintenance_status);
         }
         if ($params->maintenance_type) {
             $maintenance_type = $params->maintenance_type;
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($maintenance_type) {
-                return $item->maintenance_type == $maintenance_type;
-            })->values();
+            $query->where('maintenance_type', $maintenance_type);
         }
 
         if ($params->fromdate) {
             $date = Carbon::parse($params->fromdate);
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($date) {
-                return Carbon::parse(data_get($item, 'maintenance_date'))->gte($date);
-            })->values();
+            $query->whereDate('maintenance_date', '>=', $date );
         }
         
         if ($params->todate) {
             $date = Carbon::parse($params->todate)->endOfDay();
-            $data = $data->filter(function ($item) use ($date) {
-                return Carbon::parse(data_get($item, 'maintenance_date'))->lte($date);
-            })->values();
+            $query->whereDate('maintenance_date', '<=', $date );
         }
 
 
 
-        $data = $data->unique('id')->sortByDesc('id')->flatten(1);
+        $total = $query->count();
+        if($skip){
+            $query->skip($skip);
+        }
+        if($take){
+            $query->take($take);
+        }else{
+            $query->take(10);
+        }
+        $data = $query->where('status', true)->with(['room' => function ($q) {
+            // Query the name field in status table
+            $q->with(['roomtypes' => function ($q1) {
+                // Query the name field in status table
+                $q1->wherePivot('status', true);
+            }]);
+            $q->where('status', true);
+        }, 'property' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        }, 'roomcheck' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        } , 'owner' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        }, 'tenant' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        },'issueby' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        }])->get()->unique('id')->flatten(1);
 
-        return $data;
+        $result['data'] = $data;
+        $result['total'] = $total;
+
+        return  $result;
     }
 
     private function getMaintenance($uid)

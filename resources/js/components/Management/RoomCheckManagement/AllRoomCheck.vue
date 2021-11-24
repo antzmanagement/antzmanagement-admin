@@ -91,7 +91,7 @@ export default {
     },
   },
   created() {
-    document.title = 'All Room Check'
+    document.title = "All Room Check";
   },
   mounted() {
     // this.getRoomChecks();
@@ -105,7 +105,7 @@ export default {
     }),
     initRoomCheckFilter(filterGroup) {
       this.roomCheckFilterGroup.reset();
-      if (_.get(filterGroup , `room.id`)) {
+      if (_.get(filterGroup, `room.id`)) {
         this.roomCheckFilterGroup.room_id = filterGroup.room.id;
         this.roomCheckFilterGroup.room = filterGroup.room;
       }
@@ -135,13 +135,8 @@ export default {
 
       var totalResult = itemsPerPage;
       //Show All Items
-      if (totalResult == -1) {
-        this.roomCheckFilterGroup.pageNumber = -1;
-        this.roomCheckFilterGroup.pageSize = -1;
-      } else {
-        this.roomCheckFilterGroup.pageNumber = page;
-        this.roomCheckFilterGroup.pageSize = itemsPerPage;
-      }
+      this.roomCheckFilterGroup.pageNumber = page;
+      this.roomCheckFilterGroup.pageSize = itemsPerPage;
 
       let filterGroup = _.cloneDeep(this.roomCheckFilterGroup);
       delete filterGroup.room;
@@ -225,7 +220,11 @@ export default {
           align="center"
           class="ma-3"
           v-if="
-            helpers.isAccessible(_.get(role, ['name']), 'roomCheck', 'tableView')
+            helpers.isAccessible(
+              _.get(role, ['name']),
+              'roomCheck',
+              'tableView'
+            )
           "
         >
           <v-col cols="12">
@@ -237,6 +236,10 @@ export default {
                 :server-items-length="totalDataLength"
                 :loading="loading"
                 disable-sort
+                :footer-props="{
+                  'items-per-page-options': [10],
+                  'show-current-page': true,
+                }"
               >
                 <template v-slot:top>
                   <v-toolbar flat class="mb-5">
@@ -264,12 +267,28 @@ export default {
                   </v-toolbar> -->
                 </template>
                 <template v-slot:item="props">
-                  <tr @click="helpers.isAccessible(_.get(role, ['name']), 'roomCheck', 'view') ? showRoomCheck(props.item) : null">
+                  <tr
+                    @click="
+                      helpers.isAccessible(
+                        _.get(role, ['name']),
+                        'roomCheck',
+                        'view'
+                      )
+                        ? showRoomCheck(props.item)
+                        : null
+                    "
+                  >
                     <td class="text-truncate">
                       {{ _.get(props.item, ["room", "name"]) || "N/A" }}
                     </td>
                     <td class="text-truncate">
-                      {{ _.get(props.item, ["checked_date"]) ? moment(props.item.checked_date).format('YYYY-MM-DD HH:mm') : 'N/A' || "N/A" }}
+                      {{
+                        _.get(props.item, ["checked_date"])
+                          ? moment(props.item.checked_date).format(
+                              "YYYY-MM-DD HH:mm"
+                            )
+                          : "N/A" || "N/A"
+                      }}
                     </td>
                     <td class="text-truncate">
                       {{ _.get(props.item, ["category"]) || "N/A" }}

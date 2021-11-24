@@ -226,11 +226,9 @@ export default {
     document.title = "All Payment";
   },
   mounted() {
-    this.getPayments();
   },
   methods: {
     ...mapActions({
-      getPaymentsAction: "getPayments",
       filterPaymentsAction: "filterPayments",
       deletePaymentAction: "deletePayment",
       showLoadingAction: "showLoadingAction",
@@ -337,15 +335,10 @@ export default {
 
       var totalResult = itemsPerPage;
 
-      let filterGroup = {...this.paymentFilterGroup};
+      let filterGroup = { ...this.paymentFilterGroup };
       //Show All Items
-      if (totalResult == -1) {
-        filterGroup.pageNumber = -1;
-        filterGroup.pageSize = -1;
-      } else {
-        filterGroup.pageNumber = page;
-        filterGroup.pageSize = itemsPerPage;
-      }
+      filterGroup.pageNumber = page;
+      filterGroup.pageSize = itemsPerPage;
 
       delete filterGroup.tenant;
       delete filterGroup.room;
@@ -445,6 +438,10 @@ export default {
                 :server-items-length="paymentTotal"
                 :loading="paymentLoading"
                 disable-sort
+                :footer-props="{
+                  'items-per-page-options': [10],
+                  'show-current-page': true,
+                }"
               >
                 <template v-slot:top>
                   <v-toolbar flat color="white">
@@ -536,7 +533,11 @@ export default {
                       {{ props.item.processing_fees | toDouble }}
                     </td>
                     <td class="text-truncate">
-                      {{ parseFloat(props.item.price || 0) + parseFloat(props.item.other_charges || 0) + parseFloat(props.item.processing_fees || 0) }}
+                      {{
+                        parseFloat(props.item.price || 0) +
+                        parseFloat(props.item.other_charges || 0) +
+                        parseFloat(props.item.processing_fees || 0)
+                      }}
                     </td>
                     <td class="text-truncate">
                       {{ props.item.totalpayment | toDouble }}

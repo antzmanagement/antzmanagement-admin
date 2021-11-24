@@ -47,7 +47,7 @@ export default {
         tenant: "",
         cleaning_type: "normal",
         cleaning_status: "pending",
-        cleaning_date : '',
+        cleaning_date: "",
         claim_by_owner: false,
         claim_by_tenant: false,
         cleaning_date: null,
@@ -113,16 +113,9 @@ export default {
     },
   },
   watch: {
-    roomId: {
-      handler: function (val, oldVal) {
-        if (val) {
-          this.init(); // call it in the context of your component object
-        }
-      },
-      deep: true,
-    },
     selectedData: {
       handler: function (val, oldVal) {
+      console.log(val, oldVal);
         if (val) {
           this.init(); // call it in the context of your component object
         }
@@ -135,7 +128,6 @@ export default {
   },
   methods: {
     ...mapActions({
-      getRoomsAction: "getRooms",
       filterRoomContractsAction: "filterRoomContracts",
       filterRoomsAction: "filterRooms",
       getOwnersAction: "getOwners",
@@ -164,24 +156,59 @@ export default {
       this.cleaningStatus = ["pending", "inprogress", "reject", "done"];
       this.initStatus = "pending";
     },
+    async getAllRoomResponses(maxPage, size = 100) {
+      let promises = [];
+      for (let index = 1; index < maxPage; index++) {
+        promises.push(
+          this.filterRoomsAction({ pageNumber: index + 1, pageSize: size })
+        );
+      }
+      this.showLoadingAction();
+      return await Promise.all(promises)
+        .then((responses) => {
+          let finalData = [];
+          responses.forEach((loopResponse) => {
+            finalData = _.concat(
+              finalData,
+              _.get(loopResponse, ["data"]) || []
+            );
+          });
+
+          return finalData;
+          this.endLoadingAction();
+        })
+        .catch((err) => {
+          console.log(err);
+          Toast.fire({
+            icon: "warning",
+            title: "Something went wrong...",
+          });
+        });
+    },
     init() {
+      console.log('init cleaning');
       this.showLoadingAction();
       this.reset();
       let promises = [];
       if (!this.roomId) {
-        promises.push(this.getRoomsAction({ pageNumber: -1, pageSize: -1 }));
+        promises.push(this.filterRoomsAction({ pageNumber: 1, pageSize: 100 }));
       } else {
         promises.push(
           this.filterRoomsAction({
-            pageNumber: -1,
-            pageSize: -1,
+            pageNumber: 1,
+            pageSize: 1,
             id: this.roomId,
           })
         );
       }
       Promise.all(promises)
-        .then(([roomRes]) => {
-          this.rooms = roomRes.data || [];
+        .then(async ([roomRes]) => {
+          this.rooms = _.get(roomRes, ["data"]) || [];
+          if (roomRes.maximumPages > 1) {
+            let appendData = await this.getAllRoomResponses(roomRes.maximumPages)
+            this.rooms = _.concat(this.rooms, appendData)
+          }
+          this.endLoadingAction();
 
           if (this.roomId) {
             let selectedRoom = _.find(this.rooms, (room) => {

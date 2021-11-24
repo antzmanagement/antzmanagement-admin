@@ -5,15 +5,15 @@ import {
   required,
   minLength,
   maxLength,
-  decimal
+  decimal,
 } from "vuelidate/lib/validators";
 import { mapActions } from "vuex";
 export default {
   props: {
     reset: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   data() {
     return {
@@ -21,52 +21,85 @@ export default {
         keyword: "",
         fromdate: null,
         todate: null,
-        rooms: []
-      })
+        rooms: [],
+      }),
     };
   },
 
   computed: {
     isLoading() {
       return this.$store.getters.isLoading;
-    }
+    },
   },
   watch: {
-    reset: function(val) {
+    reset: function (val) {
       if (val) {
         this.data.reset();
       }
-    }
+    },
   },
   mounted() {
     this.showLoadingAction();
-    this.getRoomsAction({ pageNumber: -1, pageSize: -1 })
-      .then(data => {
+    this.filterRoomsAction({ pageNumber: 1, pageSize: 100 })
+      .then(async (data) => {
         this.rooms = data.data;
+        if (data.maximumPages > 1) {
+          let appendData = await this.getAllRoomResponses(data.maximumPages);
+          this.rooms = _.concat(this.rooms, appendData);
+        }
         this.endLoadingAction();
       })
-      .catch(error => {
+      .catch((error) => {
         Toast.fire({
           icon: "warning",
-          title: "Something went wrong... "
+          title: "Something went wrong... ",
         });
         this.endLoadingAction();
       });
   },
   methods: {
     ...mapActions({
-      getRoomsAction: "getRooms",
+      filterRoomsAction: "filterRooms",
       showLoadingAction: "showLoadingAction",
-      endLoadingAction: "endLoadingAction"
+      endLoadingAction: "endLoadingAction",
     }),
-    close(){
+    close() {
       this.$emit("close");
+    },
+    async getAllRoomResponses(maxPage, size = 100) {
+      let promises = [];
+      for (let index = 1; index < maxPage; index++) {
+        promises.push(
+          this.filterRoomsAction({ pageNumber: index + 1, pageSize: size })
+        );
+      }
+      this.showLoadingAction();
+      return await Promise.all(promises)
+        .then((responses) => {
+          let finalData = [];
+          responses.forEach((loopResponse) => {
+            finalData = _.concat(
+              finalData,
+              _.get(loopResponse, ["data"]) || []
+            );
+          });
+
+          return finalData;
+          this.endLoadingAction();
+        })
+        .catch((err) => {
+          console.log(err);
+          Toast.fire({
+            icon: "warning",
+            title: "Something went wrong...",
+          });
+        });
     },
     submitFilter() {
       this.$emit("submitFilter", this.data);
       this.close();
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -79,21 +112,27 @@ export default {
       <v-toolbar-title v->Filter Claims</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-toolbar-items>
-        <v-btn dark text :disabled="isLoading" @click="submitFilter()">Apply</v-btn>
+        <v-btn dark text :disabled="isLoading" @click="submitFilter()"
+          >Apply</v-btn
+        >
       </v-toolbar-items>
     </v-toolbar>
     <v-card-text>
       <v-container>
         <v-row>
           <v-col cols="12">
-            <v-text-field label="Keyword" :maxlength="300" v-model="data.keyword"></v-text-field>
+            <v-text-field
+              label="Keyword"
+              :maxlength="300"
+              v-model="data.keyword"
+            ></v-text-field>
           </v-col>
         </v-row>
         <v-row>
           <v-col cols="12">
             <v-autocomplete
               v-model="data.rooms"
-              :item-text="item => helpers.capitalizeFirstLetter(item.name)"
+              :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
               :items="rooms || []"
               label="Room"
               chips

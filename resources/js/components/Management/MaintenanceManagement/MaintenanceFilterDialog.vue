@@ -74,15 +74,19 @@ export default {
   mounted() {
     this.showLoadingAction();
     let promises = [];
-    promises.push(this.getRoomsAction({ pageNumber: -1, pageSize: -1 }));
+    promises.push(this.filterRoomsAction({ pageNumber: 1, pageSize: 100 }));
     promises.push(this.getOwnersAction({ pageNumber: -1, pageSize: -1 }));
     promises.push(this.getPropertiesAction({ pageNumber: -1, pageSize: -1 }));
     promises.push(this.getTenantsAction({ pageNumber: -1, pageSize: -1 }));
 
 
     Promise.all(promises)
-      .then(([roomRes, ownerRes, propertyRes, tenantRes]) => {
+      .then(async([roomRes, ownerRes, propertyRes, tenantRes]) => {
         this.rooms = _.get(roomRes, ["data"]) || [];
+        if (roomRes.maximumPages > 1) {
+          let appendData = await this.getAllRoomResponses(roomRes.maximumPages);
+          this.rooms = _.concat(this.rooms, appendData);
+        }
         this.owners = _.get(ownerRes, ["data"]) || [];
         this.properties = _.get(propertyRes, ["data"]) || [];
         this.tenants = _.get(tenantRes, ["data"]) || [];
@@ -99,13 +103,42 @@ export default {
   },
   methods: {
     ...mapActions({
-      getRoomsAction: "getRooms",
+      filterRoomsAction: "filterRooms",
       getTenantsAction: "getTenants",
       getPropertiesAction: "getProperties",
       getOwnersAction: "getOwners",
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction",
     }),
+    async getAllRoomResponses(maxPage, size = 100) {
+      let promises = [];
+      for (let index = 1; index < maxPage; index++) {
+        promises.push(
+          this.filterRoomsAction({ pageNumber: index + 1, pageSize: size })
+        );
+      }
+      this.showLoadingAction();
+      return await Promise.all(promises)
+        .then((responses) => {
+          let finalData = [];
+          responses.forEach((loopResponse) => {
+            finalData = _.concat(
+              finalData,
+              _.get(loopResponse, ["data"]) || []
+            );
+          });
+
+          return finalData;
+          this.endLoadingAction();
+        })
+        .catch((err) => {
+          console.log(err);
+          Toast.fire({
+            icon: "warning",
+            title: "Something went wrong...",
+          });
+        });
+    },
     submitFilter() {
       this.$emit("submitFilter", this.data);
       this.dialog = false;

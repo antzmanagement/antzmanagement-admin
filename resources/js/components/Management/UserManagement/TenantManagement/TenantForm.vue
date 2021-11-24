@@ -397,12 +397,14 @@ export default {
   },
   created() {
     this.showLoadingAction();
-    this.getRoomsAction({
-      pageNumber: -1,
-      pageSize: -1,
-    })
-      .then((data) => {
-        this.rooms = (data.data || []).map(function (room) {
+    this.filterRoomsAction({ pageNumber: 1, pageSize: 100 })
+      .then(async (data) => {
+        this.rooms = data.data;
+        if (data.maximumPages > 1) {
+          let appendData = await this.getAllRoomResponses(data.maximumPages);
+          this.rooms = _.concat(this.rooms, appendData);
+        }
+        this.rooms = this.rooms.map(function (room) {
           if (
             room.room_types.length > 0 &&
             room.room_types[0].services.length > 0
@@ -483,7 +485,6 @@ export default {
     ...mapActions({
       getContractsAction: "getContracts",
       getStaffsAction: "getStaffs",
-      getRoomsAction: "getRooms",
       filterRoomsAction: "filterRooms",
       getRoomTypesAction: "getRoomTypes",
       getTenantAction: "getTenant",
@@ -492,6 +493,35 @@ export default {
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction",
     }),
+    async getAllRoomResponses(maxPage, size = 100) {
+      let promises = [];
+      for (let index = 1; index < maxPage; index++) {
+        promises.push(
+          this.filterRoomsAction({ pageNumber: index + 1, pageSize: size })
+        );
+      }
+      this.showLoadingAction();
+      return await Promise.all(promises)
+        .then((responses) => {
+          let finalData = [];
+          responses.forEach((loopResponse) => {
+            finalData = _.concat(
+              finalData,
+              _.get(loopResponse, ["data"]) || []
+            );
+          });
+
+          return finalData;
+          this.endLoadingAction();
+        })
+        .catch((err) => {
+          console.log(err);
+          Toast.fire({
+            icon: "warning",
+            title: "Something went wrong...",
+          });
+        });
+    },
     customValidate() {
       if (!this._.isEmpty(this.data.room)) {
         return (

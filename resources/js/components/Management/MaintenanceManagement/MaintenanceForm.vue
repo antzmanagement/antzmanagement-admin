@@ -159,7 +159,7 @@ export default {
   mounted() {
     this.showLoadingAction();
     let promises = [];
-    promises.push(this.getRoomsAction({ pageNumber: -1, pageSize: -1 }));
+    promises.push(this.filterRoomsAction({ pageNumber: 1, pageSize: 100 }));
     promises.push(this.getPropertiesAction({ pageNumber: -1, pageSize: -1 }));
     promises.push(this.getOwnersAction({ pageNumber: -1, pageSize: -1 }));
 
@@ -168,8 +168,12 @@ export default {
     }
 
     Promise.all(promises)
-      .then(([roomRes, propertyRes, ownerRes, maintenanceRes]) => {
+      .then(async ([roomRes, propertyRes, ownerRes, maintenanceRes]) => {
         this.rooms = roomRes.data || [];
+        if (roomRes.maximumPages > 1) {
+          let appendData = await this.getAllRoomResponses(roomRes.maximumPages);
+          this.rooms = _.concat(this.rooms, appendData);
+        }
         this.owners = ownerRes.data || [];
         this.properties = propertyRes.data || [];
 
@@ -205,7 +209,7 @@ export default {
   },
   methods: {
     ...mapActions({
-      getRoomsAction: "getRooms",
+      filterRoomsAction: "filterRooms",
       getOwnersAction: "getOwners",
       getPropertiesAction: "getProperties",
       getMaintenanceAction: "getMaintenance",
@@ -215,6 +219,35 @@ export default {
       endLoadingAction: "endLoadingAction",
     }),
 
+    async getAllRoomResponses(maxPage, size = 100) {
+      let promises = [];
+      for (let index = 1; index < maxPage; index++) {
+        promises.push(
+          this.filterRoomsAction({ pageNumber: index + 1, pageSize: size })
+        );
+      }
+      this.showLoadingAction();
+      return await Promise.all(promises)
+        .then((responses) => {
+          let finalData = [];
+          responses.forEach((loopResponse) => {
+            finalData = _.concat(
+              finalData,
+              _.get(loopResponse, ["data"]) || []
+            );
+          });
+
+          return finalData;
+          this.endLoadingAction();
+        })
+        .catch((err) => {
+          console.log(err);
+          Toast.fire({
+            icon: "warning",
+            title: "Something went wrong...",
+          });
+        });
+    },
     createMaintenance() {
       this.$v.$touch(); //it will validate all fields
 

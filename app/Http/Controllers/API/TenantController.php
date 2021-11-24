@@ -85,13 +85,12 @@ class TenantController extends Controller
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
-        $tenants = $this->getTenants($request->user());
-        $tenants = $this->filterTenants($tenants, $params);
+        $data = $this->filterTenants($params, $this->toInt($request->pageSize), ($this->toInt($request->pageNumber) - 1 ) * $this->toInt($request->pageSize));
 
-        if ($this->isEmpty($tenants)) {
+        if ($this->isEmpty($data)) {
             return $this->errorPaginateResponse('Tenants');
         } else {
-            return $this->successPaginateResponse('Tenants', $tenants, $this->toInt($request->pageSize), $this->toInt($request->pageNumber));
+            return $this->successPaginateResponse('Tenants', $data['data'], $this->toInt($request->pageSize), $this->toInt($request->pageNumber), $data['total']);
         }
     }
     /**

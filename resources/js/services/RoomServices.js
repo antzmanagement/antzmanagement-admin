@@ -4,6 +4,7 @@ import PassportServices from "../common/LaravelPassportServices";
 const RoomServices = {
 
   index(data) {
+    console.log('getAll');
     PassportServices.AuthenticationServices.setHeader();
 
     const clonedata = Object.assign({}, data);

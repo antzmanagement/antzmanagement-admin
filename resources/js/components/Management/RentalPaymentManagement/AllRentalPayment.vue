@@ -840,6 +840,10 @@ export default {
                 :server-items-length="rentalPaymentTotal"
                 :loading="loading"
                 disable-sort
+                :footer-props="{
+                  'items-per-page-options': [10],
+                  'show-current-page': true,
+                }"
               >
                 <template v-slot:top>
                   <v-toolbar flat color="white">

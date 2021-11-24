@@ -278,12 +278,13 @@ export default {
   },
   created() {
     this.showLoadingAction();
-    this.getRoomsAction({
-      pageNumber: -1,
-      pageSize: -1,
-    })
-      .then((data) => {
+    this.filterRoomsAction({ pageNumber: 1, pageSize: 100 })
+      .then(async (data) => {
         this.rooms = data.data;
+        if (data.maximumPages > 1) {
+          let appendData = await this.getAllRoomResponses(data.maximumPages);
+          this.rooms = _.concat(this.rooms, appendData);
+        }
         if (this.editMode) {
           this.getOwnerAction({ uid: this.uid })
             .then((data) => {
@@ -317,7 +318,6 @@ export default {
   },
   methods: {
     ...mapActions({
-      getRoomsAction: "getRooms",
       filterRoomsAction: "filterRooms",
       getRoomTypesAction: "getRoomTypes",
       getOwnerAction: "getOwner",
@@ -327,6 +327,35 @@ export default {
       endLoadingAction: "endLoadingAction",
     }),
 
+    async getAllRoomResponses(maxPage, size = 100) {
+      let promises = [];
+      for (let index = 1; index < maxPage; index++) {
+        promises.push(
+          this.filterRoomsAction({ pageNumber: index + 1, pageSize: size })
+        );
+      }
+      this.showLoadingAction();
+      return await Promise.all(promises)
+        .then((responses) => {
+          let finalData = [];
+          responses.forEach((loopResponse) => {
+            finalData = _.concat(
+              finalData,
+              _.get(loopResponse, ["data"]) || []
+            );
+          });
+
+          return finalData;
+          this.endLoadingAction();
+        })
+        .catch((err) => {
+          console.log(err);
+          Toast.fire({
+            icon: "warning",
+            title: "Something went wrong...",
+          });
+        });
+    },
     customValidate() {
       return (
         (!this.data.tel1 || this.helpers.isPhoneFormat(this.data.tel1)) &&

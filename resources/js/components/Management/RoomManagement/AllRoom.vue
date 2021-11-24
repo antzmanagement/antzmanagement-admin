@@ -158,14 +158,12 @@ export default {
     },
   },
   created() {
-    document.title = 'All Room'
+    document.title = "All Room";
   },
   mounted() {
-    this.getRooms();
   },
   methods: {
     ...mapActions({
-      getRoomsAction: "getRooms",
       filterRoomsAction: "filterRooms",
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction",
@@ -215,19 +213,12 @@ export default {
       // this.$router.push("/room/" + $data.uid);
     },
     getRooms() {
+      console.log("here");
       this.loading = true;
       const { sortBy, sortDesc, page, itemsPerPage } = this.options;
 
-      var totalResult = itemsPerPage;
-      //Show All Items
-      if (totalResult == -1) {
-        this.roomFilterGroup.pageNumber = -1;
-        this.roomFilterGroup.pageSize = -1;
-      } else {
-        this.roomFilterGroup.pageNumber = page;
-        this.roomFilterGroup.pageSize = itemsPerPage;
-      }
-
+      this.roomFilterGroup.pageNumber = page;
+      this.roomFilterGroup.pageSize = itemsPerPage;
       this.filterRoomsAction(this.roomFilterGroup)
         .then((data) => {
           console.log("data");
@@ -241,6 +232,7 @@ export default {
           this.loading = false;
         })
         .catch((error) => {
+          console.log('error', error);
           this.loading = false;
           Toast.fire({
             icon: "warning",
@@ -360,6 +352,10 @@ export default {
                 :server-items-length="totalDataLength"
                 :loading="loading"
                 disable-sort
+                :footer-props="{
+                  'items-per-page-options': [10],
+                  'show-current-page': true,
+                }"
               >
                 <template v-slot:top>
                   <v-toolbar flat class="mb-5">

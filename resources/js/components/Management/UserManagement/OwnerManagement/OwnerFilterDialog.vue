@@ -67,12 +67,41 @@ export default {
   mounted() {
     this.showLoadingAction();
     let promises = [];
-    promises.push(this.getRoomsAction({ pageNumber: -1, pageSize: -1 }));
+    promises.push(this.filterRoomsAction({ pageNumber: 1, pageSize: 100 }));
 
     Promise.all(promises)
       .then(([roomRes]) => {
         this.rooms = _.get(roomRes, ["data"]) || [];
-        this.endLoadingAction();
+        if (roomRes.maximumPages > 1) {
+          promises = [];
+          for (let index = 1; index < roomRes.maximumPages; index++) {
+            promises.push(
+              this.filterRoomsAction({ pageNumber: index + 1, pageSize: 100 })
+            );
+          }
+          this.showLoadingAction();
+          Promise.all(promises)
+            .then((responses) => {
+              let finalData = [];
+              responses.forEach((loopResponse) => {
+                finalData = _.concat(
+                  finalData,
+                  _.get(loopResponse, ["data"]) || []
+                );
+              });
+              this.rooms = _.concat(this.rooms, finalData);
+              this.endLoadingAction();
+            })
+            .catch((err) => {
+              console.log(err);
+              Toast.fire({
+                icon: "warning",
+                title: "Something went wrong...",
+              });
+            });
+        } else {
+          this.endLoadingAction();
+        }
       })
       .catch((err) => {
         console.log(err);
@@ -86,7 +115,7 @@ export default {
   methods: {
     ...mapActions({
       getRoomTypesAction: "getRoomTypes",
-      getRoomsAction: "getRooms",
+      filterRoomsAction: "filterRooms",
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction",
     }),
@@ -155,7 +184,9 @@ export default {
           <v-col cols="12">
             <v-autocomplete
               v-model="data.room"
-              :item-text="(item) => helpers.capitalizeFirstLetter(item.name)"
+              :item-text="
+                (item) => helpers.capitalizeFirstLetter(item.name || '')
+              "
               :items="rooms || []"
               label="Room"
               chips

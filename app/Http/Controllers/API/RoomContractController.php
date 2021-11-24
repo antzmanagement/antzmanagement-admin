@@ -49,13 +49,12 @@ class RoomContractController extends Controller
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
-        $roomContracts = $this->getRoomContracts($request->user());
-        $roomContracts = $this->filterRoomContracts( $roomContracts , $request);
+        $data = $this->filterRoomContracts($params, $this->toInt($request->pageSize), ($this->toInt($request->pageNumber) - 1 ) * $this->toInt($request->pageSize));
 
-        if ($this->isEmpty($roomContracts)) {
+        if ($this->isEmpty($data)) {
             return $this->errorPaginateResponse('RoomContracts');
         } else {
-            return $this->successPaginateResponse('RoomContracts', $roomContracts, $this->toInt($request->pageSize), $this->toInt($request->pageNumber));
+            return $this->successPaginateResponse('RoomContracts', $data['data'], $this->toInt($request->pageSize), $this->toInt($request->pageNumber), $data['total']);
         }
     }
 

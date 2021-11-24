@@ -72,13 +72,12 @@ class OwnerController extends Controller
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
-        $owners = $this->getOwners($request->user());
-        $owners = $this->filterOwners($owners, $params);
+        $data = $this->filterOwners($params, $this->toInt($request->pageSize), ($this->toInt($request->pageNumber) - 1 ) * $this->toInt($request->pageSize));
 
-        if ($this->isEmpty($owners)) {
+        if ($this->isEmpty($data)) {
             return $this->errorPaginateResponse('Owners');
         } else {
-            return $this->successPaginateResponse('Owners', $owners, $this->toInt($request->pageSize), $this->toInt($request->pageNumber));
+            return $this->successPaginateResponse('Owners',  $data['data'], $this->toInt($request->pageSize), $this->toInt($request->pageNumber), $data['total']);
         }
     }
     /**

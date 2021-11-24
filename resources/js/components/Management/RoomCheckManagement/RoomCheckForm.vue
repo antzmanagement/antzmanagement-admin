@@ -10,7 +10,7 @@ import {
 } from "vuelidate/lib/validators";
 import { mapActions } from "vuex";
 import { _ } from "../../../common/common-function";
-import moment from 'moment';
+import moment from "moment";
 export default {
   props: {
     editMode: {
@@ -45,7 +45,7 @@ export default {
   },
   data() {
     return {
-      moment : moment,
+      moment: moment,
       dialog: false,
       dateMenu: false,
       maintenanceEditMode: false,
@@ -133,49 +133,83 @@ export default {
     uid: {
       handler: function (val, oldVal) {
         if (val) {
+          console.log(val, oldVal);
           this.init(); // call it in the context of your component object
         }
       },
       deep: true,
     },
-    maintenanceFormDialog: function (val) {
-      if (!val) {
-        this.selectedRoom = {};
-        this.selectedMaintenance = {};
-        this.maintenanceEditMode = false;
-      }
-    },
-    cleaningFormDialog: function (val) {
-      if (!val) {
-        this.selectedRoom = {};
-        this.selectedCleaning = {};
-        this.cleaningEditMode = false;
-      }
-    },
+    // maintenanceFormDialog: function (val) {
+    //   if (!val) {
+    //     this.selectedRoom = {};
+    //     this.selectedMaintenance = {};
+    //     this.maintenanceEditMode = false;
+    //   }
+    // },
+    // cleaningFormDialog: function (val) {
+    //   if (!val) {
+    //     this.selectedRoom = {};
+    //     this.selectedCleaning = {};
+    //     this.cleaningEditMode = false;
+    //   }
+    // },
   },
   mounted() {
     this.init();
   },
   methods: {
     ...mapActions({
-      getRoomsAction: "getRooms",
+      filterRoomsAction: "filterRooms",
       getRoomCheckAction: "getRoomCheck",
       createRoomCheckAction: "createRoomCheck",
       updateRoomCheckAction: "updateRoomCheck",
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction",
     }),
+    async getAllRoomResponses(maxPage, size = 100) {
+      let promises = [];
+      for (let index = 1; index < maxPage; index++) {
+        promises.push(
+          this.filterRoomsAction({ pageNumber: index + 1, pageSize: size })
+        );
+      }
+      this.showLoadingAction();
+      return await Promise.all(promises)
+        .then((responses) => {
+          this.endLoadingAction();
+          let finalData = [];
+          responses.forEach((loopResponse) => {
+            finalData = _.concat(
+              finalData,
+              _.get(loopResponse, ["data"]) || []
+            );
+          });
+
+          return finalData;
+        })
+        .catch((err) => {
+          console.log(err);
+          Toast.fire({
+            icon: "warning",
+            title: "Something went wrong...",
+          });
+        });
+    },
     init() {
+      console.log('init');
       this.showLoadingAction();
       let promises = [];
-      promises.push(this.getRoomsAction({ pageNumber: -1, pageSize: -1 }));
+      promises.push(this.filterRoomsAction({ pageNumber: 1, pageSize: 100 }));
       if (this.editMode) {
         promises.push(this.getRoomCheckAction({ uid: this.uid }));
       }
       Promise.all(promises)
-        .then(([roomRes, roomCheckRes]) => {
+        .then(async ([roomRes, roomCheckRes]) => {
           this.rooms = roomRes.data || [];
-
+          if (roomRes.maximumPages > 1) {
+            let appendData = await this.getAllRoomResponses(roomRes.maximumPages)
+            this.rooms = _.concat(this.rooms, appendData)
+          }
           if (this.uid && this.editMode && _.get(roomCheckRes, `data`)) {
             roomCheckRes.data.room = _.find(this.rooms, [
               "id",
@@ -448,15 +482,13 @@ export default {
                 <template v-slot:item="props">
                   <tr :key="props.item.uid">
                     <td class="text-truncate">
-                       {{
-                            _.get(props.item, ["property", "name"]) == "others"
-                              ? `${
-                                  _.get(props.item, ["property", "text"]) || ""
-                                } - ${
-                                  _.get(props.item, ["other_property"]) || ""
-                                }`
-                              : _.get(props.item, ["property", "text"]) || "N/A"
-                          }}
+                      {{
+                        _.get(props.item, ["property", "name"]) == "others"
+                          ? `${
+                              _.get(props.item, ["property", "text"]) || ""
+                            } - ${_.get(props.item, ["other_property"]) || ""}`
+                          : _.get(props.item, ["property", "text"]) || "N/A"
+                      }}
                     </td>
                     <td class="text-truncate">
                       {{ props.item.maintenance_type }}
@@ -475,7 +507,13 @@ export default {
                       }}
                     </td>
                     <td class="text-truncate">
-                      {{ _.get(props.item, ["maintenance_date"]) ? moment(props.item.maintenance_date).format('YYYY-MM-DD HH:mm') : 'N/A' || "N/A" }}
+                      {{
+                        _.get(props.item, ["maintenance_date"])
+                          ? moment(props.item.maintenance_date).format(
+                              "YYYY-MM-DD HH:mm"
+                            )
+                          : "N/A" || "N/A"
+                      }}
                     </td>
                     <td class="text-truncate">
                       <!-- <v-icon
@@ -542,7 +580,13 @@ export default {
                       }}
                     </td>
                     <td class="text-truncate">
-                         {{ _.get(props.item, ["cleaning_date"]) ? moment(props.item.cleaning_date).format('YYYY-MM-DD HH:mm') : 'N/A' || "N/A" }}
+                      {{
+                        _.get(props.item, ["cleaning_date"])
+                          ? moment(props.item.cleaning_date).format(
+                              "YYYY-MM-DD HH:mm"
+                            )
+                          : "N/A" || "N/A"
+                      }}
                     </td>
                     <td class="text-truncate">
                       <!-- <v-icon

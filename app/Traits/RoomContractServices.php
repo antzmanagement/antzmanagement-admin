@@ -70,143 +70,155 @@ trait RoomContractServices
     }
 
 
-    private function filterRoomContracts($data, $params)
+    private function filterRoomContracts( $params, $take, $skip)
     {
         $params = $this->checkUndefinedProperty($params, $this->roomContractFilterCols());
 
+        $query = RoomContract::query();
+        $query->join('rooms', function ($join) {
+            $join->on('room_contracts.room_id', '=', 'rooms.id');
+        })->select('room_contracts.*', 'rooms.unit');
+        $query->orderBy('unit');
+
         if($params->tenant_id){
             $tenant_id = $params->tenant_id;
-            $data = $data->filter(function ($item) use($tenant_id) {
-                if($item->tenant){
-                    return $item->tenant->id == $tenant_id;
-                }
-                return false;
-            })->values();
+            $query->whereHas('tenant', function($q) use($tenant_id) {
+                $q->where('id', $tenant_id);
+            });
         }
 
         if($params->room_id){
             $room_id = $params->room_id;
-            $data = $data->filter(function ($item) use($room_id) {
-                if($item->room){
-                    return $item->room->id == $room_id;
-                }
-                return false;
-            })->values();
+            $query->whereHas('room', function($q) use($room_id) {
+                $q->where('id', $room_id);
+            });
         }
 
         if($params->owner_id){
             $owner_id = $params->owner_id;
-            $data = $data->filter(function ($item) use($owner_id) {
-                if($item->room){
-                    if($item->room->owners){
-                        return $item->room->owners->contains('id' , $owner_id);
-                    }
-                }
-                return false;
-            })->values();
+            $query->whereHas('room', function($q) use($owner_id) {
+                $q->whereHas('owners', function($q) use($owner_id) {
+                    $q->where('user_id', $owner_id);
+                });
+            });
         }
 
         if($params->service_ids){
             $service_ids = collect($params->service_ids);
-            $data = $data->filter(function ($item) use($service_ids) {
-                $existed = false;
-                if($item->origservices || $item->addonservices ){
-                    $services = collect($item->origservices)->concat($item->addonservices);
-                    foreach ($services as $service) {
-                        if($service_ids->contains($service->id)){
-                            $existed = true;
-                            break;
-                        }
-                    }
-                }
-                return $existed;
-            })->values();
+            $query->whereHas('origservices', function($q) use($service_ids) {
+                $q->whereIn('service_id', $service_ids);
+            })->orWhereHas('addonservices', function($q) use($service_ids) {
+                $q->whereIn('service_id', $service_ids);
+            });
         }
 
         if ($params->sequence) {
             $sequence = $params->sequence;
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($sequence) {
-                return $item->sequence == $sequence;
-            })->values();
+            $query->where('sequence', $sequence);
         }
 
 
-        if (property_exists($params, 'outstanding') && $params->outstanding != null) {
-            $outstanding = $params->outstanding;
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($outstanding) {
-                return $outstanding ? $item->outstanding > 0 : $item->outstanding == 0;
-            })->values();
-        }
+        // if (property_exists($params, 'outstanding') && $params->outstanding != null) {
+        //     $outstanding = $params->outstanding;
+        //     $data = collect($data);
+        //     $data = $data->filter(function ($item) use ($outstanding) {
+        //         return $outstanding ? $item->outstanding > 0 : $item->outstanding == 0;
+        //     })->values();
+        // }
         
         if (property_exists($params, 'checkedout') && $params->checkedout != null) {
             $checkedout = $params->checkedout;
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($checkedout) {
-                return $item->checkedout == $checkedout;
-            })->values();
+            $query->where('checkedout', $checkedout);
         }
 
 
         if ($params->startDateFromDate) {
             $date = Carbon::parse($params->startDateFromDate);
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($date) {
-                return Carbon::parse(data_get($item, 'startdate'))->gte($date);
-            })->values();
+            $query->whereDate('startdate', '>=', $date );
         }
         
         if ($params->startDateToDate) {
             $date = Carbon::parse($params->startDateToDate)->endOfDay();
-            $data = $data->filter(function ($item) use ($date) {
-                return Carbon::parse(data_get($item, 'startdate'))->lte($date);
-            })->values();
+            $query->whereDate('startdate', '<=', $date );
         }
 
 
 
         if ($params->endDateFromDate) {
             $date = Carbon::parse($params->endDateFromDate);
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($date) {
-                return Carbon::parse(data_get($item, 'enddate'))->gte($date);
-            })->values();
+            $query->whereDate('enddate', '>=', $date );
         }
         
         if ($params->endDateToDate) {
             $date = Carbon::parse($params->endDateToDate)->endOfDay();
-            $data = $data->filter(function ($item) use ($date) {
-                return Carbon::parse(data_get($item, 'enddate'))->lte($date);
-            })->values();
+            $query->whereDate('enddate', '<=', $date );
         }
         
         if ($params->createdDateFromDate) {
             $date = Carbon::parse($params->createdDateFromDate);
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($date) {
-                return Carbon::parse(data_get($item, 'created_at'))->gte($date);
-            })->values();
+            $query->whereDate('created_at', '>=', $date );
         }
         
         if ($params->createdDateToDate) {
             $date = Carbon::parse($params->createdDateToDate)->endOfDay();
-            $data = $data->filter(function ($item) use ($date) {
-                return Carbon::parse(data_get($item, 'created_at'))->lte($date);
-            })->values();
+            $query->whereDate('created_at', '<=', $date );
         }
         
+        $total = $query->count();
+        if($skip){
+            $query->skip($skip);
+        }
+        if($take){
+            $query->take($take);
+        }else{
+            $query->take(10);
+        }
+        $data = $query->where('room_contracts.status', true)->with(['room' => function ($q) {
+            // Query the name field in status table
+            $q->with(['roomtypes' => function ($q1) {
+                // Query the name field in status table
+                $q1->wherePivot('status', true);
+            }]);
+            $q->with(['owners' => function ($q1) {
+                // Query the name field in status table
+                $q1->wherePivot('status', true);
+            }]);
+            $q->where('status', true);
+        }, 'contract' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        }, 'tenant' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        }, 'creator' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        }, 'addonservices' => function ($q) {
+            // Query the name field in status table
+            $q->wherePivot('status', true);
+        }, 'origservices' => function ($q) {
+            // Query the name field in status table
+            $q->wherePivot('status', true);
+        }, 'rentalpayments' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+            $q->with('issueby');
+        }, 'childrenroomcontracts' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        }, 'parentroomcontract' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+        }, 'payments' => function ($q) {
+            // Query the name field in status table
+            $q->with('services');
+            $q->where('status', true);
+        }])->get()->unique('id')->flatten(1);
 
+        $result['data'] = $data;
+        $result['total'] = $total;
 
-        $data = $data->unique('id')->sortBy(function ($item, $key) {
-            if($item->room){
-                return $item->room->unit;
-            }else{
-                return '';
-            }
-        })->flatten(1);
-
-        return $data;
+        return  $result;
     }
 
     private function getRoomContract($uid)

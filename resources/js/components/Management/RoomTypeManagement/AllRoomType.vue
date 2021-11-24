@@ -78,14 +78,11 @@ export default {
     },
   },
   created() {
-    document.title = 'All Room Type'
+    document.title = "All Room Type";
   },
-  mounted() {
-    this.getRoomTypes();
-  },
+  mounted() {},
   methods: {
     ...mapActions({
-      getRoomTypesAction: "getRoomTypes",
       filterRoomTypesAction: "filterRoomTypes",
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction",
@@ -110,16 +107,8 @@ export default {
       this.loading = true;
       const { sortBy, sortDesc, page, itemsPerPage } = this.options;
       _.isEmpty({});
-      var totalResult = itemsPerPage;
-      //Show All Items
-      if (totalResult == -1) {
-        this.roomTypeFilterGroup.pageNumber = -1;
-        this.roomTypeFilterGroup.pageSize = -1;
-      } else {
-        this.roomTypeFilterGroup.pageNumber = page;
-        this.roomTypeFilterGroup.pageSize = itemsPerPage;
-      }
-
+      this.roomTypeFilterGroup.pageNumber = page;
+      this.roomTypeFilterGroup.pageSize = itemsPerPage;
       this.filterRoomTypesAction(this.roomTypeFilterGroup)
         .then((data) => {
           if (notEmptyLength(data.data)) {
@@ -193,7 +182,9 @@ export default {
           justify="center"
           align="center"
           class="ma-3"
-          v-if="helpers.isAccessible(_.get(role, ['name']), 'roomType', 'tableView')"
+          v-if="
+            helpers.isAccessible(_.get(role, ['name']), 'roomType', 'tableView')
+          "
         >
           <v-col cols="12">
             <v-card class="pa-8" raised>
@@ -204,6 +195,10 @@ export default {
                 :server-items-length="totalDataLength"
                 :loading="loading"
                 disable-sort
+                :footer-props="{
+                  'items-per-page-options': [10],
+                  'show-current-page': true,
+                }"
               >
                 <!-- <template v-slot:top>
                   <v-toolbar flat class="mb-5">
@@ -215,7 +210,17 @@ export default {
                   </v-toolbar>
                 </template> -->
                 <template v-slot:item="props">
-                  <tr @click="helpers.isAccessible(_.get(role, ['name']), 'roomType', 'view') ? showRoomType(props.item) : null">
+                  <tr
+                    @click="
+                      helpers.isAccessible(
+                        _.get(role, ['name']),
+                        'roomType',
+                        'view'
+                      )
+                        ? showRoomType(props.item)
+                        : null
+                    "
+                  >
                     <td class="text-truncate">{{ props.item.name }}</td>
                     <td class="text-truncate">{{ props.item.price }}</td>
                   </tr>

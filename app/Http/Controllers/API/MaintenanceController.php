@@ -35,19 +35,19 @@ class MaintenanceController extends Controller
             'todate' => $request->todate,
             'maintenance_type' => $request->maintenance_type,
             'owner_id' => $request->owner_id,
+            'tenant_id' => $request->tenant_id,
             'room_id' => $request->room_id,
             'property_id' => $request->property_id,
             'maintenance_status' => $request->maintenance_status,
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
-        $maintenances = $this->getMaintenances($request->user());
-        $maintenances = $this->filterMaintenances($maintenances, $request);
+        $data = $this->filterMaintenances($params, $this->toInt($request->pageSize), ($this->toInt($request->pageNumber) - 1 ) * $this->toInt($request->pageSize));
 
-        if ($this->isEmpty($maintenances)) {
+        if ($this->isEmpty($data)) {
             return $this->errorPaginateResponse('Maintenances');
         } else {
-            return $this->successPaginateResponse('Maintenances', $maintenances, $this->toInt($request->pageSize), $this->toInt($request->pageNumber));
+            return $this->successPaginateResponse('Maintenances', $data['data'], $this->toInt($request->pageSize), $this->toInt($request->pageNumber), $data['total']);
         }
     }
 

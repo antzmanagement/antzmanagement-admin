@@ -20,14 +20,7 @@ class RoomController extends Controller
 
     public function index(Request $request)
     {
-        error_log($this->controllerName . 'Retrieving list of rooms.');
-        // api/room (GET)
-        $rooms = $this->getRooms($request->user());
-        if ($this->isEmpty($rooms)) {
-            return $this->errorPaginateResponse('Rooms');
-        } else {
-            return $this->successPaginateResponse('Rooms', $rooms, $this->toInt($request->pageSize), $this->toInt($request->pageNumber));
-        }
+        return $this->successPaginateResponse('Rooms', collect(), $this->toInt($request->pageSize), $this->toInt($request->pageNumber), 0);
     }
 
     public function filter(Request $request)
@@ -48,13 +41,12 @@ class RoomController extends Controller
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
-        $rooms = $this->getRooms($request->user());
-        $rooms = $this->filterRooms( $rooms , $params);
-
-        if ($this->isEmpty($rooms)) {
+        $rooms = $this->filterRooms($params, $this->toInt($request->pageSize), ($this->toInt($request->pageNumber) - 1 ) * $this->toInt($request->pageSize));
+        if ($this->isEmpty($rooms['data'])) {
+            error_log('here');
             return $this->errorPaginateResponse('Rooms');
         } else {
-            return $this->successPaginateResponse('Rooms', $rooms, $this->toInt($request->pageSize), $this->toInt($request->pageNumber));
+            return $this->successPaginateResponse('Rooms', $rooms['data'], $this->toInt($request->pageSize), $this->toInt($request->pageNumber), $rooms['total']);
         }
     }
 

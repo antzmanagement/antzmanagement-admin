@@ -53,53 +53,76 @@ trait RoomCheckServices
     }
 
 
-    private function filterRoomChecks($data, $params)
+    private function filterRoomChecks( $params, $take, $skip)
     {
         $params = $this->checkUndefinedProperty($params, $this->roomCheckFilterCols());
 
+        $query = RoomCheck::query();   
+        $query->join('rooms', function ($join) {
+            $join->on('room_checks.room_id', '=', 'rooms.id');
+        })->select('room_checks.*', 'rooms.unit');
+        $query->orderBy('unit');
+
         if($params->room_id){
             $room_id = $params->room_id;
-            $data = $data->filter(function ($item) use($room_id) {
-                if($item->room){
-                    return $item->room->id == $room_id;
-                }
-                return false;
-            })->values();
+            $query->whereHas('room', function($q) use($room_id) {
+                $q->where('rooms.id', $room_id);
+            });
         }
 
         if ($params->category) {
             $category = $params->category;
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($category) {
-                return $item->category== $category;
-            })->values();
+            $query->where('category',$category);
         }
 
         if ($params->fromdate) {
             $date = Carbon::parse($params->fromdate);
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($date) {
-                return Carbon::parse(data_get($item, 'checked_date'))->gte($date);
-            })->values();
+            $query->whereDate('checked_date', '>=', $date );
         }
         
         if ($params->todate) {
             $date = Carbon::parse($params->todate)->endOfDay();
-            $data = $data->filter(function ($item) use ($date) {
-                return Carbon::parse(data_get($item, 'checked_date'))->lte($date);
-            })->values();
+            $query->whereDate('checked_date', '<=', $date );
         }
 
+        $total = $query->count();
+        if($skip){
+            $query->skip($skip);
+        }
+        if($take){
+            $query->take($take);
+        }else{
+            $query->take(10);
+        }
+        $data = $query->where('room_checks.status', true)->with(['room' => function ($q) {
+            $q->where('status', true);
+        }, 'maintenances' => function ($q) {
+            // Query the name field in status table
+            $q->with(['property' => function ($q1) {
+                $q1->where('status', true);
+            }]);
+            $q->with(['owner' => function ($q1) {
+                $q1->where('status', true);
+            }]);
+            $q->with(['tenant' => function ($q1) {
+                $q1->where('status', true);
+            }]);
+            $q->where('status', true);
+        }, 'cleanings' => function ($q) {
+            $q->with(['owner' => function ($q1) {
+                $q1->where('status', true);
+            }]);
+            $q->with(['tenant' => function ($q1) {
+                $q1->where('status', true);
+            }]);
+            // Query the name field in status table
+            $q->where('status', true);
+        }])->get()->unique('id')->flatten(1);
 
-        $data = $data->unique('id')->sortBy(function ($item, $key) {
-            if($item->room){
-                return $item->room->unit;
-            }else{
-                return '';
-            }
-        })->flatten(1);
+        $result['data'] = $data;
+        $result['total'] = $total;
 
-        return $data;
+        return  $result;
     }
 
     private function getRoomCheck($uid)

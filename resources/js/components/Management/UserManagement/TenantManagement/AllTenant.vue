@@ -136,11 +136,10 @@ export default {
   },
   created() {
     document.title = `All Tenant`;
-  
+
     var styles = this.helpers.managementStyles();
   },
   mounted() {
-    this.getTenants();
   },
   methods: {
     ...mapActions({
@@ -179,7 +178,7 @@ export default {
         if (filterGroup.birthdayFromDay) {
           this.tenantFilterGroup.birthdayFromDay = filterGroup.birthdayFromDay;
         } else {
-          this.tenantFilterGroup.birthdayFromDay = 1
+          this.tenantFilterGroup.birthdayFromDay = 1;
         }
       }
       if (filterGroup.birthdayToMonth) {
@@ -222,19 +221,15 @@ export default {
 
       var totalResult = itemsPerPage;
       //Show All Items
-      let filterGroup = {...this.tenantFilterGroup};
-      if (totalResult == -1) {
-        filterGroup.pageNumber = -1;
-        filterGroup.pageSize = -1;
-      } else {
-        filterGroup.pageNumber = page;
-        filterGroup.pageSize = itemsPerPage;
-      }
+      let filterGroup = { ...this.tenantFilterGroup };
+      filterGroup.pageNumber = page;
+      filterGroup.pageSize = itemsPerPage;
 
       delete filterGroup.room;
       delete filterGroup.picObj;
       this.filterTenantsAction(filterGroup)
         .then((data) => {
+          console.log(data);
           if (data.data) {
             this.data = data.data;
             this.totalDataLength = data.totalResult;
@@ -339,7 +334,6 @@ export default {
                 <v-chip class="mx-2">{{
                   tenantFilterGroup.birthdaytodate ||
                   `${tenantFilterGroup.birthdayToDay}/${tenantFilterGroup.birthdayToMonth}`
-                  
                 }}</v-chip>
               </v-card-subtitle>
               <v-card-subtitle v-show="tenantFilterGroup.religion">
@@ -375,7 +369,9 @@ export default {
           justify="center"
           align="center"
           class="ma-3"
-          v-if="helpers.isAccessible(_.get(role, ['name']), 'tenant', 'tableView')"
+          v-if="
+            helpers.isAccessible(_.get(role, ['name']), 'tenant', 'tableView')
+          "
         >
           <v-col cols="12">
             <v-card class="pa-8" raised>
@@ -386,6 +382,10 @@ export default {
                 :server-items-length="totalDataLength"
                 :loading="loading"
                 disable-sort
+                :footer-props="{
+                  'items-per-page-options': [10],
+                  'show-current-page': true,
+                }"
               >
                 <template v-slot:top>
                   <v-toolbar flat>
@@ -413,7 +413,17 @@ export default {
                   </v-toolbar>
                 </template>
                 <template v-slot:item="props">
-                  <tr @click="helpers.isAccessible(_.get(role, ['name']), 'tenant', 'view') ? showTenant(props.item) : null">
+                  <tr
+                    @click="
+                      helpers.isAccessible(
+                        _.get(role, ['name']),
+                        'tenant',
+                        'view'
+                      )
+                        ? showTenant(props.item)
+                        : null
+                    "
+                  >
                     <td class="text-truncate">
                       <div
                         v-for="roomContract in props.item.roomcontracts"

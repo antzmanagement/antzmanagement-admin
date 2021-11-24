@@ -69,13 +69,11 @@ class StaffController extends Controller
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
-        $staffs = $this->getStaffs($request->user());
-        $staffs = $this->filterStaffs($staffs, $params);
-
-        if ($this->isEmpty($staffs)) {
+        $data = $this->filterStaffs($params, $this->toInt($request->pageSize), ($this->toInt($request->pageNumber) - 1 ) * $this->toInt($request->pageSize));
+        if ($this->isEmpty($data)) {
             return $this->errorPaginateResponse('Staffs');
         } else {
-            return $this->successPaginateResponse('Staffs', $staffs, $this->toInt($request->pageSize), $this->toInt($request->pageNumber));
+            return $this->successPaginateResponse('Staffs', $data['data'], $this->toInt($request->pageSize), $this->toInt($request->pageNumber), $data['total']);
         }
     }
     /**

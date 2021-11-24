@@ -87,15 +87,12 @@ export default {
   },
   created() {
     document.title = `All Staff`;
-  
+
     var styles = this.helpers.managementStyles();
   },
-  mounted() {
-    this.getStaffs();
-  },
+  mounted() {},
   methods: {
     ...mapActions({
-      getStaffsAction: "getStaffs",
       filterStaffsAction: "filterStaffs",
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction",
@@ -120,15 +117,8 @@ export default {
       this.loading = true;
       const { sortBy, sortDesc, page, itemsPerPage } = this.options;
 
-      var totalResult = itemsPerPage;
-      //Show All Items
-      if (totalResult == -1) {
-        this.staffFilterGroup.pageNumber = -1;
-        this.staffFilterGroup.pageSize = -1;
-      } else {
-        this.staffFilterGroup.pageNumber = page;
-        this.staffFilterGroup.pageSize = itemsPerPage;
-      }
+      this.staffFilterGroup.pageNumber = page;
+      this.staffFilterGroup.pageSize = itemsPerPage;
 
       this.filterStaffsAction(this.staffFilterGroup)
         .then((data) => {
@@ -212,7 +202,9 @@ export default {
           justify="center"
           align="center"
           class="ma-3"
-          v-if="helpers.isAccessible(_.get(role, ['name']), 'staff', 'tableView')"
+          v-if="
+            helpers.isAccessible(_.get(role, ['name']), 'staff', 'tableView')
+          "
         >
           <v-col cols="12">
             <v-card class="pa-8" raised>
@@ -223,6 +215,10 @@ export default {
                 :server-items-length="totalDataLength"
                 :loading="loading"
                 disable-sort
+                :footer-props="{
+                  'items-per-page-options': [10],
+                  'show-current-page': true,
+                }"
               >
                 <template v-slot:top>
                   <v-toolbar flat class="mb-5">
@@ -234,7 +230,17 @@ export default {
                   </v-toolbar>
                 </template>
                 <template v-slot:item="props">
-                  <tr @click="helpers.isAccessible(_.get(role, ['name']), 'staff', 'view') ? showStaff(props.item) : null">
+                  <tr
+                    @click="
+                      helpers.isAccessible(
+                        _.get(role, ['name']),
+                        'staff',
+                        'view'
+                      )
+                        ? showStaff(props.item)
+                        : null
+                    "
+                  >
                     <td class="text-truncate">{{ props.item.name }}</td>
                     <td class="text-truncate">{{ props.item.icno }}</td>
                     <td class="text-truncate">{{ props.item.tel1 }}</td>

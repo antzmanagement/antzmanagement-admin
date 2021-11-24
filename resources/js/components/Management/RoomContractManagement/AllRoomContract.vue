@@ -170,11 +170,9 @@ export default {
     },
   },
   created() {
-    document.title = 'All Room Contract'
+    document.title = "All Room Contract";
   },
-  mounted() {
-    this.getRoomContracts();
-  },
+  mounted() {},
   methods: {
     ...mapActions({
       getRoomContractsAction: "getRoomContracts",
@@ -202,22 +200,27 @@ export default {
         this.roomContractFilterGroup.services = filterGroup.services;
       }
       if (filterGroup.startDateFromDate) {
-        this.roomContractFilterGroup.startDateFromDate = filterGroup.startDateFromDate;
+        this.roomContractFilterGroup.startDateFromDate =
+          filterGroup.startDateFromDate;
       }
       if (filterGroup.startDateToDate) {
-        this.roomContractFilterGroup.startDateToDate = filterGroup.startDateToDate;
+        this.roomContractFilterGroup.startDateToDate =
+          filterGroup.startDateToDate;
       }
       if (filterGroup.endDateFromDate) {
-        this.roomContractFilterGroup.endDateFromDate = filterGroup.endDateFromDate;
+        this.roomContractFilterGroup.endDateFromDate =
+          filterGroup.endDateFromDate;
       }
       if (filterGroup.endDateToDate) {
         this.roomContractFilterGroup.endDateToDate = filterGroup.endDateToDate;
       }
       if (filterGroup.createdDateFromDate) {
-        this.roomContractFilterGroup.createdDateFromDate = filterGroup.createdDateFromDate;
+        this.roomContractFilterGroup.createdDateFromDate =
+          filterGroup.createdDateFromDate;
       }
       if (filterGroup.createdDateToDate) {
-        this.roomContractFilterGroup.createdDateToDate = filterGroup.createdDateToDate;
+        this.roomContractFilterGroup.createdDateToDate =
+          filterGroup.createdDateToDate;
       }
       if (filterGroup.sequence) {
         this.roomContractFilterGroup.sequence = filterGroup.sequence;
@@ -225,14 +228,9 @@ export default {
       if (filterGroup.checkedout === 1 || filterGroup.checkedout === 0) {
         this.roomContractFilterGroup.checkedout = filterGroup.checkedout;
       }
-      if (
-        filterGroup.outstanding === 1 ||
-        filterGroup.outstanding === 0
-      ) {
-        this.roomContractFilterGroup.outstanding =
-          filterGroup.outstanding;
+      if (filterGroup.outstanding === 1 || filterGroup.outstanding === 0) {
+        this.roomContractFilterGroup.outstanding = filterGroup.outstanding;
       }
-      console.log(this.roomContractFilterGroup);
       this.options.page = 1;
       this.getRoomContracts();
     },
@@ -250,15 +248,15 @@ export default {
 
       var totalResult = itemsPerPage;
       //Show All Items
-      if (totalResult == -1) {
-        this.roomContractFilterGroup.pageNumber = -1;
-        this.roomContractFilterGroup.pageSize = -1;
-      } else {
-        this.roomContractFilterGroup.pageNumber = page;
-        this.roomContractFilterGroup.pageSize = itemsPerPage;
-      }
+      let filterGroup = _.cloneDeep(this.roomContractFilterGroup);
+      filterGroup.pageNumber = page;
+      filterGroup.pageSize = itemsPerPage;
 
-      this.filterRoomContractsAction(this.roomContractFilterGroup)
+      delete filterGroup.services
+      delete filterGroup.room
+      delete filterGroup.owner
+      delete filterGroup.tenant
+      this.filterRoomContractsAction(filterGroup)
         .then((data) => {
           if (data.data) {
             this.data = data.data;
@@ -329,6 +327,10 @@ export default {
               'create'
             )
           "
+          :footer-props="{
+            'items-per-page-options': [10],
+            'show-current-page': true,
+          }"
         >
           <v-col cols="12">
             <room-contract-form
@@ -422,7 +424,11 @@ export default {
           align="center"
           class="ma-3"
           v-if="
-            helpers.isAccessible(_.get(role, ['name']), 'roomContract', 'tableView')
+            helpers.isAccessible(
+              _.get(role, ['name']),
+              'roomContract',
+              'tableView'
+            )
           "
         >
           <v-col cols="12">
@@ -470,7 +476,17 @@ export default {
                   </v-toolbar>
                 </template>
                 <template v-slot:item="props">
-                  <tr @click="helpers.isAccessible(_.get(role, ['name']), 'roomContract', 'view') ? showRoomContract(props.item) : null">
+                  <tr
+                    @click="
+                      helpers.isAccessible(
+                        _.get(role, ['name']),
+                        'roomContract',
+                        'view'
+                      )
+                        ? showRoomContract(props.item)
+                        : null
+                    "
+                  >
                     <td class="text-truncate">
                       {{ _.get(props.item, ["room", "name"]) || "N/A" }}
                     </td>

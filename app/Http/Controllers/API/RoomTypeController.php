@@ -41,13 +41,12 @@ class RoomTypeController extends Controller
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
-        $roomTypes = $this->getRoomTypes($request->user());
-        $roomTypes = $this->filterRoomTypes($roomTypes, $params);
+        $data = $this->filterRoomTypes($params, $this->toInt($request->pageSize), ($this->toInt($request->pageNumber) - 1 ) * $this->toInt($request->pageSize));
 
-        if ($this->isEmpty($roomTypes)) {
+        if ($this->isEmpty($data)) {
             return $this->errorPaginateResponse('RoomTypes');
         } else {
-            return $this->successPaginateResponse('RoomTypes', $roomTypes, $this->toInt($request->pageSize), $this->toInt($request->pageNumber));
+            return $this->successPaginateResponse('RoomTypes', $data['data'], $this->toInt($request->pageSize), $this->toInt($request->pageNumber), $data['total']);
         }
     }
  

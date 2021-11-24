@@ -136,17 +136,9 @@ export default {
     },
   },
   watch: {
-    roomId: {
-      handler: function (val, oldVal) {
-        if (val) {
-          this.init(); // call it in the context of your component object
-        }
-      },
-      deep: true,
-    },
     selectedData: {
       handler: function (val, oldVal) {
-        if (val) {
+        if (_.get(val, 'uid')) {
           this.init(); // call it in the context of your component object
         }
       },
@@ -158,7 +150,6 @@ export default {
   },
   methods: {
     ...mapActions({
-      getRoomsAction: "getRooms",
       filterRoomContractsAction: "filterRoomContracts",
       filterPropertiesAction: "filterProperties",
       filterRoomsAction: "filterRooms",
@@ -190,17 +181,47 @@ export default {
       this.maintenanceStatus = ["pending", "inprogress", "reject", "done"];
       this.initStatus = "pending";
     },
+    async getAllRoomResponses(maxPage, size = 100) {
+      let promises = [];
+      for (let index = 1; index < maxPage; index++) {
+        promises.push(
+          this.filterRoomsAction({ pageNumber: index + 1, pageSize: size })
+        );
+      }
+      this.showLoadingAction();
+      return await Promise.all(promises)
+        .then((responses) => {
+          let finalData = [];
+          responses.forEach((loopResponse) => {
+            finalData = _.concat(
+              finalData,
+              _.get(loopResponse, ["data"]) || []
+            );
+          });
+
+          return finalData;
+          this.endLoadingAction();
+        })
+        .catch((err) => {
+          console.log(err);
+          Toast.fire({
+            icon: "warning",
+            title: "Something went wrong...",
+          });
+        });
+    },
     init() {
+      console.log('inittt');
       this.showLoadingAction();
       this.reset();
       let promises = [];
       if (!this.roomId) {
-        promises.push(this.getRoomsAction({ pageNumber: -1, pageSize: -1 }));
+        promises.push(this.filterRoomsAction({ pageNumber: 1, pageSize: 200 }));
       } else {
         promises.push(
           this.filterRoomsAction({
-            pageNumber: -1,
-            pageSize: -1,
+            pageNumber: 1,
+            pageSize: 1,
             id: this.roomId,
           })
         );
@@ -208,15 +229,21 @@ export default {
       promises.push(this.getPropertiesAction({ pageNumber: -1, pageSize: -1 }));
 
       Promise.all(promises)
-        .then(([roomRes, propertyRes]) => {
-          this.rooms = roomRes.data || [];
+        .then(async ([roomRes, propertyRes]) => {
+          this.rooms = _.get(roomRes, ["data"]) || [];
+          if (roomRes.maximumPages > 1) {
+            let appendData = await this.getAllRoomResponses(
+              roomRes.maximumPages
+            );
+            this.rooms = _.concat(this.rooms, appendData);
+          }
           this.properties = propertyRes.data || [];
 
           if (this.roomId) {
+            console.log("this.rooms", this.rooms);
             let selectedRoom = _.find(this.rooms, (room) => {
               return room.id == this.roomId;
             });
-
             this.data.room = selectedRoom;
           }
 
@@ -286,24 +313,15 @@ export default {
       if (_.get(this.data, `room.id`)) {
         this.filterRoomContractsAction({
           room_id: _.get(this.data.room, `id`),
-          pageNumber: -1,
-          pageSize: -1,
+          tenant_id: _.get(this.selectedData, `tenant.id`),
+          pageNumber: 1,
+          pageSize: 100,
         })
           .then((data) => {
+            console.log("contracts", data);
             if (data.data) {
               this.roomcontracts = data.data;
-              if (this.editMode && this.selectedData) {
-                this.data.tenant = _.get(
-                  _.find(this.roomcontracts, [
-                    "tenant.id",
-                    _.get(this.selectedData, `tenant.id`) ||
-                      _.get(this.selectedData, `tenant_id`),
-                  ]),
-                  "tenant"
-                );
-              } else {
-                this.data.tenant = _.get(data.data, `[0].tenant`);
-              }
+              this.data.tenant = _.get(data.data, `[0].tenant`);
             } else {
               this.roomcontracts = [];
               this.data.tenant = null;
@@ -471,7 +489,7 @@ export default {
               </template>
             </v-autocomplete>
           </v-col>
-          <v-col cols="12" v-if="_.get(data , `property.name`) == 'others'">
+          <v-col cols="12" v-if="_.get(data, `property.name`) == 'others'">
             <v-text-field
               label="Other Property"
               :maxlength="300"
@@ -508,14 +526,14 @@ export default {
             ></v-select>
           </v-col>
           <v-col cols="6">
-              <v-datetime-picker
+            <v-datetime-picker
               :disabled="initStatus != 'pending'"
-                label="Maintenance Date"
-                v-model="data.maintenance_date"
-                no-title
-                scrollable
-                timeFormat="HH:mm"
-              ></v-datetime-picker>
+              label="Maintenance Date"
+              v-model="data.maintenance_date"
+              no-title
+              scrollable
+              timeFormat="HH:mm"
+            ></v-datetime-picker>
           </v-col>
           <!-- <v-col
             cols="12"

@@ -132,15 +132,12 @@ export default {
   },
   created() {
     document.title = `All Owner`;
-  
+
     var styles = this.helpers.managementStyles();
   },
-  mounted() {
-    this.getOwners();
-  },
+  mounted() {},
   methods: {
     ...mapActions({
-      getOwnersAction: "getOwners",
       filterOwnersAction: "filterOwners",
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction",
@@ -172,17 +169,13 @@ export default {
       this.loading = true;
       const { sortBy, sortDesc, page, itemsPerPage } = this.options;
 
-      var totalResult = itemsPerPage;
-      //Show All Items
-      if (totalResult == -1) {
-        this.ownerFilterGroup.pageNumber = -1;
-        this.ownerFilterGroup.pageSize = -1;
-      } else {
-        this.ownerFilterGroup.pageNumber = page;
-        this.ownerFilterGroup.pageSize = itemsPerPage;
-      }
+      let filterGroup = _.cloneDeep(this.ownerFilterGroup);
+      filterGroup.pageNumber = page;
+      filterGroup.pageSize = itemsPerPage;
 
-      this.filterOwnersAction(this.ownerFilterGroup)
+      delete filterGroup.room;
+      console.log(this.ownerFilterGroup);
+      this.filterOwnersAction(filterGroup)
         .then((data) => {
           console.log(data);
           if (data.data) {
@@ -310,6 +303,10 @@ export default {
                 :loading="loading"
                 disable-sort
                 calculate-widths
+                :footer-props="{
+                  'items-per-page-options': [10],
+                  'show-current-page': true,
+                }"
               >
                 <template v-slot:top>
                   <v-toolbar flat class="mb-5">

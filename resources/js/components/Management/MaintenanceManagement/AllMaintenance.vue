@@ -123,9 +123,7 @@ export default {
   created() {
     document.title = "All Maintenance";
   },
-  mounted() {
-    this.getMaintenances();
-  },
+  mounted() {},
   methods: {
     ...mapActions({
       getMaintenancesAction: "getMaintenances",
@@ -185,14 +183,8 @@ export default {
 
       var totalResult = itemsPerPage;
       //Show All Items
-      if (totalResult == -1) {
-        this.maintenanceFilterGroup.pageNumber = -1;
-        this.maintenanceFilterGroup.pageSize = -1;
-      } else {
-        this.maintenanceFilterGroup.pageNumber = page;
-        this.maintenanceFilterGroup.pageSize = itemsPerPage;
-      }
-
+      this.maintenanceFilterGroup.pageNumber = page;
+      this.maintenanceFilterGroup.pageSize = itemsPerPage;
       let filterGroup = _.cloneDeep(this.maintenanceFilterGroup);
       delete filterGroup.room;
       delete filterGroup.tenant;
@@ -462,6 +454,10 @@ export default {
                 :server-items-length="totalDataLength"
                 :loading="loading"
                 disable-sort
+                :footer-props="{
+                  'items-per-page-options': [10],
+                  'show-current-page': true,
+                }"
               >
                 <template v-slot:top>
                   <v-toolbar flat>
@@ -522,9 +518,9 @@ export default {
                     >
                       {{
                         _.get(props.item, ["property", "name"]) == "others"
-                          ? `${_.get(props.item, ["property", "text"]) || ""} - ${
-                              _.get(props.item, ["other_property"]) || ""
-                            }`
+                          ? `${
+                              _.get(props.item, ["property", "text"]) || ""
+                            } - ${_.get(props.item, ["other_property"]) || ""}`
                           : _.get(props.item, ["property", "text"]) || "N/A"
                       }}
                     </td>

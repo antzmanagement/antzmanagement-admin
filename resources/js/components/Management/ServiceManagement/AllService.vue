@@ -82,7 +82,6 @@ export default {
     document.title = `All Service`;
   },
   mounted() {
-    this.getServices();
   },
   methods: {
     ...mapActions({
@@ -111,14 +110,8 @@ export default {
       const { sortBy, sortDesc, page, itemsPerPage } = this.options;
 
       var totalResult = itemsPerPage;
-      //Show All Items
-      if (totalResult == -1) {
-        this.serviceFilterGroup.pageNumber = -1;
-        this.serviceFilterGroup.pageSize = -1;
-      } else {
-        this.serviceFilterGroup.pageNumber = page;
-        this.serviceFilterGroup.pageSize = itemsPerPage;
-      }
+      this.serviceFilterGroup.pageNumber = page;
+      this.serviceFilterGroup.pageSize = itemsPerPage;
 
       this.filterServicesAction(this.serviceFilterGroup)
         .then((data) => {
@@ -209,6 +202,10 @@ export default {
                 :server-items-length="totalDataLength"
                 :loading="loading"
                 disable-sort
+                :footer-props="{
+                  'items-per-page-options': [10],
+                  'show-current-page': true,
+                }"
               >
                 <!-- <template v-slot:top>
                   <v-toolbar flat class="mb-5">

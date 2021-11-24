@@ -109,13 +109,42 @@ export default {
     this.showLoadingAction();
     let promises = [];
     promises.push(this.getStaffsAction({ pageNumber: -1, pageSize: -1 }));
-    promises.push(this.getRoomsAction({ pageNumber: -1, pageSize: -1 }));
+    promises.push(this.filterRoomsAction({ pageNumber: 1, pageSize: 100 }));
 
     Promise.all(promises)
       .then(([staffRes, roomRes]) => {
         this.staffs = _.get(staffRes, ["data"]) || [];
         this.rooms = _.get(roomRes, ["data"]) || [];
-        this.endLoadingAction();
+        if (roomRes.maximumPages > 1) {
+          promises = [];
+          for (let index = 1; index < roomRes.maximumPages; index++) {
+            promises.push(
+              this.filterRoomsAction({ pageNumber: index + 1, pageSize: 100 })
+            );
+          }
+          this.showLoadingAction();
+          Promise.all(promises)
+            .then((responses) => {
+              let finalData = [];
+              responses.forEach((loopResponse) => {
+                finalData = _.concat(
+                  finalData,
+                  _.get(loopResponse, ["data"]) || []
+                );
+              });
+              this.rooms = _.concat(this.rooms, finalData);
+              this.endLoadingAction();
+            })
+            .catch((err) => {
+              console.log(err);
+              Toast.fire({
+                icon: "warning",
+                title: "Something went wrong...",
+              });
+            });
+        } else {
+          this.endLoadingAction();
+        }
       })
       .catch((err) => {
         console.log(err);
@@ -129,7 +158,7 @@ export default {
   methods: {
     ...mapActions({
       getStaffsAction: "getStaffs",
-      getRoomsAction: "getRooms",
+      filterRoomsAction: "filterRooms",
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction",
     }),
@@ -180,7 +209,6 @@ export default {
         <v-container>
           <v-row>
             <v-col cols="6">
-
               <div>Birthday From Date</div>
               <div class="d-flex justify-start align-center">
                 <v-select
@@ -197,7 +225,6 @@ export default {
               </div>
             </v-col>
             <v-col cols="6">
-
               <div>Birthday To Date</div>
               <div class="d-flex justify-start align-center">
                 <v-select

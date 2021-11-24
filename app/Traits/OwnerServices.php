@@ -27,47 +27,47 @@ trait OwnerServices
     }
 
 
-    private function filterOwners($data, $params)
+    private function filterOwners( $params, $take, $skip)
     {
         $params = $this->checkUndefinedProperty($params, $this->ownerFilterCols());
 
+        $query = User::query();
+        $userTypeId = $this->ownerType;
+        $query->whereHas('usertypes', function($q) use($userTypeId) {
+            $q->where('user_type_id', $userTypeId);
+        });
+        $query->orderBy('name');
         if ($params->keyword) {
             $keyword = $params->keyword;
-            $data = $data->filter(function ($item) use ($keyword) {
-                //check string exist inside or not
-                if (stristr($item->name, $keyword) == TRUE || stristr($item->icno, $keyword) == TRUE) {
-                    return true;
-                } else {
-                    return false;
-                }
-            })->values();
+            $query->where('name', 'like', '%' . $keyword . '%');
+            $query->orWhere('icno', 'like', '%' . $keyword . '%');
         }
 
         if ($params->tel) {
             $tel = $params->tel;
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($tel) {
-                if ( stristr($item->tel1, $tel) == TRUE) {
-                    return true;
-                } else {
-                    return false;
-                }
-            })->values();
+            $query->where('tel1', 'like', '%' . $keyword . '%');
         }
 
         if($params->room_id){
             $room_id = $params->room_id;
-            $data = $data->filter(function ($item) use($room_id) {
-                if($item->ownrooms){
-                    return $item->ownrooms->contains('id' , $room_id);
-                }
-                return false;
-            })->values();
+            $query->whereHas('ownrooms', function($q) use($room_id) {
+                $q->where('room_id', $room_id);
+            });
         }
 
-        $data = $data->unique('id');
+        $total = $query->count();
+        if($skip){
+            $query->skip($skip);
+        }
+        if($take){
+            $query->take($take);
+        }
+        $data = $query->where('users.status', true)->with('ownrooms')->get();
 
-        return $data;
+        $result['data'] = $data;
+        $result['total'] = $total;
+
+        return  $result;
     }
 
     private function getOwner($uid)

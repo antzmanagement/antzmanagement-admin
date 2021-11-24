@@ -20,7 +20,7 @@ class DevUserTableSeeder extends Seeder
         $faker = Faker::create();
 
 
-        for ($x = 0; $x < 500; $x++) {
+        for ($x = 0; $x < 1000; $x++) {
 
             $user = new User();
             $user->uid = Carbon::now()->timestamp . User::count();

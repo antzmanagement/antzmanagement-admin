@@ -48,13 +48,12 @@ class PaymentController extends Controller
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
-        $payments = $this->getPayments($request->user(), $params);
-        $payments = $this->filterPayments($payments, $params);
+        $data = $this->filterPayments($params, $this->toInt($request->pageSize), ($this->toInt($request->pageNumber) - 1 ) * $this->toInt($request->pageSize));
 
-        if ($this->isEmpty($payments)) {
+        if ($this->isEmpty($data)) {
             return $this->errorPaginateResponse('Payments');
         } else {
-            return $this->successPaginateResponse('Payments', $payments, $this->toInt($request->pageSize), $this->toInt($request->pageNumber));
+            return $this->successPaginateResponse('Payments', $data['data'], $this->toInt($request->pageSize), $this->toInt($request->pageNumber), $data['total']);
         }
     }
 

@@ -48,13 +48,12 @@ class RentalPaymentController extends Controller
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
-        $rentalPayments = $this->getRentalPayments($request->user(), $params);
-        $rentalPayments = $this->filterRentalPayments($rentalPayments, $params);
+        $data = $this->filterRentalPayments($params, $this->toInt($request->pageSize), ($this->toInt($request->pageNumber) - 1 ) * $this->toInt($request->pageSize));
 
-        if ($this->isEmpty($rentalPayments)) {
+        if ($this->isEmpty($data)) {
             return $this->errorPaginateResponse('RentalPayments');
         } else {
-            return $this->successPaginateResponse('RentalPayments', $rentalPayments, $this->toInt($request->pageSize), $this->toInt($request->pageNumber));
+            return $this->successPaginateResponse('RentalPayments', $data['data'], $this->toInt($request->pageSize), $this->toInt($request->pageNumber), $data['total']);
         }
     }
 

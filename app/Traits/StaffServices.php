@@ -28,25 +28,38 @@ trait StaffServices
     }
 
 
-    private function filterStaffs($data, $params)
+    private function filterStaffs( $params, $take, $skip)
     {
         $params = $this->checkUndefinedProperty($params, $this->staffFilterCols());
 
+        $query = User::query();
+        $userTypeId = $this->staffType;
+        $query->whereHas('usertypes', function($q) use($userTypeId) {
+            $q->where('user_type_id', $userTypeId);
+        });
+        $query->orderBy('id', 'DESC');
         if ($params->keyword) {
             $keyword = $params->keyword;
-            $data = $data->filter(function ($item) use ($keyword) {
-                //check string exist inside or not
-                if (stristr($item->name, $keyword) == TRUE || stristr($item->icno, $keyword) == TRUE) {
-                    return true;
-                } else {
-                    return false;
-                }
-            });
+            $query->where('name', 'like', '%' . $keyword . '%');
+            $query->orWhere('icno', 'like', '%' . $keyword . '%');
         }
 
-        $data = $data->unique('id');
+        $total = $query->count();
+        if($skip){
+            $query->skip($skip);
+        }
+        if($take){
+            $query->take($take);
+        }
+        $data = $query->where('users.status', true)->with(['usertypes' => function ($q) {
+            $q->wherePivot('status', true);
+        }, 'role' => function ($q) {
+            $q->where('status', true);
+        }])->get();
+        $result['data'] = $data;
+        $result['total'] = $total;
 
-        return $data;
+        return  $result;
     }
 
     private function getStaff($uid)

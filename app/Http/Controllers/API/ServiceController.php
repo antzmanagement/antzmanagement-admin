@@ -38,13 +38,12 @@ class ServiceController extends Controller
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
-        $services = $this->getServices($request->user());
-        $services = $this->filterServices( $services , $params);
+        $data = $this->filterServices($params, $this->toInt($request->pageSize), ($this->toInt($request->pageNumber) - 1 ) * $this->toInt($request->pageSize));
 
-        if ($this->isEmpty($services)) {
+        if ($this->isEmpty($data)) {
             return $this->errorPaginateResponse('Services');
         } else {
-            return $this->successPaginateResponse('Services', $services, $this->toInt($request->pageSize), $this->toInt($request->pageNumber));
+            return $this->successPaginateResponse('Services', $data['data'], $this->toInt($request->pageSize), $this->toInt($request->pageNumber), $data['total']);
         }
     }
 

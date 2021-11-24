@@ -27,28 +27,31 @@ trait ServiceServices
     }
 
 
-    private function filterServices($data, $params)
+    private function filterServices( $params, $take, $skip)
     {
         $params = $this->checkUndefinedProperty($params, $this->serviceFilterCols());
 
+        $query = Service::query();
+        $query->orderBy('name');
         if ($params->keyword) {
             $keyword = $params->keyword;
-            $data = $data->filter(function ($item) use ($keyword) {
-                //check string exist inside or not
-                if (stristr($item->name, $keyword) == TRUE) {
-                    return true;
-                } else {
-                    return false;
-                }
-            });
+            $query->where('name', 'like', '%' . $keyword . '%');
         }
        
 
-        $data = $data->unique('id')->sortBy(function ($item, $key) {
-            return $item->name;
-        })->flatten(1);
+        $total = $query->count();
+        if($skip){
+            $query->skip($skip);
+        }
+        if($take){
+            $query->take($take);
+        }
+        $data = $query->where('status', true)->get();
 
-        return $data;
+        $result['data'] = $data;
+        $result['total'] = $total;
+
+        return  $result;
     }
 
     private function getService($uid)

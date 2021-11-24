@@ -6,6 +6,7 @@ use App\User;
 use App\UserType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
+use DB;
 
 trait TenantServices
 {
@@ -41,180 +42,122 @@ trait TenantServices
     }
 
 
-    private function filterTenants($data, $params)
+    private function filterTenants( $params, $take, $skip)
     {
         $params = $this->checkUndefinedProperty($params, $this->tenantFilterCols());
 
+        $query = User::query();
+        $userTypeId = $this->tenantType;
+        $query->whereHas('usertypes', function($q) use($userTypeId) {
+            $q->where('user_type_id', $userTypeId);
+        });
+        $query->join('room_contracts', function ($join) {
+            $join->on('users.id', '=', 'room_contracts.tenant_id');
+            $join->join('rooms', function ($join1) {
+                $join1->on('rooms.id', '=', 'room_contracts.room_id');
+            })->select('rooms.unit as unit');;
+        })->select('users.*', 'unit');
+        $query->orderBy('unit');
         if ($params->keyword) {
             $keyword = $params->keyword;
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($keyword) {
-                //check string exist inside or not
-                if ( stristr($item->name, $keyword) == TRUE || stristr($item->icno, $keyword) == TRUE) {
-                    return true;
-                } else {
-                    return false;
-                }
-            })->values();
+            $query->where('users.name', 'like', '%' . $keyword . '%');
+            $query->orWhere('icno', 'like', '%' . $keyword . '%');
         }
 
         if ($params->occupation) {
             $keyword = $params->occupation;
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($keyword) {
-                //check string exist inside or not
-                if ( stristr($item->occupation, $keyword) == TRUE) {
-                    return true;
-                } else {
-                    return false;
-                }
-            })->values();
+            $query->where('occupation', 'like', '%' . $keyword . '%');
         }
 
         if ($params->state) {
             $keyword = $params->state;
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($keyword) {
-                //check string exist inside or not
-                if ( stristr($item->state, $keyword) == TRUE) {
-                    return true;
-                } else {
-                    return false;
-                }
-            })->values();
+            $query->where('state', 'like', '%' . $keyword . '%');
         }
 
         if ($params->religion) {
             $religion = $params->religion;
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($religion) {
-                return $item->religion == $religion;
-            })->values();
+            $query->where('religion', 'like', '%' . $religion . '%');
         }
 
         if ($params->approach_method) {
             $approach_method = $params->approach_method;
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($approach_method) {
-                return $item->approach_method == $approach_method;
-            })->values();
-        }
-
-        if ($params->pic) {
-            $pic = $params->pic;
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($pic) {
-                if($item->creator){
-                    return $item->creator->id == $pic;
-                }else{
-                    return false;
-                }
-            })->values();
+            $query->where('approach_method', 'like', '%' . $approach_method . '%');
         }
 
         if ($params->gender) {
             $gender = $params->gender;
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($gender) {
-                return $item->gender == $gender;
-            })->values();
+            $query->where('gender', 'like', '%' . $gender . '%');
         }
 
         if ($params->tel) {
             $tel = $params->tel;
-            $data = collect($data);
-            $data = $data->filter(function ($item) use ($tel) {
-                if ( stristr($item->tel1, $tel) == TRUE) {
-                    return true;
-                } else {
-                    return false;
-                }
-            })->values();
+            $query->where('tel1', 'like', '%' . $tel . '%');
         }
 
 
         if ($params->birthdayfromdate) {
             $date = Carbon::parse($params->birthdayfromdate)->startOfDay();
-            $data = $data->filter(function ($item) use ($date) {
-                if(data_get($item, 'birthday')){
-                    return Carbon::parse(data_get($item, 'birthday'))->gte($date);
-                }else{
-                    return false;
-                }
-            })->values();
+            $query->whereDate('birthday', '>=', $date );
         }
 
         if ($params->birthdaytodate) {
             $date = Carbon::parse($params->birthdaytodate)->endOfDay();
-            $data = $data->filter(function ($item) use ($date) {
-                if(data_get($item, 'birthday')){
-                    return Carbon::parse(data_get($item, 'birthday'))->lte($date);
-                }else{
-                    return false;
-                }
-            })->values();
+            $query->whereDate('birthday', '<=', $date );
         }
 
 
         if ($params->birthdayFromMonth) {
-            if($params->birthdayFromDay){
-                $date = Carbon::createFromDate(2012, $params->birthdayFromMonth, $params->birthdayFromDay)->startOfDay();
-            }else{
-                $date = Carbon::createFromDate(2012, $params->birthdayFromMonth, 1)->startOfDay();
-            }
-            
-            $data = $data->filter(function ($item) use ($date) {
-                if(data_get($item, 'birthday')){
-                    $birthday = Carbon::parse(data_get($item, 'birthday'));
-                    $birthday->setYear(2012);
-                    return $birthday->gte($date);
-                }else{
-                    return false;
-                }
-            })->values();
+            $query->whereMonth('birthday', '>=', $params->birthdayFromMonth );
+            $query->whereDay('birthday', '>=', $params->birthdayFromDay );
         }
 
         if ($params->birthdayToMonth) {
-            if($params->birthdayToDay){
-                
-                $date = Carbon::createFromDate(2012, $params->birthdayToMonth, $params->birthdayToDay)->endOfDay();
-            }else{
-                $date = Carbon::createFromDate(2012, $params->birthdayToMonth, 1)->endOfMonth();
-                error_log($date);
-            }
-            
-            $data = $data->filter(function ($item) use ($date) {
-                if(data_get($item, 'birthday')){
-                    $birthday = Carbon::parse(data_get($item, 'birthday'));
-                    $birthday->setYear(2012);
-                    return $birthday->lte($date);
-                }else{
-                    return false;
-                }
-            })->values();
+            $query->whereMonth('birthday', '<=', $params->birthdayToMonth );
+            $query->whereDay('birthday', '<=', $params->birthdayToMonth );
         }
 
+
+        if ($params->pic) {
+            $pic = $params->pic;
+            $query->whereHas('creator', function($q) use($pic) {
+                $q->where('id', $pic);
+            });
+        }
 
         if($params->room_id){
             $room_id = $params->room_id;
-            $data = $data->filter(function ($item) use($room_id) {
-                if($item->roomcontracts){
-                    return $item->roomcontracts->contains(function($roomcontract)use($room_id) {
-                        $room = collect();
-                        try {
-                            $room = $roomcontract->room;
-                        } catch (\Throwable $th) {
-                        }
-                        return $room->id == $room_id;
-                    });
-                }
-                return false;
-            })->values();
+            $query->whereHas('roomcontracts', function($q) use($room_id) {
+                $q->whereHas('room', function($q1) use($room_id) {
+                    $q1->where('id', $room_id);
+                });
+            });
         }
 
-        $data = $data->unique('id');
+        $total = $query->count();
+        if($skip){
+            $query->skip($skip);
+        }
+        if($take){
+            $query->take($take);
+        }else{
+            $query->take(10);
+        }
+        $data = $query->where('users.status', true)->with(['roomcontracts' => function ($q) {
+            // Query the name field in status table
+            $q->where('status', true);
+            $q->with(['room' => function ($q) {
+                // Query the name field in status table
+                $q->where('status', true);
+            }, 'contract' => function ($q) {
+                // Query the name field in status table
+                $q->where('status', true);
+            }]);
+        }, 'creator'])->get()->unique('id')->flatten(1);
 
-        return $data;
+        $result['data'] = $data;
+        $result['total'] = $total;
+
+        return  $result;
     }
 
     private function getTenant($uid)

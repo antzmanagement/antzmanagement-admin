@@ -26,6 +26,7 @@ export default {
         paymentdate: "",
         uid: "",
       },
+      todayPaidRentals : [],
       deleteRentalButtonConfig: {
         activatorStyle: {
           block: false,

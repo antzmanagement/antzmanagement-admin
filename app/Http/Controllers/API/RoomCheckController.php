@@ -42,13 +42,12 @@ class RoomCheckController extends Controller
         ]);
         //Convert To Json Object
         $params = json_decode(json_encode($params));
-        $roomChecks = $this->getRoomChecks($request->user());
-        $roomChecks = $this->filterRoomChecks( $roomChecks , $params);
+        $data = $this->filterRoomChecks($params, $this->toInt($request->pageSize), ($this->toInt($request->pageNumber) - 1 ) * $this->toInt($request->pageSize));
 
-        if ($this->isEmpty($roomChecks)) {
+        if ($this->isEmpty($data)) {
             return $this->errorPaginateResponse('RoomChecks');
         } else {
-            return $this->successPaginateResponse('RoomChecks', $roomChecks, $this->toInt($request->pageSize), $this->toInt($request->pageNumber));
+            return $this->successPaginateResponse('RoomChecks', $data['data'], $this->toInt($request->pageSize), $this->toInt($request->pageNumber), $data['total']);
         }
     }
 

@@ -34,41 +34,43 @@ trait RoomTypeServices
     }
 
 
-    private function filterRoomTypes($data, $params)
+    private function filterRoomTypes( $params, $take, $skip)
     {
         $params = $this->checkUndefinedProperty($params, $this->roomTypeFilterCols());
 
+        $query = RoomType::query();
+        $query->orderBy('name');
         if ($params->keyword) {
             $keyword = $params->keyword;
-            $data = $data->filter(function ($item) use ($keyword) {
-                //check string exist inside or not
-                if (stristr($item->title, $keyword) == TRUE) {
-                    return true;
-                } else {
-                    return false;
-                }
-            })->values();
+            $query->where('title', 'like', '%' . $keyword . '%');
         }
 
         if ($params->scope) {
-            error_log('Filtering roomTypes with scope....');
             $scope = $params->scope;
-            if ($scope == 'private') {
-                $data = $data->filter(function ($item) {
-                    return $item->scope == 'private';
-                })->values();
-            } else {
-                $data = $data->filter(function ($item) {
-                    return $item->scope == 'public';
-                })->values();
-            }
+            $query->where('scope', $scope);
         }
 
-        $data = $data->unique('id')->sortBy(function ($item, $key) {
-            return $item->name;
-        })->flatten(1);
+        $total = $query->count();
+        if($skip){
+            $query->skip($skip);
+        }
+        if($take){
+            $query->take($take);
+        }
 
-        return $data;
+        $data = $query->where('status', true)->with(['images' => function ($q){
+            $q->where('status', true);
+        }, 'properties' => function ($q){
+            $q->wherePivot('status', true);
+            $q->where('properties.status', true);
+        }, 'services' => function ($q){
+            $q->wherePivot('status', true);
+            $q->where('services.status', true);
+        }])->get();
+        $result['data'] = $data;
+        $result['total'] = $total;
+
+        return  $result;
     }
 
     private function getRoomType($uid)
