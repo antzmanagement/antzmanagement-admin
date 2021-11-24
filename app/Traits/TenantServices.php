@@ -51,13 +51,13 @@ trait TenantServices
         $query->whereHas('usertypes', function($q) use($userTypeId) {
             $q->where('user_type_id', $userTypeId);
         });
-        $query->join('room_contracts', function ($join) {
-            $join->on('users.id', '=', 'room_contracts.tenant_id');
-            $join->join('rooms', function ($join1) {
-                $join1->on('rooms.id', '=', 'room_contracts.room_id');
-            })->select('rooms.unit as unit');;
-        })->select('users.*', 'unit');
-        $query->orderBy('unit');
+        // $query->join('room_contracts', function ($join) {
+        //     $join->on('users.id', '=', 'room_contracts.tenant_id');
+        //     $join->join('rooms', function ($join1) {
+        //         $join1->on('rooms.id', '=', 'room_contracts.room_id');
+        //     })->select('rooms.unit as unit');;
+        // })->select('users.*', 'unit');
+        $query->orderBy('name');
         if ($params->keyword) {
             $keyword = $params->keyword;
             $query->where('users.name', 'like', '%' . $keyword . '%');
