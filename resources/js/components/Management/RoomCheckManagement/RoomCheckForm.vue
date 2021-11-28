@@ -166,14 +166,13 @@ export default {
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction",
     }),
-    async getAllRoomResponses(maxPage, size = 100) {
+    async getAllRoomResponses(maxPage, size = this.helpers.maxPaginationSize()) {
       let promises = [];
-      for (let index = 1; index < maxPage; index++) {
+      for (let index = 1; index <= maxPage; index++) {
         promises.push(
           this.filterRoomsAction({ pageNumber: index + 1, pageSize: size })
         );
       }
-      this.showLoadingAction();
       return await Promise.all(promises)
         .then((responses) => {
           this.endLoadingAction();
@@ -199,12 +198,13 @@ export default {
       console.log('init');
       this.showLoadingAction();
       let promises = [];
-      promises.push(this.filterRoomsAction({ pageNumber: 1, pageSize: 100 }));
+      promises.push(this.filterRoomsAction({ pageNumber: 1, pageSize: this.helpers.maxPaginationSize() }));
       if (this.editMode) {
         promises.push(this.getRoomCheckAction({ uid: this.uid }));
       }
       Promise.all(promises)
         .then(async ([roomRes, roomCheckRes]) => {
+          this.endLoadingAction();
           this.rooms = roomRes.data || [];
           if (roomRes.maximumPages > 1) {
             let appendData = await this.getAllRoomResponses(roomRes.maximumPages)
@@ -218,7 +218,6 @@ export default {
             this.data = new Form(roomCheckRes.data);
             console.log(this.data);
           }
-          this.endLoadingAction();
         })
         .catch((error) => {
           this.endLoadingAction();

@@ -181,14 +181,13 @@ export default {
       this.maintenanceStatus = ["pending", "inprogress", "reject", "done"];
       this.initStatus = "pending";
     },
-    async getAllRoomResponses(maxPage, size = 100) {
+    async getAllRoomResponses(maxPage, size = this.helpers.maxPaginationSize()) {
       let promises = [];
-      for (let index = 1; index < maxPage; index++) {
+      for (let index = 1; index <= maxPage; index++) {
         promises.push(
           this.filterRoomsAction({ pageNumber: index + 1, pageSize: size })
         );
       }
-      this.showLoadingAction();
       return await Promise.all(promises)
         .then((responses) => {
           let finalData = [];
@@ -216,7 +215,7 @@ export default {
       this.reset();
       let promises = [];
       if (!this.roomId) {
-        promises.push(this.filterRoomsAction({ pageNumber: 1, pageSize: 200 }));
+        promises.push(this.filterRoomsAction({ pageNumber: 1, pageSize: this.helpers.maxPaginationSize() }));
       } else {
         promises.push(
           this.filterRoomsAction({
@@ -230,6 +229,7 @@ export default {
 
       Promise.all(promises)
         .then(async ([roomRes, propertyRes]) => {
+          this.endLoadingAction();
           this.rooms = _.get(roomRes, ["data"]) || [];
           if (roomRes.maximumPages > 1) {
             let appendData = await this.getAllRoomResponses(
@@ -281,7 +281,6 @@ export default {
           } else if (this.initStatus == "done") {
             this.maintenanceStatus = ["done"];
           }
-          this.endLoadingAction();
         })
         .catch((error) => {
           this.endLoadingAction();

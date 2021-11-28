@@ -159,7 +159,7 @@ export default {
   mounted() {
     this.showLoadingAction();
     let promises = [];
-    promises.push(this.filterRoomsAction({ pageNumber: 1, pageSize: 100 }));
+    promises.push(this.filterRoomsAction({ pageNumber: 1, pageSize: this.helpers.maxPaginationSize() }));
     promises.push(this.getPropertiesAction({ pageNumber: -1, pageSize: -1 }));
     promises.push(this.getOwnersAction({ pageNumber: -1, pageSize: -1 }));
 
@@ -169,6 +169,7 @@ export default {
 
     Promise.all(promises)
       .then(async ([roomRes, propertyRes, ownerRes, maintenanceRes]) => {
+        this.endLoadingAction();
         this.rooms = roomRes.data || [];
         if (roomRes.maximumPages > 1) {
           let appendData = await this.getAllRoomResponses(roomRes.maximumPages);
@@ -196,7 +197,6 @@ export default {
 
           this.data = new Form(maintenanceRes.data);
         }
-        this.endLoadingAction();
       })
       .catch((error) => {
         this.endLoadingAction();
@@ -219,14 +219,13 @@ export default {
       endLoadingAction: "endLoadingAction",
     }),
 
-    async getAllRoomResponses(maxPage, size = 100) {
+    async getAllRoomResponses(maxPage, size = this.helpers.maxPaginationSize()) {
       let promises = [];
-      for (let index = 1; index < maxPage; index++) {
+      for (let index = 1; index <= maxPage; index++) {
         promises.push(
           this.filterRoomsAction({ pageNumber: index + 1, pageSize: size })
         );
       }
-      this.showLoadingAction();
       return await Promise.all(promises)
         .then((responses) => {
           let finalData = [];

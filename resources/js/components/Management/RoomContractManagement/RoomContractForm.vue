@@ -266,18 +266,26 @@ export default {
   mounted() {
     this.showLoadingAction();
     let promises = [];
-    promises.push(this.filterRoomsAction({ pageNumber: 1, pageSize: 200 }));
+    console.log(this.helpers.maxPaginationSize());
+    promises.push(
+      this.filterRoomsAction({
+        pageNumber: 1,
+        pageSize: this.helpers.maxPaginationSize(),
+      })
+    );
     promises.push(this.getContractsAction({ pageNumber: -1, pageSize: -1 }));
     promises.push(this.getTenantsAction({ pageNumber: -1, pageSize: -1 }));
     promises.push(this.getStaffsAction({ pageNumber: -1, pageSize: -1 }));
 
     Promise.all(promises)
       .then(async ([rooms, contracts, tenants, staffs]) => {
+        this.endLoadingAction();
         this.rooms = _.get(rooms, ["data"]) || [];
         if (rooms.maximumPages > 1) {
           let appendData = await this.getAllRoomResponses(rooms.maximumPages);
           this.rooms = _.concat(this.rooms, appendData);
         }
+        console.log(this.rooms);
         this.rooms = this.rooms.map(function (room) {
           if (
             room.room_types.length > 0 &&
@@ -303,7 +311,6 @@ export default {
         this.contracts = contracts.data;
         this.tenants = tenants.data;
         this.staffs = staffs.data;
-        this.endLoadingAction();
 
         if (this.editMode && this.uid) {
           this.showLoadingAction();
@@ -372,14 +379,16 @@ export default {
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction",
     }),
-    async getAllRoomResponses(maxPage, size = 100) {
+    async getAllRoomResponses(
+      maxPage,
+      size = this.helpers.maxPaginationSize()
+    ) {
       let promises = [];
-      for (let index = 1; index < maxPage; index++) {
+      for (let index = 1; index <= maxPage; index++) {
         promises.push(
           this.filterRoomsAction({ pageNumber: index + 1, pageSize: size })
         );
       }
-      this.showLoadingAction();
       return await Promise.all(promises)
         .then((responses) => {
           let finalData = [];

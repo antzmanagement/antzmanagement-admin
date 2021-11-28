@@ -95,9 +95,8 @@ trait RoomServices
             $query->where('price', '<=', $maxPrice);
         }
 
-        error_log($skip);
-        error_log($take);
         $total = $query->count();
+        error_log($total);
         if($skip){
             $query->skip($skip);
         }

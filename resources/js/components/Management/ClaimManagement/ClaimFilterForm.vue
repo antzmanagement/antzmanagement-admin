@@ -39,15 +39,14 @@ export default {
     },
   },
   mounted() {
-    this.showLoadingAction();
-    this.filterRoomsAction({ pageNumber: 1, pageSize: 100 })
+    this.filterRoomsAction({ pageNumber: 1, pageSize: this.helpers.maxPaginationSize() })
       .then(async (data) => {
         this.rooms = data.data;
+        this.endLoadingAction();
         if (data.maximumPages > 1) {
           let appendData = await this.getAllRoomResponses(data.maximumPages);
           this.rooms = _.concat(this.rooms, appendData);
         }
-        this.endLoadingAction();
       })
       .catch((error) => {
         Toast.fire({
@@ -66,14 +65,13 @@ export default {
     close() {
       this.$emit("close");
     },
-    async getAllRoomResponses(maxPage, size = 100) {
+    async getAllRoomResponses(maxPage, size = this.helpers.maxPaginationSize()) {
       let promises = [];
-      for (let index = 1; index < maxPage; index++) {
+      for (let index = 1; index <= maxPage; index++) {
         promises.push(
           this.filterRoomsAction({ pageNumber: index + 1, pageSize: size })
         );
       }
-      this.showLoadingAction();
       return await Promise.all(promises)
         .then((responses) => {
           let finalData = [];
@@ -84,8 +82,8 @@ export default {
             );
           });
 
-          return finalData;
           this.endLoadingAction();
+          return finalData;
         })
         .catch((err) => {
           console.log(err);

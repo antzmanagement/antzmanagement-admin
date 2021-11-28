@@ -156,14 +156,13 @@ export default {
       this.cleaningStatus = ["pending", "inprogress", "reject", "done"];
       this.initStatus = "pending";
     },
-    async getAllRoomResponses(maxPage, size = 100) {
+    async getAllRoomResponses(maxPage, size = this.helpers.maxPaginationSize()) {
       let promises = [];
-      for (let index = 1; index < maxPage; index++) {
+      for (let index = 1; index <= maxPage; index++) {
         promises.push(
           this.filterRoomsAction({ pageNumber: index + 1, pageSize: size })
         );
       }
-      this.showLoadingAction();
       return await Promise.all(promises)
         .then((responses) => {
           let finalData = [];
@@ -174,8 +173,8 @@ export default {
             );
           });
 
-          return finalData;
           this.endLoadingAction();
+          return finalData;
         })
         .catch((err) => {
           console.log(err);
@@ -191,7 +190,7 @@ export default {
       this.reset();
       let promises = [];
       if (!this.roomId) {
-        promises.push(this.filterRoomsAction({ pageNumber: 1, pageSize: 100 }));
+        promises.push(this.filterRoomsAction({ pageNumber: 1, pageSize: this.helpers.maxPaginationSize() }));
       } else {
         promises.push(
           this.filterRoomsAction({
@@ -203,12 +202,12 @@ export default {
       }
       Promise.all(promises)
         .then(async ([roomRes]) => {
+          this.endLoadingAction();
           this.rooms = _.get(roomRes, ["data"]) || [];
           if (roomRes.maximumPages > 1) {
             let appendData = await this.getAllRoomResponses(roomRes.maximumPages)
             this.rooms = _.concat(this.rooms, appendData)
           }
-          this.endLoadingAction();
 
           if (this.roomId) {
             let selectedRoom = _.find(this.rooms, (room) => {
@@ -279,8 +278,8 @@ export default {
       if (_.get(this.data, `room.id`)) {
         this.filterRoomContractsAction({
           room_id: _.get(this.data.room, `id`),
-          pageNumber: -1,
-          pageSize: -1,
+          pageNumber: 1,
+          pageSize: 100,
         })
           .then((data) => {
             if (data.data) {

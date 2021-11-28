@@ -67,40 +67,15 @@ export default {
   mounted() {
     this.showLoadingAction();
     let promises = [];
-    promises.push(this.filterRoomsAction({ pageNumber: 1, pageSize: 100 }));
+    promises.push(this.filterRoomsAction({ pageNumber: 1, pageSize: this.helpers.maxPaginationSize() }));
 
     Promise.all(promises)
-      .then(([roomRes]) => {
+      .then(async ([roomRes]) => {
+        this.endLoadingAction();
         this.rooms = _.get(roomRes, ["data"]) || [];
         if (roomRes.maximumPages > 1) {
-          promises = [];
-          for (let index = 1; index < roomRes.maximumPages; index++) {
-            promises.push(
-              this.filterRoomsAction({ pageNumber: index + 1, pageSize: 100 })
-            );
-          }
-          this.showLoadingAction();
-          Promise.all(promises)
-            .then((responses) => {
-              let finalData = [];
-              responses.forEach((loopResponse) => {
-                finalData = _.concat(
-                  finalData,
-                  _.get(loopResponse, ["data"]) || []
-                );
-              });
-              this.rooms = _.concat(this.rooms, finalData);
-              this.endLoadingAction();
-            })
-            .catch((err) => {
-              console.log(err);
-              Toast.fire({
-                icon: "warning",
-                title: "Something went wrong...",
-              });
-            });
-        } else {
-          this.endLoadingAction();
+          let appendData = await this.getAllRoomResponses(roomRes.maximumPages);
+          this.rooms = _.concat(this.rooms, appendData);
         }
       })
       .catch((err) => {
@@ -119,6 +94,33 @@ export default {
       showLoadingAction: "showLoadingAction",
       endLoadingAction: "endLoadingAction",
     }),
+    async getAllRoomResponses(maxPage, size = this.helpers.maxPaginationSize()) {
+      let promises = [];
+      for (let index = 1; index <= maxPage; index++) {
+        promises.push(
+          this.filterRoomsAction({ pageNumber: index + 1, pageSize: size })
+        );
+      }
+      return await Promise.all(promises)
+        .then((responses) => {
+          let finalData = [];
+          responses.forEach((loopResponse) => {
+            finalData = _.concat(
+              finalData,
+              _.get(loopResponse, ["data"]) || []
+            );
+          });
+          this.endLoadingAction();
+          return finalData;
+        })
+        .catch((err) => {
+          console.log(err);
+          Toast.fire({
+            icon: "warning",
+            title: "Something went wrong...",
+          });
+        });
+    },
     submitFilter() {
       this.$emit("submitFilter", this.data);
       this.dialog = false;

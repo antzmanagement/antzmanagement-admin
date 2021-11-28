@@ -146,7 +146,11 @@ const helpers = {
 
     isAccessible(role, module, action) {
         return checkIsAccessible(role, module, action)
-    }
+    },
+
+    maxPaginationSize() {
+        return 200;
+    },
 
 
 };
