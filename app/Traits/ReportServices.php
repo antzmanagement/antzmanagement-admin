@@ -61,7 +61,7 @@ trait ReportServices
     private function getUnpaidRentalTenant($requester)
     {
         try {
-            $rentalPayments = RentalPayment::where('paid', false)->get();
+            $rentalPayments = RentalPayment::where('paid', false)->where('status', true)->get();
             
             $rentalPayments = $rentalPayments->map(function($rentalPayment){
                 $rentalPayment['tenant'] = $rentalPayment->roomcontract->tenant;
@@ -80,7 +80,7 @@ trait ReportServices
     private function getTotalPaidRental($requester)
     {
         try {
-            $rentalPayments = RentalPayment::whereDate('paymentdate', '>=', Carbon::now()->startOfDay())->whereDate('paymentdate', '<=', Carbon::now()->endOfDay())->get();
+            $rentalPayments = RentalPayment::whereDate('paymentdate', '>=', Carbon::now()->startOfDay())->whereDate('paymentdate', '<=', Carbon::now()->endOfDay())->where('status', true)->get();
             
             $rentalPayments = $rentalPayments->map(function($rentalPayment){
                 $rentalPayment['tenant'] = $rentalPayment->roomcontract->tenant;

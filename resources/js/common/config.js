@@ -9,7 +9,7 @@ export let commonConfig = {
 
     //develop
     // API_URL: 'http://localhost:8000/api',
-    // client_secret : "7CfCE2yZpW3N2SRMd4PKg2fftH0EDuq2kARtEICo",
+    // client_secret : "lrmshU5VJwmXaHsVOpstKS3EitLVfvT1FzI29QvR",
     // client_id : "2",
 
     google_maps_api_key : "8WnW78jHuT0ZynxzuOa5BA32Sc0hKaZIRqZ2cxDm",
