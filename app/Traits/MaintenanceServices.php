@@ -214,14 +214,12 @@ trait MaintenanceServices
 
         $room = $this->getRoomById($params->room_id);
         if ($this->isEmpty($room)) {
-            error_log('no room' + $params->room_id);
             return null;
         }
         $data->room()->associate($room);
 
         $property = $this->getPropertyById($params->property_id);
         if ($this->isEmpty($property)) {
-            error_log('no property' + $params->property_id);
             return null;
         }
         $data->property()->associate($property);
@@ -257,7 +255,6 @@ trait MaintenanceServices
         if ($params->room_check_id) {
             $roomCheck = $this->getRoomCheckById($params->room_check_id);
             if ($this->isEmpty($roomCheck)) {
-                error_log('no roomCheck' + $params->room_check_id);
                 return null;
             }
             $data->roomcheck()->associate($roomCheck);

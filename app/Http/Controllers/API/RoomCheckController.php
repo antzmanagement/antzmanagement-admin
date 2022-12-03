@@ -82,6 +82,7 @@ class RoomCheckController extends Controller
         foreach ($request->maintenances as $maintenance) {
             $maintenance = json_decode(json_encode($maintenance));
             $maintenance->room_check_id = $roomCheck->id;
+            $maintenance->room_id = $roomCheck->room_id;
             $maintenance = $this->createMaintenance($maintenance);
             if ($this->isEmpty($maintenance)) {
                 DB::rollBack();
@@ -92,6 +93,7 @@ class RoomCheckController extends Controller
         foreach ($request->cleanings as $cleaning) {
             $cleaning = json_decode(json_encode($cleaning));
             $cleaning->room_check_id = $roomCheck->id;
+            $cleaning->room_id = $roomCheck->room_id;
             $cleaning = $this->createCleaning($cleaning);
             if ($this->isEmpty($cleaning)) {
                 DB::rollBack();
