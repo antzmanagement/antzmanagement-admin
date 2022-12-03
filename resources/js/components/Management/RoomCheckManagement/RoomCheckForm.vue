@@ -260,6 +260,7 @@ export default {
             this.dialog = false;
           })
           .catch((error) => {
+            console.log(error);
             Toast.fire({
               icon: "error",
               title: "Something went wrong. ",

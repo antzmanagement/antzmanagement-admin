@@ -212,6 +212,7 @@ trait MaintenanceServices
         $data->claim_by_tenant = $params->claim_by_tenant;
 
 
+        error_log($params);
         $room = $this->getRoomById($params->room_id);
         if ($this->isEmpty($room)) {
             return null;
@@ -219,6 +220,7 @@ trait MaintenanceServices
         $data->room()->associate($room);
 
         $property = $this->getPropertyById($params->property_id);
+        error_log($property);
         if ($this->isEmpty($property)) {
             return null;
         }
@@ -254,6 +256,7 @@ trait MaintenanceServices
 
         if ($params->room_check_id) {
             $roomCheck = $this->getRoomCheckById($params->room_check_id);
+            error_log($roomCheck);
             if ($this->isEmpty($roomCheck)) {
                 return null;
             }
